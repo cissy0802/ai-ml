@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：预训练与微调 — Day 2</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.eng{background:rgba(123,97,255,0.08);border-left:2px solid #7b61ff;padding:12px 14px;border-radius:6px;color:#cfd3df;font-size:0.9rem;font-style:italic}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+.back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
+.back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：预训练与微调</h1>
+  <div class="meta">Day 2 · 2026-05-19</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<!-- 1. Pre-training -->
+<div class="card">
+  <h2>预训练<span class="en">Pre-training</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">训练</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像让一个新人把整个互联网"读一遍"——只做一个动作：看前文猜下一个词。猜对/猜错都不评价对错，只校准它对"世界文本规律"的直觉。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>如果对每个任务（翻译、问答、写代码）都从零训一个模型，每次都要重新教模型"什么是英语、什么是句子、什么是事实"，成本和数据需求都不现实。预训练把"语言+常识"作为一个共享的底座一次性学好，下游任务只需要在这个底座上做小量的"专科训练"。这就是基础模型（Foundation Model）的核心思路。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>核心任务非常朴素：<b>给前 N 个 token，预测第 N+1 个 token</b>。然后用预测和真实 token 的差距做梯度下降。重复亿万亿次。</p>
+<pre><span class="cmt"># 伪代码：预训练的一个 step</span>
+text = sample_from_internet()              <span class="cmt"># 大杂烩：网页/书/代码/论文</span>
+tokens = tokenize(text)                    <span class="cmt"># 切成 token 序列</span>
+<span class="kw">for</span> i <span class="kw">in</span> range(len(tokens) - 1):
+    pred = model(tokens[:i+1])             <span class="cmt"># 模型预测下一个 token 的概率分布</span>
+    loss = cross_entropy(pred, tokens[i+1])<span class="cmt"># 预测错了多少</span>
+    loss.backward(); optimizer.step()      <span class="cmt"># 调一点点参数</span></pre>
+    <p>规模决定能力：数据量从 GB→TB，参数量从亿→千亿，"涌现"出来的能力（推理、写代码）就出现了。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># 用 Hugging Face 体会预训练目标：模型给每个位置算下一个 token 的概率</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForCausalLM
+<span class="kw">import</span> torch
+
+tok = AutoTokenizer.from_pretrained(<span class="str">"gpt2"</span>)
+model = AutoModelForCausalLM.from_pretrained(<span class="str">"gpt2"</span>)
+
+inputs = tok(<span class="str">"The capital of France is"</span>, return_tensors=<span class="str">"pt"</span>)
+<span class="kw">with</span> torch.no_grad():
+    logits = model(**inputs).logits        <span class="cmt"># [1, seq_len, vocab_size]</span>
+next_id = logits[0, -1].argmax()           <span class="cmt"># 选最可能的下一个 token</span>
+<span class="fn">print</span>(tok.decode(next_id))                  <span class="cmt"># " Paris"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">预训练模型"懂"事实，是因为见过类似句式很多次，本质是统计共现，不是"知道"。所以它会自信地说出听起来对、但其实错的内容（幻觉）。预训练完的"裸模型"也不会跟你对话——它只是个续写引擎，你说"你好"它可能续上"你好，我是 XX 教授，今天我们讲……"。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li>Karpathy："Let's build GPT" YouTube 视频（2 小时手撸一个迷你 GPT，最佳入门）</li>
+      <li>Hugging Face："How does a language model work" 章节</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <p>经典：GPT-2/3、Llama 系列的"base 模型"就是只做了预训练。<br>贴近你：当你看到 <code>llama-3-8b</code>（无 instruct 后缀），那就是预训练裸模型；做投资研报续写、生成数据这种"补全式任务"反而比 chat 模型更直接。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Pre-training teaches a model the structure of language by predicting the next token across massive text corpora. The result is a "foundation model" — a generalist that knows grammar and facts but doesn't yet follow instructions. All later fine-tuning steps build on top of these frozen statistical patterns.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">5 分钟动手</div>
+    <div class="exercise">用 <code>pip install transformers</code> 加载 <code>gpt2</code>，给它输入「Once upon a time」让它生成 50 个 token。再换成「def fibonacci(n):」试试。感受同一个模型，输入风格不同，续写方向完全不同——这就是预训练学到的"上下文统计先验"。</div>
+  </div>
+</div>
+
+<!-- 2. Supervised Fine-tuning (SFT) -->
+<div class="card">
+  <h2>有监督微调<span class="en">Supervised Fine-tuning (SFT)</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">训练</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像给应届生发一本《标准回答示例集》，让他照着抄一千遍——目的是把"会续写"的模型，调教成"会按指令回答"的助手。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>预训练完的模型只会续写，它不知道"请翻译这段话"该输出译文而不是一段评论。SFT 用人工写好的「指令-回答」对，把模型的输出风格切到"听话、有用、格式整齐"的轨道上。这一步把 base model 变成 instruct model（指令模型），是所有 ChatGPT/Claude 类产品落地的第一步。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>训练目标和预训练完全一样（预测下一个 token），<b>变的只是数据</b>：从"互联网杂文"变成"高质量指令-回答对"。</p>
+<pre><span class="cmt"># 数据样本长这样：</span>
+{
+  <span class="str">"instruction"</span>: <span class="str">"用一句话解释什么是缓存"</span>,
+  <span class="str">"response"</span>:   <span class="str">"缓存是把昂贵计算的结果暂存起来，下次直接复用。"</span>
+}
+<span class="cmt"># 训练时拼成：</span>
+prompt = <span class="str">"&lt;|user|&gt;用一句话解释什么是缓存&lt;|assistant|&gt;"</span>
+target = prompt + response
+<span class="cmt"># 关键：只在 response 部分计算 loss，prompt 部分不学</span>
+loss = cross_entropy(model(target), target, mask=is_response_token)</pre>
+    <p>通常 1 万~100 万条精挑细选的样本就能让模型脱胎换骨。<b>质量 >> 数量。</b></p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># 用 trl 库做一次最简单的 SFT，<= 20 行</span>
+<span class="kw">from</span> datasets <span class="kw">import</span> load_dataset
+<span class="kw">from</span> trl <span class="kw">import</span> SFTTrainer, SFTConfig
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer
+
+model_id = <span class="str">"meta-llama/Llama-3.2-1B"</span>
+tok   = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(model_id)
+ds    = load_dataset(<span class="str">"HuggingFaceH4/ultrachat_200k"</span>, split=<span class="str">"train_sft[:1000]"</span>)
+
+trainer = SFTTrainer(
+    model=model, tokenizer=tok, train_dataset=ds,
+    args=SFTConfig(output_dir=<span class="str">"sft-llama"</span>, num_train_epochs=1,
+                   per_device_train_batch_size=2, learning_rate=2e-5),
+)
+trainer.train()                            <span class="cmt"># 跑完模型就会"听话"了</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">SFT 不是"让模型学新知识"——它学的是"该用什么格式、什么口吻说话"。如果训练集里的事实是错的，模型会更自信地说错。教知识请用 RAG，SFT 用来教<b>风格、格式、领域用语</b>。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li>Hugging Face TRL 文档：<a href="https://huggingface.co/docs/trl">huggingface.co/docs/trl</a>（SFT/DPO/PPO 全套高层 API）</li>
+      <li>Sebastian Raschka 博客："Practical Tips for Fine-tuning LLMs"</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <p>经典：InstructGPT、Alpaca、Llama-3-Instruct。<br>贴近你：给"育儿助手"做 SFT——用 500 条「家长问题 → 你认可的回答风格」的样本，模型就会用你想要的语气和深度回答，而不是空话套话。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Supervised Fine-tuning (SFT) adapts a pre-trained model on curated instruction-response pairs so it follows directions instead of merely continuing text. The loss is computed only on the response portion. SFT shapes style, format, and tone — not new knowledge.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">5 分钟动手</div>
+    <div class="exercise">在 <a href="https://huggingface.co/datasets/HuggingFaceH4/ultrachat_200k">ultrachat_200k</a> 里随便看 10 条样本，写下你认为"高质量回答"应该满足的 3 条标准（比如：直接给答案、不啰嗦开场白、必要时举例）。这 3 条标准就是你未来 SFT 数据的筛选规则——质量比数量重要得多。</div>
+  </div>
+</div>
+
+<!-- 3. RLHF -->
+<div class="card">
+  <h2>人类反馈强化学习<span class="en">RLHF (Reinforcement Learning from Human Feedback)</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">对齐</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像 App Store 评分系统：让人对模型的两个回答打"哪个更好"，训出一个"评分员模型"，然后让主模型反复刷分——逐渐学会输出人类更喜欢的回答。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>SFT 教模型"模仿示范回答"，但很多东西没法用标准答案表达：什么叫"礼貌但不啰嗦"？什么叫"有用但不越界"？人类自己写示例既慢又不一致，但比较两个回答"哪个更好"很容易。RLHF 把"难写示例"的问题转成"易做选择"的问题，是 ChatGPT 第一次让大众感觉"AI 真懂事"的关键。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>三步走，每一步都是独立的训练：</p>
+<pre><span class="cmt"># Step 1: SFT 模型已就绪（上一张卡片）</span>
+
+<span class="cmt"># Step 2: 训练奖励模型（Reward Model, RM）</span>
+<span class="kw">for</span> (prompt, response_A, response_B, human_pref) <span class="kw">in</span> pref_data:
+    score_A = reward_model(prompt, response_A)
+    score_B = reward_model(prompt, response_B)
+    <span class="cmt"># 让"人类偏好那个"的分数更高</span>
+    loss = -log(sigmoid(score_chosen - score_rejected))
+
+<span class="cmt"># Step 3: 用 PPO 算法让主模型刷高 RM 的分</span>
+<span class="kw">for</span> prompt <span class="kw">in</span> prompts:
+    response = sft_model.generate(prompt)
+    reward   = reward_model(prompt, response)        <span class="cmt"># 评分员打分</span>
+    <span class="cmt"># PPO：朝着高分方向更新，但不能偏离 SFT 太远（KL 惩罚）</span>
+    sft_model.ppo_step(reward, kl_penalty=0.1)</pre>
+    <p>那个 KL 惩罚很重要——没它的话模型会学会"奖励黑客"：输出一堆奇怪但 RM 喜欢的话术。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># trl 的 PPOTrainer 把三步骤封装好了（这里只展示第 3 步骨架）</span>
+<span class="kw">from</span> trl <span class="kw">import</span> PPOTrainer, PPOConfig
+<span class="kw">from</span> transformers <span class="kw">import</span> pipeline
+
+reward = pipeline(<span class="str">"text-classification"</span>, model=<span class="str">"my-reward-model"</span>)
+ppo = PPOTrainer(config=PPOConfig(batch_size=8),
+                 model=sft_model, tokenizer=tok)
+
+<span class="kw">for</span> batch <span class="kw">in</span> dataloader:
+    responses = ppo.generate(batch[<span class="str">"prompt"</span>])
+    <span class="cmt"># RM 打分，分数越高代表越符合人类偏好</span>
+    scores = [reward(p + r)[0][<span class="str">"score"</span>] <span class="kw">for</span> p, r <span class="kw">in</span> zip(batch[<span class="str">"prompt"</span>], responses)]
+    ppo.step(batch[<span class="str">"prompt"</span>], responses, scores)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">很多人以为 RLHF 让模型"更聪明"。其实它更准确地说是<b>更讨喜</b>——更礼貌、更有结构、更不越界。RLHF 后的模型在某些客观基准上反而会变差（"alignment tax"，对齐税），因为它学会了讨好，不再"什么都敢说"。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li>Hugging Face 博客：<a href="https://huggingface.co/blog/rlhf">"Illustrating RLHF"</a>（图最清楚的入门）</li>
+      <li>Chip Huyen："RLHF: Reinforcement Learning from Human Feedback"</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <p>经典：ChatGPT、Claude、Gemini 都用了 RLHF（或其变体）。<br>贴近你：你给团队 AI 助手做内部"点赞/点踩"按钮，积累足够数据后训一个 RM，再去 PPO 优化主模型——这就是把内部协作偏好沉淀进模型的标准做法。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">RLHF aligns a model with human preferences in three steps: SFT, training a reward model on pairwise human comparisons, then using PPO to make the policy maximize the reward while staying close to the SFT model via a KL penalty. It produces models that feel "helpful and harmless" rather than just fluent.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">5 分钟动手</div>
+    <div class="exercise">打开 ChatGPT 或 Claude，问同一个问题两次（用 regenerate）。对两个回答，假装自己是标注员选一个"更好的"，并写下为什么。重复 5 次。你刚才做的就是 RM 训练数据——你会发现"更好"非常主观，这就是为什么 RLHF 需要海量标注。</div>
+  </div>
+</div>
+
+<!-- 4. DPO -->
+<div class="card">
+  <h2>直接偏好优化<span class="en">DPO (Direct Preference Optimization)</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">对齐</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像把 RLHF 的"训评分员 + PPO 刷分"两步合并成一个 SQL：直接用偏好数据一步调参，省掉奖励模型、省掉强化学习、训练像 SFT 一样稳定。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>RLHF 的痛点有三个：(1) 要训两个模型（RM + policy），机器和工程量翻倍；(2) PPO 调参玄学，不稳定，容易崩；(3) 中间多了 RM 这层近似，可能引入偏差。DPO（2023 年 Stanford 提出）从数学上证明：在某些假设下，"最大化奖励"等价于一个非常简单的分类损失，可以跳过 RM 和 RL 直接用偏好对训练。结果：训练成本砍半，稳定性大幅提升。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>核心想法：<b>对每条偏好数据，让"赢家"在新模型下的概率比在旧模型下涨，让"输家"反之</b>。</p>
+<pre><span class="cmt"># 训练数据：(prompt, chosen, rejected) 三元组</span>
+<span class="kw">for</span> (prompt, chosen, rejected) <span class="kw">in</span> data:
+    <span class="cmt"># 新模型给 chosen 的对数概率 - 参考模型(SFT)给 chosen 的对数概率</span>
+    log_ratio_chosen   = log P_new(chosen|prompt)   - log P_ref(chosen|prompt)
+    log_ratio_rejected = log P_new(rejected|prompt) - log P_ref(rejected|prompt)
+    <span class="cmt"># 让 chosen 的提升量 &gt; rejected 的提升量</span>
+    loss = -log(sigmoid(beta * (log_ratio_chosen - log_ratio_rejected)))</pre>
+    <p>一句话翻译：<b>新模型相比 SFT 模型，应当更喜欢 chosen、更不喜欢 rejected。</b>就这么直接，没有 RM、没有 PPO、没有采样、没有奖励黑客的烦恼。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># trl 的 DPOTrainer，接口和 SFTTrainer 一样简单</span>
+<span class="kw">from</span> trl <span class="kw">import</span> DPOTrainer, DPOConfig
+<span class="kw">from</span> datasets <span class="kw">import</span> load_dataset
+
+<span class="cmt"># 偏好数据：每条有 prompt / chosen / rejected 三个字段</span>
+ds = load_dataset(<span class="str">"trl-lib/ultrafeedback_binarized"</span>, split=<span class="str">"train"</span>)
+
+trainer = DPOTrainer(
+    model=sft_model,                       <span class="cmt"># 上一步 SFT 完的模型</span>
+    ref_model=sft_model,                   <span class="cmt"># 参考模型（冻结）</span>
+    train_dataset=ds, tokenizer=tok,
+    args=DPOConfig(beta=0.1, num_train_epochs=1,
+                   learning_rate=5e-7, output_dir=<span class="str">"dpo-llama"</span>),
+)
+trainer.train()                            <span class="cmt"># 跑完，效果约等于 RLHF，工程量小很多</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">DPO 不是"更好的 RLHF"，是"更便宜的 RLHF"。在偏好数据非常多、质量非常高、需要持续在线学习的场景下，PPO 类的在线 RL 上限仍然更高（你可以源源不断采样新回答让 RM 评分）。DPO 是离线的——只能学到偏好数据集里的"好"，无法探索新行为。Llama 3、Tulu 等开源模型用的就是 DPO 系列。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li>原论文友好讲解：<a href="https://huggingface.co/blog/pref-tuning">HF Blog "Preference Tuning LLMs"</a></li>
+      <li>Sebastian Raschka："LLM Training: RLHF and Its Alternatives"</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <p>经典：Llama-3-Instruct、Zephyr、Tulu 系列都用 DPO。<br>贴近你：你想给"投研分析助手"做对齐——攒 2000 条「同一个问题的两份回答 + 你选哪个更专业」，用 DPO 微调，单卡几小时跑完，效果常常打平 RLHF。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">DPO replaces the reward-model + PPO pipeline with a single supervised-style loss on preference pairs. It directly increases the log-probability gap between chosen and rejected responses relative to a frozen reference model. Cheaper, more stable, now the default open-source alignment recipe.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">5 分钟动手</div>
+    <div class="exercise">写一个 prompt（比如「向 8 岁孩子解释为什么天空是蓝的」），让 ChatGPT 生成两版回答。手动标注一版为 chosen，一版为 rejected。重复 10 次——你现在拥有了一个"妈妈视角的育儿语气"DPO 数据集骨架。理解 DPO 的关键不是数学，是这个数据闭环：偏好数据是新石油。</div>
+  </div>
+</div>
+
+<a href="index.html" class="back">← 返回首页</a>
+
+<footer>BigCat · AI &amp; ML Daily · 2026</footer>
+</div>
+</body>
+</html>
