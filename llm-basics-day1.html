@@ -30,6 +30,14 @@ pre .fn{color:#00d4ff}
 .eng{background:rgba(123,97,255,0.08);border-left:2px solid #7b61ff;padding:12px 14px;border-radius:6px;color:#cfd3df;font-size:0.9rem;font-style:italic}
 .tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
 .exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
@@ -123,9 +131,13 @@ inputs = tok(<span class="str">"Transformers changed NLP."</span>, return_tensor
     <div class="eng">Transformers replaced recurrent loops with parallel self-attention, letting every token attend to every other token in one pass. This unlocked GPU-scale training and is the backbone of all modern LLMs (GPT, Claude, Llama).</div>
   </div>
 
-  <div class="section">
-    <div class="label">5 分钟动手</div>
-    <div class="exercise">在 Colab 或本地跑上面的 10 行代码，把句子换成中文 "我爱机器学习"，观察输出 shape。然后试着用 <code>tok.tokenize(...)</code> 看看每个中文字符被切成了几个 token，体会"看上去 1 个字 ≠ 1 个 token"。</div>
+  <div class="section think">
+    <div class="label">思考题</div>
+    <details><summary>Transformer 比 RNN 快是因为"并行"——训练时确实并行了，但推理时（自回归生成）还能并行吗？为什么？</summary><div>推理时不能。生成第 N+1 个 token 必须先有第 N 个 token，本质又退化成串行循环——这就是为什么 LLM 推理慢、要靠 KV Cache 优化、要做 Speculative Decoding。但有个关键区别：训练时 N 个 token 一次性并行计算所有梯度，所以训练成本是 O(n)；推理时虽然串行，但每步内部的 Attention 仍是并行的，所以仍快于 RNN。这也启发了：现代推理优化的核心不是"并行 token"，而是"压缩单步开销"——比如把 KV 缓存复用、把矩阵乘法用 FlashAttention 重排。</div></details>
+    <details><summary>如果 Attention 能让任意两个位置相连，为什么还需要堆 96 层？一层够吗？类比 SQL 多次 JOIN 的必要性。</summary><div>一层不够。一层 Attention 只能做"一跳查询"——A 查 B，B 查 C，但 A 还没法用上 C 的信息。多层就是反复"扩散"：第二层时 A 看到的 B 已经融合了 C 的信息，第三层 A 又能拿到 D 的间接关联。类似 SQL 多次 JOIN——单次 JOIN 只能连两张表，要查"朋友的朋友的朋友喜欢什么"必须递归连接。深度让模型从"匹配"升级到"推理链"。但也有边际效应：超过约 100 层收益急剧递减，因为信息已经充分混合，再深只是加噪声。这是为什么 Llama-3 405B 只 126 层，没有无限堆深。</div></details>
+    <details><summary>Transformer 计算复杂度是 O(n²)——这个"原罪"决定了哪些应用边界？为什么 GPT-4 上下文做到 128K 还能用？</summary><div>原罪让朴素 Transformer 难以处理长序列：序列长度翻倍，计算和显存四倍。这把它挡在了"全基因组分析、整本书一次性建模"之外。能撑到 128K 是靠工程堆叠：(1) FlashAttention 把内存搬运优化掉，让 attention 算得起；(2) GQA/MQA 共享 KV 减少内存压力；(3) RoPE 让位置编码可外推；(4) 推理时用 chunked prefill 和 KV cache 复用。但要注意：128K 能"装下"不等于"用好"——很多模型在长上下文里检索能力骤降（lost in the middle）。这告诉你架构瓶颈被工程绕过去时，常常引入新的能力陷阱。</div></details>
+    <details><summary>BERT (Encoder-only)、GPT (Decoder-only)、T5 (Encoder-Decoder) 三种架构——为什么 2024 年后基本只剩 Decoder-only？</summary><div>本质是任务统一带来的胜利。Decoder-only 用"下一个 token 预测"作为统一接口，几乎所有 NLP 任务（翻译、问答、摘要、分类）都能转写成"续写"——大一统之后，规模化收益最大。Encoder-only（BERT）擅长理解但不会生成，应用面窄。Encoder-Decoder（T5）参数翻倍但收益有限。还有个工程因素：Decoder-only 的 KV Cache 友好、自回归推理基础设施成熟。但 2024 年后小型化、专用模型（embedding、reranker）又重新拥抱了 Encoder——架构选择仍是任务驱动，"赢者通吃"并不是终局。延伸：Hyung Won Chung 的"Decoder-only is all you need"演讲。</div></details>
+    <details><summary>残差连接 + LayerNorm 看似工程细节，但去掉就训不动——这揭示了"深度学习能 scale"的关键前提是什么？</summary><div>这俩是"梯度高速公路"。残差让梯度可以跨层直接回传不被乘性衰减，LayerNorm 让每层输入分布稳定不爆炸。没它们，96 层网络的梯度要么消失要么爆炸——根本没法收敛。深层洞察：深度学习能 scale 不是因为"更深的网络更强"，而是因为"我们能稳定地训练更深的网络"。这是个微妙的转折——模型架构（Transformer）的成功一半归功于辅助机制（Norm + Residual）。类比软件工程：分布式系统能 scale 不是因为"机器多"，而是因为有共识协议、心跳、故障转移这些"看不见的基础设施"。</div></details>
   </div>
 </div>
 
@@ -193,9 +205,13 @@ attn = out.attentions[-1][0, 0]   <span class="cmt"># 最后一层第 0 个 head
     <div class="eng">Attention computes a weighted sum of values, where weights come from query-key similarity. It lets each token dynamically pull context from any position, replacing fixed locality with content-based routing.</div>
   </div>
 
-  <div class="section">
-    <div class="label">5 分钟动手</div>
-    <div class="exercise">用 <a href="https://github.com/jessevig/bertviz">BertViz</a> 在浏览器里可视化一句歧义句（"它"指代不明）的 attention 矩阵，看看模型把代词的注意力分给了哪几个名词。</div>
+  <div class="section think">
+    <div class="label">思考题</div>
+    <details><summary>把 Attention 类比成 SQL JOIN——这个类比在哪里破？KV Cache 在这个类比里对应什么？</summary><div>类比破在三处：(1) SQL JOIN 是离散等值/范围匹配，Attention 是连续相似度加权——所有 Key 都参与，只是权重不同；(2) JOIN 结果是表，Attention 结果是加权向量，已经做了"聚合"；(3) JOIN 一次完成，Attention 要堆很多层反复"重新 JOIN"。KV Cache 在类比里对应"物化视图（materialized view）"——把已经算过的 K、V 缓存下来，新 token 进来只需"增量更新"而不必重算整张表。这个类比的价值不在精确，而在让你建立"内容路由"的直觉：和 grep/JOIN 一样，都是"按内容查找相关项"，只是粒度和数学形式不同。</div></details>
+    <details><summary>Q、K、V 三个矩阵都是 token embedding 的线性变换——为什么不直接用 embedding 自己跟自己做 attention？分开训三套矩阵的本质收益是什么？</summary><div>核心收益是"角色分离"：同一个词在"查找时"想要的特征和"被查找时"提供的特征往往不同。比如"它"作为 Q 时关心"我要指代谁"，作为 K 时关心"我是不是一个被指代候选"。如果共用一套向量，模型只能在"提问能力"和"应答能力"之间妥协。分开训三套就让模型有自由度学到"非对称关系"——A 关注 B 不代表 B 关注 A。这和数据库设计里"主键 vs 外键 vs 业务字段分离"是一回事：物理上可以合并，但分开能让索引、查询、修改各自优化。延伸：后来的 MQA/GQA 又把 K、V 共享了一部分换内存，是工程上的反向妥协。</div></details>
+    <details><summary>为什么要除以 √d？取消这个除法会发生什么？这和"归一化"在数据库索引设计中的作用有何相似？</summary><div>不除会让点积数值随维度 d 增长（高维向量内积期望值正比于 √d），结果 softmax 的输入过大 → 输出退化成 one-hot → 梯度消失 → 训不动。除以 √d 把 score 的方差归一化到 1 附近，softmax 才能保持有意义的"软"分布。类比：数据库索引按 hash 分桶时也要"归一化"分布，否则某个桶过载（softmax 退化成 one-hot 就是"所有查询都打到一个桶"）。深层教训：深度学习里大量"看似偶然"的细节（除以 √d、LayerNorm 的 ε、Adam 的 β1=0.9）都是在管理"数值分布"——这是一门工程艺术，不是数学必然。</div></details>
+    <details><summary>Multi-Head 用 8 个头比 1 个大头强，参数量基本一样——凭什么效果更好？这和"集成学习"有何关系？</summary><div>本质是"强制多样性"。一个大头在训练中只能学到一种最优注意力模式；8 个小头被切分了，每个头看不同子空间，倾向自然学到不同关系（语法/语义/指代/位置近邻）。这和集成学习（bagging、ensemble）思路同源：用结构约束逼出多样性，再合并。但区别在于 Multi-Head 是端到端训练的，"多样性"是自然涌现的副产品，不像 ensemble 是人为构造的。Mechanistic Interpretability 研究确实发现：不同 head 学到了 induction head、name mover、duplicate token detector 等不同"电路"——所以"多头"不是噱头，是真实的功能分工。</div></details>
+    <details><summary>Linear/Sparse Attention 试图把 O(n²) 降到 O(n)——为什么至今没取代标准 Attention？它们牺牲了什么？</summary><div>核心牺牲是"全局精确匹配"。标准 Attention 让每个 token 看到所有 token 的精确权重；Linear Attention 用核技巧近似（牺牲精度），Sparse Attention 只看局部窗口或定模式（牺牲全局）。在中短上下文（&lt;32K）下精度损失会让能力明显下降，工业界宁愿用 FlashAttention 把常数项压到极致也不切换。但在超长上下文（1M+）下，O(n²) 已经不可行，Mamba/SSM 等线性方法重新成为活跃赛道。这告诉你"算法复杂度"不是孤立指标——常数项、精度损失、硬件适配都参与博弈。延伸：可能未来是"混合架构"——前几层 Attention 抓全局，后几层 Linear/SSM 处理细节。</div></details>
   </div>
 </div>
 
@@ -266,9 +282,13 @@ text_zh = <span class="str">"分词其实很有意思！"</span>
     <div class="eng">Tokenization splits text into subword units (via BPE/WordPiece) so the vocabulary stays manageable while rare words remain encodable. Token counts drive both context limits and API pricing.</div>
   </div>
 
-  <div class="section">
-    <div class="label">5 分钟动手</div>
-    <div class="exercise">在 OpenAI Tokenizer 网页上贴一段你昨天的 Claude 对话，看 prompt 和 response 各占多少 token。再算一下：如果按 GPT-4 价格，你这次对话花了多少美分？</div>
+  <div class="section think">
+    <div class="label">思考题</div>
+    <details><summary>GPT 数不清 strawberry 里有几个 r——除了 tokenization 这个根因，有什么 prompt 工程能绕过？这教你什么"系统性 bug"思维？</summary><div>绕过方法：(1) 让模型先"把每个字母列出来"（一旦字符被显式拆开就能数）；(2) 用 code interpreter 调用 Python；(3) 让模型先把字母用空格分隔再处理。系统性 bug 的思维：根因常在"低层抽象"——这里是 token 表示——但在"高层接口"看不到。修复策略是"绕过抽象层"而非"在抽象内修复"。类比软件：你不能在 ORM 层修复 SQL 注入，必须下到 SQL 层；同样不能在文本层修复 token 限制，必须把任务转换成 token 友好形式。这就是为什么 prompt 工程本质是"理解模型的认知盲区，再绕路"。</div></details>
+    <details><summary>中文 tokenization 比英文贵 2-3 倍——这是技术问题还是商业策略？如果让你设计中英文同样高效的 tokenizer 会怎么做？</summary><div>主要是技术问题：BPE 训练数据中英文比例失衡（GPT-4 训练语料英文占 90%+），所以英文常用 1 token 一词，中文常 2-3 字节合成一个汉字。也有商业惯性——OpenAI 没动力为中文优化。设计方法：(1) 在训练语料里强制中英文均衡；(2) 用 SentencePiece + Unigram LM 而非 BPE，能更好处理无空格语言；(3) 给中文设大型基础词表（比如直接收 8000 常用汉字单独建 token）。DeepSeek 和 Qwen 的 tokenizer 处理中文就比 GPT 高效。延伸思考：这暴露了"看似中立的技术决策"背后的语言不平等——和"UTF-8 对 ASCII 友好、对 CJK 不友好"是同一类问题。</div></details>
+    <details><summary>词表太小（256）和太大（500K）分别什么问题？类比 hash 表 bucket 大小的取舍。</summary><div>太小（256，等于按字节）：每个字符一个 token，序列变得非常长，模型要花更多算力建立"字母→词"的关联，长依赖更难学；优点是几乎不会有 OOV（未登录词）。太大（500K）：每个常见词独立编号，序列变短，但 embedding 矩阵巨大（500K×4096 ≈ 2B 参数都用来记词表），训练效率低、低频词学不好。最优在 32K~128K 之间。类比 hash bucket：太多 bucket 内存浪费、cache miss 多；太少冲突严重，每次查找退化成 O(n)。词表大小本质是"频率分布的离散化粒度"——和 hash 一样要匹配数据分布。</div></details>
+    <details><summary>不同厂家 tokenizer 不统一——这和"字符集编码大战"(UTF-8 vs UTF-16) 有何相似？</summary><div>相似在四点：(1) 都缺乏强制标准，各家按训练数据/工程偏好自选；(2) 都形成"高切换成本"——一旦选定，整个模型权重就绑死，换 tokenizer 等于重训；(3) 都有"先发优势固化"——GPT-2 的 BPE 被沿用多年，UTF-8 因 ASCII 兼容统治了 Web；(4) 都引入"看不见的成本"——你按 token 付费但不同模型 token 量不同，类似存储同样的中文 UTF-8 比 UTF-16 多 50%。不同在：字符集后来统一到 Unicode，tokenizer 大概不会统一——因为它和模型权重耦合。这告诉你：标准化的前提是"接口可独立演进"，tokenizer 缺这个前提。</div></details>
+    <details><summary>如果未来出现 byte-level tokenization（每字节就是一个 token），在哪些场景会赢？又会牺牲什么？</summary><div>会赢的场景：(1) 多语言/小语种——不再需要为每种语言调 tokenizer；(2) 代码/二进制数据——字符级处理更精确；(3) 字母级任务（拼写、计数 r）——不会再有 strawberry 问题；(4) 鲁棒性——对错别字、不规范输入更宽容。牺牲：(1) 序列长度暴增 4-8 倍，O(n²) 复杂度直接炸；(2) 长依赖更难学（模型要先重建"词"概念）；(3) 训练数据效率下降。Meta 的 BLT (Byte Latent Transformer, 2024) 用"动态 patching"——熵高的地方细分、熵低的地方合并——试图鱼与熊掌兼得。如果硬件继续解决 O(n²) 瓶颈（线性 attention、Mamba），byte-level 完全可能成为下一代默认。</div></details>
   </div>
 </div>
 
@@ -349,9 +369,13 @@ ids_b = tok(<span class="str">"man bites dog"</span>, return_tensors=<span class
     <div class="eng">Self-attention is permutation-invariant, so positional encodings inject order information into token embeddings. Modern LLMs use Rotary Position Embedding (RoPE), which encodes relative positions via rotation, enabling long-context extrapolation.</div>
   </div>
 
-  <div class="section">
-    <div class="label">5 分钟动手</div>
-    <div class="exercise">跑上面那段代码，验证 "dog bites man" 和 "man bites dog" 的隐藏状态不同。然后注释掉 GPT-2 的位置编码层（<code>model.transformer.wpe</code>），重跑一次 —— 你会看到结果几乎一样，亲眼验证"没有位置编码 = 词袋模型"。</div>
+  <div class="section think">
+    <div class="label">思考题</div>
+    <details><summary>RoPE 能外推到训练长度之外——但超过 2-4 倍就性能崩——为什么？这暴露了"位置外推"的什么本质难题？</summary><div>崩溃的根因是"频率覆盖盲区"：RoPE 把不同维度配不同周期的正弦，训练时模型只见过某频率范围内的相位组合，外推时高频维度旋转到"训练分布之外"的相位区，模型从没见过这种 Q·K 模式。本质难题是：位置编码是"先验注入"，但模型学到的是"先验上的特定行为"，没法对未见的先验泛化。解决方向：(1) YaRN/NTK Scaling 通过插值压缩相位让外推像内插；(2) 训练时刻意混入超长样本（continual pretraining）。深层教训：神经网络外推泛化能力极弱，"理论上能外推"和"实际能外推"是两回事——这也是为什么"长上下文"是个工程而非算法问题。</div></details>
+    <details><summary>三代位置编码（Sinusoidal/Learned/RoPE）演进逻辑是什么？为什么"相对位置"比"绝对位置"更好？类比 git 相对路径 vs 绝对路径。</summary><div>演进逻辑：从"显式标位置"（Sinusoidal、Learned 给绝对编号）→"隐式编距离"（RoPE 让点积自然反映相对位置）。相对位置更好的原因：(1) 语言规律是相对的——"主语和谓语之间的距离"比"主语在第几个词"更重要；(2) 同一句话在不同上下文里整体偏移时，绝对位置变了但语义不变，相对位置编码能内在不变；(3) 更易外推。类比 git：commit hash 是绝对引用（精确但僵硬），HEAD~3 是相对引用（语义清晰、可移植）。同理代码里用 `../config` 比写死 `/Users/cissy/...` 更鲁棒。这是个反复出现的设计哲学：用"关系"代替"标识"。</div></details>
+    <details><summary>位置编码加在 embedding 上会不会污染语义？模型如何把"位置"和"语义"分离学习？</summary><div>会有干扰，但模型能学到分离。原因有两层：(1) 高维空间足够大（768-4096 维）——位置信号和语义信号可以占用不同子空间，互不冲突；(2) 训练时模型本身就在学"哪个维度是哪种信息"——它会自然把位置信息映射到对结果有用的子空间。RoPE 更进一步：位置不是加进去，而是用旋转作用于 Q、K 的不同对——这种"乘性而非加性"的注入更不易污染。但确实有副作用：早期层往往学到"位置模式"，深层才用语义——你能在 attention map 里看到第一层往往是对角线（看附近 token）。</div></details>
+    <details><summary>长上下文的三个瓶颈：位置编码、Attention 复杂度、KV Cache 内存——你赌哪个最先被突破？为什么？</summary><div>个人押注 KV Cache 内存——因为这是最直接的工程瓶颈，已经有大量优化路径在落地：(1) GQA/MQA 共享 KV；(2) KV quantization 把 fp16 压成 int8/int4；(3) PagedAttention（vLLM）让 KV 像虚拟内存分页；(4) Sliding Window/Recurrent 抛弃远距离 KV。Attention 复杂度需要算法突破（Mamba 类），代价是精度——不容易完全替代。位置编码外推本质是泛化问题，最难。优先级排序：内存（工程）&gt; 复杂度（算法+硬件）&gt; 外推（理论）。这告诉你：判断瓶颈优先级时，"是否有清晰工程路径"是关键启发——纯算法/理论问题往往最慢。</div></details>
+    <details><summary>给"视频帧序列"或"代码 AST 树"设计位置编码，1D RoPE 还够用吗？这暴露"位置"概念的什么深层假设？</summary><div>不够。视频是时间×空间×通道的 3D 结构，AST 是树结构——1D 位置编码假设"位置是线性可比的"，在这些结构上会丢失维度信息。改造方向：(1) 视频用 2D/3D RoPE（每个维度独立旋转），如 Sora 用了时空联合编码；(2) AST/图用 Graph Positional Encoding（基于图拉普拉斯特征向量、最短路径距离）。深层假设暴露：我们说"位置"时，其实是在说"在某个度量空间里的坐标"——文本碰巧是 1D 时间序列，所以 1D 够用。一旦数据有更丰富的结构，"位置"就必须重新定义。这是为什么多模态模型的核心难点之一是"统一位置编码"——把图像 patch、视频帧、文本 token、音频片段映射到同一个可比较的空间。</div></details>
   </div>
 </div>
 
