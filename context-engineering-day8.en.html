@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: Context Engineering — Day 8</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: Context Engineering</h1>
+  <div class="meta">Day 8 · 2026-05-25</div>
+  <div class="audience">For: experienced engineers outside the AI/ML field</div>
+</header>
+
+<!-- 1. Context Window -->
+<div class="card">
+  <h2>Context Window</h2>
+  <div class="tags"><span class="tag">hardware limit</span><span class="tag purple">attention</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>The context window is the model's <b>working set</b> — like a process's virtual memory: you imagine it holds anything, but it has a hard ceiling and <b>performance degrades the closer you get to it</b>. Backend analogues: DB buffer pool, SQL <code>work_mem</code>, CPU L1/L2 cache — sizing is always a trade-off, never "bigger is better".</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Transformer attention is O(n²): every token computes a similarity against every other token in the window. A 1M-token window means ~10¹² similarity ops, and KV cache memory grows linearly (each token's Key/Value matrices must be stored). Window size is a <b>hardware cost</b> problem, not a "make it big" knob.</p>
+    <p style="margin-top:8px">2026 state-of-the-art: Claude 4.7 / GPT-5 around 200K–1M, Gemini 2.5 around 2M, most open-source 32K–128K. But the <b>counter-intuitive core finding</b> from Liu et al. 2023 — "<b>Lost in the Middle</b>" — is this: when a key fact sits at the start or end of a 100K context, recall is ~80%; in the middle, it drops to ~50%. Attention is U-shaped:</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Key-fact position → model recall</span><br>
+start <span class="bar" style="width:80px;height:24px"></span> 80%<br>
+1/4 in <span class="bar" style="width:60px;height:24px;opacity:0.7"></span> 60%<br>
+middle <span class="bar" style="width:48px;height:24px;opacity:0.55"></span> 48% (trough)<br>
+3/4 in <span class="bar" style="width:65px;height:24px;opacity:0.75"></span> 65%<br>
+end <span class="bar" style="width:82px;height:24px"></span> 82%<br>
+<span style="color:#5a6378;font-size:0.78rem">↑ U-shape: long context ≠ everything is "seen"</span>
+</div>
+
+    <p style="margin-top:14px">Even 2025 models that advertise "100% needle-in-haystack recall" still show clear position bias on <b>multi-needle reasoning</b> tasks. Treating the context window as "unlimited attention" is the canonical misconception.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = Anthropic()  <span class="cmt"># needs ANTHROPIC_API_KEY</span>
+
+<span class="cmt"># Always measure tokens via the SDK before deciding to stuff something in</span>
+long_doc = <span class="fn">open</span>(<span class="str">"report.txt"</span>).read()
+resp = client.messages.<span class="fn">create</span>(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    max_tokens=1024,
+    messages=[{
+        <span class="str">"role"</span>: <span class="str">"user"</span>,
+        <span class="cmt"># Put the critical question LAST — ride the U-curve's recency end</span>
+        <span class="str">"content"</span>: <span class="fn">f</span><span class="str">"&lt;document&gt;{long_doc}&lt;/document&gt;\n\nBased on the above: what is the key conclusion?"</span>
+    }]
+)
+<span class="fn">print</span>(resp.usage.input_tokens, <span class="str">"input tokens"</span>)  <span class="cmt"># track usage</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + scenario</div>
+    <div class="tip">"With a 1M window I'll dump all company docs and skip RAG" — wrong. A 200K input is both expensive (cost scales linearly in tokens) and slow (TTFT scales with input length), and middle content still gets ignored. Both Anthropic and Google explicitly recommend <b>RAG + short context &gt; raw long context</b>, especially with stable corpora and varied queries.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: when reading a paper, <b>don't</b> dump the whole book; build an 8–32K focused context of <b>current chapter + abstract + your specific question</b>. Quality far beats stuffing 200K, at 10× lower per-call cost.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + reflection</div>
+    <div class="takeaway">💡 The context window is a working set, not a database. The goal is "put in the right things", not "put in more things".<br>🤔 When you defaulted to "longer context = smarter model", what cheaper engineering options did you miss?</div>
+  </div>
+</div>
+
+<!-- 2. Context Caching -->
+<div class="card">
+  <h2>Context Caching <span class="en">(Prompt Caching)</span></h2>
+  <div class="tags"><span class="tag">optimization</span><span class="tag orange">cost</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Treat a prompt like an HTTP request: the static <b>system prompt + tool schemas + few-shot examples</b> are your "static assets". Re-running attention on them every call is the equivalent of <b>not using a CDN</b>. Context caching persists that prefix's KV cache into GPU memory or fast SSD so the next hit skips prefill — same family as Redis cache, HTTP 304, Postgres prepared statements.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>In a typical agent app, ~80% of the prompt is invariant (persona + tool descriptions + chat history); only the latest user turn changes. But the LLM re-runs prefill from scratch every call — for a 50K-token fixed prefix, that's 50K wasted attention ops. Caching mechanics:</p>
+    <ul>
+      <li><b>Hit condition</b>: the prefix must match <b>token-for-token</b>. Change a punctuation mark and it invalidates — as brittle as a Redis key hash;</li>
+      <li><b>Order is critical</b>: invariant content goes <b>first</b>, dynamic content last. Inserting the user query in the middle of the system prompt = cache never hits;</li>
+      <li><b>Pricing shape</b>: Anthropic prompt caching costs ~25% more on write, ~90% less on read. ROI breaks even at ~2 hits — write once, read many is the play;</li>
+      <li><b>TTL</b>: Anthropic defaults to 5 min, 1-hour TTL is purchasable; OpenAI auto-caches for ~5–10 min, free but uncontrollable.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Prompt layout (order matters)</b><br>
+<span class="box g">① system prompt</span><span class="arrow">+</span><span class="box g">② tools schema</span><span class="arrow">+</span><span class="box g">③ few-shot</span><span class="arrow">+</span><span class="box o">④ chat history</span><span class="arrow">+</span><span class="box p">⑤ user query</span><br>
+<span style="color:#5a6378">└──────── cache hit (KV reused, prefill skipped) ────────┘└── recomputed each call ──┘</span><br><br>
+<b style="color:#ff8e8e">Anti-pattern:</b> <span class="box p">user query</span><span class="arrow">→</span><span class="box g">system prompt</span> = cache never hits
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = Anthropic()
+
+<span class="cmt"># cache_control marks "this block and everything before it" as a cacheable prefix</span>
+resp = client.messages.<span class="fn">create</span>(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    max_tokens=512,
+    system=[
+        {<span class="str">"type"</span>: <span class="str">"text"</span>, <span class="str">"text"</span>: <span class="str">"You are a senior financial analyst..."</span>},
+        {<span class="str">"type"</span>: <span class="str">"text"</span>,
+         <span class="str">"text"</span>: long_company_filing,  <span class="cmt"># 50K-token filing, queried repeatedly</span>
+         <span class="str">"cache_control"</span>: {<span class="str">"type"</span>: <span class="str">"ephemeral"</span>}}  <span class="cmt"># ← cache breakpoint</span>
+    ],
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"Which segment drove revenue growth?"</span>}]
+)
+<span class="fn">print</span>(resp.usage.cache_creation_input_tokens)  <span class="cmt"># first call: write</span>
+<span class="fn">print</span>(resp.usage.cache_read_input_tokens)      <span class="cmt"># later: hit (90% cheaper)</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + scenario</div>
+    <div class="tip">"I'll also cache_control the chat history to save more" — wrong. Chat history changes every turn; hit rate is ~zero and you pay the +25% write premium every time. Rule: <b>only cache truly invariant prefixes</b>. Test: can you predict the next request will contain this content byte-identical? If not, don't cache.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: cache a ~20K system prompt holding your child's <b>learning profile + past mistakes + preferred frameworks</b>. Each "explain today's math problem" then only pays for the user query. The monthly token bill drops visibly.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + reflection</div>
+    <div class="takeaway">💡 Caching is the simplest, most underused lever in prompt engineering — zero IQ investment, 50–90% cost reduction.<br>🤔 Across your AI toolchain, which prompts are "near-static + frequently reused"? Are they cached right now?</div>
+  </div>
+</div>
+
+<!-- 3. Compression -->
+<div class="card">
+  <h2>Context Compression</h2>
+  <div class="tags"><span class="tag">data flow</span><span class="tag purple">summarization</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Long-conversation context management = database <b>log rotation</b> + <b>compaction</b>. MySQL binlog doesn't grow forever — past a threshold, rotate, compress, archive. LLM context is identical: as conversations grow, compression is a hard requirement, not an option.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Past 50K–100K tokens, three problems hit at once: <b>window overflow</b> (hard limit), <b>attention dilution</b> (lost-in-the-middle), <b>linear cost growth per turn</b> (all history recomputed). Four mainstream strategies, ordered by fidelity-vs-cost:</p>
+    <ul>
+      <li><b>① Sliding Window</b> — keep the last N turns. Cheapest but loses the most; fits short-horizon tasks with no long-term memory needs;</li>
+      <li><b>② Summarization</b> — LLM-compress old messages into 200–500 token summaries, replace original text. <b>The default choice</b>; beware "summary of summaries" drift over many cycles;</li>
+      <li><b>③ Hierarchical</b> — tiered summaries: last 5 turns full text + turns 5–20 grouped summary + 20+ one-line summary. LSM-tree shaped;</li>
+      <li><b>④ Selective / RAG-style</b> — store conversation history in an external vector DB, retrieve relevant slices per turn. Most expensive, highest fidelity.</li>
+    </ul>
+    <p style="margin-top:8px">Anthropic's 2025 <b>Memory tool</b> and <b>automatic compaction</b> ship this machinery built-in — context auto-summarizes near the limit without app-level code. But <b>what to compress</b> and <b>at what granularity</b> remains a product decision, not a sane default.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">def</span> <span class="fn">compress_history</span>(messages, max_tokens=8000):
+    <span class="cmt"># Simple two-tier: keep last 6 turns verbatim, summarize the rest</span>
+    recent = messages[-6:]
+    older  = messages[:-6]
+    <span class="kw">if</span> <span class="kw">not</span> older <span class="kw">or</span> <span class="fn">count_tokens</span>(messages) &lt; max_tokens:
+        <span class="kw">return</span> messages
+
+    older_text = <span class="str">"\n"</span>.<span class="fn">join</span>(<span class="fn">f</span><span class="str">"{m['role']}: {m['content']}"</span> <span class="kw">for</span> m <span class="kw">in</span> older)
+    summary = client.messages.<span class="fn">create</span>(
+        model=<span class="str">"claude-haiku-4-5-20251001"</span>,  <span class="cmt"># cheap model for summarization</span>
+        max_tokens=400,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+                   <span class="str">"content"</span>: <span class="fn">f</span><span class="str">"Summarize as 5 bullets — key facts, decisions, open issues:\n{older_text}"</span>}]
+    ).content[0].text
+
+    <span class="cmt"># Reassemble: summary + recent verbatim (recent details preserved)</span>
+    <span class="kw">return</span> [{<span class="str">"role"</span>: <span class="str">"system"</span>,
+             <span class="str">"content"</span>: <span class="fn">f</span><span class="str">"&lt;earlier_conversation_summary&gt;\n{summary}\n&lt;/earlier_conversation_summary&gt;"</span>}] + recent</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + scenario</div>
+    <div class="tip">"Compress everything, saving tokens always wins" — wrong. Crushing <b>explicit user instructions</b> ("never use library X"), <b>critical numbers</b>, or <b>confirmed decisions</b> into a 5-bullet summary almost always drops them. Rules: (1) keep user's <b>literal preferences</b> verbatim; (2) never compress numbers/code/IDs; (3) "discussed but rejected alternatives" are safe to compress. Compression is a lossy codec — know what you're willing to lose.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: a "<b>long-term project notebook</b>" with Claude — each week have the model summarize last week's chat into a 200-word "decisions + open questions + verbatim user preferences" block, archive raw messages to markdown. After a year the main window stays light, but the full history is traceable.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + reflection</div>
+    <div class="takeaway">💡 Compression isn't a cost trick, it's a lossy-encoding decision — you must explicitly declare what to keep and what to drop.<br>🤔 In your long AI conversations, which info <b>must be preserved verbatim</b>, which can become a one-line summary? That list IS your "personal AI protocol".</div>
+  </div>
+</div>
+
+<!-- 4. Memory Management -->
+<div class="card">
+  <h2>Memory Management</h2>
+  <div class="tags"><span class="tag">architecture</span><span class="tag purple">state</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>LLMs are <b>stateless</b> — every API call is a cold start. To make one "remember you", you must architect a memory hierarchy like an OS: CPU register (current context) → L1/L2 cache (cached prefix) → RAM (recent sessions) → disk (vector store + notes). "Memory management" is designing that hierarchy.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Stuffing "every conversation from the last three months" into context is impossible (window overflow) and pointless (lost in the middle). Four memory types borrowed from cognitive science, each mapped to a storage strategy:</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">LLM memory hierarchy (with OS analogy)</b><br><br>
+<span class="box">① Working Memory</span> <span style="color:#5a6378">≈ CPU register</span> — current context window content<br>
+<span class="box g">② Procedural</span> <span style="color:#5a6378">≈ ROM / firmware</span> — long-lived system prompts, workflows (cache-friendly)<br>
+<span class="box o">③ Episodic</span> <span style="color:#5a6378">≈ RAM / SSD</span> — past conversation history, time-indexed, retrieved on demand<br>
+<span class="box p">④ Semantic</span> <span style="color:#5a6378">≈ knowledge base</span> — <b>facts</b> distilled from conversation, stored in a vector DB ("user dislikes emoji", "project due 6/30")<br><br>
+<span style="color:#8b92a8">Read/write path: each query → retrieve relevant slices of ③④ → inject into ① → model reasons → extract new facts → write back to ④</span>
+</div>
+
+    <p style="margin-top:14px">Mainstream implementations: <b>MemGPT / Letta</b> use an OS-paging metaphor so the LLM decides what to swap in/out; <b>mem0 / LangMem</b> wrap episodic + semantic into SDKs; OpenAI ChatGPT "memory" and Anthropic's Memory tool are productized versions. Common pattern: <b>extract → store → retrieve → inject</b>.</p>
+
+    <p style="margin-top:10px">Key engineering call: <b>what is worth remembering?</b> — not "everything said in chat", but use an extraction LLM to judge "will this affect a future answer?" Mem0's 2024 paper shows that active extraction + dedup beats "store everything + retrieve" by ~26% accuracy and 91% latency.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> mem0 <span class="kw">import</span> Memory  <span class="cmt"># pip install mem0ai</span>
+m = Memory()
+
+<span class="cmt"># 1) Write: mem0 uses an LLM to extract "worth-remembering" facts, dedup, store in vector DB</span>
+m.<span class="fn">add</span>(<span class="str">"I'm allergic to peanuts; my kid loves blue"</span>, user_id=<span class="str">"bigcat"</span>)
+m.<span class="fn">add</span>(<span class="str">"Last week we discussed Mamba — concluded SSMs suit long sequences"</span>, user_id=<span class="str">"bigcat"</span>)
+
+<span class="cmt"># 2) Retrieve: pull memories relevant to the current query (not entire history)</span>
+hits = m.<span class="fn">search</span>(<span class="str">"birthday cake ideas for my kid"</span>, user_id=<span class="str">"bigcat"</span>, limit=3)
+
+<span class="cmt"># 3) Inject — only the relevant few</span>
+ctx = <span class="str">"\n"</span>.<span class="fn">join</span>(h[<span class="str">"memory"</span>] <span class="kw">for</span> h <span class="kw">in</span> hits[<span class="str">"results"</span>])
+resp = client.messages.<span class="fn">create</span>(
+    model=<span class="str">"claude-opus-4-7"</span>, max_tokens=512,
+    system=<span class="fn">f</span><span class="str">"&lt;known_about_user&gt;\n{ctx}\n&lt;/known_about_user&gt;"</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"Recommend a birthday cake recipe for Saturday"</span>}])
+<span class="cmt"># → model avoids peanuts, knows blue decorations might fit</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + scenario</div>
+    <div class="tip">"More memory = smarter" — wrong. The dominant failure mode of memory systems is <b>contamination</b>: a wrong fact ("user hates Python" — really one frustrated comment) gets persisted and poisons all future answers. Production rules: (1) assign <b>confidence scores</b> (explicit statement &gt; inference), (2) let users <b>view + delete</b>, (3) run periodic "memory audits" — an LLM checks each memory is still valid.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: build a "<b>BigCat operating manual</b>" memory — your work preferences (dark theme, terse output, no emoji), family facts (kid's age range, allergies, interests), preferred thinking frames (Buddhism / complexity science / distributed-systems analogies). Have every AI tool read this shared memory for a consistent experience across tools — far better than repeating yourself each session.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + reflection</div>
+    <div class="takeaway">💡 Context is working set; Memory is persistent storage — conflating them is the most common architectural mistake in AI apps.<br>🤔 If "working with AI for a year" is the design of a stateful system, what does your "data schema" look like? Which fields need persistence, and which are just session state?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading</h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/2307.03172" target="_blank">Liu et al. 2023 — Lost in the Middle</a> — the foundational paper on long-context position bias; required reading</li>
+      <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching" target="_blank">Anthropic Prompt Caching docs</a> — cache_control usage, pricing, best practices</li>
+      <li><a href="https://platform.openai.com/docs/guides/prompt-caching" target="_blank">OpenAI Prompt Caching</a> — automatic caching mechanics</li>
+      <li><a href="https://arxiv.org/abs/2310.08560" target="_blank">MemGPT paper (2023)</a> — OS memory management ideas applied to LLMs, foundational</li>
+      <li><a href="https://arxiv.org/abs/2504.19413" target="_blank">Mem0 paper (2024)</a> — empirical study of extract-based memory vs full-archive retrieval</li>
+      <li><a href="https://www.anthropic.com/news/context-management" target="_blank">Anthropic Context Management</a> — official compaction + Memory tool walkthrough</li>
+      <li><a href="https://lilianweng.github.io/posts/2023-06-23-agent/#memory" target="_blank">Lilian Weng — Agent Memory section</a> — elegant mapping from cognitive science to LLM memory</li>
+      <li><a href="https://www.philschmid.de/context-engineering" target="_blank">Philipp Schmid — Context Engineering</a> — representative 2025 blog where the term gained traction</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions</h2>
+  <div class="section">
+    <details><summary>1. How does "prompt engineering" (Day 3) relate to "context engineering" (today)? Is one an upgrade of the other, or are they different layers?</summary><div>They are <b>different layers of abstraction</b>, not versions. Prompt engineering is about "<b>for this single LLM call, what's the most effective prompt?</b>" — CoT, few-shot, role play — fundamentally <b>single-inference techniques</b>. Context engineering is about "<b>across many calls, across long time spans, what should the model see?</b>" — caching strategy, compression strategy, memory architecture — fundamentally <b>system-level data flow design</b>. A great prompt engineer can be terrible at context architecture (writes systems that demo perfectly but fall apart in week 2 of usage), and vice versa. The relationship is "<b>SQL query optimization</b>" vs "<b>database schema design</b>" — one looks at queries, the other at schemas. BigCat, your distributed-systems background is a massive advantage on context engineering: cache coherence, data lifecycle, hot/cold tiering — all directly transferable. The 2024–2025 industry consensus: once models reach Claude 4.7 / GPT-5 quality, <b>the bottleneck for app quality moves from model to context engineering</b>. That's why "context engineering" became the term of 2025.</div></details>
+
+    <details><summary>2. KV caches get evicted under GPU memory pressure. What's the same and different vs Redis LRU or OS page replacement? What should you consider when designing your own caching strategy?</summary><div>Similarities: all are <b>bounded storage + retain hot + evict cold</b> — classic caching problems. Anthropic/OpenAI don't publish details, but the industry uses LRU/LFU variants + explicit TTL. Differences: (a) <b>eviction granularity</b> — Redis evicts whole keys; KV cache evicts along <b>prefix hash chains</b>, partial mismatches partially invalidate; (b) <b>asymmetric write cost</b> — Redis writes and reads are symmetric; KV caching is +25% write, −90% read, so the <b>read:write ratio</b> dominates ROI; (c) <b>externally opaque</b> — you don't know the provider's GPU load, two identical prompts can land hit/miss back-to-back. Design moves: (1) <b>use 1-hour cache</b> over default 5-min if prefix is invoked &gt; 1×/hour; (2) <b>pre-warm</b> off-peak with a no-op call; (3) <b>monitor cache_read/cache_creation ratio</b>; below ~5:1, your caching policy is losing money on the write premium; (4) <b>stabilize prefix boundaries</b> — never embed wall-clock timestamps or random session IDs that wreck the hash.</div></details>
+
+    <details><summary>3. In 2026, when do you pick long context (1M–2M tokens) over RAG? When is long context "good enough" that RAG isn't needed?</summary><div>When long context shipped in 2024 the industry chanted "RAG is dead"; 2025 reality slapped that down — they coexist for most apps. Decision axes: (a) <b>knowledge stability</b> — fixed corpora (one book, one contract) fit long-context + caching; dynamic corpora (news, product docs, user notes) require RAG; (b) <b>query diversity</b> — queries highly aligned with the doc ("what does clause N of this contract say") work in long context; divergent queries ("of all our customers last year, which look like A") need RAG, because "global aggregation" recall in long context is poor; (c) <b>cost budget</b> — long context bills the full input every call; a 100K-MAU app cannot afford it; RAG pulls 5–10K per call and scales linearly. <b>Where you really don't need RAG</b>: single-doc analysis (paper reader, contract review) + doc ≤ 500K tokens + low query frequency + cacheable prefix. Everything else is hybrid: RAG narrows to 50K–100K candidates, long context does the final pass. BigCat, your "read paper / read filing" use case is bucket 1; "personal long-term knowledge base" is bucket 2 — different architectures.</div></details>
+
+    <details><summary>4. Memory systems introduce "<b>AI memory contamination</b>" — wrong facts persist and poison future answers. What engineering patterns transfer from "<b>dirty-data governance</b>" in databases?</summary><div>Fundamentally the same problem: <b>low-quality writes → persistent storage → poisoned downstream inference</b>, the core challenge of any stateful system. Transferable patterns: (1) <b>pre-write validation (schema check)</b> — an independent LLM judges "is this fact <b>asserted</b> or <b>inferred</b>? user statement or AI hypothesis?", and only high-confidence items persist — DB constraint check; (2) <b>soft delete + audit log</b> — never DROP, mark invalidated, keep history so you can debug "why did the model suddenly get this wrong"; (3) <b>periodic GC + consistency check</b> — sweep memory with an LLM, flag contradictions ("user prefers dark mode" vs "user prefers light recently") and surface them; (4) <b>user-visible + editable</b> — every memory has a UI for view/delete/edit — this is both informed consent and dirty-data governance; (5) <b>multi-source corroboration</b> — high-stakes facts (medical, legal) require two independent confirmations before persisting. Mem0 / Letta partially do 1–3, but visibility and tiered confidence are widely under-built — BigCat, this is exactly what you should enforce when building your own "personal AI manual".</div></details>
+
+    <details><summary>5. If "working with AI" is cognitive outsourcing, <b>which memories should you outsource to AI, and which must stay in your own head</b>? What does this question mean for personal growth?</summary><div>This is the deepest personal-level extension of context engineering. <b>Safe to outsource</b>: (a) <b>factual memory</b> (names, dates, config values) — AI beats you 100×, zero-loss outsource; (b) <b>procedural memory</b> (how to configure Kubernetes, how to write a PR template) — AI + docs is enough; occasional review keeps skills sharp; (c) <b>infrequent specialist knowledge</b> (legal clauses, tax workflow used yearly) — pure outsource. <b>Must stay in your head</b>: (i) <b>core judgment</b> — "what is good code" / "what is a good decision" — outsource it and you lose agency; (ii) <b>emotional bonds</b> — every detail of conversations with your kid, your loved ones' preferences — outsourcing the memory outsources the relationship; (iii) <b>cross-domain intuition</b> — your Buddhism × distributed systems × complexity science connections are <b>combinatorial memory</b>; outsource the parts and the connections vanish; (iv) <b>embodied skills</b> — anything that requires "learning by doing" — outsource it and you never learn it. The deeper point: context engineering isn't just technical, it forces you to answer "<b>who am I?</b>" — which memories make up the non-outsourceable part of you. BigCat, the heart of "AI super-individual" is knowing precisely: which AI capabilities <b>augment</b> you vs <b>atrophy</b> you. That line is a personal "context schema design" — only you can draw it.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 8 · 2026-05-25</footer>
+
+</div>
+
+</body>
+</html>
