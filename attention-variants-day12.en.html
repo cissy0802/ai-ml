@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Attention Variants — Day 12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Attention Variants</h1>
+  <div class="meta">Day 12 · 2026-05-29 · Difficulty ★★★★☆</div>
+  <div class="audience">For: engineers with coding experience, non-AI background</div>
+</header>
+
+<!-- 1. Multi-Head Attention -->
+<div class="card">
+  <h2>Multi-Head Attention<span class="en">MHA</span></h2>
+  <div class="tags"><span class="tag">baseline arch</span><span class="tag purple">subspaces</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>MHA is like <b>building several secondary indexes on the same table</b>—each index optimized for a different query pattern. One head = one specialized "attention channel": some learn adjacent-word relations, some learn syntactic dependencies, some learn coreference. Run them in parallel, then concatenate—much like a MapReduce where several reducers each compute a different aggregation.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Pain point: a single attention's softmax produces only <b>one</b> probability distribution per query—it can only "focus one way" at a time. But a word's relation to its context is multi-dimensional (syntax + semantics + position); one head can't hold all of it.</p>
+    <p style="margin-top:8px">Mechanism: split the d_model dimension (say 512) into h heads (say 8, each d_head = 512/8 = 64). <b>Each head does its own attention in its own low-dimensional subspace</b>, then concatenate + one output projection W<sup>O</sup> to mix. The core formula (per head):</p>
+    <p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">Attention(Q,K,V) = softmax( Q·K<sup>T</sup> / √d_head ) · V</p>
+    <p style="margin-top:8px"><b>Each symbol</b>: Q (query, "what I'm looking for"), K (key, "what I can offer"), V (value, "the content actually carried"). <b>Q·K<sup>T</sup></b> scores every token pair's similarity (larger dot product = more relevant); softmax turns it into weights; then weighted-sum the V's. <b>Why divide by √d_head?</b>—higher dimensions make dot products larger, pushing softmax into its saturated region (one weight near 1, the rest near 0), where gradients vanish. Dividing by √d_head pulls the variance back to ~1 so training stays stable. This is the design from 2017's <i>Attention Is All You Need</i>.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">d_model=512 split into 8 parallel heads</b><br><br>
+input x <span class="box">512-d</span><br>
+<span class="arrow">↓ split into 8, each projected to 64-d</span><br>
+<span class="box g">head1·64</span><span class="box g">head2·64</span><span class="arrow">…</span><span class="box g">head8·64</span><br>
+<span class="arrow">↓ each head runs softmax(QKᵀ/√64)·V independently</span><br>
+<span class="box o">attn1</span><span class="box o">attn2</span><span class="arrow">…</span><span class="box o">attn8</span><br>
+<span class="arrow">↓ concat back to 512-d → output proj Wᴼ mixes</span><br>
+output <span class="box p">512-d</span> <span style="color:#5a6378">(shape unchanged, info now cross-fused)</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+<span class="cmt"># d_model=512 split into 8 heads, each of dim 512/8 = 64</span>
+mha = nn.<span class="fn">MultiheadAttention</span>(embed_dim=512, num_heads=8, batch_first=<span class="kw">True</span>)
+x = torch.<span class="fn">randn</span>(2, 10, 512)   <span class="cmt"># (batch, seq_len, d_model)</span>
+
+<span class="cmt"># self-attention: Q=K=V are all x itself</span>
+out, attn = mha(x, x, x, need_weights=<span class="kw">True</span>, average_attn_weights=<span class="kw">False</span>)
+<span class="fn">print</span>(out.shape)    <span class="cmt"># (2, 10, 512) shape unchanged, info mixed</span>
+<span class="fn">print</span>(attn.shape)   <span class="cmt"># (2, 8, 10, 10) 8 heads, each a 10x10 attention matrix</span>
+<span class="cmt"># each head learns a different pattern: adjacency, syntax, ...</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <div class="tip">"More heads = stronger model"—wrong. Head count is constrained (d_model must be divisible by h), and too many heads makes each d_head too small, hurting expressiveness. Research finds <b>many heads are redundant</b> after training—pruning them barely changes results—so capacity isn't improved by splitting indefinitely.</div>
+    <div class="exercise" style="margin-top:8px">📌 Cross-disciplinary scenario: MHA is a "<b>parallel multi-perspective</b>" compute paradigm—like a committee reviewing the same sentence simultaneously from syntactic, semantic, and coreference angles, then aggregating. This "many experts in parallel + aggregate at the end" structure is isomorphic to the distributed scatter-gather and multi-expert reviews you already know.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 "Multi-head" isn't piling on compute—it lets the model <b>learn different relations in parallel across subspaces</b>; total FLOPs is about the same as one big head, the difference is expressiveness.<br>🤔 If a head is a "specialized perspective," what does the redundancy of heads after training tell you about how neural nets allocate capacity?</div>
+  </div>
+</div>
+
+<!-- 2. GQA / MQA -->
+<div class="card">
+  <h2>Grouped / Multi-Query Attention<span class="en">GQA / MQA</span></h2>
+  <div class="tags"><span class="tag">inference opt</span><span class="tag orange">KV cache</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Think of the KV cache as the "<b>hot data</b>" repeatedly read at inference. MHA gives every query head its own dedicated KV replica (memory explodes); <b>MQA</b> makes all heads <b>share one</b> KV (like all workers sharing a single connection pool); <b>GQA</b> compromises—a few groups, each sharing one. In essence it's "deduplicating / sharing" the KV.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Pain point: during autoregressive decoding, generating each new token requires <b>reading the entire KV cache from HBM</b>. The bigger the KV cache, the more memory bandwidth becomes the bottleneck—slow decoding is usually not about FLOPs but about "moving the KV." And KV cache size ∝ <b>number of KV heads</b>.</p>
+    <ul>
+      <li><b>MHA</b>: KV heads = Q heads (e.g. 64). Most expressive, but largest KV cache;</li>
+      <li><b>MQA</b> (Shazeer 2019): KV heads = <b>1</b>, shared by all Q heads. KV cache shrinks to 1/64, but quality drops;</li>
+      <li><b>GQA</b> (Ainslie 2023): KV heads = g (e.g. 8), each group of Q heads shares one. <b>Interpolates between MHA and MQA</b>—the paper shows it reaches "quality close to MHA at speed close to MQA." Llama 2/3 and Mistral default to GQA.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">KV head sharing spectrum (8 Q heads in all)</b><br><br>
+<b>MHA</b> 8 Q ↔ 8 KV: <span class="box">Q</span><span class="box g">KV</span> ×8 <span style="color:#5a6378">largest KV cache</span><br>
+<b>GQA</b> 8 Q ↔ 2 KV: <span class="box">Q Q Q Q</span><span class="arrow">→</span><span class="box g">KV</span> | <span class="box">Q Q Q Q</span><span class="arrow">→</span><span class="box g">KV</span> <span style="color:#5a6378">4× smaller</span><br>
+<b>MQA</b> 8 Q ↔ 1 KV: <span class="box">Q Q Q Q Q Q Q Q</span><span class="arrow">→</span><span class="box g">KV</span> <span style="color:#5a6378">8× smaller, quality drops</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># KV cache size is proportional to KV head count.</span>
+<span class="cmt"># Estimate the KV cache of one sequence on a 70B-class model:</span>
+<span class="kw">def</span> <span class="fn">kv_cache_gb</span>(n_kv_heads, seq, d_head=128, layers=80, dtype=2):
+    <span class="cmt"># K and V each stored → ×2; dtype=2 means fp16, 2 bytes/number</span>
+    <span class="kw">return</span> 2 * n_kv_heads * d_head * seq * layers * dtype / 1e9
+
+seq = 8192
+<span class="fn">print</span>(<span class="str">"MHA (64 KV head):"</span>, <span class="fn">round</span>(<span class="fn">kv_cache_gb</span>(64, seq), 1), <span class="str">"GB"</span>)  <span class="cmt"># ~21.5</span>
+<span class="fn">print</span>(<span class="str">"GQA ( 8 KV head):"</span>, <span class="fn">round</span>(<span class="fn">kv_cache_gb</span>(8,  seq), 1), <span class="str">"GB"</span>)  <span class="cmt"># ~2.7</span>
+<span class="fn">print</span>(<span class="str">"MQA ( 1 KV head):"</span>, <span class="fn">round</span>(<span class="fn">kv_cache_gb</span>(1,  seq), 1), <span class="str">"GB"</span>)  <span class="cmt"># ~0.3</span>
+<span class="cmt"># GQA cuts KV cache to 1/8 with almost no quality loss → the practical pick</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <div class="tip">"GQA is for saving training compute"—wrong. GQA/MQA mainly save <b>inference-time</b> KV-cache memory and bandwidth; training gains are small. It's an <b>inference optimization</b> dressed up as architecture—same "what the model knows," just less KV to move.</div>
+    <div class="exercise" style="margin-top:8px">📌 Model-selection scenario: check <code>num_key_value_heads</code> on the model card. If it equals <code>num_attention_heads</code>, it's MHA (expensive memory, slow decode at long context); if far smaller (e.g. 8 vs 64), it's GQA (cheaper and faster for long-document tasks). This single number predicts your long-context cost curve.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 GQA/MQA don't change what the model "knows," only how much KV must be moved at inference—it's a <b>memory-access optimization</b> dressed as architecture.<br>🤔 When the KV cache becomes the "memory wall" for long context, do you cut the number of KV heads, or cut the KV dimension per token? (That's the other road, taken by DeepSeek's MLA.)</div>
+  </div>
+</div>
+
+<!-- 3. Sliding Window Attention -->
+<div class="card">
+  <h2>Sliding Window Attention<span class="en">SWA</span></h2>
+  <div class="tags"><span class="tag">sparse attn</span><span class="tag purple">linear cost</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Like a <b>bounded buffer</b> in stream processing: each token only sees the most recent w tokens, not the whole stream. But information isn't trapped—it propagates <b>layer by layer forward</b>, like a gossip protocol spreading hop by hop, or a CNN stacking depth to grow its receptive field.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Pain point: standard attention is <b>O(n²)</b>—every token scores similarity against all n tokens. At n=100K that's ~10<sup>10</sup> pairs; long sequences simply can't be computed or stored.</p>
+    <p style="margin-top:8px">Mechanism: restrict each token to attend to only the <b>previous w</b> (window width), dropping cost to <b>O(n·w)</b>—<b>linear</b> in sequence length. So how does distant info arrive? Through <b>depth</b>: each layer pushes information forward by w tokens; after L layers the effective receptive field ≈ <b>L·w</b>. The Mistral 7B paper states exactly this—"after k layers, information can move forward up to k×W tokens." Longformer (2020) adds a few "<b>global tokens</b>" (e.g. [CLS]) as cross-segment bridges.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Window w=3: info spreads hop by hop via depth</b><br><br>
+token: &nbsp;t0 &nbsp;t1 &nbsp;t2 &nbsp;t3 &nbsp;t4 &nbsp;t5 &nbsp;t6 &nbsp;t7<br>
+layer 1: <span style="color:#7ed6a0">each token sees only 3 to its left → diagonal band</span><br>
+layer 2: <span style="color:#ffb450">t6 indirectly sees t3 (relayed via t4/t5)</span><br>
+layer L: <span style="color:#a48cff">effective receptive field ≈ L × 3 tokens</span><br><br>
+<span style="color:#5a6378">how far it can reach → grows linearly with depth</span><br>
+1 layer <span class="bar" style="width:18px;height:14px"></span> 3 | 8 layers <span class="bar" style="width:60px;height:14px"></span> 24 | 32 layers <span class="bar" style="width:160px;height:14px"></span> 96
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+seq, window = 10, 3
+<span class="cmt"># sliding-window mask: token i can only see [i-window+1, i]</span>
+i = torch.<span class="fn">arange</span>(seq).<span class="fn">unsqueeze</span>(1)
+j = torch.<span class="fn">arange</span>(seq).<span class="fn">unsqueeze</span>(0)
+mask = (j &lt;= i) & (j &gt; i - window)   <span class="cmt"># causal + window → a diagonal band</span>
+<span class="fn">print</span>(mask.<span class="fn">int</span>())   <span class="cmt"># 1=visible 0=masked; visible region is a band, not full triangle</span>
+
+<span class="cmt"># effective receptive field grows linearly with depth</span>
+<span class="kw">for</span> L <span class="kw">in</span> (1, 8, 32):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"after {L} layers, receptive field ~ {L*window} tokens"</span>)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <div class="tip">"Sliding window = can only handle short text"—wrong. By stacking layers, the receptive field covers very long sequences. Its real weakness is <b>"single-hop long-range exact retrieval"</b>: pulling a fact at token #100K precisely to the current position must be relayed across many layers and is easily distorted—hence the frequent pairing with global tokens or alternating with full-attention layers.</div>
+    <div class="exercise" style="margin-top:8px">📌 Judgment scenario: when a model claiming 128K context does poorly on "very long-range association" tasks, first ask whether its attention is pure SWA—if so, distant info propagates slowly through depth, and "needle-in-a-haystack + reasoning" is a structural blind spot, not a prompt failure.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Local attention + depth = trading "layers" for "reach," the same trick a CNN uses to grow its receptive field with depth.<br>🤔 Since information propagates hop by hop through layers, what failure mode does that imply for needle-in-a-haystack tasks? How should you trade depth against window width?</div>
+  </div>
+</div>
+
+<!-- 4. FlashAttention -->
+<div class="card">
+  <h2>FlashAttention<span class="en">IO-Aware Exact Attention</span></h2>
+  <div class="tags"><span class="tag">memory-access opt</span><span class="tag orange">exact</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Like an <b>external merge sort</b>: the data is too big for memory, so you process it in blocks that fit in cache, avoiding repeated trips to slow storage. FlashAttention is the "cache-aware algorithm" for attention—it <b>never materializes the n×n attention matrix in memory</b>, computing block by block inside fast on-chip cache. Same math, different memory-access order.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p><b>The key counterintuition</b>: attention is <b>memory-bound</b>, not compute-bound. The bottleneck isn't multiplications, it's shuttling that n×n matrix between <b>HBM (big GPU memory, slow)</b> and <b>SRAM (on-chip cache, fast but tiny)</b>. The naive version: compute S=QKᵀ, write to HBM → read back for softmax → read back again to multiply by V—dragged down by slow memory throughout.</p>
+    <p style="margin-top:8px">FlashAttention (Dao 2022) tiles Q, K, V into small blocks, <b>each fitting in SRAM</b>, and computes block by block, <b>never writing the full n×n back to HBM</b>. The catch is that softmax must normalize over an entire row's global max and sum—yet you only see one block at a time. The fix is <b>online softmax</b>: maintain a running max and running sum, and as each new block arrives, rescale the accumulated result by a correction factor exp(old_max − new_max). Numerically stable, and the result is <b>element-for-element identical</b> to the naive version (exact, not approximate). Payoff: memory accesses plummet → 2–4× speedup, memory <b>linear</b> in n rather than quadratic.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Bottleneck is movement, not compute</b><br><br>
+<span class="box r">HBM big·slow</span> <span class="arrow">↔ shuttle n×n matrix repeatedly ↔</span> <span class="box g">SRAM small·fast</span> <span class="arrow">→</span> compute<br><br>
+<b style="color:#ff8e8e">Naive:</b> QKᵀ→write HBM→read→softmax→write→read→×V <span style="color:#5a6378">(materializes full n×n)</span><br>
+<b style="color:#7ed6a0">Flash:</b> tile Q/K/V into SRAM → in-block compute + online-softmax accumulate → <b>n×n never hits HBM</b><br><br>
+<span style="color:#5a6378">same output, memory O(n²)→O(n), wall-clock 2–4× faster</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+<span class="kw">from</span> torch.nn.attention <span class="kw">import</span> SDPBackend, sdpa_kernel
+<span class="cmt"># needs a CUDA GPU; q/k/v shape (batch, heads, seq, d_head)</span>
+q = torch.<span class="fn">randn</span>(2, 8, 4096, 64, device=<span class="str">"cuda"</span>, dtype=torch.float16)
+k = torch.<span class="fn">randn_like</span>(q); v = torch.<span class="fn">randn_like</span>(q)
+
+<span class="cmt"># force the FlashAttention kernel: never materialize 4096x4096 in HBM</span>
+<span class="kw">with</span> <span class="fn">sdpa_kernel</span>(SDPBackend.FLASH_ATTENTION):
+    out = F.<span class="fn">scaled_dot_product_attention</span>(q, k, v, is_causal=<span class="kw">True</span>)
+<span class="fn">print</span>(out.shape)   <span class="cmt"># (2, 8, 4096, 64) element-for-element same as naive</span>
+<span class="cmt"># naive materializes hundreds of MB of intermediate matrix; Flash ~0</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <div class="tip">"FlashAttention is a sparse / approximate attention that loses precision"—wrong. It is <b>exact</b>; its output is element-for-element identical to the naive version. It optimizes <b>how you compute</b> (memory-access order), not <b>what you compute</b> (the math). That's entirely unlike sparse attention such as SWA, which genuinely changes the math.</div>
+    <div class="exercise" style="margin-top:8px">📌 Selection scenario: when the same model runs much faster on inference frameworks like vLLM / SGLang, IO-aware kernels like FlashAttention are a key source. Understanding that "the speedup comes from memory-access optimization, not a different model" helps you judge whether a performance claim is real or quietly trading away precision.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Same math, different memory-access order, and it's 2–4× faster—performance bottlenecks are often in <b>memory, not FLOPs</b>.<br>🤔 How many times in your past system work did you "think it was CPU-bound when it was actually I/O-bound"? How does that intuition transfer to diagnosing AI systems?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en"></span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1706.03762" target="_blank">Vaswani et al. 2017 — Attention Is All You Need</a> — the original MHA and scaled dot-product attention, essential</li>
+      <li><a href="https://arxiv.org/abs/1911.02150" target="_blank">Shazeer 2019 — Multi-Query Attention</a> — the starting point for single-KV-head fast decoding</li>
+      <li><a href="https://arxiv.org/abs/2305.13245" target="_blank">Ainslie et al. 2023 — GQA</a> — interpolation between MHA and MQA, now the mainstream default</li>
+      <li><a href="https://arxiv.org/abs/2004.05150" target="_blank">Beltagy et al. 2020 — Longformer</a> — the canonical sliding-window + global-token work</li>
+      <li><a href="https://arxiv.org/abs/2310.06825" target="_blank">Mistral 7B (2023)</a> — GQA + sliding window combined in practice</li>
+      <li><a href="https://arxiv.org/abs/2205.14135" target="_blank">Dao et al. 2022 — FlashAttention</a> — IO-aware exact attention, a foundational work</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en"></span></h2>
+  <div class="section">
+    <details><summary>1. GQA (changes the math/architecture) and FlashAttention (changes memory access, not the math) both make attention faster, yet they belong to two completely different classes of optimization. Why does the distinction matter?</summary><div>This is the key watershed for understanding the whole field. <b>GQA/MQA/SWA change "what you compute"</b>—they alter the model's mathematical definition: GQA reduces KV heads (trading a bit of expressiveness for memory), SWA narrows each token's view (trading direct long-range links for linear cost). These optimizations <b>change the model's output</b> and must be decided at training time (or via uptraining), a true <b>quality–cost trade-off</b>. <b>FlashAttention changes "how you compute"</b>—the math is untouched, only the GPU memory-access order is reordered, and the output is element-for-element identical. It's a <b>free lunch</b>: no precision cost, any model can adopt it directly. Why it matters: (a) <b>can it be added after the fact</b>—Flash can accelerate an existing model; GQA cannot, it needs retraining or uptraining; (b) <b>different evaluation</b>—Flash only needs numerical equivalence checks and timing; GQA/SWA require downstream quality evals because they lose points; (c) <b>composability</b>—the two are orthogonal and combine (Mistral = GQA + SWA + Flash stacked). For your distributed intuition: Flash is like "swapping in a better I/O scheduler," GQA like "denormalizing your DB schema"—one leaves semantics intact, the other changes them.</div></details>
+
+    <details><summary>2. The KV cache is the "memory wall" of long context. GQA cuts the number of KV heads; DeepSeek's MLA cuts the KV dimension per token—two roads compressing different axes of the same thing. Which do you think has more of a future?</summary><div>KV cache size ≈ (KV head count) × (per-head dim) × seq × layers, so "compressing KV" has two orthogonal axes. <b>GQA works the "head count" axis</b>: let multiple query heads share fewer KV heads—simple, training-stable, uptrainable from an MHA checkpoint, the current industry default. The cost is expressiveness loss from sharing, and the compression ratio is bounded (KV heads can't go below 1, and at MQA's 1 the quality clearly drops). <b>MLA (Multi-head Latent Attention) works the "dimension" axis</b>: jointly compress K and V into one low-dimensional latent vector in the cache, projecting back when used—essentially "lossy compress + decompress" of the KV, with a compression ratio far beyond GQA, and DeepSeek reports quality holding or even improving. The cost is implementation complexity and special handling for RoPE compatibility. My read: short-term, GQA stays mainstream for simplicity + ecosystem maturity; but the "dimension axis" has a higher theoretical ceiling (redundancy can be shared across heads) and is sexier long-term. Deeper still: both assume the KV holds compressible redundancy—pointing at a fundamental question, <b>how much "memory bandwidth" does attention actually need?</b> That in turn leads to Mamba/SSM-style routes that replace the KV cache with a fixed-size state (Day 34).</div></details>
+
+    <details><summary>3. Why did an optimization like FlashAttention—"reorder memory access and it's 2-4× faster"—take years to appear? What does it reveal about hardware–software co-design?</summary><div>On the surface it looks "late"; underneath, <b>the abstraction layers hid the hardware reality</b>. Researchers write attention at the PyTorch/math layer—matmul, softmax—where "compute" and "memory" are invisible, so the bottleneck looks like it ought to be FLOPs. But the GPU truth is: compute (TFLOPs) has grown far faster than memory bandwidth this past decade, so <b>more and more kernels are memory-bound</b>—compute sits idle while time is spent waiting on HBM. FlashAttention's insight isn't a new algorithm (online softmax dates to the 1980s) but that <b>someone was willing to drop to the CUDA layer and redesign the kernel around the GPU's memory hierarchy (HBM/SRAM sizes)</b>. The lessons: (a) <b>abstraction has a cost</b>—higher-level abstractions make you "blind" to the real bottleneck, and major optimizations often come from piercing the abstraction and rewriting close to the hardware; (b) <b>bottlenecks drift</b>—hardware evolution (the compute-vs-bandwidth scissors) turns yesterday's non-bottleneck into today's, so optimization must chase hardware trends; (c) <b>IO-awareness is a general method</b>—the same idea later spread to many kernels. For you: this matches your distributed experience exactly—a slow DB query is nine times out of ten not CPU but disk/network I/O; the real experts optimize data movement, not computation.</div></details>
+
+    <details><summary>4. Stringing today's four variants together: from MHA in 2017 to now, what's the main thread of attention's evolution? Where does it go next?</summary><div>The thread in one line: <b>a constant tug-of-war between expressiveness and scalability (long sequences + low cost), gradually pushing cost from quadratic toward linear</b>. (1) <b>MHA (2017)</b> set the paradigm, but O(n²) compute + a KV cache that grows linearly with sequence length doomed it on long sequences. (2) <b>Sparsification (SWA/Longformer, 2020)</b> attacks "what you compute" to cut computational complexity, O(n²)→O(n·w), at the cost of relaying long-range info through depth. (3) <b>KV sharing (MQA 2019 / GQA 2023)</b> attacks the inference bottleneck, cutting KV-cache memory and bandwidth so long-context decoding becomes affordable. (4) <b>FlashAttention (2022)</b> switches dimensions—doesn't touch the math, cuts memory access close to the hardware, making MHA itself faster and leaner. The four are orthogonal and stackable; today's frontier models are basically "GQA + local/global mix + Flash kernel" combined. Two lines ahead: (a) <b>keep compressing KV</b>—MLA (dimension compression), KV quantization, even KV eviction (dropping unimportant history); (b) <b>step outside attention</b>—Mamba/SSM replaces the ever-growing KV cache with a fixed-size state, turning "memory" from O(n) to O(1). An open bet: will the future be dominated by "attention + these optimizations," or by hybrid architectures (some layers SSM, some attention)? Right now hybrids have strong momentum.</div></details>
+
+    <details><summary>5. Attention's "cost" forces architects into lossy trade-offs (GQA loses a little quality, SWA loses long range). This "sacrifice perfection for scale" engineering philosophy—what isomorphic shadows does it have in the distributed systems you know?</summary><div>This is almost the same worldview projected onto different domains. <b>CAP / eventual consistency in distributed systems</b>: give up strong consistency for availability and partition tolerance—isomorphic to GQA "giving up a little expressiveness for memory," both admitting "perfection doesn't scale, you must give something up selectively." <b>Caching and sampling</b>: a CDN/Redis cache trades a bit of staleness for huge throughput; SWA trades a bit of long-range precision for linear cost—both lossy but worth it. <b>LSM-tree / columnar denormalization</b>: sacrifice storage redundancy and immediate consistency for read/write throughput, the same ledger as "compress KV cache for long context." <b>Approximate algorithms</b>: HyperLogLog, Bloom filters trade bounded error for orders-of-magnitude space savings—in spirit "exact is too expensive, go approximate"—while FlashAttention is precisely the counterexample (insist on exact, optimize only memory access), a reminder that "lossy" isn't the only path; sometimes a different implementation lets you have both. The deeper point: <b>scale itself rewrites what "correct" means</b>—on small data you chase the exact solution, at scale "good enough and scalable" usually beats "perfect but unscalable." As you design "AI super-individual" systems, this judgment—knowing on which axis you can be lossy, how lossy, and how to compensate—is worth more than memorizing any single technique.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 12 · 2026-05-29</footer>
+
+</div>
+
+</body>
+</html>

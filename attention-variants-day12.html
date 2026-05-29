@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：Attention 变种 — Day 12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：Attention 变种</h1>
+  <div class="meta">Day 12 · 2026-05-29 · 难度 ★★★★☆</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<!-- 1. Multi-Head Attention -->
+<div class="card">
+  <h2>多头注意力<span class="en">Multi-Head Attention · MHA</span></h2>
+  <div class="tags"><span class="tag">基线架构</span><span class="tag purple">子空间</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>MHA 就像在<b>同一张表上建多个二级索引</b>——每个索引为一种查询模式优化。一个 head = 一个专用"关注通道"：有的学相邻词关系，有的学句法依赖，有的学指代。并行跑完再把结果拼起来，类似一次 MapReduce 里多个 reducer 各算一种聚合。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：单个 attention 的 softmax 对每个 query 只能产生<b>一个</b>概率分布——也就是只能"用一种方式聚焦"一次。但一个词和上下文的关系是多维的（语法 + 语义 + 位置），单头表达不下。</p>
+    <p style="margin-top:8px">机制：把 d_model 维（比如 512）切成 h 个 head（比如 8 个，每个 d_head = 512/8 = 64），<b>每个 head 在自己的低维子空间里独立做一次注意力</b>，最后拼接 + 一个输出投影 W<sup>O</sup> 混合。核心公式（每个 head）：</p>
+    <p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">Attention(Q,K,V) = softmax( Q·K<sup>T</sup> / √d_head ) · V</p>
+    <p style="margin-top:8px"><b>每个符号</b>：Q（query，"我在找什么"）、K（key，"我能提供什么"）、V（value，"实际要传的内容"）。<b>Q·K<sup>T</sup></b> 算每对 token 的相似度（点积越大越相关）；softmax 把它变成权重；再加权求和 V。<b>为什么除 √d_head？</b>——维度越高点积数值越大，会把 softmax 推向饱和区（一个权重接近 1、其余接近 0），梯度几乎消失。除以 √d_head 把方差拉回 ~1，训练才稳定。这是 2017 年 <i>Attention Is All You Need</i> 的设计。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">d_model=512 拆成 8 个 head 并行</b><br><br>
+输入 x <span class="box">512 维</span><br>
+<span class="arrow">↓ 切成 8 份，各自投影到 64 维</span><br>
+<span class="box g">head1·64</span><span class="box g">head2·64</span><span class="arrow">…</span><span class="box g">head8·64</span><br>
+<span class="arrow">↓ 每个 head 独立算 softmax(QKᵀ/√64)·V</span><br>
+<span class="box o">注意力1</span><span class="box o">注意力2</span><span class="arrow">…</span><span class="box o">注意力8</span><br>
+<span class="arrow">↓ 拼接回 512 维 → 输出投影 Wᴼ 混合</span><br>
+输出 <span class="box p">512 维</span> <span style="color:#5a6378">（形状不变，信息已交叉融合）</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+<span class="cmt"># d_model=512 拆成 8 个 head,每个 head 维度 = 512/8 = 64</span>
+mha = nn.<span class="fn">MultiheadAttention</span>(embed_dim=512, num_heads=8, batch_first=<span class="kw">True</span>)
+x = torch.<span class="fn">randn</span>(2, 10, 512)   <span class="cmt"># (batch, seq_len, d_model)</span>
+
+<span class="cmt"># self-attention: Q=K=V 都是 x 自己</span>
+out, attn = mha(x, x, x, need_weights=<span class="kw">True</span>, average_attn_weights=<span class="kw">False</span>)
+<span class="fn">print</span>(out.shape)    <span class="cmt"># (2, 10, 512) 形状不变,信息已混合</span>
+<span class="fn">print</span>(attn.shape)   <span class="cmt"># (2, 8, 10, 10) 8 个 head 各一张 10×10 注意力矩阵</span>
+<span class="cmt"># 每个 head 学到不同关注模式:有的盯相邻词,有的盯句法依赖</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"head 越多模型越强"——错。head 数受约束（d_model 必须能被 h 整除），且 head 太多每个 d_head 太小、表达力反而下降。研究发现训练后<b>很多 head 是冗余的</b>，剪掉对效果几乎无影响——说明容量不是越分越好。</div>
+    <div class="exercise" style="margin-top:8px">📌 跨学科场景：MHA 是一种"<b>并行多视角</b>"计算范式——像一个委员会同时从语法、语义、指代多个角度审同一句话再汇总。这个"多专家并行 + 末端聚合"的结构，和你熟悉的分布式 scatter-gather、组织决策中的多专家会审是同构的。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 "多头"不是堆算力，是让模型在多个子空间里<b>并行学不同关系</b>——总算量和单个大头差不多，差别在表达力。<br>🤔 如果一个 head 是一个"专用视角"，训练后冗余的 head 说明了神经网络在容量分配上的什么习性？</div>
+  </div>
+</div>
+
+<!-- 2. GQA / MQA -->
+<div class="card">
+  <h2>分组 / 多查询注意力<span class="en">GQA / MQA</span></h2>
+  <div class="tags"><span class="tag">推理优化</span><span class="tag orange">KV cache</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>把 KV cache 想成推理时被反复读取的"<b>热数据</b>"。MHA 给每个 query head 配一份专属 KV 副本（显存爆）；<b>MQA</b> 让所有 head <b>共享一份</b> KV（像所有 worker 共用一个连接池）；<b>GQA</b> 折中——分几组、每组共享一份。本质是给 KV 做"去重 / 共享"。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：自回归解码时，每生成一个新 token，都要<b>把整个 KV cache 从 HBM 读一遍</b>。KV cache 越大，内存带宽越成为瓶颈——解码慢的主因往往不是算力，是"搬 KV"。而 KV cache 大小 ∝ <b>KV head 数量</b>。</p>
+    <ul>
+      <li><b>MHA</b>：KV head 数 = Q head 数（如 64）。最强表达，但 KV cache 最大；</li>
+      <li><b>MQA</b>（Shazeer 2019）：KV head 数 = <b>1</b>，所有 Q head 共享。KV cache 缩小到 1/64，但质量会掉；</li>
+      <li><b>GQA</b>（Ainslie 2023）：KV head 数 = g（如 8），每组 Q head 共享一份。<b>在 MHA 和 MQA 之间插值</b>——论文证明它能"质量接近 MHA、速度接近 MQA"。Llama 2/3、Mistral 都默认用 GQA。</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">KV head 共享谱（Q head 数都是 8）</b><br><br>
+<b>MHA</b> 8 Q ↔ 8 KV：<span class="box">Q</span><span class="box g">KV</span> ×8 <span style="color:#5a6378">KV cache 最大</span><br>
+<b>GQA</b> 8 Q ↔ 2 KV：<span class="box">Q Q Q Q</span><span class="arrow">→</span><span class="box g">KV</span> ｜ <span class="box">Q Q Q Q</span><span class="arrow">→</span><span class="box g">KV</span> <span style="color:#5a6378">缩 4×</span><br>
+<b>MQA</b> 8 Q ↔ 1 KV：<span class="box">Q Q Q Q Q Q Q Q</span><span class="arrow">→</span><span class="box g">KV</span> <span style="color:#5a6378">缩 8×,质量掉</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># KV cache 大小 ∝ KV head 数。估算 70B 级模型单条序列的 KV cache:</span>
+<span class="kw">def</span> <span class="fn">kv_cache_gb</span>(n_kv_heads, seq, d_head=128, layers=80, dtype=2):
+    <span class="cmt"># K 和 V 各存一份 → ×2; dtype=2 表示 fp16 每个数 2 字节</span>
+    <span class="kw">return</span> 2 * n_kv_heads * d_head * seq * layers * dtype / 1e9
+
+seq = 8192
+<span class="fn">print</span>(<span class="str">"MHA (64 KV head):"</span>, <span class="fn">round</span>(<span class="fn">kv_cache_gb</span>(64, seq), 1), <span class="str">"GB"</span>)  <span class="cmt"># ~21.5</span>
+<span class="fn">print</span>(<span class="str">"GQA ( 8 KV head):"</span>, <span class="fn">round</span>(<span class="fn">kv_cache_gb</span>(8,  seq), 1), <span class="str">"GB"</span>)  <span class="cmt"># ~2.7</span>
+<span class="fn">print</span>(<span class="str">"MQA ( 1 KV head):"</span>, <span class="fn">round</span>(<span class="fn">kv_cache_gb</span>(1,  seq), 1), <span class="str">"GB"</span>)  <span class="cmt"># ~0.3</span>
+<span class="cmt"># GQA 把 KV cache 砍到 1/8,几乎不掉质量 → 长上下文的现实选择</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"GQA 是为了省训练算力"——错。GQA/MQA 省的主要是<b>推理时</b>的 KV cache 显存和内存带宽，训练时收益很小。它是一种<b>推理优化</b>，披着架构的外衣——同样的"模型会什么"，只是改了 KV 要搬多少。</div>
+    <div class="exercise" style="margin-top:8px">📌 选型决策场景：看模型卡里的 <code>num_key_value_heads</code>。若它 = <code>num_attention_heads</code>，是 MHA（长上下文显存贵、解码慢）；若远小于（如 8 vs 64），是 GQA（长文档任务更省、更快）。这一个数字直接预示你跑长上下文的成本曲线。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 GQA/MQA 改的不是模型"会什么"，而是推理时 KV 要搬多少——是<b>访存优化</b>披着架构外衣。<br>🤔 当 KV cache 成为长上下文的"内存墙"，下一步该压 KV head 数，还是压每个 token 的 KV 维度？（这正是 DeepSeek 的 MLA 走的另一条路）</div>
+  </div>
+</div>
+
+<!-- 3. Sliding Window Attention -->
+<div class="card">
+  <h2>滑动窗口注意力<span class="en">Sliding Window Attention · SWA</span></h2>
+  <div class="tags"><span class="tag">稀疏注意力</span><span class="tag purple">线性复杂度</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>像流处理里的<b>有界缓冲（bounded buffer）</b>：每个 token 只看最近 w 个 token，不再看全程。但信息不会被困死——靠<b>层层向前传递</b>，类似 gossip 协议逐跳扩散，或 CNN 用深度堆出大感受野。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：标准注意力是 <b>O(n²)</b>——每个 token 和全部 n 个 token 算相似度。n=100K 时就是约 10<sup>10</sup> 对，长序列直接算不动、存不下。</p>
+    <p style="margin-top:8px">机制：限制每个 token 只注意<b>前 w 个</b>（窗口宽度），复杂度降到 <b>O(n·w)</b>——对序列长度<b>线性</b>。那远处的信息怎么传过来？靠<b>深度</b>：每过一层，信息向前推进 w 个 token；叠 L 层后，有效感受野 ≈ <b>L·w</b>。Mistral 7B 论文正是这么说的——"k 层之后信息可前移最多 k×W 个 token"。Longformer (2020) 进一步加少量"<b>全局 token</b>"（如 [CLS]）当跨段桥梁。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">窗口 w=3：信息靠层数逐跳扩散</b><br><br>
+token: &nbsp;t0 &nbsp;t1 &nbsp;t2 &nbsp;t3 &nbsp;t4 &nbsp;t5 &nbsp;t6 &nbsp;t7<br>
+第1层: &nbsp;<span style="color:#7ed6a0">每个 token 只看左边 3 个 → 对角带</span><br>
+第2层: &nbsp;<span style="color:#ffb450">t6 间接看到 t3（经 t4/t5 传递）</span><br>
+第L层: &nbsp;<span style="color:#a48cff">有效感受野 ≈ L × 3 个 token</span><br><br>
+<span style="color:#5a6378">L 层后能覆盖多远 → 随深度线性增长</span><br>
+1 层 <span class="bar" style="width:18px;height:14px"></span> 3 ｜ 8 层 <span class="bar" style="width:60px;height:14px"></span> 24 ｜ 32 层 <span class="bar" style="width:160px;height:14px"></span> 96
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+seq, window = 10, 3
+<span class="cmt"># 滑动窗口掩码:token i 只能看 [i-window+1, i] 这 window 个位置</span>
+i = torch.<span class="fn">arange</span>(seq).<span class="fn">unsqueeze</span>(1)
+j = torch.<span class="fn">arange</span>(seq).<span class="fn">unsqueeze</span>(0)
+mask = (j &lt;= i) & (j &gt; i - window)   <span class="cmt"># 因果 + 窗口 → 一条对角带</span>
+<span class="fn">print</span>(mask.<span class="fn">int</span>())   <span class="cmt"># 1=可见 0=屏蔽,可见区是对角带不是整个三角</span>
+
+<span class="cmt"># 有效感受野随层数线性增长</span>
+<span class="kw">for</span> L <span class="kw">in</span> (1, 8, 32):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{L} 层后感受野 ≈ {L*window} tokens"</span>)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"滑动窗口 = 只能处理短文本"——错。靠堆层数，感受野能覆盖很长序列。但它的真实弱点是<b>"单跳远距离精确检索"</b>：要把第 100K 个 token 的某个事实精确取到当前位置，得靠多层接力传递，容易在传递中失真——所以常配全局 token 或与 full attention 层交替使用。</div>
+    <div class="exercise" style="margin-top:8px">📌 判断力场景：当一个号称 128K 上下文的模型在"跨越很远的关联"任务上表现差，先想想它的注意力是不是纯 SWA——若是，远距离信息靠层数慢慢传，"大海捞针 + 推理"本就是它的结构性短板，不是 prompt 没写好。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 局部注意力 + 深度 = 用"层数"换"广度"，和 CNN 用深度堆感受野是同一招。<br>🤔 信息靠层数逐跳传播，这对"大海捞针"任务意味着什么样的失败模式？深度和窗口宽度该怎么权衡？</div>
+  </div>
+</div>
+
+<!-- 4. FlashAttention -->
+<div class="card">
+  <h2>FlashAttention<span class="en">IO-Aware Exact Attention</span></h2>
+  <div class="tags"><span class="tag">访存优化</span><span class="tag orange">精确</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>像<b>外部归并排序</b>：数据大到装不进内存，就分块、每块装进缓存处理，避免把全量反复搬进慢速存储。FlashAttention 是 attention 的"cache-aware 算法"——<b>从不在显存里物化那张 n×n 的注意力矩阵</b>，分块在片上高速缓存里算完。同样的数学，换访存顺序。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p><b>关键反直觉</b>：attention 是 <b>memory-bound（访存受限）</b>，不是 compute-bound（算力受限）。瓶颈不在乘法次数，而在那张 n×n 矩阵在 <b>HBM（GPU 大显存，慢）</b> 和 <b>SRAM（片上缓存，快但极小）</b> 之间反复搬运。朴素实现：算 S=QKᵀ 写回 HBM → 读回做 softmax → 再读回乘 V，全程被慢显存拖死。</p>
+    <p style="margin-top:8px">FlashAttention (Dao 2022) 把 Q、K、V 切成小块（tile），<b>每块装进 SRAM</b>，一块一块算，<b>永不把完整 n×n 写回 HBM</b>。难点是 softmax 要按整行的全局最大值和总和归一化——而你一次只看到一块。解法是 <b>online softmax（在线 softmax）</b>：维护"running max"和"running sum"，每来一个新块就用修正因子 exp(旧max − 新max) 重新缩放已累积的结果。数值稳定、且结果与朴素实现<b>逐元素完全相同</b>（exact，非近似）。收益：访存暴减 → 2–4× 提速，显存随 n <b>线性</b>而非平方。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">瓶颈在搬运,不在算力</b><br><br>
+<span class="box r">HBM 大·慢</span> <span class="arrow">↔ 反复搬 n×n 矩阵 ↔</span> <span class="box g">SRAM 小·快</span> <span class="arrow">→</span> 算力<br><br>
+<b style="color:#ff8e8e">朴素:</b> QKᵀ→写 HBM→读→softmax→写→读→×V <span style="color:#5a6378">（物化整张 n×n）</span><br>
+<b style="color:#7ed6a0">Flash:</b> Q/K/V 切块进 SRAM → 块内算 + online softmax 累加 → <b>n×n 永不落 HBM</b><br><br>
+<span style="color:#5a6378">同样的输出，显存 O(n²)→O(n)，墙钟 2–4× 快</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+<span class="kw">from</span> torch.nn.attention <span class="kw">import</span> SDPBackend, sdpa_kernel
+<span class="cmt"># 需要支持 CUDA 的 GPU; q/k/v 形状 (batch, heads, seq, d_head)</span>
+q = torch.<span class="fn">randn</span>(2, 8, 4096, 64, device=<span class="str">"cuda"</span>, dtype=torch.float16)
+k = torch.<span class="fn">randn_like</span>(q); v = torch.<span class="fn">randn_like</span>(q)
+
+<span class="cmt"># 强制走 FlashAttention 内核:从不在 HBM 物化 4096×4096 注意力矩阵</span>
+<span class="kw">with</span> <span class="fn">sdpa_kernel</span>(SDPBackend.FLASH_ATTENTION):
+    out = F.<span class="fn">scaled_dot_product_attention</span>(q, k, v, is_causal=<span class="kw">True</span>)
+<span class="fn">print</span>(out.shape)   <span class="cmt"># (2, 8, 4096, 64) 结果与朴素实现逐元素相同</span>
+<span class="cmt"># 朴素实现要物化数百 MB 的中间矩阵;Flash 近乎为 0</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"FlashAttention 是一种稀疏 / 近似注意力，会损失精度"——错。它是<b>精确（exact）</b>的，输出和朴素实现逐元素相同。它优化的是<b>怎么算</b>（访存顺序），不是<b>算什么</b>（数学）。这点和 SWA 这种真改了数学的稀疏注意力完全不同。</div>
+    <div class="exercise" style="margin-top:8px">📌 选型场景：当你发现同一个模型换到 vLLM / SGLang 这类推理框架后快很多，FlashAttention 这类 IO-aware 内核是关键来源之一。理解"速度差来自访存优化、不是模型变了"，能帮你判断一个性能宣传是真本事还是偷换了精度。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 同样的数学，换个访存顺序就快 2–4 倍——性能瓶颈常在 <b>memory，不在 FLOPs</b>。<br>🤔 你过去优化系统时，有多少次"以为是 CPU 瓶颈、其实是 I/O 瓶颈"？这个直觉怎么迁移到判断 AI 系统的性能问题？</div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1706.03762" target="_blank">Vaswani et al. 2017 — Attention Is All You Need</a> — MHA 与缩放点积注意力的原始论文，必读</li>
+      <li><a href="https://arxiv.org/abs/1911.02150" target="_blank">Shazeer 2019 — Multi-Query Attention</a> — 单 KV head 加速解码的起点</li>
+      <li><a href="https://arxiv.org/abs/2305.13245" target="_blank">Ainslie et al. 2023 — GQA</a> — MHA 与 MQA 之间的插值，主流默认</li>
+      <li><a href="https://arxiv.org/abs/2004.05150" target="_blank">Beltagy et al. 2020 — Longformer</a> — 滑动窗口 + 全局 token 的代表作</li>
+      <li><a href="https://arxiv.org/abs/2310.06825" target="_blank">Mistral 7B (2023)</a> — 实战中 GQA + 滑动窗口的组合</li>
+      <li><a href="https://arxiv.org/abs/2205.14135" target="_blank">Dao et al. 2022 — FlashAttention</a> — IO 感知的精确注意力，奠基性工作</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. GQA（改数学/架构）和 FlashAttention（改访存/不改数学）都让注意力更快，但属于完全不同的两类优化。这个区分为什么重要？</summary><div>这是理解整个领域的关键分水岭。<b>GQA/MQA/SWA 改的是"算什么"</b>——它们改变了模型的数学定义：GQA 让 KV head 变少（牺牲一点表达力换显存），SWA 让每个 token 看的范围变窄（牺牲远距离直连换线性复杂度）。这类优化<b>会改变模型输出</b>，必须在训练时就决定（或用 uptraining 微调），是一种 <b>quality–cost trade-off</b>。<b>FlashAttention 改的是"怎么算"</b>——数学定义一字不动，只重排了 GPU 上的访存顺序，输出逐元素完全相同。它是<b>免费午餐</b>：没有任何精度代价，任何模型都能直接套用。为什么重要：(a) <b>能不能事后加</b>——Flash 可以给现成模型直接加速；GQA 不行，得重训或 uptrain；(b) <b>评估方式不同</b>——Flash 只需对拍数值和测速；GQA/SWA 必须跑下游质量评测，因为它们会掉点；(c) <b>叠加</b>——两类正交，可同时用（Mistral = GQA + SWA + Flash 三者叠加）。BigCat 你的分布式直觉：Flash 像"换个更好的 I/O 调度器"，GQA 像"改数据库 schema 做反范式化"——一个不动语义、一个动语义。</div></details>
+
+    <details><summary>2. KV cache 是长上下文的"内存墙"。GQA 砍 KV head 数，DeepSeek 的 MLA 砍每个 token 的 KV 维度——这两条路线本质上在压缩同一个东西的不同轴，你怎么看哪条更有前途？</summary><div>KV cache 大小 ≈ (KV head 数) × (每 head 维度) × seq × layers，所以"压 KV"有两个正交的轴。<b>GQA 走"head 数"轴</b>：让多个 query head 共享少数 KV head，简单、训练稳定、可从 MHA checkpoint uptrain，是当下工业默认。代价是共享带来的表达力损失，且压缩比受限（KV head 不能少于 1，少到 MQA 就明显掉点）。<b>MLA（Multi-head Latent Attention）走"维度"轴</b>：把 K、V 联合压缩成一个低维 latent 向量存进 cache，用时再投影回来——相当于对 KV 做了"有损压缩 + 解压"，压缩比可以远超 GQA，且 DeepSeek 报告质量不降反升。代价是实现复杂、和 RoPE 位置编码的兼容需要特殊处理。怎么看：短期 GQA 因为简单 + 生态成熟仍是主流；但"维度轴"理论上限更高（信息可以跨 head 共享冗余），长期更性感。更深的一层：两者都假设 KV 里有冗余可压——这本身指向一个根本问题，<b>注意力到底需要多少"记忆带宽"</b>？这又把话题引向 Mamba/SSM 这种用固定大小状态替代 KV cache 的路线（Day 34）。</div></details>
+
+    <details><summary>3. 为什么 FlashAttention 这种"重排访存就快 2-4 倍"的优化，过了好几年才出现？它揭示了软硬件协同设计的什么规律？</summary><div>表面看是"晚了"，深层是<b>抽象层把硬件现实藏起来了</b>。研究者写 attention 时用的是 PyTorch/数学层的抽象——矩阵乘、softmax，这层抽象里"算"和"存"是不可见的，看起来瓶颈就该是 FLOPs。但 GPU 的真相是：算力（TFLOPs）这十年涨得远比内存带宽快，导致<b>越来越多 kernel 是 memory-bound</b>——算力闲着，时间全花在等 HBM。FlashAttention 的洞察不是新算法（online softmax 1980 年代就有），而是<b>有人愿意下到 CUDA 层，按 GPU 的内存层级（HBM/SRAM 大小）重新设计 kernel</b>。揭示的规律：(a) <b>抽象有代价</b>——越高层的抽象越容易让你对真实瓶颈"失明"，重大优化常来自捅破抽象、贴着硬件重写；(b) <b>瓶颈会漂移</b>——硬件演进（算力 vs 带宽剪刀差）会让昨天的非瓶颈变成今天的瓶颈，优化要追着硬件趋势走；(c) <b>IO-awareness 是通法</b>——同样的思路后来推广到很多 kernel。对 BigCat：这和你在分布式系统里的经验完全一致——数据库查询慢，十有八九不是 CPU 而是磁盘/网络 I/O；真正的高手优化的是数据移动，不是计算。</div></details>
+
+    <details><summary>4. 把今天四个变种串起来:从 2017 的 MHA 到现在,attention 的演化主线是什么?这条主线接下来会走向哪里?</summary><div>主线是一句话：<b>在"表达力"和"扩展性（长序列 + 低成本）"之间反复拉扯，逐步把成本从平方降向线性</b>。(1) <b>MHA（2017）</b>奠定范式，但 O(n²) 计算 + 随序列线性增长的 KV cache，注定长序列吃不消。(2) <b>稀疏化（SWA/Longformer，2020）</b>从"算什么"下手砍计算复杂度，O(n²)→O(n·w)，代价是远距离要靠深度接力。(3) <b>KV 共享（MQA 2019 / GQA 2023）</b>从推理瓶颈下手砍 KV cache 显存与带宽，让长上下文解码可负担。(4) <b>FlashAttention（2022）</b>换个维度——不改数学，贴着硬件砍访存，把 MHA 本身变快变省。四者正交、可叠加，今天的前沿模型基本是"GQA + 局部/全局混合 + Flash 内核"的合体。接下来两条线：(a) <b>继续压 KV</b>——MLA（维度压缩）、KV 量化、甚至 KV 驱逐（evict 不重要的历史）；(b) <b>跳出注意力</b>——Mamba/SSM 用固定大小的状态彻底取代随序列增长的 KV cache，把"记忆"从 O(n) 变成 O(1)。一个开放赌注：未来主流是"注意力 + 这些优化"继续主导，还是混合架构（部分层用 SSM、部分层用注意力）胜出？目前看混合架构势头很猛。</div></details>
+
+    <details><summary>5. 注意力的"成本"逼着架构师做有损权衡（GQA 掉一点质量、SWA 丢远距离）。这种"为了规模牺牲完美"的工程哲学，在你熟悉的分布式系统里有哪些同构的影子?</summary><div>这几乎是同一套世界观在不同领域的投影。<b>分布式系统的 CAP / 最终一致性</b>：为了可用性和分区容忍，放弃强一致——和 GQA"为了显存放弃一点表达力"同构，都是承认"完美不可扩展，必须选择性放弃"。<b>缓存与采样</b>：CDN/Redis 缓存是"用一点陈旧换巨大吞吐"，SWA 是"用一点远距离精度换线性复杂度"——都是有损但值得。<b>LSM-tree / 列存的反范式化</b>：为读写吞吐牺牲存储冗余和即时一致，和"压 KV cache 换长上下文"是一类账。<b>近似算法</b>：HyperLogLog、Bloom filter 用可控误差换数量级的空间——精神上正是"exact 太贵就转 approximate"，而 FlashAttention 偏偏是反例（坚持 exact、只优化访存），提醒你"有损"不是唯一出路，有时换个实现就能既要又要。更深的意涵：<b>规模本身会重写什么叫"对"</b>——小数据上你追求精确解，大规模下"够好且能扩展"往往打败"完美但不可扩展"。BigCat 你做"AI 超级个体"系统设计时，这个判断力——知道在哪条轴上可以有损、有损多少、怎么补偿——比记住任何单个技巧都值钱。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 12 · 2026-05-29</footer>
+
+</div>
+
+</body>
+</html>
