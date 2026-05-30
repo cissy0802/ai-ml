@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：位置编码深入 — Day 13</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：位置编码深入</h1>
+  <div class="meta">Day 13 · 2026-05-30 · 难度 ★★★★☆</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<!-- 开篇：为什么需要位置编码 -->
+<div class="card" style="border-left-color:#ffb450">
+  <h2>开篇：为什么 Transformer 必须额外注入"位置"？<span class="en">Why Positional Encoding</span></h2>
+  <div class="section">
+    <p>Attention 的核心计算是<b>对一组 token 加权求和</b>——和数学上的"集合"操作同构：把同一组 token 打乱顺序，<b>每个 token 看到的上下文完全不变</b>。这叫 <b>permutation-invariant（置换不变）</b>。对 RNN/CNN 这不是问题（它们的卷积窗 / 时间步天然带顺序），但对纯 Attention 来说，"我爱你" 和 "你爱我" 在它眼里就是同一个 bag of tokens。</p>
+    <p style="margin-top:8px">所以必须额外往输入里<b>注入"我在第几位"这一信号</b>。这就是位置编码（Positional Encoding，PE）。今天看四种：固定正弦（2017 原版）、可学习绝对位置（GPT-2/BERT 用过）、<b>RoPE</b>（Llama / Qwen / DeepSeek 当今主流）、<b>ALiBi</b>（外推友好的偏置方案）。它们对应一条很清楚的演化主线：<b>从"加在输入上的标签"，到"嵌进 attention 计算里的几何"</b>。</p>
+  </div>
+</div>
+
+<!-- 1. Sinusoidal -->
+<div class="card">
+  <h2>正弦位置编码<span class="en">Sinusoidal Positional Encoding</span></h2>
+  <div class="tags"><span class="tag">2017 原版</span><span class="tag purple">绝对位置</span><span class="tag orange">无参数</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>像给每个位置发一张<b>多频段的"时钟读数"卡片</b>——位置 0 是全零，位置 1 是各频率指针走一格，位置 1000 是各指针走 1000 格。低频指针变化慢、负责"段落级远距离"，高频指针变化快、负责"邻近精细"。后端类比：相当于在每条记录里塞了<b>多分辨率的复合时间戳</b>（年/月/日/秒），模型自己挑用哪个尺度。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：Attention 是置换不变的，必须从外部告诉模型每个 token 的位置。最朴素的做法是把"位置 i"编码成一个 d 维向量 <b>加</b>到 token embedding 上。问题是怎么编。<i>Attention Is All You Need</i>（Vaswani 2017）给了一个<b>没有可学习参数</b>的优雅方案：</p>
+    <p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">PE(pos, 2i)&nbsp;&nbsp;= sin(pos / 10000<sup>2i/d</sup>)<br>PE(pos, 2i+1) = cos(pos / 10000<sup>2i/d</sup>)</p>
+    <p style="margin-top:8px"><b>每个符号</b>：<code>pos</code> 是 token 在序列里的位置（0,1,2,…），<code>i</code> 是 embedding 维度索引（0…d/2−1），<code>d</code> 是 embedding 总维度。把维度成对分组，每对用一个 (sin,cos) 配对，<b>波长从 2π 几何增长到 10000·2π</b>。低 i 高频 → 邻近敏感；高 i 低频 → 远距离敏感。</p>
+    <p style="margin-top:8px"><b>为什么用 sin/cos？</b>关键性质：对任意固定偏移 k，<code>PE(pos+k)</code> 都可以用一个<b>只依赖 k 的线性变换</b>从 <code>PE(pos)</code> 得到（三角函数的和角公式）。这给模型一个"潜在的相对位置可学习性"——只要它愿意，就能从两个绝对编码里隐式提取相对距离。另一个好处：<b>训练时没见过的 pos 也能算</b>（公式直接代），理论上可外推，但实测外推效果一般。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">不同维度 = 不同频率的"指针"（示意）</b><br><br>
+维度 i=0&nbsp;&nbsp;高频: <span class="bar" style="width:8px;height:14px"></span><span class="bar" style="width:8px;height:14px"></span><span class="bar" style="width:8px;height:14px"></span><span class="bar" style="width:8px;height:14px"></span><span class="bar" style="width:8px;height:14px"></span><span class="bar" style="width:8px;height:14px"></span><span class="bar" style="width:8px;height:14px"></span><span class="bar" style="width:8px;height:14px"></span> <span style="color:#5a6378">每隔几位就翻一轮</span><br>
+维度 i=d/4 中频: <span class="bar" style="width:14px;height:14px"></span><span class="bar" style="width:14px;height:14px"></span><span class="bar" style="width:14px;height:14px"></span><span class="bar" style="width:14px;height:14px"></span> <span style="color:#5a6378">十几位翻一轮</span><br>
+维度 i=d/2 低频: <span class="bar" style="width:60px;height:14px"></span> <span style="color:#5a6378">数千位才翻一轮</span><br><br>
+<span style="color:#5a6378">所有频率拼在一起 → 每个位置有独一无二的指纹</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch, math
+<span class="kw">def</span> <span class="fn">sinusoidal_pe</span>(max_len, d):
+    pe = torch.<span class="fn">zeros</span>(max_len, d)
+    pos = torch.<span class="fn">arange</span>(max_len).<span class="fn">unsqueeze</span>(1)        <span class="cmt"># (L, 1)</span>
+    <span class="cmt"># 几何分布的频率:维度越大频率越低</span>
+    div = torch.<span class="fn">exp</span>(torch.<span class="fn">arange</span>(0, d, 2) * (-math.<span class="fn">log</span>(10000.0) / d))
+    pe[:, 0::2] = torch.<span class="fn">sin</span>(pos * div)             <span class="cmt"># 偶数维放 sin</span>
+    pe[:, 1::2] = torch.<span class="fn">cos</span>(pos * div)             <span class="cmt"># 奇数维放 cos</span>
+    <span class="kw">return</span> pe
+
+pe = <span class="fn">sinusoidal_pe</span>(max_len=512, d=128)
+<span class="fn">print</span>(pe.shape)                                 <span class="cmt"># (512, 128)</span>
+<span class="cmt"># 使用时:x = token_embedding + pe[:seq_len]  ← 加,不是拼</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"正弦编码天然能外推到任意长度"——理论上能算，<b>实测不行</b>。模型训练时只见过 0–N 的位置，N+1 之后的编码值虽然能算出来，但其和 attention 权重的对应关系是模型没学过的，质量会显著掉。这条经验直接催生了后来 ALiBi、RoPE 的外推研究。</div>
+    <div class="exercise" style="margin-top:8px">📌 跨学科场景：多频段编码本身是一种<b>多分辨率表示</b>，和神经科学里"网格细胞用多个空间尺度联合定位"、傅里叶分析的"用不同频率基底重构信号"是同构。BigCat 你做 AI 工作流时，给任务标签也常常需要"多粒度"（项目级 / 周级 / 任务级）——同一个对象在多个尺度上都需要可定位。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 正弦 PE = <b>无参数的多频段位置指纹</b>，把"绝对位置"塞进输入；漂亮但外推弱。<br>🤔 为什么 2017 年的作者选择"加到 token embedding 上"而不是"拼到旁边"？这个"加法"在数学上对后续层意味着什么？</div>
+  </div>
+</div>
+
+<!-- 2. 可学习绝对位置 -->
+<div class="card">
+  <h2>可学习绝对位置编码<span class="en">Learned Absolute Position Embedding</span></h2>
+  <div class="tags"><span class="tag">BERT/GPT-2 用过</span><span class="tag purple">绝对位置</span><span class="tag orange">有参数</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>把"位置"当成<b>一张和 token 同等地位的查找表</b>：词表里有 vocab_size 个词向量，位置表里有 max_len 个位置向量，<b>训练时一起学</b>。后端类比：相当于多建一张"位置维表"，按 row_id 关联回主表——简单粗暴但够用。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：正弦编码是"人拍脑袋设计的频率"，没人能保证 sin/cos 就是最优的位置基底。可学习方案直接放弃假设：<b>"既然神经网络擅长学，那位置编码也让它自己学"</b>。</p>
+    <p style="margin-top:8px">机制：建一个 <code>nn.Embedding(max_len, d)</code>，里面 max_len 行、每行是一个 d 维向量。输入第 i 个位置时查表取出第 i 行，加到 token embedding 上。BERT、GPT-1/2 都用这种方案。<b>关键限制</b>：你必须在训练时就<b>固定 max_len</b>（如 BERT 是 512），跑序列长度 = 511 没问题，跑 513 就完全没对应的向量——模型连"那个位置是什么样"都没学过，<b>不能外推</b>。这也是 BERT 系列在长文档上必须做 chunk 的根本原因。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">三种方案对比（核心差别）</b><br><br>
+<b>正弦</b>：&nbsp;&nbsp;<span class="box g">公式生成 PE</span> <span class="arrow">+</span> <span class="box">token emb</span> <span style="color:#5a6378">无参数、固定</span><br>
+<b>可学习</b>: <span class="box o">PE 查找表</span> <span class="arrow">+</span> <span class="box">token emb</span> <span style="color:#5a6378">有参数、长度封顶</span><br>
+<b>RoPE</b>：&nbsp;&nbsp;<span class="box p">直接旋转 Q,K 向量</span> <span style="color:#5a6378">不再加到输入,嵌入 attention 内部</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+<span class="kw">class</span> <span class="fn">LearnedPE</span>(nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, max_len=512, d=128):
+        <span class="kw">super</span>().<span class="fn">__init__</span>()
+        <span class="cmt"># 一张 (max_len, d) 的可学习查找表,和词向量同等地位</span>
+        <span class="kw">self</span>.pos = nn.<span class="fn">Embedding</span>(max_len, d)
+    <span class="kw">def</span> <span class="fn">forward</span>(<span class="kw">self</span>, x):                       <span class="cmt"># x: (batch, L, d)</span>
+        L = x.<span class="fn">size</span>(1)
+        ids = torch.<span class="fn">arange</span>(L, device=x.device)   <span class="cmt"># 0,1,...,L-1</span>
+        <span class="kw">return</span> x + <span class="kw">self</span>.<span class="fn">pos</span>(ids)              <span class="cmt"># 广播加到每个 token</span>
+
+pe = <span class="fn">LearnedPE</span>(max_len=512, d=128)
+<span class="fn">print</span>(<span class="fn">pe</span>(torch.<span class="fn">randn</span>(2, 128, 128)).shape)      <span class="cmt"># (2,128,128) OK</span>
+<span class="cmt"># 喂 L=600 会 IndexError → 没有第 600 行,根本不能外推</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"可学习的总比固定的好"——不一定。可学习 PE 在训练长度内常常略优，但<b>外推能力为零</b>；正弦至少公式上能算，可学习连"算"都做不到。这就是为什么后来的大模型几乎都抛弃了它，转向 RoPE / ALiBi 这类<b>结构化、可外推</b>的方案。</div>
+    <div class="exercise" style="margin-top:8px">📌 判断力场景：看一个模型的 config 里若有 <code>max_position_embeddings</code> + <code>position_embedding_type=absolute</code>，基本就是这种方案——上下文窗硬上限，超了直接报错。这种模型扩窗只能重训。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 可学习绝对 PE 是"让网络自己学位置"的最直接方案，<b>简单但天花板低</b>——上下文长度硬绑死。<br>🤔 "把位置当成查找表去学"这种思路，在你做后端 / 系统时遇到过哪些类似的"用查表代替结构化先验"的设计？它们的扩展瓶颈一般出现在哪里？</div>
+  </div>
+</div>
+
+<!-- 3. RoPE -->
+<div class="card">
+  <h2>旋转位置编码<span class="en">Rotary Position Embedding · RoPE</span></h2>
+  <div class="tags"><span class="tag">当今主流</span><span class="tag purple">相对位置</span><span class="tag orange">嵌入 attention 内</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>不在输入上加标签，而是<b>把 Q、K 向量按位置旋转一个角度</b>。两个 token 做点积时，旋转差 = 它们的<b>相对距离</b>——位置信息直接以"两向量夹角差"的几何形式存在 attention 里。后端类比：从"在每条记录里塞时间戳字段"升级到"按时间戳给坐标做旋转"，关联运算自然就带上了时间差。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：前两种 PE 是<b>绝对位置</b>，但语言关系本质上是<b>相对的</b>——"形容词修饰它后面紧跟的名词"和"主谓相距两个词"这种规律和"在句子第几位"无关。把绝对位置加到 token 上，模型还得自己费劲从两个绝对位置反推相对距离。能不能直接编码相对距离？</p>
+    <p style="margin-top:8px">RoPE（Su Jianlin 等，RoFormer 2021）的洞察：<b>不动 token embedding，改 Q 和 K</b>。把 d 维 Q / K 向量两两配对成 d/2 个 2D 平面，<b>每个平面绕原点旋转一个角度 m·θ<sub>i</sub></b>（m 是 token 位置，θ<sub>i</sub> 是该平面的固有频率，跟正弦 PE 一样几何分布）。核心公式（一个 2D 平面）：</p>
+    <p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">RoPE(q, m) = R<sub>m</sub> · q&nbsp;&nbsp;&nbsp;&nbsp;其中 R<sub>m</sub> = [[cos(mθ), −sin(mθ)],<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[sin(mθ),&nbsp;&nbsp;cos(mθ)]]</p>
+    <p style="margin-top:8px"><b>每个符号</b>：<code>q</code> 是这一对维度的 2D 子向量，<code>m</code> 是 token 位置，<code>θ</code> 是这对维度的频率（高维度低频率，跟正弦同样设计）。R<sub>m</sub> 是绕原点的二维旋转矩阵。</p>
+    <p style="margin-top:8px"><b>关键性质（也是 RoPE 的魔法）</b>：旋转后做点积，</p>
+    <p style="margin-top:6px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">(R<sub>m</sub> q)<sup>T</sup> (R<sub>n</sub> k) = q<sup>T</sup> R<sub>m</sub><sup>T</sup> R<sub>n</sub> k = q<sup>T</sup> R<sub>n−m</sub> k</p>
+    <p style="margin-top:8px">右边只依赖 <b>n−m</b>（相对距离）——绝对位置在做完点积后<b>自动消掉</b>，剩下只剩相对位置。一个看似不起眼的旋转，干净地把"绝对编码"变成了"相对距离编码"。Llama、Qwen、DeepSeek、Mistral 全部在用。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">RoPE 几何直觉：转向量,不动 embedding</b><br><br>
+位置 m=0 的 Q：<span class="box">→</span> <span style="color:#5a6378">0°</span><br>
+位置 m=1 的 Q：<span class="box">↗</span> <span style="color:#5a6378">+θ</span><br>
+位置 m=5 的 Q：<span class="box">↑</span> <span style="color:#5a6378">+5θ</span><br>
+位置 m=10 的 Q：<span class="box">↖</span> <span style="color:#5a6378">+10θ</span><br><br>
+做 attention 时：<span class="box">Q@m</span><span class="arrow">·</span><span class="box g">K@n</span><span class="arrow">→</span>夹角差 = (n−m)θ <b style="color:#a48cff">只剩相对距离</b><br><br>
+<span style="color:#5a6378">不同维度配不同 θ → 多分辨率的相对位置感知</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">def</span> <span class="fn">apply_rope</span>(x, theta_base=10000.0):
+    <span class="cmt"># x: (batch, seq, d) , d 必须偶数; 这里给出最小可读版本</span>
+    b, L, d = x.shape
+    half = d // 2
+    <span class="cmt"># 每对维度的固有频率,几何分布:高维度低频</span>
+    freq = 1.0 / (theta_base ** (torch.<span class="fn">arange</span>(0, half).<span class="fn">float</span>() / half))
+    pos  = torch.<span class="fn">arange</span>(L).<span class="fn">float</span>()
+    ang  = torch.<span class="fn">outer</span>(pos, freq)            <span class="cmt"># (L, d/2) 每个位置 × 每个频率</span>
+    cos, sin = ang.<span class="fn">cos</span>(), ang.<span class="fn">sin</span>()
+    x1, x2 = x[..., :half], x[..., half:]   <span class="cmt"># 把 d 拆成两半配对</span>
+    <span class="cmt"># 二维旋转:(x1, x2) → (x1·cos − x2·sin, x1·sin + x2·cos)</span>
+    out1 = x1 * cos - x2 * sin
+    out2 = x1 * sin + x2 * cos
+    <span class="kw">return</span> torch.<span class="fn">cat</span>([out1, out2], dim=-1)
+
+<span class="cmt"># 实际使用:在 attention 内对 Q 和 K 各 apply 一次,V 不动</span>
+q = torch.<span class="fn">randn</span>(1, 8, 64); q_rot = <span class="fn">apply_rope</span>(q)
+<span class="fn">print</span>(q_rot.shape)   <span class="cmt"># (1, 8, 64) 形状不变,位置已嵌入几何</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"RoPE 让模型可以无限外推"——错。原生 RoPE 在训练长度外仍会显著退化，因为高频维度的旋转角在长序列上"绕了太多圈"，模型没见过那种相位组合。这才催生了 <b>YaRN / NTK-aware scaling</b>（Peng 等 2023）——只缩放低频维度、保留高频细节，让 Llama-2 在少量微调下从 4K 扩到 64K+。但"原生外推"仍属误解。</div>
+    <div class="exercise" style="margin-top:8px">📌 判断力场景：当你看到一个开源模型的扩窗版本（如 Llama-2-7B-32K），它几乎都不是重训，而是<b>调 RoPE 的 base θ + 短微调</b>。理解这点能让你判断哪些"扩窗模型"是真本事，哪些只是改了一个数字。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 RoPE 的精髓：<b>位置不是加上去的数据，是嵌进 Q/K 几何里的角度</b>——做点积时自动只剩相对距离。<br>🤔 "绝对编码 + 点积后自动消掉"得到相对编码，这种"用对称性化简"的思想，在物理、密码学、分布式协议里你还见过哪些类似招法？</div>
+  </div>
+</div>
+
+<!-- 4. ALiBi -->
+<div class="card">
+  <h2>线性偏置注意力<span class="en">Attention with Linear Biases · ALiBi</span></h2>
+  <div class="tags"><span class="tag">外推友好</span><span class="tag purple">无 PE 向量</span><span class="tag orange">直接改 score</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>更激进：<b>根本不要位置编码这种"独立信号"</b>，直接在 attention 的相似度分数上<b>按距离扣分</b>——隔得越远，penalty 越大。后端类比：相当于在 SQL 的 ORDER BY 后面追加 <code>− DISTANCE_PENALTY</code>，让排序里天然带"近的优先"，不必额外建一张位置维表。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：前面所有方案——正弦、可学习、RoPE——都要先<b>构造一个位置向量</b>再融进计算。ALiBi（Press 2022）问了一个反向问题：<b>能不能不要 PE 向量，直接在 attention score 上加一个距离相关的 bias 就完事？</b></p>
+    <p style="margin-top:8px">机制：朴素 attention 算 <code>score(i,j) = q<sub>i</sub>·k<sub>j</sub>/√d</code>。ALiBi 改成：</p>
+    <p style="margin-top:6px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">score(i, j) = q<sub>i</sub>·k<sub>j</sub>/√d &nbsp;&minus;&nbsp; m<sub>h</sub> · |i &minus; j|</p>
+    <p style="margin-top:8px"><b>每个符号</b>：<code>|i−j|</code> 是两个 token 的相对距离（在因果模型里只看 j ≤ i），<code>m<sub>h</sub></code> 是每个 head 固定的<b>斜率（slope）</b>——论文给的是几何序列（如 1/2, 1/4, 1/8, …, 1/256），<b>不同 head 用不同斜率</b>：斜率大的 head 强烈关注邻近，斜率小的 head 能看更远。token embedding 不动、Q/K 不动，<b>只在 softmax 前的分数上减一个跟距离成正比的数</b>，就完成了位置注入。</p>
+    <p style="margin-top:8px"><b>为什么外推强？</b>因为 bias 只是 <code>m·|i−j|</code>，对任意大的 i−j 都有定义且行为一致——模型没见过 8192 长度，但 "距离 8000 比距离 4000 的 penalty 更大" 这个<b>单调规律</b>它已经学过。论文报告：在 1024 上训练、直接推 2048，质量持平甚至好过专门训到 2048 的正弦 PE 模型。BLOOM、MPT 等模型采用。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">ALiBi 的 distance penalty 矩阵（小斜率 head）</b><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;j=0&nbsp;&nbsp;j=1&nbsp;&nbsp;j=2&nbsp;&nbsp;j=3&nbsp;&nbsp;j=4<br>
+i=0&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">0</span><br>
+i=1&nbsp;&nbsp;<span style="color:#ffb450">−m</span>&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">0</span><br>
+i=2&nbsp;&nbsp;<span style="color:#ff8e8e">−2m</span>&nbsp;<span style="color:#ffb450">−m</span>&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">0</span><br>
+i=3&nbsp;&nbsp;<span style="color:#ff8e8e">−3m</span>&nbsp;<span style="color:#ff8e8e">−2m</span>&nbsp;<span style="color:#ffb450">−m</span>&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">0</span><br>
+i=4&nbsp;&nbsp;<span style="color:#ff8e8e">−4m</span>&nbsp;<span style="color:#ff8e8e">−3m</span>&nbsp;<span style="color:#ff8e8e">−2m</span>&nbsp;<span style="color:#ffb450">−m</span>&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">0</span><br><br>
+<span style="color:#5a6378">距离越远扣分越多 → softmax 后远 token 权重指数衰减</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">def</span> <span class="fn">alibi_bias</span>(seq_len, n_heads):
+    <span class="cmt"># 每个 head 一个固定斜率,几何分布:论文里 head h 的斜率 ~ 2^(-8h/n)</span>
+    slopes = torch.<span class="fn">tensor</span>([2 ** (-8.0 * (h + 1) / n_heads)
+                           <span class="kw">for</span> h <span class="kw">in</span> <span class="fn">range</span>(n_heads)])
+    <span class="cmt"># 距离矩阵 |i - j|</span>
+    i = torch.<span class="fn">arange</span>(seq_len).<span class="fn">unsqueeze</span>(1)
+    j = torch.<span class="fn">arange</span>(seq_len).<span class="fn">unsqueeze</span>(0)
+    dist = (j - i).<span class="fn">float</span>()                <span class="cmt"># 因果模型里只取 j<=i 部分</span>
+    <span class="cmt"># 每个 head 一个 (L,L) 偏置,广播到 (n_heads, L, L)</span>
+    bias = slopes[:, <span class="kw">None</span>, <span class="kw">None</span>] * dist[<span class="kw">None</span>, :, :]
+    <span class="kw">return</span> bias                              <span class="cmt"># 加到 softmax 前的 score 上</span>
+
+bias = <span class="fn">alibi_bias</span>(seq_len=8, n_heads=4)
+<span class="fn">print</span>(bias.shape)                          <span class="cmt"># (4, 8, 8) 4 个 head 各一张</span>
+<span class="cmt"># 训练用 1024,推理直接喂 8192 也能跑 → 外推友好</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"既然 ALiBi 外推这么好，为什么 Llama 还用 RoPE？"——因为外推不是唯一指标。ALiBi 对远距离<b>强加单调衰减</b>，对"忽然要看一个很远的关键 token"这种<b>反距离</b>任务（如长文档里的精确引用、in-context learning 的远 demo）表现不如 RoPE。RoPE 不预设"远的不重要"，灵活性更高。这是一个真实的 trade-off，不是哪个绝对赢。</div>
+    <div class="exercise" style="margin-top:8px">📌 选型场景：要做"原生长上下文 + 极少微调"的开源场景，ALiBi 系（如 MPT、BLOOM）门槛低；要做"高质量长上下文 + 远距离精确检索"，主流还是 RoPE + YaRN 这条路。理解两者的归纳偏置差别，比记住哪个最新更值钱。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 ALiBi = "<b>不要 PE 向量，直接给远距离扣分</b>"——把位置变成 attention 的一个归纳偏置（inductive bias），换来强外推。<br>🤔 一个明显的"近优先"归纳偏置就能让外推变好——这是否暗示，"通用"的位置编码反而比"针对任务"的偏置更难学好？</div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1706.03762" target="_blank">Vaswani et al. 2017 — Attention Is All You Need</a> — 正弦位置编码的原始来源</li>
+      <li><a href="https://arxiv.org/abs/2104.09864" target="_blank">Su et al. 2021 — RoFormer (RoPE)</a> — 旋转位置编码的奠基论文</li>
+      <li><a href="https://blog.eleuther.ai/rotary-embeddings/" target="_blank">EleutherAI Blog — Rotary Embeddings: A Relative Revolution</a> — RoPE 几何直觉最清楚的科普</li>
+      <li><a href="https://arxiv.org/abs/2108.12409" target="_blank">Press et al. 2022 — ALiBi (Train Short, Test Long)</a> — 线性偏置外推方案</li>
+      <li><a href="https://arxiv.org/abs/2309.00071" target="_blank">Peng et al. 2023 — YaRN</a> — RoPE 长上下文扩窗的代表工作</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. 把四种方案串起来,位置编码的演化主线是什么? 它在告诉你"什么样的归纳偏置才扛得住规模"?</summary><div>主线一句话：<b>从"把位置当作输入数据"，到"把位置当作 attention 几何里的内禀结构"</b>。(1) <b>正弦（2017）</b>：人手设计的多频段向量加到输入——优雅但外推弱。(2) <b>可学习绝对（BERT 时代）</b>：让网络自己学位置向量——长度封顶 + 零外推。这两种都把位置当"独立的一份数据"。(3) <b>RoPE（2021）</b>：换思路——位置是 Q/K 向量被旋转的角度，点积后绝对位置自动消掉、只剩相对距离。位置和 attention 几何融为一体。(4) <b>ALiBi（2022）</b>：更激进——不存位置向量，直接给 score 加"远 → 扣分多"的偏置。位置变成归纳偏置。<br><br>这条线在告诉你：<b>"把先验塞进算子的结构里"比"把先验做成额外数据让模型学"扛规模</b>。前两种长上下文时崩，是因为位置和内容挤在同一个向量里互相干扰；后两种位置和内容结构上分离（RoPE 改几何、ALiBi 改 score），不抢容量。这就是"硬约束（等变性、对称性）比软监督更省样本"的现代版本，物理学家几百年前就懂了。</div></details>
+
+    <details><summary>2. RoPE 看似只是"把向量旋转一下",为什么它能成为 Llama / Qwen / DeepSeek 等几乎所有现代主流模型的默认选择?</summary><div>关键是它同时满足了几个互相牵制的需求，没有明显短板。(a) <b>相对位置 = 语言的真实结构</b>——"形容词修饰它后面的名词"靠的是相对距离，绝对位置编码必须让模型自己费劲反推，RoPE 直接送到嘴边。(b) <b>不占 token embedding 的容量</b>——它修改的是 Q 和 K，token embedding 本身完全用来承载语义，不像加法 PE 那样把位置和内容挤在同一个向量里互相干扰。(c) <b>多分辨率自带</b>——不同维度配不同 θ，高维低频负责远距离、低维高频负责邻近，相当于一个免费的多尺度位置感知。(d) <b>外推可扩展</b>——虽然原生外推不够，但 base θ 是一个可调旋钮，YaRN / NTK-aware 等方法只要在这个旋钮上做手脚就能从 4K 扩到 128K+，几乎不动模型权重。(e) <b>实现简单</b>——一段 element-wise 乘法 + 加法，跟 FlashAttention 等内核完全兼容。<br><br>反观替代方案：可学习绝对 PE 锁死长度；ALiBi 强加"远的不重要"在远距离精确检索上吃亏；正弦 PE 外推弱。RoPE 是<b>没有明显反例的中间偏右最优解</b>，所以工业界默认。这种"没明显短板就赢"的现象在工程史上反复出现——TCP 不是吞吐最高、不是延迟最低，但综合最稳，结果统治网络。</div></details>
+
+    <details><summary>3. 训练长度内表现好的位置编码,放到更长的序列上常常崩——"外推问题"的本质是什么?它和神经网络其他形式的"泛化失败"是同一回事吗?</summary><div>本质：<b>外推 = 测试分布跑出训练分布</b>，而神经网络在 OOD 从不可靠。训练时模型看过 pos=0..N，它学的不是"位置语义的抽象规律"，而是"这些具体 pos 上对应什么注意力模式"。pos=N+1 时 PE 公式能算，但模型对那段输入<b>没校准过</b>。这和分类模型在新分布上崩、RL agent 进未见状态空间就乱走是同源的——网络学的是输入→输出映射，不是抽象规律。位置外推更显眼，因为"延伸"是最自然的 OOD 形式。<br><br>哪些方案外推更好？答案是<b>归纳偏置更接近"距离本质规律"</b>的方案：ALiBi 编码"距离越远越不重要"——对任何距离都成立的单调规律，所以训 1K 就能跑 8K。RoPE 编码"相对距离的旋转角"——抽象但高频维度在长序列上"绕圈"会破坏平滑性，必须靠 YaRN 修正。正弦和可学习编码的只是"绝对位置标签"，没抽象规律，外推自然差。<br><br>更深一层：这就是 <b>Occam 原则</b>的工程版——越简单、越对称的先验，越能跨分布泛化。对 BigCat：做 agent 工作流时，按"距离/相似度"软排序的工具调度策略比"硬规则枚举"更扛新场景，是同一招。</div></details>
+
+    <details><summary>4. ALiBi 给"距离越远扣分越多"加了一个硬归纳偏置,外推变好了,但远距离精确检索变差。这个"偏置-灵活性"trade-off,你在工程设计里遇到过哪些同构?</summary><div>这是一个工程里反复出现的根本张力：<b>引入先验</b>能在数据少 / 分布漂移时帮模型站稳，但<b>会同时关掉模型本该探索的某些可能</b>。ALiBi 的"近优先"在 99% 的语言任务里是对的（语法、邻近指代），所以训练数据少时它收敛快、外推稳；但在长文档精确引用、in-context learning 看远 demo 这种<b>反距离</b>任务上，它的硬偏置反而成了枷锁。RoPE 不预设这条规则，所以这些任务上更强，代价是数据效率和外推性差一点。<br><br>同构在工程里到处都是：<b>(a) 数据库索引</b>——B+树为"有序访问"硬偏置，所以范围查询飞快但全表 scan 反而不如堆表；<b>(b) 缓存策略</b>——LRU 假设"最近用过的还会用"，对周期性访问就崩；<b>(c) 网络拥塞控制</b>——TCP Reno 的 AIMD 假设"丢包=拥塞"，在无线/卫星链路就误判；<b>(d) 强化学习的奖励工程</b>——给 shaping reward 加速学习，但 shaping 写错了 agent 就钻空子。<br><br>识别这个模式的能力很值钱：每当你看到一个新方案"外推强 / 数据效率高"，就该立刻问"它牺牲了什么灵活性？这个牺牲在我场景里成立吗？"。对 BigCat 做"AI 超级个体"工作流：给 agent 加的每个硬规则（"工具调用必须先 dry-run"、"长度超 X 必须摘要"）都是这种偏置——加得对省事，加错了就限制 agent 在边界场景的发挥。</div></details>
+
+    <details><summary>5. 长上下文这条赛道,位置编码这一层接下来会走向哪里? 还是说它会被某种"无需位置编码"的架构取代?</summary><div>两条并行路线。<b>路线一：在 RoPE 框架内做手脚</b>。RoPE 的 θ_base 是一个旋钮，YaRN / NTK-aware / LongRoPE 等方法核心都是"<b>选择性缩放不同频段</b>"——保留高频细节、拉长低频周期，让模型用 0.1% 量级的微调把 Llama 系列从 4K 扩到 128K+。短期内这条路线仍会主导。<br><br><b>路线二：跳出显式位置编码</b>。<b>SSM / Mamba</b> 用固定大小的隐状态做序列建模，"位置"隐式编码在状态更新里——没有 KV cache、没有 RoPE。但目前在"远距离精确检索"上仍不如纯注意力，业界在搞<b>混合架构</b>（Jamba、Samba）——大部分层用 SSM，关键层用注意力 + RoPE。这种"局部用便宜结构、远距离留给注意力"的分工，很像 CPU 的 L1/L2/L3 分层。<br><br>更激进的赌注：未来位置编码可能不再是<b>显式模块</b>——要么被卷进 SSM 的"位置即状态"，要么进化成"自适应位置感知"（让 head 自己学不同强度的偏置）。对 BigCat：关键不是"哪种 PE 赢"，而是<b>上下文长度的成本曲线</b>——它松一格，agent 工作流的设计可能性就重写一遍。位置编码是个不起眼的螺丝，但它牵着整张地图。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 13 · 2026-05-30</footer>
+
+</div>
+
+</body>
+</html>
