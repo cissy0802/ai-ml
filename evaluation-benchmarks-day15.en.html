@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Evaluation & Benchmarks — Day 15</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.formula{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px 18px;margin-top:10px;text-align:center;font-family:"SF Mono",Menlo,monospace;font-size:1.02rem;color:#7ed6a0;overflow-x:auto}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Evaluation &amp; Benchmarks</h1>
+  <div class="meta">Day 15 · 2026-06-01</div>
+  <div class="audience">For: engineers with coding experience, outside the AI field</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual D6: Eval engineering (building your own offline eval pipeline)
+  </a>
+</div>
+
+<div class="card" style="border-left-color:#5a6378;background:#101424">
+  <div class="section">
+    <p style="color:#cfd3df">An unavoidable question: <strong>on what grounds do you say "this model is better than that one"?</strong> In software engineering you have a test suite—red/green, unambiguous. But an LLM's output is open-ended text with no single correct answer. Today we dissect four core evaluation mechanisms, and they happen to map onto the testing pyramid you already know: MMLU is a <strong>unit assertion</strong>, HumanEval is <strong>only counts if the tests pass</strong>, MT-Bench is a <strong>multi-turn integration test</strong>, and LLM-as-Judge is the <strong>automated referee</strong>—along with the referee's own bugs.</p>
+  </div>
+</div>
+
+<!-- 1. MMLU -->
+<div class="card">
+  <h2>Massive Multitask Language Understanding<span class="en">MMLU</span></h2>
+  <div class="tags"><span class="tag">knowledge benchmark</span><span class="tag purple">multiple choice</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>MMLU is the <strong>standardized exam</strong> we give models—a multiple-choice question bank across 57 subjects (math, law, medicine, history…). In your world it maps to a <strong>regression suite</strong>: a fixed, unchanging set of assertions you run against every new model version to see if the score regressed. Each question is one <code>assert</code>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Pain point: early NLP had one benchmark per task, fragmented like a hundred incompatible test frameworks—nobody could answer "<strong>how much world knowledge does this model actually have?</strong>" Hendrycks et al. (2021) merged multiple-choice questions from 57 domains into <strong>a single score</strong>, spanning elementary math to professional law.</p>
+    <p style="margin-top:8px">The key mechanism isn't free-form answering (you can't auto-grade that)—it's <strong>collapsing open generation into a classification problem</strong>: give the model the stem plus four options A/B/C/D and see which option it assigns the highest <strong>log-likelihood (how probable the model thinks that string is)</strong>. Highest-probability option = the model's pick; correct = +1. That "dimensionality reduction" is exactly why the benchmark scales with zero human labor.</p>
+    <p style="margin-top:8px">Honestly, it has a fatal weakness: <strong>contamination</strong>—the question text leaked into training data, so the model isn't "solving" but "reciting," inflating the score. It's like test cases sneaking into the code under test.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+    <pre><span class="cmt"># MMLU scoring is really about comparing option log-likelihoods, not free generation</span>
+<span class="kw">from</span> datasets <span class="kw">import</span> load_dataset
+
+ds = load_dataset(<span class="str">"cais/mmlu"</span>, <span class="str">"high_school_physics"</span>, split=<span class="str">"test"</span>)
+q = ds[<span class="str">0</span>]
+<span class="cmt"># q["question"], q["choices"] = ["option A",...], q["answer"] = correct index</span>
+
+prompt = <span class="fn">f</span><span class="str">"{q['question']}\nA. {q['choices'][0]}\nB. {q['choices'][1]}\n..."</span>
+
+<span class="cmt"># For each candidate, compute log P(option | prompt); pick the max</span>
+<span class="kw">def</span> <span class="fn">score_choice</span>(prompt, letter):
+    <span class="cmt"># Real frameworks (lm-eval-harness) take that token's logprob</span>
+    <span class="kw">return</span> model.<span class="fn">logprob</span>(prompt + <span class="str">" "</span> + letter)
+
+pred = <span class="fn">max</span>(<span class="str">"ABCD"</span>, key=<span class="kw">lambda</span> L: <span class="fn">score_choice</span>(prompt, L))
+correct = (<span class="str">"ABCD"</span>[q[<span class="str">"answer"</span>]] == pred)  <span class="cmt"># auto-graded, zero human labor</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">Misconception: "high MMLU = the model is genuinely smart." Wrong. MMLU measures <strong>knowledge retrieval + multiple-choice test-taking skill</strong>—not reasoning depth, not open-generation quality, and definitely not multi-turn dialogue. A model that's good at reciting can score high on MMLU yet write poor code and make a poor agent.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: when picking a model, treat MMLU as a <strong>"smoke test"</strong>—quickly eliminate the obviously inadequate, but never as the final verdict. To actually pick a model for "help me read papers / make decisions," look at evals close to your task (reasoning, long-context comprehension), not one aggregate number.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 MMLU's genius is "collapsing an open problem into auto-gradable multiple choice"; its limit comes from the same source—what can be auto-graded is often not the ability you most want to measure.<br>🤔 In your CI, which checks are "multiple-choice" deterministic assertions, and which need a human to judge quality? How do you test the latter today?</div>
+  </div>
+</div>
+
+<!-- 2. HumanEval / pass@k -->
+<div class="card">
+  <h2>HumanEval and pass@k<span class="en">Functional Correctness</span></h2>
+  <div class="tags"><span class="tag">code eval</span><span class="tag purple">probability estimation</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>HumanEval is the model's <strong>TDD acceptance test</strong>—164 Python problems, each with a set of hidden unit tests; generated code <strong>only counts if the tests pass</strong>, regardless of how pretty it looks. And pass@k is the thing you know best: <strong>configure retries for a flaky downstream service—what's the probability of at least one success in k retries?</strong></p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Pain point: code <strong>can't be graded by string matching</strong>. Two programs can be character-for-character different yet both correct, or nearly identical yet one right and one wrong. So BLEU and edit distance all fail. The answer from Chen et al. (2021, the Codex paper) is blunt: <strong>functional correctness—run the unit tests, passing = correct</strong>.</p>
+    <p style="margin-top:8px">The mathematically interesting part is <strong>pass@k</strong>. It answers: "sampling k solutions, what's the probability at least one is correct?" The naive form <code>1−(1−p)^k</code> has <strong>huge variance</strong> when per-problem samples are few. The Codex paper uses an unbiased estimator: per problem, first sample <strong>n</strong> solutions (n far larger than k), count the <strong>c</strong> correct ones, then:</p>
+    <div class="formula">pass@k = 1 − C(n−c, k) / C(n, k)</div>
+    <p style="margin-top:8px">Unpacked symbol by symbol it's intuitive:<br>
+    · <strong>C(n, k)</strong>: number of ways to draw k from n solutions (the binomial coefficient).<br>
+    · <strong>C(n−c, k)</strong>: number of ways to draw k from the <strong>n−c wrong solutions</strong>—i.e., the count of "<strong>all k drawn are wrong</strong>."<br>
+    · Their ratio = probability that all k drawn are wrong; <strong>1 minus it = probability of at least one correct</strong>.<br>
+    Estimate the true success rate with a large n, then compute this combinatorial formula—far more stable than directly retrying k times. In essence: <strong>trade more samples for lower estimation variance</strong>.</p>
+    <div class="diagram" style="margin-top:10px">
+      One problem, n=8 sampled solutions, c=2 correct:<br>
+      <span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><span class="box r">✗</span><span class="box r">✗</span><br>
+      <span style="color:#8b92a8">pass@1 ≈ 25%　pass@4 = 1 − C(6,4)/C(8,4) = 1 − 15/70 ≈ <span style="color:#7ed6a0">79%</span></span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+    <pre><span class="cmt"># pass@k unbiased estimator (the standard implementation from the Codex paper)</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">pass_at_k</span>(n, c, k):
+    <span class="cmt"># n=total samples, c=correct count, k=the k to evaluate</span>
+    <span class="kw">if</span> n - c &lt; k:                 <span class="cmt"># fewer than k wrong → must hit a correct one</span>
+        <span class="kw">return</span> <span class="str">1.0</span>
+    <span class="cmt"># product form of C(n-c,k)/C(n,k), avoids large-factorial overflow</span>
+    <span class="kw">return</span> <span class="str">1.0</span> - np.<span class="fn">prod</span>(<span class="str">1.0</span> - k / np.<span class="fn">arange</span>(n - c + <span class="str">1</span>, n + <span class="str">1</span>))
+
+<span class="cmt"># Evaluate one problem: sample n solutions, run hidden unit tests on each</span>
+samples = [model.<span class="fn">generate</span>(problem[<span class="str">"prompt"</span>]) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="str">8</span>)]
+c = <span class="fn">sum</span>(<span class="fn">run_unit_tests</span>(s, problem[<span class="str">"test"</span>]) <span class="kw">for</span> s <span class="kw">in</span> samples)
+
+<span class="fn">print</span>(<span class="fn">pass_at_k</span>(n=<span class="str">8</span>, c=c, k=<span class="str">1</span>))   <span class="cmt"># prob. of getting it right in one shot</span>
+<span class="fn">print</span>(<span class="fn">pass_at_k</span>(n=<span class="str">8</span>, c=c, k=<span class="str">4</span>))   <span class="cmt"># prob. of at least one correct in 4</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">Misconception: "low pass@1 means the model is useless." Not necessarily. When you <strong>have a verifier</strong> (you can auto-run tests), high pass@10 is good enough—let the model try repeatedly and the verifier picks the right one. That's exactly how coding agents work: generate → run tests → retry on failure. When auto-verification is cheap, "sampling multiple times" is an underrated strategy.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: when evaluating a coding agent, don't just look at pass@1. If your workflow lets the agent run its own tests and iterate, pass@k (larger k) is the true usability metric—it directly decides whether you can let it auto-fix bugs hands-off.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 The paradigm shift in code eval is "<strong>from looks-right to runs-right</strong>"; pass@k then tells you: when you have a verifier, the model's value isn't "right on the first try" but "can it hit the answer in a few tries."<br>🤔 Which of your tasks have a <strong>cheap automated verifier</strong> (tests, compilation, schema validation)? Those are the best candidates for "AI samples many times + auto-filters."</div>
+  </div>
+</div>
+
+<!-- 3. MT-Bench -->
+<div class="card">
+  <h2>MT-Bench Multi-Turn Benchmark<span class="en">MT-Bench</span></h2>
+  <div class="tags"><span class="tag">open generation</span><span class="tag purple">multi-turn</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>If MMLU/HumanEval are <strong>unit tests</strong>, MT-Bench is the <strong>integration test</strong>—it tests whether a model can <strong>keep context consistent and not drop the ball on follow-ups</strong> across multiple (2) turns. Like testing a stateful session service: passing the first request doesn't count; you need the session state to still be correct across several requests.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Pain point: multiple-choice and code problems can't measure "<strong>open dialogue quality</strong>"—writing, role-play, explaining reasoning, rewriting. These have no single correct answer; you can't <code>assert</code> them. MT-Bench (from Zheng et al. 2023, the MT-Bench / Chatbot Arena paper) uses <strong>80 high-quality two-turn questions</strong> across 8 categories (writing, reasoning, math, coding, etc.), specifically stress-testing "can it still keep up on turn two."</p>
+    <p style="margin-top:8px">The core difficulty follows: <strong>how do you auto-grade open answers?</strong> MT-Bench's answer is to outsource grading to a strong model—<strong>LLM-as-Judge</strong>—scoring each answer 1–10 (single-answer grading) or comparing two models' answers head-to-head (pairwise). That leads to today's most important, and most dangerous, mechanism → next card.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+    <pre><span class="cmt"># MT-Bench-style single-answer grading: a strong model scores 1-10 by rubric</span>
+<span class="kw">import</span> anthropic
+client = anthropic.<span class="fn">Anthropic</span>(api_key=<span class="str">"sk-ant-..."</span>)  <span class="cmt"># placeholder</span>
+
+JUDGE = <span class="str">"""You are an impartial judge. Score the answer below 1-10 on
+[helpfulness, relevance, accuracy, depth]. Give brief reasoning, then on
+a single final line output "Rating: [[score]]".
+
+[Question] {q}
+[Turn-1 answer] {a1}
+[Follow-up] {q2}
+[Turn-2 answer] {a2}"""</span>
+
+msg = client.messages.<span class="fn">create</span>(
+    model=<span class="str">"claude-opus-4-8"</span>, max_tokens=<span class="str">512</span>,
+    messages=[{<span class="str">"role"</span>:<span class="str">"user"</span>,
+        <span class="str">"content"</span>: JUDGE.<span class="fn">format</span>(q=q, a1=a1, q2=q2, a2=a2)}])
+<span class="cmt"># Regex out the score from "Rating: [[8]]"—structured output is easy to parse</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">Misconception: "MT-Bench scores can be compared in absolute terms across papers." No. Scores <strong>depend heavily on which judge model, which version, and what prompt</strong>. Swap the judge and the whole score shifts. It's suited for <strong>relative comparison under one fixed setup</strong> (how much better A is than B), not as an absolute scale across studies.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: when evaluating your own writing assistant, fix one judge + one rubric and have it score "old prompt vs new prompt" outputs head-to-head. What you care about is <strong>relative progress</strong>, not the absolute number.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Once the target becomes "open quality," no assertion is available—you can only bring in a judge, and the judge itself needs to be evaluated.<br>🤔 How do you know "the turn-two answer was good"? Writing the implicit rubric in your head as 5 explicit criteria reveals it's harder than it seems.</div>
+  </div>
+</div>
+
+<!-- 4. LLM-as-Judge -->
+<div class="card">
+  <h2>LLM-as-Judge<span class="en">LLM-as-Judge</span></h2>
+  <div class="tags"><span class="tag">auto eval</span><span class="tag purple">bias</span><span class="tag orange">Elo</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Using a strong model to score another model's output is like "<strong>one service monitoring another service</strong>," or an automated code-review bot. But here's the twist: <strong>the judge itself has systematic biases</strong>—just as your monitoring system can have bugs that produce false alarms or miss real ones. An uncalibrated judge is an untested probe you've chosen to trust.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Pain point: human annotation is <strong>expensive and slow</strong>, and doesn't scale. Zheng et al. (2023) gave LLM-as-Judge its legitimacy: <strong>GPT-4 as a judge agrees with human preferences over 80% of the time—the same level of agreement humans have with each other</strong>. In other words, a strong judge already approaches the "human ceiling."</p>
+    <p style="margin-top:8px">But the same paper names three systematic biases you must know:</p>
+    <ul style="margin-top:6px">
+      <li><strong>Position bias</strong>: in pairwise comparison, it tends to prefer the answer that <strong>appears first</strong>, regardless of content.</li>
+      <li><strong>Verbosity bias</strong>: it tends to score <strong>longer</strong> answers higher, even when they aren't better.</li>
+      <li><strong>Self-enhancement bias</strong>: it tends to prefer answers generated by <strong>itself or same-family models</strong>.</li>
+    </ul>
+    <p style="margin-top:8px">The most practical fix targets position bias: <strong>swap the order and run twice</strong>—each of A/B gets to go first once, and <strong>only a win in both runs</strong> counts as a win, otherwise it's a tie. This eliminates "position" as a confound.</p>
+    <div class="diagram" style="margin-top:10px">
+      Position bias and the swap fix:<br>
+      Run 1　<span class="box g">Answer A</span><span class="arrow">vs</span><span class="box p">Answer B</span><span class="arrow">→</span> judge picks <span style="color:#7ed6a0">first one</span><br>
+      Run 2　<span class="box p">Answer B</span><span class="arrow">vs</span><span class="box g">Answer A</span><span class="arrow">→</span> judge still picks <span style="color:#7ed6a0">first one</span>?<br>
+      <span style="color:#8b92a8">→ two runs contradict = judge looks at position not content, scored as a tie</span>
+    </div>
+    <p style="margin-top:10px">How do you quantify agreement? Use the <strong>agreement rate</strong>, or more rigorously <strong>Cohen's kappa</strong>—which subtracts out the "agree by random chance" part, leaving only genuine agreement. Another route is <strong>Chatbot Arena</strong>: real users vote between two anonymous models' answers, then an <strong>Elo / Bradley-Terry model</strong> converts massive pairwise win/loss into a single ranking score (the same math as chess ladder ratings).</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+    <pre><span class="cmt"># Pairwise judging + position swap to remove position bias</span>
+<span class="kw">def</span> <span class="fn">judge_pair</span>(q, ans_a, ans_b):
+    <span class="kw">def</span> <span class="fn">ask</span>(first, second):
+        p = <span class="fn">f</span><span class="str">"Question: {q}\nAnswer 1: {first}\nAnswer 2: {second}\n"</span> \
+            <span class="str">"Which is better? Reply only '1' or '2'."</span>
+        <span class="kw">return</span> client.messages.<span class="fn">create</span>(
+            model=<span class="str">"claude-opus-4-8"</span>, max_tokens=<span class="str">5</span>,
+            messages=[{<span class="str">"role"</span>:<span class="str">"user"</span>,<span class="str">"content"</span>:p}]).content[<span class="str">0</span>].text.<span class="fn">strip</span>()
+
+    r1 = <span class="fn">ask</span>(ans_a, ans_b)   <span class="cmt"># A first</span>
+    r2 = <span class="fn">ask</span>(ans_b, ans_a)   <span class="cmt"># B first (swapped)</span>
+    <span class="cmt"># A wins only if both runs pick A, else tie—cancels position bias</span>
+    <span class="kw">if</span> r1 == <span class="str">"1"</span> <span class="kw">and</span> r2 == <span class="str">"2"</span>: <span class="kw">return</span> <span class="str">"A"</span>
+    <span class="kw">if</span> r1 == <span class="str">"2"</span> <span class="kw">and</span> r2 == <span class="str">"1"</span>: <span class="kw">return</span> <span class="str">"B"</span>
+    <span class="kw">return</span> <span class="str">"tie"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">Misconception: "an LLM judge's score = objective truth." No. What it amplifies are the <strong>preferences in its training distribution</strong>—longer, more polite, more like-its-own-style answers score higher, even when no better in substance. Optimizing a model directly against the judge score as a KPI teaches it to "please the judge" rather than "actually improve" (a form of reward hacking).</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: using an LLM judge to auto-evaluate your prompt iterations is efficient, but pair it with two safeguards: <strong>(1) pairwise comparison + swap</strong> to remove position bias; <strong>(2) periodic human spot-checks</strong> of a small batch to calibrate whether the judge has drifted. The judge must itself be judged.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 LLM-as-Judge makes evaluation scalable, but it's not a truth detector—it's a <strong>probe with known biases that needs continuous calibration</strong>.<br>🤔 Does your monitoring system monitor itself? Same here: when you use AI to evaluate AI, who evaluates the evaluator? Where does this chain bottom out?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/2009.03300" target="_blank">Hendrycks et al. 2021 — Measuring Massive Multitask Language Understanding (MMLU)</a> — the foundational broad-knowledge benchmark, ICLR 2021</li>
+      <li><a href="https://arxiv.org/abs/2107.03374" target="_blank">Chen et al. 2021 — Evaluating LLMs Trained on Code (Codex)</a> — origin of HumanEval and the pass@k unbiased estimator</li>
+      <li><a href="https://arxiv.org/abs/2306.05685" target="_blank">Zheng et al. 2023 — Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</a> — LLM-judge feasibility + the three biases, NeurIPS 2023</li>
+      <li><a href="https://github.com/hendrycks/test" target="_blank">MMLU official repo</a> — question bank and evaluation scripts</li>
+      <li><a href="https://github.com/EleutherAI/lm-evaluation-harness" target="_blank">EleutherAI lm-evaluation-harness</a> — the industry-standard open-source eval framework, reference implementation for MMLU and others</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Why do nearly all public benchmarks eventually "go stale"? Is this the same thing as "test overfitting" in software testing?</summary><div>Essentially the same, but more insidious. In software testing you might write an implementation that "only passes a specific test"; an LLM's staleness has two layers: (1) <strong>contamination</strong>—benchmark questions flow into training data, and the model degrades from "able to solve" to "has memorized," inflating the score without representing ability; (2) <strong>overfitting to the distribution</strong>—the whole industry optimizes against the same leaderboard, so the model learns "the test-taking pattern of these questions" rather than the underlying capability, like every school teaching the same exam tricks. The result: once a benchmark is widely known, its <strong>information content decays over time</strong>—which is why MMLU (2021) has been followed by MMLU-Pro, GPQA, and other "harder, newer, more contamination-resistant" benchmarks. The engineering analogy: periodically <strong>rotate a private holdout set</strong>, just as a security team doesn't publish all its penetration cases. The takeaway for BigCat: when you see a model "crush a leaderboard," the first reaction should be "how much information does this board still carry," not "it must be this strong."</div></details>
+
+    <details><summary>2. Statistically, what's the difference between "sample n then estimate" in pass@k and "just retry k times"? Why does the paper bother?</summary><div>The difference is <strong>estimation variance</strong>. Retrying k times gives you a single 0/1 outcome (did these k succeed), very low information per problem, and the noise is large after averaging across problems—especially when a problem's success rate is something like 5%: retrying 5 times you very likely fail every time, misjudging it as "pass@5 = 0," though the true value isn't 0. The paper's approach is to first use a <strong>large n (e.g., 100 or 200)</strong> to <strong>estimate that problem's true success rate c/n accurately</strong>, then analytically compute the expected pass@k via the combinatorial formula <code>1 − C(n−c,k)/C(n,k)</code>. This is "buying a more stable estimate with more samples." The statistical intuition: you're not "simulating one k-retry"—you're "estimating the problem's difficulty parameter, then deriving the theoretical pass rate at any k." Analogy to your load testing: rather than manually replaying 5 requests to see a success rate, you precisely measure the single-request success rate p, then analytically derive availability at any retry count—the latter has far higher sample efficiency and a much more stable conclusion.</div></details>
+
+    <details><summary>3. Given LLM-as-Judge has 80% agreement with humans, is the remaining 20% disagreement "the judge being wrong" or "humans being wrong"? Why is there no clean answer?</summary><div>Because "the correct answer" itself doesn't exist—open-generation quality is a <strong>preference</strong>, not a fact, and human annotators agree with each other only about 80% of the time (i.e., two human labels also clash on 20% of samples). So in that 20% disagreement, three cases are mixed together and can't be cleanly separated: (a) the judge, influenced by bias (preferring longer answers), judged wrong; (b) annotator attention/preference differences make the "human gold answer" itself unstable; (c) the question <strong>genuinely has no consensus right or wrong</strong> (e.g., two equally reasonable writing styles). This means 80% isn't "the judge's accuracy" but "the judge's match with an equally noisy reference"—and <strong>the reference itself has 20% internal noise</strong>. The deeper implication: when evaluating open quality, don't pursue "approaching truth"—pursue "alignment with your target population's preferences." For BigCat: when you use a judge to evaluate "which writing style is better," first be clear about <strong>better for whom</strong>—the judge should be calibrated toward your real audience, not some abstract "objective quality."</div></details>
+
+    <details><summary>4. Stringing today's four mechanisms together: why is evaluation difficulty such that "the closer an ability is to real value, the harder it is to auto-evaluate"? What does this mean for designing AI workflows?</summary><div>The four mechanisms line up along an inverse curve of "<strong>degree of automatability vs closeness to real value</strong>." MMLU is fully auto-gradable (multiple choice) but farthest from real value (only tests knowledge retrieval); HumanEval is auto-gradable (run tests) with higher fidelity (it can actually write correct code); MT-Bench measures open quality, close to real usage, but <strong>can no longer be graded by assertion</strong>, forcing a judge in; LLM-as-Judge tries to automate "quality judgment" itself, but brings bias and the infinite regress of "who evaluates the evaluator." The rule: <strong>abilities you can write as an assert are often not the ones you care most about; the abilities you care most about often can't be written as an assert.</strong> Implications for workflow design: (1) in <strong>steps with a cheap verifier</strong> (code, data validation, formatting), automate aggressively and let AI sample many times and self-filter; (2) in <strong>open-quality steps</strong> (writing, decisions, cross-disciplinary insight), keep a human in the loop—use an LLM judge for first-pass screening and a human for final review; (3) beware "over-optimizing an ability just because it's easy to measure"—this is the eval-driven local-optimum trap, where you over-invest where it's quantifiable and go blind where it truly matters but is hard to quantify.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 15 · 2026-06-01</footer>
+
+</div>
+
+</body>
+</html>
