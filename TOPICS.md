@@ -45,3 +45,17 @@
 - Day 32: 激活函数与归一化 — ReLU/GELU/SwiGLU, BatchNorm/LayerNorm/RMSNorm
 - Day 33: 概率与信息论基础 — KL Divergence, Entropy, Mutual Information, ELBO
 - Day 34: 前沿架构 — MoE, Mamba/SSM, Long Context, State Space Models
+
+## Phase 4 — 经典 ML 分支与研究前沿
+- Day 35: 时间序列 — ARIMA, 状态空间模型, Prophet, 时序 Transformer
+- Day 36: 因果推断 — 潜在结果框架, 工具变量, 双重差分, 因果 vs 相关
+- Day 37: 图机器学习 — GNN, GCN/GAT, 消息传递, 图嵌入
+- Day 38: 概率编程与贝叶斯深度学习 — MCMC, 变分推断, 不确定性量化, PyMC/Stan
+- Day 39: 元学习与小样本 — MAML, few-shot, 迁移学习, in-context learning 机制
+- Day 40: 联邦与隐私学习 — 联邦学习, 差分隐私, 同态加密, 安全多方计算
+- Day 41: 世界模型与具身 — 世界模型, 因果表示学习, JEPA, 具身智能
+- Day 42: 神经符号 — 符号 + 神经结合, 知识图谱嵌入, 可微分推理, 程序合成
+- Day 43: 优化器深入 — SGD/Adam/Lion, 学习率调度, 二阶方法, 损失景观
+- Day 44: 涌现与 scaling 机制 — 涌现能力之辩, grokking, 双下降, 相变
+- Day 45: 推理与规划 — 思维链机制, 树搜索(MCTS), 过程奖励, o1/o3 推理
+- Day 46: AI for Science — AlphaFold, 材料发现, 数学猜想, 科学大模型
