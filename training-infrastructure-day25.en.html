@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Training Infrastructure — Day 25</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Training Infrastructure</h1>
+  <div class="meta">Day 25 · 2026-06-11 · Difficulty: Advanced</div>
+  <div class="audience">For: engineers with distributed-systems experience, outside AI</div>
+</header>
+
+
+<!-- 1. Distributed Training -->
+<div class="card">
+  <h2>Distributed Training<span class="en">Distributed Training</span></h2>
+  <div class="tags"><span class="tag">systems</span><span class="tag purple">parallelism</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A 70B model won't fit on one GPU — just like a table too big for one machine. Your instinct is <b>sharding</b>. But training has <b>three orthogonal axes to split along</b>: split the data (like read replicas), split the model's layers (like a microservice pipeline), or split the big matrix inside a single layer (like splitting one huge JOIN across machines). Understanding distributed training is really about <b>how these three axes combine</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>The pain point is <b>VRAM</b>, not compute. A 70B model in fp16 is 140GB of parameters alone; add gradients and Adam optimizer state and each parameter costs <strong>~16 bytes</strong> during training (the ZeRO card breaks this number down) — over 1TB total. An 80GB H100 can't hold it. The three parallelisms each solve one piece:</p>
+    <ul>
+      <li><b>Data Parallel (DP)</b>: every GPU holds a <b>full copy of the model</b>, only the training batch is split. Each GPU runs forward/backward independently, then <b>all-reduce</b> averages the gradients. Analogy: multiple read replicas each handling a batch, reconciling periodically. <b>Requires the model itself to fit on one GPU</b>;</li>
+      <li><b>Pipeline Parallel (PP)</b>: split the model <b>by layers</b> into stages across GPUs, like an assembly line / CPU pipeline. The cost is the <b>bubble</b> — stage 1 finishes and waits for stage 2; you fill it by chopping the batch into micro-batches;</li>
+      <li><b>Tensor Parallel (TP)</b>: split the big matrix multiply <b>inside a single layer</b> across GPUs (detailed in card 4). Communication-heaviest, done only over a machine's high-speed <b>NVLink</b>.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Three orthogonal splitting axes</b><br><br>
+<span class="box">Data parallel</span> split the batch, replicate model <span style="color:#5a6378">→ all-reduce gradients</span><br>
+<span class="box o">Pipeline parallel</span> split layers (vertical) <span style="color:#5a6378">→ GPU A: layers 1-8 │ GPU B: 9-16 …</span><br>
+<span class="box p">Tensor parallel</span> split a single layer's matrix (horizontal) <span style="color:#5a6378">→ one matmul across GPUs</span><br><br>
+<span style="color:#8b92a8">Modern thousand-GPU training = all three combined, called 3D parallelism</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Simplest data parallel: PyTorch DDP. Launch multi-process with torchrun</span>
+<span class="kw">import</span> torch, torch.distributed <span class="kw">as</span> dist
+<span class="kw">from</span> torch.nn.parallel <span class="kw">import</span> DistributedDataParallel <span class="kw">as</span> DDP
+
+dist.<span class="fn">init_process_group</span>(<span class="str">"nccl"</span>)        <span class="cmt"># NCCL = NVIDIA's GPU collective comm library</span>
+rank = dist.<span class="fn">get_rank</span>()
+torch.cuda.<span class="fn">set_device</span>(rank)
+
+model = MyTransformer().<span class="fn">to</span>(rank)
+model = <span class="fn">DDP</span>(model, device_ids=[rank])  <span class="cmt"># auto all-reduce of grads on backward</span>
+
+<span class="kw">for</span> batch <span class="kw">in</span> <span class="fn">shard_loader</span>(rank):     <span class="cmt"># each rank gets a different data slice</span>
+    loss = model(batch).loss
+    loss.<span class="fn">backward</span>()                  <span class="cmt"># ← gradients averaged across GPUs here</span>
+    optimizer.<span class="fn">step</span>(); optimizer.<span class="fn">zero_grad</span>()
+<span class="cmt"># Launch: torchrun --nproc_per_node=8 train.py</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"More GPUs = linear speedup" — wrong. Adding GPUs adds <b>communication overhead</b> (gradient sync, parameter gathering), and all-reduce cost grows with GPU count. 8 GPUs often hit 7x, but 512 GPUs might only reach ~380x (~74% efficiency). That's why the Megatron paper reports "<b>scaling efficiency</b>" rather than raw multipliers — communication is always fighting you for bandwidth.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: you probably won't train a 70B from scratch, but you will <b>fine-tune</b>. The first-principles test for "do I need multiple GPUs" is exactly this card's logic — estimate the combined VRAM of «params + gradients + optimizer state»; over one GPU means you must shard. Treat it as capacity planning, the same mindset as planning database shards.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 The bottleneck in distributed training is <b>VRAM and communication</b>, not compute. The three parallelisms are three orthogonal axes — choose by "what doesn't fit."<br>🤔 In distributed storage you know the "replication vs sharding" trade-off — how exactly does it map onto "data parallel vs ZeRO sharding"?</div>
+  </div>
+</div>
+
+<!-- 2. ZeRO -->
+<div class="card">
+  <h2>Zero Redundancy Optimizer<span class="en">ZeRO</span></h2>
+  <div class="tags"><span class="tag">VRAM</span><span class="tag purple">sharding</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Pure data parallel has a huge waste: <b>every GPU stores a full copy of the parameters, gradients, and optimizer state</b> — N redundant copies, like "replicate the full dataset to every node" in distributed storage. ZeRO's insight: these states are <b>idle most of the time</b>, so why keep them full on every GPU? <b>Shard</b> them across GPUs so each holds only 1/N, and <b>all-gather</b> on demand when needed. It's fundamentally <b>trading communication for VRAM</b> — the same trade-off as using erasure coding instead of full replication.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>First, unpack the "16 bytes per parameter" — that's the key to ZeRO. In mixed-precision training each parameter stores:</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">Mixed-precision training: VRAM bill per parameter</b><br><br>
+fp16 parameter <span class="bar" style="width:24px;height:14px"></span> 2 bytes<br>
+fp16 gradient <span class="bar" style="width:24px;height:14px"></span> 2 bytes<br>
+fp32 param copy <span class="bar" style="width:48px;height:14px"></span> 4 bytes <span style="color:#5a6378">┐</span><br>
+fp32 momentum m <span class="bar" style="width:48px;height:14px"></span> 4 bytes <span style="color:#5a6378">├ Adam optimizer state</span><br>
+fp32 variance v <span class="bar" style="width:48px;height:14px"></span> 4 bytes <span style="color:#5a6378">┘</span><br><br>
+<span style="color:#8b92a8">≈ 16 bytes/param. 70B model ≈ 1.1 TB — the 12 bytes of optimizer state is the fattest part</span>
+</div>
+
+    <p style="margin-top:14px">ZeRO comes in three stages, <b>progressively cutting redundancy</b> — more savings, more communication:</p>
+    <ul>
+      <li><b>ZeRO-1</b>: shard the <b>optimizer state</b> (those 12 bytes). Cut the fattest part first, almost no extra communication — best bang for the buck;</li>
+      <li><b>ZeRO-2</b>: also shard the <b>gradients</b>. After backward, reduce-scatter gradients to the owning GPU, keep only your slice locally;</li>
+      <li><b>ZeRO-3</b>: shard the <b>parameters</b> themselves too. When forward/backward reaches a layer, all-gather the full params, and <b>discard immediately</b> after use. Per-GPU VRAM drops to about <strong>16/N bytes/param</strong> — in theory, adding GPUs linearly lowers VRAM.</li>
+    </ul>
+    <p style="margin-top:8px">This is Microsoft DeepSpeed's <b>ZeRO</b> (Rajbhandari et al. 2019, arXiv 1910.02054). Its elegance: under the <b>data-parallel programming model</b> (each GPU still sees the illusion of a "full model"), it quietly eliminates the memory redundancy.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># DeepSpeed enables ZeRO via one JSON config; business code barely changes</span>
+ds_config = {
+    <span class="str">"train_micro_batch_size_per_gpu"</span>: 4,
+    <span class="str">"bf16"</span>: {<span class="str">"enabled"</span>: <span class="kw">True</span>},
+    <span class="str">"zero_optimization"</span>: {
+        <span class="str">"stage"</span>: 3,                 <span class="cmt"># shard optimizer + grads + params</span>
+        <span class="str">"offload_optimizer"</span>: {<span class="str">"device"</span>: <span class="str">"cpu"</span>},  <span class="cmt"># can even offload to CPU RAM</span>
+        <span class="str">"stage3_prefetch_bucket_size"</span>: 5e7        <span class="cmt"># prefetch to hide comm latency</span>
+    }
+}
+<span class="kw">import</span> deepspeed
+engine, _, _, _ = deepspeed.<span class="fn">initialize</span>(
+    model=model, config=ds_config, model_parameters=model.<span class="fn">parameters</span>())
+<span class="kw">for</span> batch <span class="kw">in</span> loader:
+    loss = engine(batch).loss
+    engine.<span class="fn">backward</span>(loss)   <span class="cmt"># ZeRO does reduce-scatter + all-gather here</span>
+    engine.<span class="fn">step</span>()</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"ZeRO-3 saves the most VRAM, so just always turn on stage 3" — wrong. Higher stages mean <b>every forward/backward must all-gather parameters</b>, and communication explodes. Worth it if your bottleneck is VRAM; if the model actually fits and your bottleneck is speed, stage 3 slows you down. Rule: <b>use the lowest stage that fits</b>. Same engineering judgment as "don't compress hot data just to save a little disk."</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: fine-tuning a 13B model on 4 consumer GPUs (e.g. 24GB ×4), ZeRO-2 + optimizer CPU offload is often the line between "barely runs" and "OOM crash." Understand the 16-byte bill and you can <b>compute beforehand</b> which stage to enable, instead of trial-and-error against the wall.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 ZeRO = replace data parallel's redundant copies with sharding + on-demand gathering, <b>trading communication bandwidth for VRAM</b>.<br>🤔 ZeRO-3's "all-gather only when needed, discard after use" — is it the same trick as virtual memory's demand paging? What's the "page-fault cost" for each?</div>
+  </div>
+</div>
+
+<!-- 3. FSDP -->
+<div class="card">
+  <h2>Fully Sharded Data Parallel<span class="en">FSDP</span></h2>
+  <div class="tags"><span class="tag">PyTorch</span><span class="tag orange">native</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>FSDP is <b>PyTorch officially baking ZeRO-3 into the standard library</b>. The mechanism is nearly equivalent; the difference is like <b>third-party library vs built-in</b>: DeepSpeed/ZeRO is bolted on (like requests), FSDP is <b>co-designed</b> with PyTorch's autograd, dispatcher, and memory allocator (like built-in urllib, but smoother). For most pure-PyTorch projects, FSDP is the default way to get ZeRO-3 without adopting a new ecosystem.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>It solves the same pain as ZeRO-3 — eliminate data-parallel memory redundancy — but must blend seamlessly into native PyTorch. The mechanism in one line: <b>shard at rest, gather in use, free after use</b>.</p>
+    <ul>
+      <li><b>Wrap into units</b>: split the model into FSDP units by layer/module. At rest, each unit's params keep only a 1/N shard on this GPU;</li>
+      <li><b>Forward into a unit</b>: <b>all-gather</b> to reconstruct that layer's full params → compute the layer → <b>free immediately</b> the non-local parts, keeping only 1/N;</li>
+      <li><b>Backward likewise</b>: all-gather once more to compute gradients, then <b>reduce-scatter</b> the gradient shards back to their owning GPUs;</li>
+      <li><b>Comm-compute overlap</b>: while computing layer i, prefetch layer i+1's params in the background, hiding all-gather latency behind compute — the key to running fast.</li>
+    </ul>
+    <p style="margin-top:8px">The authoritative reference is <b>PyTorch FSDP</b> (Zhao et al. 2023, arXiv 2304.11277), which details the co-design with PyTorch internals. <b>auto_wrap_policy</b> sets granularity: units too fine → many all-gathers, fragmented comm; too coarse → high peak VRAM per gather. Granularity itself is a continuous VRAM-vs-communication trade-off.</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">Lifecycle of one FSDP layer (repeats per layer)</b><br><br>
+<span class="box r">sharded: GPU has only 1/N of params</span><br>
+<span class="arrow">↓ all-gather (reconstruct full layer)</span><br>
+<span class="box g">full: run forward / backward</span><br>
+<span class="arrow">↓ free non-local shards + reduce-scatter grads</span><br>
+<span class="box r">back to sharded, VRAM released</span><br><br>
+<span style="color:#8b92a8">Peak VRAM ≈ whole model sharded (1/N) + the full params of the current layer (not the whole model)</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># PyTorch-native FSDP, no third-party library</span>
+<span class="kw">import</span> torch, functools
+<span class="kw">from</span> torch.distributed.fsdp <span class="kw">import</span> FullyShardedDataParallel <span class="kw">as</span> FSDP
+<span class="kw">from</span> torch.distributed.fsdp.wrap <span class="kw">import</span> transformer_auto_wrap_policy
+
+<span class="cmt"># Auto-split units by Transformer block — granularity sets the comm/VRAM trade-off</span>
+policy = functools.<span class="fn">partial</span>(
+    transformer_auto_wrap_policy,
+    transformer_layer_cls={TransformerBlock})
+
+model = <span class="fn">FSDP</span>(
+    model,
+    auto_wrap_policy=policy,
+    device_id=torch.cuda.<span class="fn">current_device</span>())
+
+<span class="cmt"># The training loop afterward looks almost like single-GPU — sharding is transparent</span>
+<span class="kw">for</span> batch <span class="kw">in</span> loader:
+    loss = model(batch).loss
+    loss.<span class="fn">backward</span>()      <span class="cmt"># FSDP handles all-gather / reduce-scatter here</span>
+    optimizer.<span class="fn">step</span>(); optimizer.<span class="fn">zero_grad</span>()</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"FSDP is a drop-in upgrade over DDP, just swap the wrapper" — be careful. FSDP changes the model's <b>state semantics</b>: parameters are sharded, so calling <code>model.state_dict()</code> directly, or any custom logic assuming "this GPU has the full params," can break — you must use FSDP's state_dict APIs to gather shards first. <b>Sharding is transparent, but not invisible</b>: it surfaces the moment you touch parameter internals.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: fine-tuning large models in 2026, FSDP is essentially the default engine behind HuggingFace <code>accelerate</code> / <code>trl</code>. Even if you only write one line of <code>accelerate launch</code>, understanding "it all-gathers and frees per layer" lets you see why <b>peak VRAM doesn't match your parameter-count estimate</b> — the extra is the full copy of the current layer.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 FSDP = native-PyTorch ZeRO-3: shard at rest, gather in use, free after use, with comm hidden behind compute.<br>🤔 FSDP makes "full parameters" a short-lived, use-and-discard object — is that the same pattern as your caching code's "materialize on demand, invalidate immediately"?</div>
+  </div>
+</div>
+
+<!-- 4. Megatron-LM -->
+<div class="card">
+  <h2>Megatron-LM Tensor Parallelism<span class="en">Megatron-LM / Tensor Parallelism</span></h2>
+  <div class="tags"><span class="tag">tensor parallel</span><span class="tag purple">3D parallel</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>ZeRO and FSDP both assume <b>a single layer is computable</b> — they shard "who stores params," but reassemble the full layer on one GPU to compute. What if <b>a single layer's matrix is itself too big for one GPU</b>? Then you must split the <b>single matrix multiply itself</b>, letting multiple GPUs cooperate on one matmul. Analogy: one record too big for a single machine — you have to split <b>that record's fields</b> across machines (vertically splitting a single operator). This is <b>tensor parallelism</b>, and Megatron-LM is its classic implementation.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Megatron-LM (Shoeybi et al. 2019, arXiv 1909.08053) is clever about how to split the Transformer's two big operators so the <b>split boundary lands outside the nonlinearity</b> — so one forward needs only <b>one sync</b>. Take the MLP layer <code>Y = GeLU(X·A)·B</code>:</p>
+    <ul>
+      <li><b>Split the first matrix A by columns</b> into [A₁, A₂]: X·A₁ and X·A₂ compute independently on two GPUs. Because <b>GeLU is element-wise</b>, GeLU(X·A₁) doesn't need A₂'s result — the nonlinearity completes <b>locally</b> on each GPU, <strong>no intermediate sync</strong>;</li>
+      <li><b>Split the second matrix B by rows</b> into [B₁; B₂]: each GPU computes a partial sum, then <b>one all-reduce</b> sums them into the full Y.</li>
+    </ul>
+    <p style="margin-top:8px">Why "column-split A, row-split B" and not the reverse? Because this combo keeps <b>the only nonlinearity (GeLU) inside the split</b>, so the whole layer's forward syncs just once at the end. The other split would require a sync before and after GeLU — doubling communication. Self-attention is even more natural: <b>split by attention head</b>, since each head computes independently — born for parallelism.</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">Megatron MLP tensor parallel: Y = GeLU(X·A)·B</b><br><br>
+<span class="box">input X (both GPUs hold full X)</span><br>
+<span class="arrow">↓ GPU1: X·A₁ │ GPU2: X·A₂ (A split by columns)</span><br>
+<span class="box g">GPU1: GeLU(X·A₁)</span> <span class="box g">GPU2: GeLU(X·A₂)</span> <span style="color:#5a6378">← nonlinearity local, no sync</span><br>
+<span class="arrow">↓ GPU1: (…)·B₁ │ GPU2: (…)·B₂ (B split by rows)</span><br>
+<span class="box o">partial sum₁</span> <span style="color:#5a6378">+</span> <span class="box o">partial sum₂</span> <span class="arrow">→ all-reduce →</span> <span class="box p">full Y</span><br>
+<span style="color:#8b92a8">The whole layer syncs only once at the end (1 all-reduce per forward)</span>
+</div>
+
+    <p style="margin-top:14px">Tensor parallel communication is heavy (an all-reduce every layer), so it's <b>done only over a single machine's NVLink</b> (~900GB/s bandwidth), never across nodes. The final thousand-GPU training is <b>3D parallelism</b>:</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">3D parallelism: three orthogonal axes combined</b><br><br>
+<span class="box p">Tensor parallel (TP)</span> <span style="color:#5a6378">→ intra-machine NVLink, split a layer's matrix, heaviest comm</span><br>
+<span class="box o">Pipeline parallel (PP)</span> <span style="color:#5a6378">→ across nodes, split layers, medium comm</span><br>
+<span class="box">Data parallel (DP)</span> <span style="color:#5a6378">→ across nodes/clusters, split data, sparsest comm</span><br><br>
+<span style="color:#8b92a8">Principle: place the heaviest-comm parallelism at the highest-bandwidth tier — a placement optimization by "bandwidth tier"</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># The core idea of tensor parallel: column-split + row-split + all-reduce, in plain PyTorch</span>
+<span class="kw">import</span> torch, torch.distributed <span class="kw">as</span> dist
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+
+<span class="kw">def</span> <span class="fn">tp_mlp</span>(X, A_shard, B_shard):
+    <span class="cmt"># A split by columns: this GPU holds only some columns of A → partial hidden dims</span>
+    H = F.<span class="fn">gelu</span>(X @ A_shard)        <span class="cmt"># GeLU is element-wise, local, no sync needed</span>
+    <span class="cmt"># B split by rows: this GPU holds the matching rows → a partial sum</span>
+    Y_partial = H @ B_shard
+    <span class="cmt"># The one sync: add the partial sums across GPUs = full output</span>
+    dist.<span class="fn">all_reduce</span>(Y_partial, op=dist.ReduceOp.SUM)
+    <span class="kw">return</span> Y_partial            <span class="cmt"># the whole layer's forward communicated once</span>
+<span class="cmt"># Production uses NVIDIA Megatron-LM / Megatron-Core, which packages this splitting</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"Tensor parallel scales out to hundreds of GPUs like data parallel" — wrong. TP all-reduces every layer, so <b>bandwidth is the ceiling</b>: cross-node InfiniBand (~50GB/s) is an order of magnitude slower than intra-machine NVLink (~900GB/s), and TP collapses once it spans machines. So TP is almost always 8 (within one 8-GPU box); larger scale stacks PP and DP on top. <b>The essence of a parallelism strategy is matching communication volume to bandwidth tiers</b>.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: you rarely configure 3D parallelism yourself, but when you read "TP=8, PP=4, DP=16, 512 GPUs total" in a model's tech report, you can immediately back out its cluster topology and where the bottleneck is — key for judging how reproducible / cheap-to-fine-tune an open model is.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Tensor parallel splits a <b>single operator</b>; Megatron's trick is making the split boundary avoid the nonlinearity, compressing each layer's sync to once. 3D parallel = placing the three parallelisms by bandwidth tier.<br>🤔 "Put the heaviest-comm parallelism at the highest-bandwidth tier" — is this the same first principle as your storage/cache tiering (hot data in RAM, cold data on disk)?</div>
+  </div>
+</div>
+
+<!-- engineering cross-reference -->
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.en.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual D12: Fine-tuning (FSDP / ZeRO configs and VRAM tuning for multi-GPU fine-tuning)
+  </a>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1910.02054" target="_blank">ZeRO (Rajbhandari et al. 2019)</a> — foundational analysis of memory redundancy and three-stage sharding</li>
+      <li><a href="https://arxiv.org/abs/1909.08053" target="_blank">Megatron-LM (Shoeybi et al. 2019)</a> — how to split the Transformer for tensor parallelism, a must-read</li>
+      <li><a href="https://arxiv.org/abs/2304.11277" target="_blank">PyTorch FSDP (Zhao et al. 2023)</a> — co-design of FSDP with PyTorch internals</li>
+      <li><a href="https://arxiv.org/abs/1811.06965" target="_blank">GPipe (Huang et al. 2018)</a> — the original pipeline-parallelism paper with micro-batches and the bubble</li>
+      <li><a href="https://www.deepspeed.ai/tutorials/zero/" target="_blank">DeepSpeed ZeRO tutorial</a> — config usage and engineering trade-offs per stage</li>
+      <li><a href="https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html" target="_blank">PyTorch FSDP tutorial</a> — hands-on auto_wrap_policy, state_dict, and more</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Data parallel's all-reduce, ZeRO's reduce-scatter + all-gather, tensor parallel's all-reduce — these are all "collective communication primitives." How do they map onto distributed-systems patterns you know?</summary><div>They are the <b>collective communication</b> primitives of MPI / NCCL, the same family of ideas as gossip, quorum, and aggregation queries in distributed systems. <b>all-reduce</b> = every node contributes data and every node ends up with the global aggregate (sum/average), equivalent to "distributed sum then broadcast back to everyone" — used to sync gradients in data parallel and merge partial sums in tensor parallel. <b>reduce-scatter</b> = aggregate while <b>scattering the result into slices</b>, each node getting only the slice it owns (ZeRO/FSDP use it to scatter gradients back). <b>all-gather</b> = the inverse: each node broadcasts its shard, so everyone ends up holding the full data (FSDP temporarily reconstructs a full layer's params). Key insight: <b>all-reduce ≈ reduce-scatter + all-gather</b> — which is exactly why ZeRO can "for free" split data-parallel sync into two halves and insert sharding in between. The underlying algorithm (ring all-reduce) has communication cost independent of node count and dependent only on data volume — the mathematical basis for scaling to thousands of GPUs. If you've done distributed aggregation queries, you already understand this — just different names.</div></details>
+
+    <details><summary>2. Is ZeRO-3 / FSDP's "all-gather only when needed, discard after use" essentially the same trick as the OS's demand paging for virtual memory? What's the cost in each?</summary><div>The core idea is indeed identical: <b>don't keep all data resident in expensive storage; page in on demand, page out after use</b>. Virtual memory swaps inactive pages to disk and pages them back on access via a page fault; FSDP "pages out" inactive layers' params into 1/N shards, "pages in" the full params via all-gather when forward reaches that layer, then pages out again. But the cost differs in nature: (a) <b>the page-fault cost source differs</b> — virtual memory pays <b>disk I/O latency</b> (random access, milliseconds), FSDP pays <b>cross-GPU communication bandwidth</b> (NVLink/IB, microseconds but high volume); (b) <b>predictability differs</b> — VM faults are <b>passive and unpredictable</b> (depend on access pattern), while FSDP's "page-in order" is <b>fully deterministic</b> (the layer-by-layer forward/backward order), so it can <b>prefetch</b> — fetch layer i+1 while computing layer i, hiding communication latency entirely behind compute. This is the root of FSDP's efficiency: a deterministic access sequence makes prefetch perfect, while the OS's generic prefetch can only guess. (c) ZeRO can offload state further to CPU RAM or even NVMe — at which point it <b>truly</b> becomes nearly identical multi-level paging, with latency costs approaching disk-level too.</div></details>
+
+    <details><summary>3. Why can tensor parallel (TP) only run within a machine, while data parallel (DP) scales across clusters? What quantitative principle is behind this?</summary><div>The core is the <b>"communication / computation" ratio</b>, which determines how bandwidth-sensitive a parallelism is. <b>Tensor parallel</b>: every layer's forward needs at least one all-reduce, so communication is <b>extremely frequent</b> (per layer, per step) and tightly coupled to compute — the next layer can't start until a sync completes. It's hypersensitive to both bandwidth and latency, so it must sit at the highest-bandwidth tier (intra-machine NVLink ~900GB/s). Once it crosses nodes onto InfiniBand (~50GB/s, ~20x slower), TP gets strangled by communication. <b>Data parallel</b>: syncs gradients only <b>once after each backward</b>, one comm per step, and it can <b>overlap</b> with backward compute (start sending a layer's gradient as soon as it's done, no need to wait for the whole backward). Low frequency, hideable — so it tolerates lower bandwidth and scales to thousands of GPUs across data centers. <b>Pipeline parallel</b> is in between: only passes activations at stage boundaries, medium comm. This yields the <b>placement law</b> of 3D parallelism: <b>put the most communication-intensive parallelism at the highest-bandwidth tier</b> — TP into the NVLink domain (usually 8 GPUs), PP across nodes, DP across clusters. It's the <b>same first principle</b> as storage tiering (hot data in RAM, warm on SSD, cold in object storage): match resource bandwidth to access/comm intensity. Grasp this and one glance at "TP=8, PP=4, DP=N" tells you the whole cluster's physical topology.</div></details>
+
+    <details><summary>4. Of these four techniques (DP/ZeRO/FSDP/TP) — if you were to train a model, how should the decision tree go?</summary><div>Escalate by "<b>what doesn't fit</b>," the cleanest framework: <b>Step 1: does the full model (params+grads+optimizer) fit on one GPU?</b> Yes → just <b>DDP data parallel</b>, simplest, least communication, best scaling. This is the default; don't over-engineer. <b>Doesn't fit, Step 2: is it the optimizer state that's too fat, or the model itself too big?</b> If the former (params actually fit, but Adam's 12 bytes/param crush VRAM) → use <b>ZeRO / FSDP</b>, picking the stage: start with ZeRO-1 (shard only optimizer state, almost no extra comm), then ZeRO-2 (shard gradients), then ZeRO-3 / FSDP (shard params too). The rule: <b>lowest stage that fits</b>. <b>Step 3: if even a single layer is too big for one GPU</b> (giant FFN or embedding at tens/hundreds of billions) → you must use <b>tensor parallel (Megatron)</b>, but only within an 8-GPU box. <b>Step 4: too many layers for one machine to hold the whole model</b> → add <b>pipeline parallel</b> to split layers across nodes. <b>The ultimate scale</b> stacks it all: TP (intra-machine) × PP (cross-node) × DP/ZeRO (cross-cluster) = 3D parallelism. Key mindset: <b>introduce each level only when the previous can't fit, because each added parallelism adds communication and complexity</b>. Exactly isomorphic to database scaling — single machine first, then read replicas (DP), then sharding (TP), and don't shard if you don't have to.</div></details>
+
+    <details><summary>5. These techniques make "training trillion-parameter models" possible, but they all just "route around the single-GPU VRAM wall." If the VRAM wall is the fundamental constraint, does this foreshadow an architecture-level (not system-level) solution?</summary><div>A deep cross-layer question. DP/ZeRO/FSDP/TP are all <b>system-level</b> "movers" — they don't change "how much total VRAM this model needs to train," they just <b>spread it across more GPUs + trade communication for space</b>. Spreading has a ceiling: more GPUs means higher communication fraction, until communication eats all the gains (this is also why scaling efficiency is always <100%). So real breakthroughs often come from the <b>architecture level</b> — directly lowering "training cost per effective parameter": (a) <b>MoE (mixture of experts)</b>: each token activates only a small subset of experts, so total params are huge but per-step compute/activation VRAM is small — using sparse activation to route around the dense-matrix wall (Day 34's topic); (b) <b>cheaper attention</b> (FlashAttention doesn't save params but saves activation VRAM by not materializing the O(n²) intermediate matrix); (c) <b>state space models / linear attention</b>: cut O(n²) to O(n) at the root. System and architecture levels are <b>complementary</b>, not substitutes: architecture decides "how much resource is theoretically needed," systems decide "how to lay it onto real hardware." BigCat, you can see it this way — distributed training is the engineering of pushing the "wall" farther away, while architecture innovation is <b>redesigning the house so it doesn't need such a big wall at all</b>. The tension between these two routes is one of the most central research threads in large-model infrastructure in 2026.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 25 · 2026-06-11</footer>
+
+</div>
+
+</body>
+</html>
