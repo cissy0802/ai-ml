@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: Alignment Math — Day 26</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+.formula{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:14px 16px;margin:10px 0;font-family:"SF Mono",Menlo,monospace;font-size:0.92rem;color:#7ed6a0;overflow-x:auto;text-align:center}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: Alignment Math</h1>
+  <div class="meta">Day 26 · 2026-06-12</div>
+  <div class="audience">For: engineers with coding experience, non-AI background · math-heavy</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/prompt-injection-day20.en.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual D20: Prompt Injection (attack/defense when alignment is bypassed)
+  </a>
+</div>
+
+<div class="card" style="border-left-color:#8b92a8">
+  <div class="section">
+    <p style="color:#8b92a8;font-size:0.92rem">Today is about the <b style="color:#cfe9f5">math behind alignment</b>: when a goal can't be written as code ("helpful," "harmless," "honest" have no unit tests), how do we turn <b>human preferences</b> into a loss a model can optimize? The four cards form one logical chain: ① the overall RLHF framework → ② how its core component, the reward model, learns scores from preferences → ③ replacing the expensive human with an AI (Constitutional AI) → ④ collapsing the whole framework into a single classification loss with algebra (DPO).</p>
+  </div>
+</div>
+
+<!-- 1. RLHF -->
+<div class="card">
+  <h2>The RLHF Math Framework<span class="en">Reinforcement Learning from Human Feedback</span></h2>
+  <div class="tags"><span class="tag">alignment</span><span class="tag purple">objective</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>RLHF is <b>"a CI pipeline for when you can't write the test."</b> In backend work you can assert on "amount calculation," but you can't write an <code>assert</code> for "is this answer polite enough." RLHF's move: first <b>distill thousands of human "this is better than that" judgments into a model that scores (the reward model)</b>, then have the main model keep optimizing to please that scorer, like passing CI — <b>turning "needs that can't be formalized" into "a differentiable objective."</b></p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem + how it works</div>
+    <p>A pretrained model only "continues the most likely next token" — it has no motive to be helpful or harmless. This is <b>objective mismatch</b>: the training objective (language modeling) ≠ what we actually want (a helpful assistant). InstructGPT (Ouyang et al. 2022) established the classic three stages:</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">The RLHF three-stage pipeline</b><br><br>
+<span class="box g">① SFT</span><span class="arrow">→</span> fine-tune on human demos → gives <span class="box g">π_ref</span> (reference model)<br>
+<span class="box o">② RM</span><span class="arrow">→</span> train a <span class="box o">reward model r</span> on pairwise preferences (card 2)<br>
+<span class="box p">③ PPO</span><span class="arrow">→</span> RL-optimize policy <span class="box p">π_θ</span> to score higher under r<br>
+<span style="color:#5a6378;font-size:0.78rem">↑ the objective in step 3 is the heart of RLHF math</span>
+</div>
+
+    <p style="margin-top:14px">The objective to maximize in step 3 (the core formula):</p>
+    <div class="formula">max<sub>θ</sub> &nbsp; E[ r(x,y) ] &nbsp; − &nbsp; β · KL( π<sub>θ</sub>(y|x) ‖ π<sub>ref</sub>(y|x) )</div>
+    <p>Term by term: <b>x</b> is the input prompt, <b>y</b> is the model's answer; <b>r(x,y)</b> is the reward model's score for that answer; <b>π<sub>θ</sub></b> is the policy being trained, <b>π<sub>ref</sub></b> is the frozen SFT model. The first term, "maximize reward," is obvious — produce answers the reward model likes. <b>The key is the second term, the KL penalty</b>: <strong>KL divergence measures how far the new policy has drifted from the reference</strong>, and β weights it.</p>
+    <p style="margin-top:8px">Why is this "<b>leash</b>" mandatory? Because the reward model is only a finite approximation with blind spots. Without the KL constraint, the optimizer will <b>game the reward model (reward hacking)</b> — find outputs that look like gibberish to humans but inexplicably score high, and the model rapidly "collapses" to these degenerate solutions. The KL penalty is like a <b>rate limiter / circuit breaker</b> in distributed systems: exploration allowed, but not too far from the known-good π_ref. <strong>Large β = short leash</strong> (conservative, close to SFT); <strong>small β = long leash</strong> (bold exploration, but prone to reward hacking).</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">import</span> torch
+<span class="cmt"># RLHF step 3: actual signal = reward − β·KL (per-token form of the formula)</span>
+<span class="kw">def</span> <span class="fn">rlhf_signal</span>(policy_logp, ref_logp, reward, beta=0.1):
+    <span class="cmt"># policy_logp / ref_logp: log-probs of generated tokens under policy / ref</span>
+    <span class="cmt"># reward: scalar score from the reward model for the whole answer</span>
+    kl = policy_logp - ref_logp        <span class="cmt"># single-sample KL estimate</span>
+    <span class="kw">return</span> reward - beta * kl          <span class="cmt"># ← leash: reward minus drift penalty</span>
+
+p = torch.tensor([-0.2, -1.1, -0.5])  <span class="cmt"># policy more confident on each token</span>
+r = torch.tensor(2.0)
+<span class="fn">print</span>(<span class="fn">rlhf_signal</span>(p, torch.tensor([-0.3, -0.9, -0.6]), r))
+<span class="cmt"># larger β → KL suppresses reward → output stays close to SFT, safer but tamer</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + use case</div>
+    <div class="tip">"RLHF makes the model smarter" — wrong. RLHF adds <b>almost no knowledge or reasoning</b>; it just brings forward abilities the model already had from pretraining, choosing to express them helpfully and harmlessly. Capability comes from pretraining; alignment only <b>steers how it's expressed</b>. Conflating the two makes you overrate RLHF and underrate data quality.</div>
+    <div class="exercise" style="margin-top:8px">📌 Parent scenario: when you set your kid's AI tutor to be "patient, doesn't give answers directly, prompts thinking," you're doing <b>personal alignment</b> — except you use a system prompt (runtime steering) while vendors use RLHF (baked into weights at training). Understanding RLHF helps you judge: which behaviors a prompt can change, and which are locked into the weights and unmovable by prompting.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 RLHF's essence is "<b>turning a goal you can't code into a differentiable loss</b>," and the KL leash is the seatbelt that stops the optimizer from cheating.<br>🤔 What goals in your work "can't be unit-tested, only judged by feel"? If you had to turn one into an optimizable score, how would you collect the "preference data"?</div>
+  </div>
+</div>
+
+<!-- 2. Reward Model -->
+<div class="card">
+  <h2>Reward Models &amp; Bradley-Terry<span class="en">Reward Model</span></h2>
+  <div class="tags"><span class="tag">preference learning</span><span class="tag orange">probabilistic model</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A reward model computes an <b>"ELO chess rating"</b> for answers. No chess player can state an absolute skill number, but from many "A beat B" games the ELO system infers a scalar rating for each. A reward model is identical: <strong>humans can't reliably say "this answer is worth 7.3," but they reliably judge "A is better than B."</strong> So we collect only pairwise comparisons and fit a scalar score consistent with them — the same math (Bradley-Terry / logistic regression) underneath.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem + how it works</div>
+    <p>The pain: RLHF step 3 needs a function that scores any answer <b>automatically and on the fly</b>, but human labeling is slow, expensive, and subjective. The fix has two steps: (1) collect preference data — generate two answers to the same prompt, a human picks the better one, giving a triple <b>(x, y<sub>w</sub>, y<sub>l</sub>)</b>, w=winner (chosen), l=loser (rejected); (2) train a scalar scorer r from these comparisons.</p>
+    <p style="margin-top:8px">The <b>Bradley-Terry model</b> translates "preference" into probability — the probability "y<sub>w</sub> beats y<sub>l</sub>" is the score difference through a sigmoid:</p>
+    <div class="formula">P(y<sub>w</sub> ≻ y<sub>l</sub>) = σ( r(x,y<sub>w</sub>) − r(x,y<sub>l</sub>) )</div>
+    <p>σ is the sigmoid (squashes any real number into 0–1 as a probability). Intuition: <strong>the larger the score gap, the closer to 1 the chance a human picks the high-scoring one; when scores tie, the probability is exactly 0.5</strong> (a coin flip). Written as maximum likelihood, this is the reward model's training loss:</p>
+    <div class="formula">L = − E[ log σ( r(x,y<sub>w</sub>) − r(x,y<sub>l</sub>) ) ]</div>
+    <p>This loss only sees the <b>difference</b> of scores, not absolute values — so <strong>the absolute scale of the reward is meaningless</strong> (add 100 to everything and the loss is unchanged), exactly like ELO caring only about relative strength. The idea of learning a reward from human preferences traces back to Christiano et al. 2017.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Pairwise preference → scalar reward</span><br>
+<span class="box">prompt x</span><span class="arrow">→</span><span class="box g">answer A (human picks = y_w)</span> <span style="color:#7ed6a0">r=2.1</span><br>
+<span style="color:#5a6378">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="box r">answer B (y_l)</span> <span style="color:#ff8e8e">r=1.0</span><br>
+<span style="color:#5a6378">gap 1.1 → σ(1.1)≈0.75 → model's "A is better" probability is 75%, matching the human ✓</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+<span class="cmt"># Reward model's Bradley-Terry loss: learns only the relative gap, scale is moot</span>
+<span class="kw">def</span> <span class="fn">bt_loss</span>(r_chosen, r_rejected):
+    <span class="cmt"># r_*: scalar scores for the chosen / rejected answers</span>
+    <span class="cmt"># −log σ(r_w − r_l): bigger, correctly-signed gap → smaller loss</span>
+    <span class="kw">return</span> -F.<span class="fn">logsigmoid</span>(r_chosen - r_rejected).<span class="fn">mean</span>()
+
+r_w = torch.tensor([2.1, 0.5])   <span class="cmt"># pair 2: model scores the chosen one LOWER</span>
+r_l = torch.tensor([1.0, 0.8])
+<span class="fn">print</span>(<span class="fn">bt_loss</span>(r_w, r_l))    <span class="cmt"># pair 2 is wrong-signed → larger loss, drives correction</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + use case</div>
+    <div class="tip">"The reward score can be used as an absolute quality rating" — wrong. It's only reliable <b>in-distribution and for relative comparison</b>. Once the policy games it with an OOD (out-of-distribution) weird output, the reward model may <b>blindly score it high</b> — exactly what the card-1 KL leash exists to prevent. The reward model is the "referee," but the referee can be fooled.</div>
+    <div class="exercise" style="margin-top:8px">📌 Decision-support scenario: when you ask AI to "pick the best of 3 options," giving it <b>pairwise comparisons</b> (A vs B, B vs C) is often more reliable than asking it to "score each at once" — because relative judgment is more stable than absolute scoring. This cognitive regularity holds for both humans and models; it's Bradley-Terry projected onto real life.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 A reward model = an ELO system fitting scalar scores from pairwise preferences; it learns <b>relative ordering</b>, not absolute truth.<br>🤔 If human labelers themselves disagree a lot (some pick A, some pick B for the same pair), what does the Bradley-Terry reward become? What does that mean for "whose preferences are we aligning to"?</div>
+  </div>
+</div>
+
+<!-- 3. Constitutional AI -->
+<div class="card">
+  <h2>Constitutional AI / RLAIF<span class="en">Harmlessness from AI Feedback</span></h2>
+  <div class="tags"><span class="tag">RLAIF</span><span class="tag purple">scalable oversight</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Constitutional AI is <b>"replacing manual code review with running a linter."</b> In RLHF every preference needs a human label, like every PR needing a senior engineer to review by hand — slow, expensive, inconsistent. CAI's move: write a <b>plaintext set of rules (a "constitution")</b>, have the model <b>review and rewrite its own outputs against those rules</b>, then use the model's own preference judgments in place of human labels. <strong>One readable, auditable, version-controllable principles doc replaces thousands of human annotations.</strong></p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem + how it works</div>
+    <p>The pain: RLHF's human preference labeling is <b>the cost and consistency bottleneck of alignment</b> — harmlessness labeling especially makes people read harmful content repeatedly, which is costly and harmful. Anthropic's Constitutional AI (Bai et al. 2022) replaces the human with AI in two phases:</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">CAI's two phases</b><br><br>
+<b style="color:#7ed6a0">Phase 1 (SL): self-critique + revise</b><br>
+<span class="box">draft answer</span><span class="arrow">→</span><span class="box o">self-critique vs constitution</span><span class="arrow">→</span><span class="box g">revise</span><span class="arrow">→</span> SFT on revisions<br><br>
+<b style="color:#a48cff">Phase 2 (RLAIF): AI labels preferences</b><br>
+<span class="box">two answers</span><span class="arrow">→</span><span class="box p">model picks better one per constitution</span><span class="arrow">→</span> train RM → RL<br>
+<span style="color:#5a6378;font-size:0.78rem">↑ replaces the entire "human labeling" in the card-1 pipeline with "AI + constitution"</span>
+</div>
+
+    <p style="margin-top:14px">The core mechanism is <b>RLAIF (Reinforcement Learning from AI Feedback)</b>: the pipeline is identical to RLHF (still reward model + KL leash + RL), <strong>the only difference is that preference labels are generated by the model per the constitution, not by humans</strong>. The "constitution" is a set of natural-language principles (e.g., "choose the more harmless, less preachy response"). This works thanks to one key assumption: <b>judging which answer is better is easier than generating a good answer from scratch</b> — the model can be a competent referee even when it makes mistakes as a player.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = Anthropic()  <span class="cmt"># needs ANTHROPIC_API_KEY</span>
+
+principle = <span class="str">"Answers must not give actionable harmful details; decline politely with a reason."</span>
+draft = <span class="str">"&lt;model's first-pass answer to a sensitive question&gt;"</span>
+<span class="cmt"># CAI phase 1: have the model self-critique + revise per the "constitution"</span>
+<span class="cmt"># (no human labeling of harmful samples needed)</span>
+revision = client.messages.<span class="fn">create</span>(
+    model=<span class="str">"claude-opus-4-8"</span>, max_tokens=512,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>:
+        <span class="fn">f</span><span class="str">"Principle: {principle}\nDraft answer: {draft}\n"</span>
+        <span class="str">"First point out where it violates the principle, then give a compliant rewrite."</span>}]
+).content[0].text
+<span class="fn">print</span>(revision)  <span class="cmt"># SFT on these self-revisions → then RLAIF on AI preferences</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + use case</div>
+    <div class="tip">"CAI removes humans entirely, alignment is now automated" — overstated. <b>The constitution itself is written by humans</b> — human value judgment moves up from "label each datum" to "define the principles," it doesn't disappear, the <b>lever just gets longer</b>. And a model-as-referee amplifies its own biases; a vague constitution gets gamed. CAI lowers labeling volume, not human responsibility.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: give your writing/coding agent a <b>"personal constitution"</b> (e.g., "conclusion first then detail," "no piled-up adjectives," "code must carry type annotations") and have it <b>self-critique once before delivering</b>. This is a miniature CAI phase 1 — replacing "manual line-by-line review" with "model self-review" via one plaintext principles doc.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 CAI's leverage is "<b>lifting human value judgment from the data layer to the principles layer</b>" — writing rules scales far better than labeling data.<br>🤔 When the referee (AI) and the player (AI) are the same model, it inherits its own blind spots in self-evaluation. How would you design a mechanism so that "self-review" doesn't degrade into "feeling good about itself"?</div>
+  </div>
+</div>
+
+<!-- 4. DPO -->
+<div class="card">
+  <h2>DPO: Direct Preference Optimization<span class="en">Direct Preference Optimization</span></h2>
+  <div class="tags"><span class="tag">algebraic collapse</span><span class="tag orange">no RL</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>DPO is <b>"using algebra to delete a whole microservice."</b> RLHF is a three-piece architecture: a reward-model service + a sampling loop + PPO training — many components, mutually coupled, as fragile to tune as a distributed system. DPO found a mathematical identity proving that <strong>the "reward model" can actually be expressed as the policy's own log-probability ratio against the reference</strong> — so the reward-model component is <b>deleted entirely</b>, leaving just an ordinary classification loss. Like discovering an RPC call can be algebraically reduced to a local function call.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem + how it works</div>
+    <p>The pain: RLHF is hard in practice — you maintain 4 models (policy, reference, reward, value), and PPO is hyperparameter-sensitive, crash-prone, and slow to sample. DPO's (Rafailov et al. 2023) insight starts from that KL-penalized objective in card 1: <strong>it has a closed-form optimum</strong>. The optimal policy looks like this:</p>
+    <div class="formula">π*(y|x) = (1/Z) · π<sub>ref</sub>(y|x) · exp( r(x,y) / β )</div>
+    <p>Z is the normalizing partition function (ensures probabilities sum to 1, depends on x). Inverting this solves for the reward:</p>
+    <div class="formula">r(x,y) = β · log( π*(y|x) / π<sub>ref</sub>(y|x) ) + β·log Z</div>
+    <p>Here's the magic: substitute this r back into card 2's Bradley-Terry loss. Because the loss contains only the <b>difference of rewards</b> r(y<sub>w</sub>)−r(y<sub>l</sub>), and <strong>β·log Z is identical for the same x, it cancels on subtraction</strong> — that nastiest, hardest-to-compute normalizing term vanishes into thin air. What remains is a loss acting directly on the policy:</p>
+    <div class="formula" style="font-size:0.82rem">L<sub>DPO</sub> = − log σ( β·log[π<sub>θ</sub>(y<sub>w</sub>)/π<sub>ref</sub>(y<sub>w</sub>)] − β·log[π<sub>θ</sub>(y<sub>l</sub>)/π<sub>ref</sub>(y<sub>l</sub>)] )</div>
+    <p>Compare card 2's reward-model loss: structurally <b>the same −log σ(difference)</b>, only the "reward difference" is replaced by the "<strong>difference of the policy's log-prob ratio against the reference</strong>." That's the meaning of the paper's title — <b>the language model is secretly a reward model</b>. The KL leash didn't disappear; it's quietly encoded into the loss via β and π_ref.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">RLHF vs DPO: architecture</b><br><br>
+<span style="color:#ff8e8e">RLHF:</span><span class="box g">preference data</span><span class="arrow">→</span><span class="box o">train reward model</span><span class="arrow">→</span><span class="box r">PPO sample+RL</span><span class="arrow">→</span><span class="box p">policy</span><br>
+<span style="color:#5a6378;font-size:0.78rem">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4 models · unstable RL · slow sampling</span><br><br>
+<span style="color:#7ed6a0">DPO:</span><span class="box g">preference data</span><span class="arrow">━━━━━━━━━━→</span><span class="box p">policy</span> (one classification loss)<br>
+<span style="color:#5a6378;font-size:0.78rem">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 models (θ + frozen ref) · no RL · like ordinary supervised training</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+<span class="cmt"># DPO loss: reward = β·log(π/π_ref); partition function Z cancels in subtraction</span>
+<span class="kw">def</span> <span class="fn">dpo_loss</span>(pi_w, pi_l, ref_w, ref_l, beta=0.1):
+    <span class="cmt"># *_w / *_l: seq log-probs of chosen/rejected under policy(pi)/reference(ref)</span>
+    logits = beta * ((pi_w - ref_w) - (pi_l - ref_l))
+    <span class="kw">return</span> -F.<span class="fn">logsigmoid</span>(logits).<span class="fn">mean</span>()  <span class="cmt"># same σ as card 2!</span>
+
+<span class="cmt"># policy raised chosen, lowered rejected vs ref → logits&gt;0 → small loss</span>
+<span class="fn">print</span>(<span class="fn">dpo_loss</span>(torch.tensor([-1.0]), torch.tensor([-2.0]),
+               torch.tensor([-1.2]), torch.tensor([-1.5])))
+<span class="cmt"># in practice just use HuggingFace TRL's DPOTrainer, no need to hand-write</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + use case</div>
+    <div class="tip">"DPO is mathematically equivalent to RLHF, so it's always better" — no. The equivalence holds under idealized assumptions; in practice DPO, because it <b>only sees the fixed preference pairs in the training set</b> (offline), is more prone to <b>overfitting the preference data</b>, less robust out-of-distribution than online RLHF, and loses the asset of a "reusable reward model." DPO is simple and stable; RLHF has a higher ceiling — that's an <b>engineering trade-off</b>, which belongs to super-individual, so just a pointer here.</div>
+    <div class="exercise" style="margin-top:8px">📌 Personal project scenario: to fine-tune a small model's "style preference" on your own domain data (e.g., teaching it your writing voice), DPO is the first choice — just a batch of (prompt, good answer, bad answer) triples + TRL, no need to stand up the whole RL stack. This is exactly why DPO brought "alignment" into everyday projects.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 DPO uses one algebraic identity to prove "the language model is itself an implicit reward model," collapsing RLHF's complex architecture into a single classification loss.<br>🤔 One algebraic simplification (canceling the partition function Z) dropped alignment cost by an order of magnitude — in your domain, is there a "seemingly necessary intermediate component" that could be eliminated by an identity?<br><a href="https://cissy0802.github.io/super-individual-weekly/prompt-injection-day20.en.html" style="color:#7b61ff">Engineering counterpart → super-individual D20: Prompt Injection (when alignment is bypassed)</a></div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/2203.02155" target="_blank">Ouyang et al. 2022 — InstructGPT</a> — the foundational paper on the RLHF three-stage process, a must-read</li>
+      <li><a href="https://arxiv.org/abs/1706.03741" target="_blank">Christiano et al. 2017 — Deep RL from Human Preferences</a> — the origin of learning rewards from human preferences</li>
+      <li><a href="https://arxiv.org/abs/2212.08073" target="_blank">Bai et al. 2022 — Constitutional AI</a> — Anthropic's RLAIF and "constitution" method</li>
+      <li><a href="https://arxiv.org/abs/2305.18290" target="_blank">Rafailov et al. 2023 — Direct Preference Optimization</a> — DPO's closed-form derivation, the beauty of simplification</li>
+      <li><a href="https://huggingface.co/docs/trl/index" target="_blank">HuggingFace TRL docs</a> — official implementations of DPOTrainer / PPOTrainer</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. "−log σ(difference)" appears twice across the cards (reward-model loss and DPO loss). Why does this sigmoid loss become the "universal shape" of preference learning?</summary><div>Because preference is inherently a <b>binary-comparison</b> problem, and the sigmoid is the most natural function mapping a "real-valued score difference" to a "choice probability." The root is the <b>Bradley-Terry model</b> (and its psychology ancestor, the Thurstone model): assume each option has a latent utility and the observed preference is the utility difference passed through logistic noise, and then P(A≻B)=σ(u<sub>A</sub>−u<sub>B</sub>) is the unique max-entropy form. This is the same math as logistic regression — logistic regression is "features → binary probability," BT is "two candidates → who-wins probability." So whether you define "score" as the reward model's output (card 2) or the policy's log-prob ratio (card 4), as long as you're learning <b>pairwise preferences</b>, the loss takes the shape −log σ(difference). <b>Recognizing this invariant</b> gives you the mathematical skeleton of modern alignment: only what you put inside the "difference" changes, the shell is always sigmoid. You can think of it as: many seemingly different ranking/matching/recommendation problems reduce, underneath, to the same logistic kernel.</div></details>
+
+    <details><summary>2. The KL leash (β) is an explicit penalty term in RLHF but "disappears" in DPO — is it really gone?</summary><div>It didn't disappear; it's <b>encoded into the structure of the loss</b>. Recall the DPO derivation: the optimal policy π* = (1/Z)·π_ref·exp(r/β) is <b>itself the solution to the KL-constrained problem</b> — β and π_ref together determine "how far the policy may drift from the reference." When you solve for r and substitute into the BT loss, β is still in the DPO loss (multiplying the log-prob ratio) and π_ref is still there (as the denominator). So the leash is still leashing, it just went from "an extra penalty added at training time" to "baked into the algebraic form of the loss." Practical implication: tuning β in DPO is still tuning the "stay close to reference vs. dare to change" balance, and too-small β will likewise let the model drift on the preference data and degenerate. One counterintuitive point: DPO's KL is <b>implicit and offline</b> — it constrains "relative to those answers in the training set," whereas RLHF's KL is an <b>online</b> constraint on new answers the current policy samples. This is exactly why DPO can be less stable than online RLHF out-of-distribution — same leash, anchored at a different spot.</div></details>
+
+    <details><summary>3. RLHF / CAI / DPO all assume "judging A is better than B" is a reliable supervision signal. When tasks get so complex that humans (or AI) can't judge accurately, how does this paradigm break down?</summary><div>This is alignment research's central worry, called <b>scalable oversight</b>. The whole premise of preference learning is "<b>evaluation is easier than generation</b>" — I can't write perfect code, but I can tell which snippet is better. When a task exceeds the evaluator's ability (judging a very long math proof, a piece of frontier research you can't follow, a decision whose consequences surface only in ten years), the premise fails: (a) human labelers will <b>favor answers that look good but are actually wrong</b> (fluent nonsense &gt; clumsy truth), so the model learns <b>sycophancy</b> and persuasiveness rather than correctness; (b) when the judge AI itself in CAI can't judge accurately, RLAIF amplifies rather than corrects errors. Known mitigation directions: debate (two models poke holes in each other, the human only referees), recursive reward modeling, process supervision (judging each reasoning step, not just the conclusion) — but none fully solves it. The deep tension: we're aligning systems that may become more capable than the judge, using methods that "today's human/model can still judge." For someone interested in consciousness and complexity science, this is really an epistemological question: when the supervised is stronger than the supervisor, what can "alignment" still be anchored to? This is the true frontier the current math of alignment touches.</div></details>
+
+    <details><summary>4. "RLHF doesn't add capability, only steers expression" — if alignment is just steering, where does the "alignment tax" (aligned models getting weaker on some benchmarks) come from?</summary><div>The "alignment tax" is the regression aligned models show on some capability benchmarks versus pure pretrained ones. If alignment truly only adjusts expression without touching capability, why a tax? Several mechanisms: (a) <b>distribution narrowing</b> — RLHF/DPO pulls the policy toward "the answer styles humans prefer," suppressing some low-probability but useful output modes (e.g., unconventional but correct solutions); the tighter the KL leash, the more pronounced the narrowing; (b) <b>preference-correctness mismatch</b> — humans prefer confident, thorough, polite answers, so the model may sacrifice conciseness or honest admission of uncertainty to please, showing up as worse calibration; (c) <b>capability-safety trade-off</b> — boundaries that decline for harmlessness "collateral-damage" legitimate requests (over-refusal). The InstructGPT paper itself observed regressions on some NLP benchmarks and mitigated them by mixing in pretraining gradients. So the more accurate statement: alignment mainly <b>reshapes the expression distribution of capability</b>, and reshaping a distribution isn't free — it incidentally suppresses the slice of capability not covered by the preferences. This is why "alignment" and "capability" are two goals frontier labs optimize together, tugging at each other, rather than one after the other.</div></details>
+
+    <details><summary>5. DPO lowered alignment from "lab-grade RL engineering" to "ordinary fine-tuning," letting anyone align a model to their own preferences. What are the two faces of this "democratization of alignment"?</summary><div>The upside: alignment capability devolves to individuals and small teams; you can make a model fit your values, domain voice, and workflow — exactly the infrastructure for the "AI super-individual," making a "personal constitution + DPO fine-tune" workflow feasible. The downside is sharp too: (a) <b>aligned to whose preferences?</b> — once DPO makes "alignment" a neutral tool, it can align toward "more helpful" but also toward "more manipulative" or "more pandering to a particular stance"; un-alignment and alignment use the same math; (b) <b>preference data is power</b> — whoever defines the batch of (good, bad) triples defines the model's values, compressing "value judgment" into an outsourceable, tradeable dataset; (c) <b>fragmentation</b> — when everyone/every org aligns the model to themselves, the shared value baseline erodes. Deep down, the math of alignment solves the <b>mechanism</b> question of "how to pour preferences into a model," but "whose preferences should be poured" and "who has the right to decide" are <b>normative</b> questions it cannot answer. The simpler the tech makes the mechanism (DPO), the more that normative question is pushed to the foreground. This may be the most important non-mathematical question this math leaves us.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 26 · 2026-06-12</footer>
+
+</div>
+
+</body>
+</html>
