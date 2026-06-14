@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Reasoning Models — Day 28</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Reasoning Models</h1>
+  <div class="meta">Day 28 · 2026-06-14</div>
+  <div class="audience">For: engineers with coding experience, not specialized in AI</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual D5: Agent Design (how to put a "thinking" model into an agent workflow)
+  </a>
+</div>
+
+<!-- 1. Test-time Compute -->
+<div class="card">
+  <h2>Test-time Compute<span class="en">o1 Architecture</span></h2>
+  <div class="tags"><span class="tag">paradigm shift</span><span class="tag purple">reasoning</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A normal LLM is like an <b>O(1) table lookup</b>—no matter how hard the question, it's one forward pass that immediately spits out an answer, with fixed compute. A reasoning model (o1 / DeepSeek-R1) is like a database <b>query optimizer</b>: trivial queries take the fast path, complex queries are <b>willing to spend more CPU at runtime planning, trying, backtracking</b> before returning. The essence: shift part of the "compute budget" from a one-time investment at training to <b>per-request, on-demand investment at runtime</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Pain point: however large the model, the compute depth of a single forward pass is <b>fixed</b>. That's fine for questions you answer at a glance, but for math or coding problems requiring multi-step deduction, it's like <b>forcing someone to blurt out the answer in 0.5 seconds</b>—errors are inevitable. OpenAI's <b>o1</b> (2024) answered this: let the model generate a long <b>internal chain of thought</b> before answering, turning "thinking" into a process that can spend more tokens and more time.</p>
+    <p style="margin-top:8px">The core mechanism is not a prompt trick but a <b>training method</b>: o1 uses <b>reinforcement learning (RL)</b> to teach the model to "learn how to think"—the reward comes from whether the final answer is correct (in <b>auto-verifiable</b> domains like math and code). Through trial and error the model learns to break down steps, recognize and correct its own mistakes, and switch approaches when one fails. In 2025 DeepSeek-R1 went further, showing that <b>pure RL (without human-annotated reasoning traces) can spontaneously elicit</b> reflection, verification, and backtracking.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Two scaling axes (the key insight of reasoning models)</b><br><br>
+Train-time compute <span class="bar" style="width:110px;height:18px"></span> invest once, all requests benefit (classic route)<br>
+Test-time compute <span class="bar" style="width:110px;height:18px;opacity:0.8"></span> invest per request, think longer on hard ones<br><br>
+<span style="color:#8b92a8">accuracy ∝ log(test-time tokens):</span><br>
+think 1K tokens <span class="bar" style="width:50px;height:14px"></span><br>
+think 8K tokens <span class="bar" style="width:90px;height:14px;opacity:0.8"></span><br>
+think 32K tokens <span class="bar" style="width:115px;height:14px;opacity:0.7"></span> <span style="color:#5a6378">↑ diminishing but rising</span>
+</div>
+
+    <p style="margin-top:14px">Key counterintuition: in reasoning models, <b>"smarter" can be bought with "thinking longer"</b>—this is the <b>second scaling path</b> beyond "make the model bigger" that has dominated since 2017. The cost is a steep rise in latency and token spend.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+client = OpenAI()  <span class="cmt"># needs OPENAI_API_KEY</span>
+
+<span class="cmt"># The key knob for reasoning models: reasoning_effort = "how long to think"</span>
+resp = client.chat.completions.<span class="fn">create</span>(
+    model=<span class="str">"o1"</span>,
+    reasoning_effort=<span class="str">"high"</span>,  <span class="cmt"># low/medium/high: high = more test-time compute</span>
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+               <span class="str">"content"</span>: <span class="str">"A three-digit number: digits sum to 12, "</span>
+                          <span class="str">"hundreds = twice the units, tens = units + 1. Find it."</span>}]
+)
+<span class="fn">print</span>(resp.choices[0].message.content)
+<span class="cmt"># Note: internal reasoning tokens are hidden by OpenAI, but you pay for them</span>
+<span class="fn">print</span>(resp.usage.completion_tokens_details.reasoning_tokens)  <span class="cmt"># monitor cost</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"Reasoning models are stronger, so use them for everything"—wrong. For tasks that <b>don't need multi-step deduction</b>—summarizing, rewriting an email, looking up a fact—a reasoning model is just <b>slower and more expensive</b>, not necessarily better, and sometimes "overthinks" a simple problem into complexity. The test: <b>does this question need scratch work?</b> Yes → reasoning model; can blurt it out → normal model.</div>
+    <div class="exercise" style="margin-top:8px">📌 Real scenario: use a reasoning model for <b>decision support that requires rigorous multi-step work</b>—e.g. "given these three homes' price, commute, and school-rank data, do a weighted comparison and flag hidden risks." Such problems need "scratch work," where o1/R1's step-by-step deduction clearly beats a normal model.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 The essence of reasoning models: buy accuracy with runtime compute—turning "thinking" from an instantaneous act into a tunable resource.<br>🤔 In your workflow, which tasks are worth 10× the token cost for "the model thinks 30s longer"? Which are a waste?</div>
+  </div>
+</div>
+
+<!-- 2. Chain-of-Thought -->
+<div class="card">
+  <h2>Chain-of-Thought<span class="en">CoT</span></h2>
+  <div class="tags"><span class="tag">mechanism</span><span class="tag purple">intermediate state</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>CoT is <b>adding print statements to a black-box function</b>—externalizing the hidden computation that the model would otherwise do in one shot inside its weights into a series of <b>visible intermediate tokens</b>. Those tokens get fed back in as input for the next step, so the model uses its own output as a <b>scratchpad</b>. Without a scratchpad, complex computation must be crammed into one forward pass; with it, serial computation unrolls into more steps.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>The root cause is architectural: a Transformer's <b>compute depth per forward pass is fixed</b> (determined by layer count). A problem needing 20 steps of deduction crammed into fixed depth simply runs out of compute. CoT's mechanism is elegant: <b>autoregressive generation is serial</b>—each token the model emits lets it re-read all generated tokens before computing the next. So having it write out reasoning steps effectively <b>spreads computation over the sequence length</b>, trading sequence length for effective compute depth.</p>
+    <p style="margin-top:8px">In 2022 Wei et al. found that simply <b>showing the reasoning process</b> in few-shot examples (rather than just the answer) sharply raised large models' accuracy on math and commonsense reasoning—and this ability <b>only emerges in sufficiently large models</b>. This is the famous "Let's think step by step."</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Why CoT works: spread fixed depth over sequence length</b><br><br>
+<span class="box r">direct</span> <span class="arrow">→</span> question → <span style="color:#ff8e8e">[one pass, fixed depth]</span> → answer <span style="color:#ff8e8e">✗ error-prone</span><br><br>
+<span class="box g">CoT</span> <span class="arrow">→</span> question → step1 → step2 → step3 → ... → answer<br>
+<span style="color:#5a6378">　　　　　└─ each step re-reads all history → effective depth ∝ #steps ─┘</span> <span style="color:#7ed6a0">✓</span>
+</div>
+
+    <p style="margin-top:14px">Distinguish two layers: <b>CoT prompting</b> (the prompting technique from Day 3, induced by the prompt) and <b>the CoT built into reasoning models</b> (o1/R1, trained via RL, generated spontaneously, far longer than human-written, and self-correcting). The latter upgrades the former from a "trick" into the model's native ability.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = Anthropic()
+
+<span class="cmt"># Use &lt;thinking&gt; tags to give a normal model an explicit scratchpad (manual CoT)</span>
+resp = client.messages.<span class="fn">create</span>(
+    model=<span class="str">"claude-opus-4-8"</span>, max_tokens=1024,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>:
+        <span class="str">"First reason step by step in &lt;thinking&gt;, then give the final answer in &lt;answer&gt;.\n"</span>
+        <span class="str">"Problem: a warehouse takes in 50 units/day, ships out 80/day, starts at 600. When empty?"</span>}]
+)
+<span class="cmt"># The model writes the reasoning first (net -30/day -> 600/30=20), then the answer</span>
+<span class="fn">print</span>(resp.content[0].text)
+<span class="cmt"># In production: strip the &lt;thinking&gt; block before showing the user, keep &lt;answer&gt;</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"The reasoning the model writes = its actual thought process"—not necessarily. Research repeatedly shows CoT can be <b>post-hoc rationalization</b>: the model already leans one way, then fabricates plausible-looking steps. So <b>don't treat CoT text as evidence of the model's reliability</b>—coherent steps don't mean the answer is right, nor that it "really thought that way."</div>
+    <div class="exercise" style="margin-top:8px">📌 Real scenario: in cross-disciplinary thinking, have the model <b>explicitly write out the reasoning chain before concluding</b>—e.g. "analyze this organizational problem through a complexity-science lens." A visible chain lets you <b>audit step by step</b> which analogy doesn't hold, instead of accepting/rejecting a black-box conclusion.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 CoT trades "sequence length" for "compute depth"—it doesn't make the model smart, it gives it room for scratch work.<br>🤔 If a model's reasoning chain might be fabricated after the fact, how would you design a verification mechanism to judge whether the answer is truly trustworthy? (The next section is half the answer.)</div>
+  </div>
+</div>
+
+<!-- 3. Self-Verification -->
+<div class="card">
+  <h2>Self-Verification<span class="en">Process Reward</span></h2>
+  <div class="tags"><span class="tag">verification</span><span class="tag orange">reward model</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Generating an answer is the <b>writer</b>; verifying it is the <b>reviewer</b>—like writing code vs code review, or writing a test vs running it. The key insight: <b>verification is often easier than generation</b> (understanding a proof is easier than inventing it; reproducing a bug is easier than finding the fix). Reasoning models exploit this asymmetry—using a <b>verifier (reward model)</b> to check the generator's output, partly converting "hard generation" into "easy verification."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Pain point: when a reasoning chain is long, <b>one wrong step dooms all the rest</b>—an early miscalculation gets "taken for granted" by later steps, ending in a confident but wrong answer. How do you know which step is wrong? Two kinds of verifiers:</p>
+    <ul>
+      <li><b>ORM (Outcome Reward Model)</b>—judges only the <b>final answer</b>, like an end-to-end test. Simple but <b>sparse feedback</b>: you know it's wrong, not where;</li>
+      <li><b>PRM (Process Reward Model)</b>—scores <b>every step</b> of the chain, like line-by-line lint / single-step breakpoints. Dense feedback that precisely locates the first wrong step.</li>
+    </ul>
+    <p style="margin-top:8px">OpenAI's 2023 "Let's Verify Step by Step" gave the key empirical result: on hard math (the MATH dataset), <b>process supervision (PRM) significantly outperforms outcome supervision (ORM)</b>. Intuition: telling the model "step 3 is wrong" carries far more information than just "the final answer is wrong"—the former resolves the credit-assignment problem down to the step level.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">ORM vs PRM: granularity of feedback</b><br><br>
+step1 ✓ step2 ✓ step3 ✗ step4 ✓ step5 → answer<br>
+<span style="color:#5a6378">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span><br>
+<span class="box r">ORM</span> looks at the end only <span class="arrow">→</span> "answer wrong" <span style="color:#ff8e8e">(where?)</span><br>
+<span class="box g">PRM</span> scores each step <span class="arrow">→</span> "step 3 wrong" <span style="color:#7ed6a0">(located → targeted fix/retry)</span>
+</div>
+
+    <p style="margin-top:14px">Self-verification has a lighter form too: have the model <b>check itself</b> ("re-examine the reasoning above—any miscalculation?"). But beware—the verifier is itself a model with <b>blind spots</b>. A model's ability to self-correct its own errors is limited; an independently trained verifier is usually more reliable than "checking yourself."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">def</span> <span class="fn">verify_steps</span>(problem, solution_steps):
+    <span class="cmt"># Use a separate call as the "verifier", checking step by step (lightweight PRM)</span>
+    prompt = <span class="fn">f</span><span class="str">"""Problem: {problem}
+Steps:
+{chr(10).join(f'{i+1}. {s}' for i, s in enumerate(solution_steps))}
+
+Check each step. Output only the number of the FIRST wrong step;
+if all correct, output OK."""</span>
+    r = client.messages.<span class="fn">create</span>(
+        model=<span class="str">"claude-opus-4-8"</span>, max_tokens=256,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}])
+    <span class="kw">return</span> r.content[0].text  <span class="cmt"># "OK" or "Step 3 wrong: ..."</span>
+
+<span class="cmt"># Usage: generate -> verify -> if wrong, retry with the "step N is wrong" signal</span>
+verdict = <span class="fn">verify_steps</span>(<span class="str">"Compute 17x23"</span>, [<span class="str">"17x20=340"</span>, <span class="str">"17x3=51"</span>, <span class="str">"340+51=391"</span>])</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"If the model says 'I checked it, looks fine', trust it"—wrong. Models often <b>confidently confirm wrong answers</b> (verifier and generator share the same blind spots). Effective self-verification uses either an <b>independently trained verifier</b> or an <b>external verifiable signal</b> (run the code, plug numbers back in)—anchoring verification to truth outside the model.</div>
+    <div class="exercise" style="margin-top:8px">📌 Real scenario: for critical calculations/decisions, <b>explicitly require a second independent verification</b>—"re-compute it a different way and cross-check." For ROI, first use the compound-interest formula, then have it verify by year-over-year accumulation; if the two disagree, there's an error.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Verification being easier than generation is the lever of reasoning models—but "self-checking" has blind spots; independent/external verification is what's trustworthy.<br>🤔 In your field, which problems are far easier to "verify" than to "solve"? Those are exactly where AI reasoning + verification shines.</div>
+  </div>
+</div>
+
+<!-- 4. Best-of-N -->
+<div class="card">
+  <h2>Best-of-N Sampling<span class="en">Best-of-N</span></h2>
+  <div class="tags"><span class="tag">sampling strategy</span><span class="tag purple">speculative</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Best-of-N is the distributed-systems <b>scatter-gather + ranking</b>: sample N candidate answers to the same question in parallel (scatter), then pick the best with a verifier (gather + rank). It's of the same family as <b>hedged requests</b>—send a few, take the best, trading redundancy for quality. And <b>self-consistency</b> is its special case: majority-vote over N answers, like a Raft quorum.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Pain point: sampling has randomness (temperature &gt; 0), so one generation may happen to go down the wrong path. But <b>"occasionally right" ≠ "can't get it right"</b>—if the correct answer appears even a few times in 100 samples, then as long as we can <b>pick it out</b>, accuracy jumps. Two ways to "pick":</p>
+    <ul>
+      <li><b>Self-Consistency (majority vote)</b>—sample N reasoning chains, vote on the <b>final answer</b>, take the most frequent. Mathematically it marginalizes over reasoning paths: <b>answer = argmax over the count of paths reaching that answer</b>. No extra verifier needed—a free boost;</li>
+      <li><b>Verifier-guided</b>—score the N candidates with a trained verifier, pick the highest. Cobbe et al. 2021 (the GSM8K paper) showed <b>verifier selection is more compute-efficient than just scaling the model</b>, and keeps improving with more samples.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Best-of-N: scatter → gather → rank</b><br><br>
+　　　　　　┌→ <span class="box">cand 1</span> → answer A<br>
+question → <span class="box p">sample×N</span> ┼→ <span class="box">cand 2</span> → answer B　┐<br>
+　　(temp&gt;0)　├→ <span class="box">cand 3</span> → answer A　├→ <span class="box g">select</span> → A<br>
+　　　　　　└→ <span class="box">cand 4</span> → answer A　┘<br>
+<span style="color:#5a6378">　　vote: A appears 3× → wins / or verifier picks highest score</span>
+</div>
+
+    <p style="margin-top:14px">This is the most direct embodiment of <b>test-time compute</b>: larger N = more compute spent = higher accuracy (log relationship, diminishing). o1-style models go further—<b>internalizing "sample + verify + backtrack" into a single long reasoning chain</b> instead of running N external passes.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> collections <span class="kw">import</span> Counter
+
+<span class="kw">def</span> <span class="fn">self_consistency</span>(problem, n=10):
+    answers = []
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n):
+        r = client.messages.<span class="fn">create</span>(
+            model=<span class="str">"claude-opus-4-8"</span>, max_tokens=1024,
+            temperature=0.8,  <span class="cmt"># must be &gt;0 for diversity</span>
+            messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+                       <span class="str">"content"</span>: <span class="fn">f</span><span class="str">"Reason step by step, then end with 'Answer: X'.\n{problem}"</span>}])
+        ans = <span class="fn">extract_final_answer</span>(r.content[0].text)  <span class="cmt"># parse last line</span>
+        answers.<span class="fn">append</span>(ans)
+    <span class="cmt"># Majority vote on the final answer (marginalize over reasoning paths)</span>
+    <span class="kw">return</span> Counter(answers).<span class="fn">most_common</span>(1)[0][0]
+
+<span class="cmt"># N independent reasoning paths converging -> much higher odds of correctness</span>
+best = <span class="fn">self_consistency</span>(<span class="str">"A pen costs $3; buy 7 with a 10% discount. Total?"</span>, n=10)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"Bigger N is always better"—there's a ceiling. (1) Cost grows <b>linearly</b> in N while accuracy grows only <b>logarithmically</b>—ROI drops fast; (2) majority vote <b>only works for problems with a unique answer</b> (math, multiple choice)—open-ended writing can't be voted on; (3) if the model <b>systematically</b> makes the same mistake, 100 candidates agree on being wrong—voting amplifies <b>consensus</b>, not <b>truth</b>.</div>
+    <div class="exercise" style="margin-top:8px">📌 Real scenario: for <b>high-stakes calculations with a ground truth</b> (taxes, dosage, finance), run self-consistency manually—ask the same question 3-5 times; only trust an answer if they agree. Disagreement is the danger signal telling you to bring in a human to cross-check.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Best-of-N turns randomness into an advantage via "sampling redundancy + selection"—but it amplifies consensus, and is helpless against systematic error.<br>🤔 Voting amplifies consensus, not truth—where else have you seen this trap, in group decisions or scientific consensus?<br><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#a48cff">Engineering counterpart → super-individual D5: Agent Design</a></div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en"></span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://openai.com/index/learning-to-reason-with-llms/" target="_blank">OpenAI — Learning to Reason with LLMs (2024)</a> — the o1 post; foundational statement of test-time compute scaling</li>
+      <li><a href="https://arxiv.org/abs/2201.11903" target="_blank">Wei et al. 2022 — Chain-of-Thought Prompting</a> — the seminal CoT paper, a must-read</li>
+      <li><a href="https://arxiv.org/abs/2203.11171" target="_blank">Wang et al. 2022 — Self-Consistency</a> — the classic "majority vote improves CoT" work</li>
+      <li><a href="https://arxiv.org/abs/2305.20050" target="_blank">Lightman et al. 2023 — Let's Verify Step by Step</a> — key evidence for process (PRM) vs outcome supervision</li>
+      <li><a href="https://arxiv.org/abs/2110.14168" target="_blank">Cobbe et al. 2021 — Training Verifiers (GSM8K)</a> — origin of Best-of-N + verifiers</li>
+      <li><a href="https://arxiv.org/abs/2501.12948" target="_blank">DeepSeek-R1 (2025)</a> — reasoning emerging from pure RL; the flagship open reasoning model</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en"></span></h2>
+  <div class="section">
+    <details><summary>1. "Test-time compute" and "making bigger models" are two scaling paths—do they substitute or complement? How to weigh them in 2026?</summary><div>They are <b>complementary and multiplicative</b>, not substitutes. Bigger models (train-time compute) raise the model's <b>capability ceiling</b>—how much it "knows," how accurate its single-step reasoning is; test-time compute raises <b>how fully you extract that capability</b>—given a fixed-tier model, thinking longer approaches its ceiling. The relationship is like <b>CPU clock speed</b> vs <b>how long you let a program run</b>: a slow CPU can't solve an over-its-head problem no matter how long it runs, but once the clock is fast enough, more time solves harder problems. Practical trade-offs: (a) basic tasks → small model + low effort, save money; (b) hard problems → strong model + high effort; (c) the key insight is that test-time compute has <b>diminishing returns</b> (log), so blindly raising effort stops being worth it past a point—better to switch to a stronger base model. The 2024-2025 industry pivot: as pretraining data nears exhaustion and train-time scaling's marginal gains drop, <b>test-time compute became the new growth curve</b>—the root cause of the o1/R1 boom. A distributed-systems analogy: it's like "vertical scaling (stronger box)" vs "giving each request a larger timeout budget"—two knobs, tuned by workload.</div></details>
+
+    <details><summary>2. CoT may be "post-hoc rationalization"—so does a reasoning model's long thinking chain have cognitive value? What should we trust it for, and not?</summary><div>Split CoT into <b>two functions</b> and judge each separately. Function one: <b>as a computation carrier</b> (functional role)—CoT tokens really do give the model extra serial compute space; this part is <b>genuinely effective</b>—remove CoT and accuracy drops, proving it's not just decoration. Function two: <b>as an interpretability window</b> (faithfulness)—"does this text faithfully reflect the model's true reasoning?" This part is <b>not fully trustworthy</b>: studies find a model can be swayed by a bias in the prompt yet never mention it in the CoT, or reach a conclusion first and backfill steps. So the right stance: <b>trust CoT's "compute value," doubt its "confession value."</b> It's a scratchpad, not a polygraph. Practical implications: (1) using CoT to improve answer quality—safe; (2) using CoT to audit "where the model went wrong"—useful but skeptical, since visible steps may not be the true causes; (3) treating CoT as evidence of the model's confidence—dangerous, since coherent reasoning often wraps a wrong answer. This is why verification (section 3) can't rely solely on reading the model's own chain—it must anchor to external signals. Deeper: it forces us to rethink what "understanding" is—a system that produces useful intermediate steps that don't faithfully reflect its internals, does it "reason"? Neuroscience has a mirror: much of human "self-explanation" is likewise post-hoc rationalization.</div></details>
+
+    <details><summary>3. Section 3 (verifier selection) and section 4 (Best-of-N) are two faces of one thing—how do they relate to o1's "single long chain"?</summary><div>They are <b>external-parallel</b> vs <b>internal-serial</b> implementations of the same idea: <b>"explore multiple paths + select/correct."</b> Best-of-N (external): run N independent samples, paths unaware of each other, then pick the best by vote or verifier at the <b>result level</b>—pros: simple, parallel, controllable; cons: N paths are fully redundant, can't learn from each other, and selection happens only at the end. o1/R1 (internal): compress the search <b>into one long chain</b>—the model "tries a path → finds it wrong → backtracks → switches," with verification and exploration <b>interwoven in one sequence</b>, so later steps can use lessons from earlier failures. This is closer to how humans solve problems: not doing 10 parallel exam sheets and picking the best, but repeatedly editing one sheet. The cost is that this ability must be specifically trained via RL (normal models don't spontaneously backtrack). The trend: o1-style "internalized search" proved more efficient—information is reused within the chain, nothing wasted. But they're not mutually exclusive: you can stack Best-of-N on top of o1 (run a reasoning model N times and vote), squeezing accuracy further at multiplied cost. From a search-algorithm view: Best-of-N is like <b>independent random restarts</b>, while o1's internal search is more like <b>DFS/beam search with backtracking</b>—the latter uses state memory to avoid re-exploring.</div></details>
+
+    <details><summary>4. Reasoning models excel at "verifiable domains" (math, code). Does the paradigm still hold in domains with no objective right/wrong (writing, strategy, interpersonal judgment)?</summary><div>The core constraint is nailed: this wave's breakthrough <b>depends heavily on "auto-verifiable" reward signals</b>—math answers can be checked, code can be tested, so RL has a clean reward. Once you enter domains with <b>no ground truth</b>, all three mechanisms loosen: (1) RL training lacks a reward—"is this essay good" has no auto-grader, only human preference (expensive, slow, biased) or another model as judge (introducing the judge's own bias); (2) verification is no longer easier than generation—judging whether a strategic decision is correct can be as hard as making it, sometimes only knowable years later, so the verification lever vanishes; (3) Best-of-N's vote fails—open problems have no "unique answer" to vote on. So currently reasoning models' gains in <b>soft domains are far smaller than in hard ones</b>. But there's partial transfer: (a) soft problems often <b>contain verifiable sub-structures</b>—market sizing and financial models inside a strategy analysis are hard, can use a reasoning model, leaving the soft judgment to humans; (b) <b>process soundness</b> is still partly checkable—logical consistency, self-contradiction, missing key factors are easier to judge than "final correctness." A deeper lesson for the "AI super-individual": <b>humans' irreplaceable value is concentrating in "judgments that can't be auto-verified"</b>—taste, value ordering, betting under uncertainty. AI commoditized "thinking with a known answer," which paradoxically highlights how human-exclusive "defining what a good answer is" remains.</div></details>
+
+    <details><summary>5. If "accuracy ∝ log(test-time compute)," is there a problem—given infinite compute, can AI solve anything? Where's the boundary?</summary><div>No, the boundary is <b>real and multi-layered</b>. First, <b>the log relationship is itself a ceiling signal</b>: raising accuracy from 90% to 99% may take 10× compute; 99% to 99.9% another 10×—exponential cost for linear gain, hitting an economic wall fast. Second, <b>base capability is a hard ceiling</b>: test-time compute can only approach the model's existing ceiling, it <b>can't conjure knowledge or reasoning patterns the model lacks</b>. A model that never learned group theory can't prove a theorem needing it no matter how long it thinks—thinking only explores "what it can reach" more thoroughly, not creates from nothing. Third, <b>the presence of a verification signal</b> (see previous question): in domains without verifiable reward, more compute has no reliable "selection" basis—thinking longer may just refine errors. Fourth, <b>some problems are computationally irreducible</b>: certain problems have no shortcut, you must actually compute step by step, and no amount of clever "thinking" compresses it—echoing Wolfram's insight in complexity science. So the more accurate picture: test-time compute is a <b>powerful but bounded knob</b>—it makes "problems within the model's reach but requiring effort" solvable, but can't touch "beyond the model's ceiling" or "intrinsically irreducible" problems. For the super-individual: AI's leverage is largest on "<b>known method, needs patient execution</b>" problems; genuine <b>creative breakthroughs</b> (inventing new methods, posing new questions) remain scarce—and that's exactly where humans should invest.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 28 · 2026-06-14</footer>
+
+</div>
+</body>
+</html>
