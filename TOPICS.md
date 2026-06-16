@@ -40,7 +40,7 @@
 - Day 27: 可解释性 — Mechanistic Interpretability, Sparse Autoencoders, Feature Circuits, Probing
 - Day 28: 推理模型 — o1 架构, CoT 推理, Self-Verification, Best-of-N
 - Day 29: 数据工程 — Synthetic Data, Data Curation, Deduplication, Quality Filtering
-- Day 30: 嵌入与表示 — Word2Vec, GloVe, Contrastive Learning, Matryoshka Embeddings
+- Day 30: 嵌入与表示 — Word2Vec, GloVe, Contrastive Learning, Matryoshka Embeddings, 嵌入空间几何与各向异性
 - Day 31: 模型压缩 — Distillation, Pruning, LoRA, QLoRA, Quantization 数学
 - Day 32: 激活函数与归一化 — ReLU/GELU/SwiGLU, BatchNorm/LayerNorm/RMSNorm
 - Day 33: 概率与信息论基础 — KL Divergence, Entropy, Mutual Information, ELBO
@@ -57,5 +57,8 @@
 - Day 42: 神经符号 — 符号 + 神经结合, 知识图谱嵌入, 可微分推理, 程序合成
 - Day 43: 优化器深入 — SGD/Adam/Lion, 学习率调度, 二阶方法, 损失景观
 - Day 44: 涌现与 scaling 机制 — 涌现能力之辩, grokking, 双下降, 相变
-- Day 45: 推理与规划 — 思维链机制, 树搜索(MCTS), 过程奖励, o1/o3 推理
+- Day 45: 解码与采样数学 — Greedy/Beam Search, Temperature/Top-p/Top-k/Min-p, 重复惩罚, 推测/对比解码, 采样的概率几何
 - Day 46: AI for Science — AlphaFold, 材料发现, 数学猜想, 科学大模型
+
+## Phase 5 — 机制缺口补齐
+- Day 47: 对齐失败机制 — Reward Hacking, Deceptive Alignment, Sycophancy 机制, 目标错误泛化(Goal Misgeneralization), Specification Gaming（区别于 Day 26 的对齐数学）
