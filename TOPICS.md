@@ -40,14 +40,14 @@
 - Day 27: 可解释性 — Mechanistic Interpretability, Sparse Autoencoders, Feature Circuits, Probing
 - Day 28: 推理模型 — o1 架构, CoT 推理, Self-Verification, Best-of-N
 - Day 29: 数据工程 — Synthetic Data, Data Curation, Deduplication, Quality Filtering
-- Day 30: 嵌入与表示 — Word2Vec, GloVe, Contrastive Learning, Matryoshka Embeddings, 嵌入空间几何与各向异性
+- Day 30: 表示与嵌入几何 — 词向量线性结构(Word2Vec/GloVe analogy), Contrastive 学习目标, 各向异性与 whitening, Matryoshka 套娃表示, 表示坍缩（区别于 Day 24 编码模型的具体架构）
 - Day 31: 模型压缩 — Distillation, Pruning, LoRA, QLoRA, Quantization 数学
 - Day 32: 激活函数与归一化 — ReLU/GELU/SwiGLU, BatchNorm/LayerNorm/RMSNorm
 - Day 33: 概率与信息论基础 — KL Divergence, Entropy, Mutual Information, ELBO
 - Day 34: 前沿架构 — MoE, Mamba/SSM, Long Context, State Space Models
 
 ## Phase 4 — 经典 ML 分支与研究前沿
-- Day 35: 时间序列 — ARIMA, 状态空间模型, Prophet, 时序 Transformer
+- Day 35: 时间序列 — ARIMA, 指数平滑/Kalman 滤波, Prophet, 时序 Transformer/TimesFM（经典状态空间，区别于 Day 34 的 Mamba/SSM 架构）
 - Day 36: 因果推断 — 潜在结果框架, 工具变量, 双重差分, 因果 vs 相关
 - Day 37: 图机器学习 — GNN, GCN/GAT, 消息传递, 图嵌入
 - Day 38: 概率编程与贝叶斯深度学习 — MCMC, 变分推断, 不确定性量化, PyMC/Stan
@@ -55,10 +55,12 @@
 - Day 40: 联邦与隐私学习 — 联邦学习, 差分隐私, 同态加密, 安全多方计算
 - Day 41: 世界模型与具身 — 世界模型, 因果表示学习, JEPA, 具身智能
 - Day 42: 神经符号 — 符号 + 神经结合, 知识图谱嵌入, 可微分推理, 程序合成
-- Day 43: 优化器深入 — SGD/Adam/Lion, 学习率调度, 二阶方法, 损失景观
-- Day 44: 涌现与 scaling 机制 — 涌现能力之辩, grokking, 双下降, 相变
+- Day 43: 优化的几何与前沿 — 损失景观/平坦极小, 锐度与泛化, 二阶方法(K-FAC/Shampoo), Lion/Sophia, 梯度噪声（区别于 Day 10 的 AdamW/LR 基础）
+- Day 44: 训练中的反常现象 — grokking(延迟泛化), 双下降, 相变与突现, 「涌现是度量假象吗」之辩（区别于 Day 14 的 scaling laws）
 - Day 45: 解码与采样数学 — Greedy/Beam Search, Temperature/Top-p/Top-k/Min-p, 重复惩罚, 推测/对比解码, 采样的概率几何
 - Day 46: AI for Science — AlphaFold, 材料发现, 数学猜想, 科学大模型
 
 ## Phase 5 — 机制缺口补齐
 - Day 47: 对齐失败机制 — Reward Hacking, Deceptive Alignment, Sycophancy 机制, 目标错误泛化(Goal Misgeneralization), Specification Gaming（区别于 Day 26 的对齐数学）
+- Day 48: 幻觉与校准机制 — 为什么模型自信地编, calibration, 知识边界, RLHF 为何损害校准（机制向；工程治理见 super-individual Day 11）
+- Day 49: 知识存储与模型编辑 — 知识在参数中的定位(knowledge neurons), 模型编辑(ROME/MEMIT), 知识冲突与更新, 编辑的副作用
