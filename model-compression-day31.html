@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：模型压缩 — Day 31</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.formula{background:rgba(123,97,255,0.07);border:1px solid #2a2150;border-radius:8px;padding:14px 16px;margin-top:10px;font-family:"SF Mono",Menlo,monospace;font-size:0.92rem;color:#cdbff5;text-align:center;overflow-x:auto}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：模型压缩</h1>
+  <div class="meta">Day 31 · 2026-06-17 · 难度 ★★★☆☆</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    工程对应 → super-individual D12: Fine-tuning（LoRA/QLoRA 的工程实战与权衡）
+  </a>
+</div>
+
+<div class="card" style="border-left-color:#7b61ff;background:#11162a">
+  <div class="section" style="margin-top:0">
+    <div class="label">本期主线</div>
+    <p>一个 70B 参数的模型，FP16 精度下光权重就要 <strong>140 GB 显存</strong>——单张消费级显卡装不下。模型压缩回答的是同一个问题的四个角度：<strong>能不能用更小的模型、更少的权重、更小的改动、更低的精度，把这堆参数塞进你负担得起的硬件</strong>。四种技术正交，可叠加：蒸馏（换小模型）、剪枝（删权重）、LoRA（只训增量）、量化（降精度）。本期讲「为什么这么做有效」的机制与数学。</p>
+  </div>
+</div>
+
+<!-- 1. Knowledge Distillation -->
+<div class="card">
+  <h2>知识蒸馏<span class="en">Knowledge Distillation</span></h2>
+  <div class="tags"><span class="tag">迁移</span><span class="tag purple">teacher-student</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>蒸馏像资深工程师带新人 code review。差的师傅只说「这题选 A」（<b>硬标签</b>，hard label）；好的师傅会说「A 八成对，B 还行有一成可能，C 基本不用考虑」（<b>软标签</b>，soft label）。后者传递的信息量大得多——新人不只学到答案，还学到了<b>类别之间的相似度结构</b>。蒸馏就是让小模型（student）去模仿大模型（teacher）输出的<b>整个概率分布</b>，而不只是最终答案。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>大模型准但贵，小模型快但笨。能不能让小模型「继承」大模型的判断力？关键洞察来自 Hinton 2015：大模型 softmax 输出里，那些<b>非正确类的微小概率</b>（猫=0.9、狗=0.08、汽车=0.0001）藏着大量「暗知识」——它告诉你「猫和狗很像，和汽车完全不像」。这种类间关系，硬标签（猫=1，其余=0）完全丢掉了。</p>
+    <p style="margin-top:10px">机制核心是用<b>温度</b>（temperature，T）软化 softmax。普通 softmax 把最大值压得接近 1、其余接近 0；除以一个 T&gt;1 再做 softmax，分布会变「平」，那些小概率被放大、暴露出来：</p>
+    <div class="formula">p<sub>i</sub> = exp(z<sub>i</sub>/T) / Σ<sub>j</sub> exp(z<sub>j</sub>/T)</div>
+    <p style="margin-top:10px">这里 <b>z<sub>i</sub></b> 是第 i 类的原始打分（logit），<b>T</b> 是温度旋钮。T=1 是普通 softmax；T 越大分布越平滑，类间相似度越清晰。训练时让 student 在<b>同样的高温</b>下匹配 teacher 的软分布（用 KL 散度衡量两个分布的差距），通常再加一点真实硬标签做锚。下图直观感受软硬标签的信息差：</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">同一张「猫」图片的监督信号</span><br><br>
+<b style="color:#ff8e8e">硬标签</b>：猫 <span class="bar" style="width:120px;height:18px"></span> 1.0 ｜狗 0 ｜虎 0 ｜车 0 <span style="color:#5a6378">← 类间关系全丢</span><br><br>
+<b style="color:#7ed6a0">软标签(T=4)</b>：<br>
+猫 <span class="bar" style="width:90px;height:16px"></span> 0.65<br>
+狗 <span class="bar" style="width:34px;height:16px;opacity:0.7"></span> 0.22 <span style="color:#5a6378">← 猫狗相似</span><br>
+虎 <span class="bar" style="width:18px;height:16px;opacity:0.6"></span> 0.11 <span style="color:#5a6378">← 都是猫科</span><br>
+车 <span class="bar" style="width:4px;height:16px;opacity:0.4"></span> 0.02 <span style="color:#5a6378">← 完全不像</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 「暗知识」= 大模型对世界的相似度地图</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+
+<span class="kw">def</span> <span class="fn">distill_loss</span>(student_logits, teacher_logits, labels, T=4.0, alpha=0.7):
+    <span class="cmt"># 1) 软目标：师生都用温度 T 软化，再比对分布（KL 散度）</span>
+    s_soft = F.<span class="fn">log_softmax</span>(student_logits / T, dim=-1)
+    t_soft = F.<span class="fn">softmax</span>(teacher_logits / T, dim=-1)  <span class="cmt"># teacher 不回传梯度</span>
+    kd = F.<span class="fn">kl_div</span>(s_soft, t_soft, reduction=<span class="str">"batchmean"</span>) * (T * T)
+    <span class="cmt"># ↑ 乘 T²：温度软化会缩小梯度，乘回来保持量级</span>
+
+    <span class="cmt"># 2) 硬目标：和真实标签的普通交叉熵，做锚点防跑偏</span>
+    ce = F.<span class="fn">cross_entropy</span>(student_logits, labels)
+
+    <span class="cmt"># 3) 加权组合：alpha 偏重模仿老师，(1-alpha) 偏重真值</span>
+    <span class="kw">return</span> alpha * kd + (1 - alpha) * ce</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">「student 越小越好，反正学老师」——错。student 容量有一个<b>下限</b>：太小则连软分布都拟合不了，蒸馏反而不如直接训练。经验上 student 通常是 teacher 的 1/2～1/10 规模（如 DistilBERT 是 BERT 的 ~60%），不是任意压。另一个坑：温度 T 太高会把分布软成接近均匀，淹没真正的信号。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：你用 GPT-5 级大模型在一个<b>窄任务</b>（如把邮件分类成「待办/参考/忽略」）上跑出几千条带概率的输出，拿它当 teacher 蒸馏一个小模型部署在本地——日常分类零 API 成本、毫秒级、还离线可用。这就是「大模型当老师、小模型当员工」的个人自动化范式。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 蒸馏迁移的不是答案，是大模型对世界的<b>相似度结构</b>——软标签里的「暗知识」才是真正值钱的部分。<br>🤔 如果软标签比硬标签信息量大，那「一个好老师」的本质是不是「愿意暴露自己不确定性的人」？这对你带团队、教孩子有什么启发？</div>
+  </div>
+</div>
+
+<!-- 2. Pruning -->
+<div class="card">
+  <h2>剪枝<span class="en">Pruning</span></h2>
+  <div class="tags"><span class="tag">稀疏化</span><span class="tag orange">删权重</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>剪枝就是<b>删掉用不到的数据库索引</b>，或者 <b>dead code elimination</b>。一个训练好的网络里，大量权重的绝对值接近 0——它们对最终输出几乎没贡献，就像一个从没被查询命中的索引、一段永远走不到的分支。把它们置零（甚至物理删除），模型变小变快，精度几乎不掉。问题只在于：<b>怎么判断哪些权重是「死」的</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>神经网络天然<b>过参数化</b>（over-parameterized）——参数远多于任务实际需要，这是训练能收敛的代价。训练完之后，很多参数就成了冗余。最朴素也最有效的判据是<b>幅值剪枝</b>（magnitude pruning）：权重绝对值越小，删掉影响越小。</p>
+    <div class="formula">若 |w<sub>ij</sub>| &lt; 阈值 τ，则令 w<sub>ij</sub> = 0</div>
+    <p style="margin-top:10px">直觉：<b>w</b> 是连接强度，<b>|w|≈0</b> 意味着这条连接几乎不传递信号，剪掉等于删一根没用的线。但一刀剪太狠精度会崩，所以标准做法是<b>迭代式</b>「剪一点 → 微调恢复 → 再剪一点」（train-prune-finetune 循环），让网络逐步适应稀疏结构。</p>
+    <p style="margin-top:10px">更深的发现是 Frankle &amp; Carbin 2018 的<b>彩票假说</b>（Lottery Ticket Hypothesis）：一个大的随机初始化网络里，<b>本就藏着一个小的「中奖」子网络</b>——单独把它拎出来、用原始初始化训练，能达到和完整大网络相当的精度。剪枝某种意义上是在「刮开彩票」找到那个子网络。两种剪枝粒度的工程含义截然不同：</p>
+    <ul>
+      <li><b>非结构化剪枝</b>（unstructured）——任意单个权重置零，压缩率最高，但得到的是<b>稀疏矩阵</b>，普通 GPU 不一定能加速（需要专门的稀疏算子）；</li>
+      <li><b>结构化剪枝</b>（structured）——整行/整列/整个注意力头删掉，矩阵变小是<b>规整</b>的，直接在标准硬件上变快，但同等精度下能删的更少。</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch.nn.utils.prune <span class="kw">as</span> prune
+<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+
+layer = nn.<span class="fn">Linear</span>(1024, 1024)
+
+<span class="cmt"># 幅值剪枝：把这层 40% 绝对值最小的权重置零</span>
+prune.<span class="fn">l1_unstructured</span>(layer, name=<span class="str">"weight"</span>, amount=0.4)
+<span class="fn">print</span>((layer.weight == 0).<span class="fn">float</span>().<span class="fn">mean</span>())  <span class="cmt"># ≈ 0.40 稀疏度</span>
+
+<span class="cmt"># 关键：剪完要微调几个 epoch 让网络恢复（此处省略训练循环）</span>
+<span class="cmt"># ... train(model) ...  # 让存活的权重补偿被删掉的</span>
+
+<span class="cmt"># 满意后固化：移除 mask，让置零永久生效</span>
+prune.<span class="fn">remove</span>(layer, <span class="str">"weight"</span>)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">「剪枝 50% 权重 = 模型快一倍」——通常不对。非结构化剪枝得到稀疏矩阵，但消费级 GPU 对稀疏运算<b>没有原生加速</b>，实际跑起来可能一点不快，只是省了存储。真正想要推理提速，往往要<b>结构化剪枝</b>或配合支持稀疏的硬件/内核。「压缩率」和「加速比」是两回事，别混淆。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：把一个本地跑的开源小模型做结构化剪枝 + 微调，塞进你的笔记本或边缘设备（如家里的小服务器），做「永远在线、零网络依赖」的私人助理——剪枝换来的是<b>能在你已有硬件上跑</b>这件事本身，而不只是省钱。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 网络过参数化是训练的必要代价，但不是部署的必要负担——剪枝是「训练用大、部署用小」的桥。<br>🤔 彩票假说说「大网络里藏着小赢家」。这和「人脑发育早期大量神经元连接、之后大规模修剪」惊人相似——冗余-然后-修剪，是不是智能系统的通用学习范式？</div>
+  </div>
+</div>
+
+<!-- 3. LoRA / QLoRA -->
+<div class="card">
+  <h2>低秩适配 / 量化低秩适配<span class="en">LoRA / QLoRA</span></h2>
+  <div class="tags"><span class="tag">参数高效</span><span class="tag purple">增量微调</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>全量微调像<b>把整个代码仓库 fork 一份重写</b>——70B 参数全部更新，每个任务存一份 140GB 副本，灾难。LoRA 像 <b>git diff / patch 文件</b>：原始权重冻结不动（base repo），只额外训练一个<b>小小的增量补丁</b>。每个任务只存这个补丁（几 MB～几十 MB），用时叠加到主干上。一个底座，无数个轻量 patch，按需切换。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>全量微调一个大模型，要为每个下游任务保存一整套权重，存储和切换成本爆炸。LoRA（Hu et al. 2021）的关键假设：微调时权重的<b>变化量 ΔW 本质是「低秩」的</b>——它没那么复杂，可以用两个瘦长矩阵的乘积来逼近。原本要更新一个 d×k 的大矩阵，现在拆成 <b>B（d×r）× A（r×k）</b>，其中秩 <b>r 极小</b>（常取 8、16）：</p>
+    <div class="formula">W' = W + ΔW ≈ W + B·A &nbsp;&nbsp;(r ≪ min(d, k))</div>
+    <p style="margin-top:10px">参数量从 <b>d×k</b> 降到 <b>r×(d+k)</b>。举例 d=k=4096、r=8：全量是 1600 万参数，LoRA 只有 6.5 万——<b>缩小约 250 倍</b>。冻结的 W 提供「通用能力」，小小的 BA 提供「任务特化」。推理时把 BA 合并进 W，<b>零额外延迟</b>。下图是维度直觉：</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">用两个瘦矩阵逼近一个大更新</b><br><br>
+全量 ΔW：<span class="box r" style="padding:14px 26px">d × k<br>(4096×4096)<br>16.7M 参数</span><br><br>
+LoRA 分解：<br>
+<span class="box p" style="padding:14px 10px">B<br>d×r<br>4096×8</span><span class="arrow">×</span><span class="box g" style="padding:4px 22px">A &nbsp; r×k &nbsp; (8×4096)</span> <span class="arrow">=</span> <span style="color:#8b92a8">同样 d×k 形状</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 只训 B、A 共 65K 参数（~0.4%），W 冻结不动</span>
+</div>
+
+    <p style="margin-top:14px"><b>QLoRA</b>（Dettmers et al. 2023）更进一步：把冻结的底座<b>量化到 4-bit</b> 存显存，只有那个小 LoRA 适配器保持高精度训练。这样单张 48GB 显卡就能微调 65B 模型。它的三个关键发明：<b>NF4</b>（4-bit NormalFloat，针对正态分布权重信息论最优的数据类型）、<b>双重量化</b>（连量化常数本身也量化，再省一点）、<b>分页优化器</b>（用显存换内存应对峰值）。一句话：LoRA 省「要训的参数」，QLoRA 再省「冻结底座占的显存」。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, BitsAndBytesConfig
+<span class="kw">from</span> peft <span class="kw">import</span> LoraConfig, get_peft_model
+
+<span class="cmt"># QLoRA：底座 4-bit 量化加载（NF4 + 双重量化）</span>
+bnb = <span class="fn">BitsAndBytesConfig</span>(load_in_4bit=<span class="kw">True</span>,
+        bnb_4bit_quant_type=<span class="str">"nf4"</span>, bnb_4bit_use_double_quant=<span class="kw">True</span>)
+base = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(
+        <span class="str">"meta-llama/Llama-3-8b"</span>, quantization_config=bnb)
+
+<span class="cmt"># 只在注意力的 q/v 投影上挂 LoRA 适配器，秩 r=8</span>
+cfg = <span class="fn">LoraConfig</span>(r=8, lora_alpha=16,
+        target_modules=[<span class="str">"q_proj"</span>, <span class="str">"v_proj"</span>], lora_dropout=0.05)
+model = <span class="fn">get_peft_model</span>(base, cfg)
+
+model.<span class="fn">print_trainable_parameters</span>()
+<span class="cmt"># → trainable: ~4M / 8B (≈0.05%)，其余全部冻结</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">「LoRA 效果一定不如全量微调」——不绝对。在多数下游适配任务上 LoRA 接近甚至持平全量，但当任务需要模型<b>学习大量全新知识</b>（而非调整已有能力）时，低秩假设会成为瓶颈——ΔW 实际不低秩，r=8 装不下。判断法则：<b>风格/格式/领域口吻适配 → LoRA 足够；灌入全新事实体系 → 可能需要更大 r 或全量。</b></div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：用 QLoRA 在你自己的写作样本上微调一个本地模型，得到一个「以你的语气写作」的适配器（几十 MB）。再训一个「以你的语气写代码注释」的——同一个底座挂不同 patch，按场景热切换。这是把「个人风格」资产化成可复用、可版本管理的小文件。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 LoRA 的本质洞察：<b>适配 ≠ 重写</b>。大部分「学一个新任务」其实是在巨大能力底座上打一个低秩补丁。<br>🤔 「能力是冻结的底座、任务是可插拔的补丁」——这个架构能不能反过来描述<b>人的专业成长</b>？你的通用判断力是 W，每份新工作是一个 LoRA？<br>　<a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html">工程对应 → super-individual D12（Fine-tuning 实战与权衡）</a></div>
+  </div>
+</div>
+
+<!-- 4. Quantization -->
+<div class="card">
+  <h2>量化<span class="en">Quantization</span></h2>
+  <div class="tags"><span class="tag">数值压缩</span><span class="tag orange">降精度</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>量化就是<b>换更小的数据类型存数</b>——把 FP16（16 位浮点）压成 INT8 甚至 INT4，类似把 PNG 转成 JPEG、把 <code>DOUBLE</code> 字段改成 <code>SMALLINT</code>。用<b>精度换空间和速度</b>：模型权重不需要那么多有效数字，砍掉低位信息，体积直接减半、再减半，访存和算力也跟着降。代价是引入<b>量化噪声</b>，关键是控制它别毁掉模型。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>大模型推理的瓶颈常常不是算力，而是<b>把几百 GB 权重从显存搬进计算单元</b>的带宽。权重存得越小，搬得越快、装得越下。量化的数学核心是一个<b>线性映射</b>：把一段连续的浮点范围 [min, max]，均匀映射到 2<sup>b</sup> 个整数格子上。</p>
+    <div class="formula">scale = (max − min) / (2<sup>b</sup> − 1)<br><br>x<sub>q</sub> = round(x / scale) &nbsp;&nbsp;→存储→&nbsp;&nbsp; x̂ = x<sub>q</sub> × scale</div>
+    <p style="margin-top:10px">直觉：<b>scale</b> 是「每个整数格子代表多大的浮点跨度」，b 是位宽（INT8 是 8、INT4 是 4）。存的时候把浮点除以 scale 取整成小整数 <b>x<sub>q</sub></b>；用的时候再乘回 scale 还原成近似浮点 <b>x̂</b>。<b>x̂ 和原始 x 的差就是量化误差</b>。位宽越低、格子越少、误差越大——这就是「精度换空间」的本质。下图是把连续值塞进 4 个格子（2-bit）的直观感受：</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#ffb450">连续浮点 → 离散整数格子（2-bit=4 格）</b><br><br>
+浮点轴 ├──────┼──────┼──────┼──────┤<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; min &nbsp;&nbsp;&nbsp; ▼0.31→<span style="color:#ff8e8e">归到格子1</span><br>
+整数值 &nbsp;&nbsp;<span class="box">0</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="box">1</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="box">2</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="box">3</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 落在格子间的真实值被「四舍五入」吸附到最近格点 = 量化误差</span>
+</div>
+
+    <p style="margin-top:14px">两个实操关键。其一<b>异常值</b>（outlier）：LLM 权重/激活里偶有极大值，会把 [min,max] 撑得很宽，导致大多数正常值挤在少数格子里、精度尽失。LLM.int8()、GPTQ 等方法的核心都在<b>处理异常值</b>。其二<b>训练后量化 vs 量化感知</b>：</p>
+    <ul>
+      <li><b>训练后量化</b>（PTQ，Post-Training Quantization）——模型训完直接量化，零额外训练。<b>GPTQ</b>（Frantar et al. 2022）用近似二阶信息逐层校准，把 175B 模型压到 3-4 bit 而精度几乎无损，是这条线的代表；</li>
+      <li><b>量化感知训练</b>（QAT，Quantization-Aware Training）——训练时就模拟量化误差，让模型「提前适应」。更准但要重训，成本高。</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+
+<span class="kw">def</span> <span class="fn">quantize_int8</span>(w):
+    <span class="cmt"># 对称量化：用绝对值最大值定 scale，零点对齐 0</span>
+    scale = w.<span class="fn">abs</span>().<span class="fn">max</span>() / 127.0          <span class="cmt"># INT8 范围 [-127,127]</span>
+    w_q = torch.<span class="fn">round</span>(w / scale).<span class="fn">clamp</span>(-127, 127).<span class="fn">to</span>(torch.int8)
+    <span class="kw">return</span> w_q, scale                       <span class="cmt"># 存 int8 权重 + 一个 fp scale</span>
+
+<span class="kw">def</span> <span class="fn">dequantize</span>(w_q, scale):
+    <span class="kw">return</span> w_q.<span class="fn">to</span>(torch.float32) * scale     <span class="cmt"># 用时还原近似浮点</span>
+
+w = torch.<span class="fn">randn</span>(4096, 4096)              <span class="cmt"># fp32 权重：64 MB</span>
+w_q, s = <span class="fn">quantize_int8</span>(w)               <span class="cmt"># int8：16 MB，缩到 1/4</span>
+err = (w - <span class="fn">dequantize</span>(w_q, s)).<span class="fn">abs</span>().<span class="fn">mean</span>()
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"平均量化误差 {err:.5f}"</span>)      <span class="cmt"># 噪声很小，模型基本无感</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">「量化到 4-bit 体积减半、效果也减半」——错。精度损失远非线性。INT8 几乎无损是行业常识；4-bit 配合 GPTQ/NF4 这类校准方法，多数任务仍接近原模型；真正的悬崖通常在 <b>3-bit 以下</b>才陡降。「位宽减半」和「质量减半」完全不成比例——这正是量化如此流行的原因。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：想在自己的笔记本上跑本地 LLM，直接选社区放出的 <b>4-bit 量化版</b>（GGUF/GPTQ 格式）。70B 模型 FP16 要 140GB、根本跑不动；4-bit 量化后约 35-40GB，配合内存就能在个人设备上跑起来——量化是「个人拥有强模型」从不可能到可能的那一步。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 量化揭示一个反直觉事实：大模型权重里的<b>有效信息量</b>，远低于它占用的比特数——多数精度是冗余的。<br>🤔 如果 16-bit 权重压到 4-bit 几乎不掉点，是不是说模型的「知识」本质上很<b>稀疏/低信息密度</b>？这和「人脑用模糊、近似的方式存记忆」是同一个道理吗？</div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1503.02531" target="_blank">Hinton, Vinyals, Dean 2015 — Distilling the Knowledge in a Neural Network</a> — 知识蒸馏奠基论文，温度与软标签的源头</li>
+      <li><a href="https://arxiv.org/abs/1803.03635" target="_blank">Frankle &amp; Carbin 2018 — The Lottery Ticket Hypothesis</a> — 「大网络藏着中奖子网络」的剪枝经典</li>
+      <li><a href="https://arxiv.org/abs/2106.09685" target="_blank">Hu et al. 2021 — LoRA: Low-Rank Adaptation</a> — 低秩适配原始论文</li>
+      <li><a href="https://arxiv.org/abs/2305.14314" target="_blank">Dettmers et al. 2023 — QLoRA</a> — 4-bit 底座 + LoRA，NF4 / 双重量化 / 分页优化器</li>
+      <li><a href="https://arxiv.org/abs/2210.17323" target="_blank">Frantar et al. 2022 — GPTQ</a> — 训练后量化到 3-4 bit 的代表方法</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. 蒸馏、剪枝、LoRA、量化四种技术为什么可以「叠加」？它们各自压缩的是什么维度？</summary><div>因为它们正交——作用在<b>不同的轴</b>上。<b>蒸馏</b>换的是「模型本身」（大架构→小架构，减层数/宽度）；<b>剪枝</b>减的是「权重的数量」（删掉冗余连接，让矩阵稀疏或变小）；<b>LoRA</b> 减的是「要训练/存储的参数」（冻结底座，只存低秩增量，是训练侧而非推理侧的压缩）；<b>量化</b>减的是「每个权重占的比特数」（数值精度，不动数量和结构）。所以现实中常见组合拳：先蒸馏出小模型 → 再剪枝去冗余 → 用 QLoRA 在小模型上做任务适配 → 最后量化部署。每一步压不同的维度，乘起来才有几十倍的总压缩比。理解这点的价值在于：当你的瓶颈是显存，优先量化+剪枝；当瓶颈是「每个任务存一份太贵」，用 LoRA；当瓶颈是延迟且能接受换架构，蒸馏。对症下药，而不是无脑全上。</div></details>
+
+    <details><summary>2. 量化、剪枝、蒸馏都「丢信息但精度不怎么掉」，这背后是不是同一个深层原因？</summary><div>是——根子都在<b>神经网络的过参数化与冗余</b>。深度网络的参数远多于拟合任务所需，这是为了让高维优化能顺利收敛（损失景观更平滑、更容易找到好极小值）。但训练完成后，这份「为了好训而准备的冗余」就成了部署负担。三种技术从不同角度榨干同一份冗余：<b>剪枝</b>说「很多权重本就≈0，删」；<b>量化</b>说「很多权重的高精度位是噪声，砍」；<b>蒸馏</b>说「一个小模型容量其实够装下这个任务的真实复杂度，只是直接训不好——让大模型当老师引导它」。彩票假说把这点说得最透：有用的「子网络」一直在那，大模型只是更容易训练的脚手架。这引出一个深刻问题——如果部署只需要这么小的有效容量，那大模型训练期的巨大规模，买到的究竟是「能力」还是「可优化性」？目前主流答案偏向后者：规模主要是为了<b>训得动</b>，不是推理时真的都用得上。</div></details>
+
+    <details><summary>3. QLoRA 把底座量化到 4-bit 还能正常微调，为什么 4-bit 的「噪声底座」不会毁掉训练？</summary><div>几个机制叠加。其一，<b>梯度只流向高精度的 LoRA 适配器</b>——4-bit 底座是冻结的，不接收梯度更新，所以量化误差不会在反向传播中被放大或累积，它只是给前向传播提供一个「足够好」的基准。其二，<b>NF4 数据类型</b>是针对正态分布权重做信息论优化的——神经网络权重近似正态，NF4 把有限的格子分配得更密集在高概率区域，同样 4-bit 下误差远小于均匀量化。其三，<b>双重量化</b>进一步压缩了量化常数本身的开销而几乎不增误差。其四也是最关键的：高精度的 LoRA 适配器<b>有能力「补偿」底座的量化噪声</b>——训练过程中，BA 会自动学到一个增量，部分抵消量化带来的偏差。所以 QLoRA 不是「在坏底座上硬训」，而是「冻结一个够用的近似底座 + 一个精确的可学补丁去校正它」。这也解释了为什么直接把模型量化到 4-bit 做<b>推理</b>有时不如 QLoRA 微调后的效果——后者多了一个适配器在补偿。</div></details>
+
+    <details><summary>4. 「软标签的暗知识」和「低秩的 ΔW」表面无关，但它们是不是都在说同一件事——任务的「真实复杂度」很低？</summary><div>是个很美的连接。蒸馏的软标签揭示：分类任务的真实信号不是「one-hot 的硬答案」，而是一个<b>低维的相似度结构</b>（猫≈狗≫车）——这个结构远比「N 个独立类别」简单，所以小模型能学会。LoRA 的低秩 ΔW 揭示：把一个通用模型适配到具体任务，所需的<b>变化量本质是低维的</b>——你不需要重写整个 16M 参数矩阵，一个秩 8 的补丁就够。两者都在用不同语言说<b>同一个先验：真实世界任务的「内在维度」（intrinsic dimension）远低于模型的「表观维度」</b>。这有专门研究（如 Aghajanyan 等关于微调内在维度的工作）支持。对复杂性科学视角，它呼应一个深层主题：高维系统的有效自由度往往集中在一个低维流形上——无论是物理系统的序参量、还是神经网络的任务表示。压缩之所以可能，是因为「看起来很大」的东西，信息上本就不大。</div></details>
+
+    <details><summary>5. 模型压缩让「在个人设备上拥有强模型」成为可能。这对「AI 超级个体」的权力结构意味着什么？</summary><div>这是技术问题背后的政治经济学。未压缩的前沿模型只有大公司数据中心跑得起，能力<b>中心化</b>在少数 API 提供方手里——你租用智能，但不拥有它，随时可能被断供、涨价或审查。压缩技术（尤其量化 + LoRA）把天平往回拨：4-bit 量化让 70B 模型跑进消费级硬件，LoRA 让你用几十 MB 的补丁把通用模型私人化，蒸馏让你把大模型的能力「下载」进一个自有小模型。这三者合起来，指向一个<b>「自主 AI」（sovereign AI）</b>的可能——智能在你的设备上、用你的数据运行，离线、私密、不可被远程关停。对追求「超级个体」的人，这不只是省钱，而是<b>能力主权</b>：你的核心智能基础设施究竟是租来的还是自有的，决定了你的自主性上限。代价是你得自己承担运维与对齐的责任——这正是「超级个体」与「平台用户」的分野。压缩技术的成熟，是这条路从理想变成可行的关键一环。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 31 · 2026-06-17</footer>
+
+</div>
+
+</body>
+</html>

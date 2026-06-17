@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Model Compression — Day 31</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.formula{background:rgba(123,97,255,0.07);border:1px solid #2a2150;border-radius:8px;padding:14px 16px;margin-top:10px;font-family:"SF Mono",Menlo,monospace;font-size:0.92rem;color:#cdbff5;text-align:center;overflow-x:auto}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Model Compression</h1>
+  <div class="meta">Day 31 · 2026-06-17 · Difficulty ★★★☆☆</div>
+  <div class="audience">For: engineers with coding experience, non-AI background</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual D12: Fine-tuning (LoRA/QLoRA in practice and its trade-offs)
+  </a>
+</div>
+
+<div class="card" style="border-left-color:#7b61ff;background:#11162a">
+  <div class="section" style="margin-top:0">
+    <div class="label">Through-line</div>
+    <p>A 70B-parameter model in FP16 needs <strong>140 GB of VRAM</strong> just for the weights—a consumer GPU can't hold it. Model compression answers one question from four angles: <strong>can we use a smaller model, fewer weights, a smaller change, or lower precision to fit this pile of parameters onto hardware you can afford?</strong> The four techniques are orthogonal and stackable: distillation (swap to a smaller model), pruning (delete weights), LoRA (train only the delta), quantization (lower precision). This is not engineering tuning—it's the mechanism and math of <em>why it works</em>.</p>
+  </div>
+</div>
+
+<!-- 1. Knowledge Distillation -->
+<div class="card">
+  <h2>Knowledge Distillation<span class="en">Knowledge Distillation</span></h2>
+  <div class="tags"><span class="tag">transfer</span><span class="tag purple">teacher-student</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Distillation is like a senior engineer mentoring a junior in code review. A poor mentor just says "pick A" (<b>hard label</b>); a good one says "A is ~80% right, B is plausible with ~10%, C basically never" (<b>soft label</b>). The latter carries far more information—the junior learns not just the answer but the <b>similarity structure between classes</b>. Distillation makes a small model (student) imitate the <b>full probability distribution</b> output by a large model (teacher), not just the final answer.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + mechanism</div>
+    <p>Big models are accurate but expensive; small ones are fast but dumb. Can a small model "inherit" the big one's judgment? The key insight (Hinton 2015): in a big model's softmax output, the <b>tiny probabilities on the wrong classes</b> (cat=0.9, dog=0.08, car=0.0001) hold enormous "dark knowledge"—they tell you "cats resemble dogs, and not at all cars." Hard labels (cat=1, rest=0) throw this class-relationship away entirely.</p>
+    <p style="margin-top:10px">The mechanism softens the softmax with a <b>temperature</b>, T. A plain softmax squashes the max toward 1 and the rest toward 0; dividing logits by T&gt;1 before softmax flattens the distribution, amplifying and exposing those small probabilities:</p>
+    <div class="formula">p<sub>i</sub> = exp(z<sub>i</sub>/T) / Σ<sub>j</sub> exp(z<sub>j</sub>/T)</div>
+    <p style="margin-top:10px">Here <b>z<sub>i</sub></b> is the raw score (logit) for class i, and <b>T</b> is the temperature knob. T=1 is plain softmax; larger T means a smoother distribution and clearer inter-class similarity. During training the student matches the teacher's soft distribution <b>at the same high temperature</b> (using KL divergence to measure the gap between two distributions), usually anchored by a bit of the true hard label too. The diagram below shows the information gap between soft and hard labels:</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Supervision signal for one "cat" image</span><br><br>
+<b style="color:#ff8e8e">Hard label</b>: cat <span class="bar" style="width:120px;height:18px"></span> 1.0 ｜dog 0 ｜tiger 0 ｜car 0 <span style="color:#5a6378">← all relations lost</span><br><br>
+<b style="color:#7ed6a0">Soft label (T=4)</b>:<br>
+cat <span class="bar" style="width:90px;height:16px"></span> 0.65<br>
+dog <span class="bar" style="width:34px;height:16px;opacity:0.7"></span> 0.22 <span style="color:#5a6378">← cat≈dog</span><br>
+tiger <span class="bar" style="width:18px;height:16px;opacity:0.6"></span> 0.11 <span style="color:#5a6378">← both felines</span><br>
+car <span class="bar" style="width:4px;height:16px;opacity:0.4"></span> 0.02 <span style="color:#5a6378">← nothing alike</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ "dark knowledge" = the big model's similarity map of the world</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+
+<span class="kw">def</span> <span class="fn">distill_loss</span>(student_logits, teacher_logits, labels, T=4.0, alpha=0.7):
+    <span class="cmt"># 1) Soft targets: both soften with temperature T, compare distributions (KL)</span>
+    s_soft = F.<span class="fn">log_softmax</span>(student_logits / T, dim=-1)
+    t_soft = F.<span class="fn">softmax</span>(teacher_logits / T, dim=-1)  <span class="cmt"># teacher: no gradient</span>
+    kd = F.<span class="fn">kl_div</span>(s_soft, t_soft, reduction=<span class="str">"batchmean"</span>) * (T * T)
+    <span class="cmt"># ↑ multiply by T²: softening shrinks gradients, scale them back</span>
+
+    <span class="cmt"># 2) Hard target: plain cross-entropy with true labels, an anchor</span>
+    ce = F.<span class="fn">cross_entropy</span>(student_logits, labels)
+
+    <span class="cmt"># 3) Weighted mix: alpha favors imitating the teacher, (1-alpha) the truth</span>
+    <span class="kw">return</span> alpha * kd + (1 - alpha) * ce</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">"Smaller student is always better, it just copies the teacher"—wrong. There's a <b>lower bound</b> on student capacity: too small and it can't even fit the soft distribution, so distillation underperforms training from scratch. Empirically the student is usually 1/2–1/10 of the teacher (e.g. DistilBERT is ~60% of BERT), not arbitrarily small. Another trap: too high a T flattens the distribution toward uniform, drowning the real signal.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: run a GPT-5-class model on a <b>narrow task</b> (e.g. sorting email into "todo / reference / ignore") over a few thousand examples with probabilities, use it as teacher to distill a small model deployed locally—everyday classification at zero API cost, millisecond latency, and offline. That's the "big model as teacher, small model as employee" pattern for personal automation.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Distillation transfers not the answer but the big model's <b>similarity structure</b> of the world—the "dark knowledge" in soft labels is the truly valuable part.<br>🤔 If soft labels carry more than hard labels, is the essence of "a good teacher" really "someone willing to expose their own uncertainty"? What does that imply for leading a team or teaching a child?</div>
+  </div>
+</div>
+
+<!-- 2. Pruning -->
+<div class="card">
+  <h2>Pruning<span class="en">Pruning</span></h2>
+  <div class="tags"><span class="tag">sparsification</span><span class="tag orange">delete weights</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Pruning is <b>dropping unused database indexes</b>, or <b>dead-code elimination</b>. In a trained network, a huge fraction of weights have near-zero magnitude—they barely contribute to the output, like an index never hit by a query or a branch never reached. Zero them out (or physically remove them) and the model gets smaller and faster with almost no accuracy loss. The only real question: <b>how do you tell which weights are "dead"</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + mechanism</div>
+    <p>Neural networks are inherently <b>over-parameterized</b>—far more parameters than the task needs, which is the price of making training converge. After training, many parameters are redundant. The simplest and most effective criterion is <b>magnitude pruning</b>: the smaller a weight's absolute value, the less deleting it hurts.</p>
+    <div class="formula">if |w<sub>ij</sub>| &lt; threshold τ, set w<sub>ij</sub> = 0</div>
+    <p style="margin-top:10px">Intuition: <b>w</b> is connection strength; <b>|w|≈0</b> means the connection passes almost no signal, so cutting it is like removing a useless wire. But pruning too hard at once collapses accuracy, so the standard recipe is <b>iterative</b>: "prune a little → fine-tune to recover → prune more" (train-prune-finetune), letting the network gradually adapt to the sparse structure.</p>
+    <p style="margin-top:10px">A deeper finding is the <b>Lottery Ticket Hypothesis</b> (Frankle &amp; Carbin 2018): inside a large randomly-initialized network <b>there already hides a small "winning" sub-network</b>—pull it out alone, train it with the original init, and it reaches accuracy comparable to the full network. Pruning is, in a sense, "scratching the lottery ticket" to find that sub-network. Two pruning granularities have very different engineering implications:</p>
+    <ul>
+      <li><b>Unstructured pruning</b>—zero out arbitrary individual weights, highest compression, but you get a <b>sparse matrix</b> that ordinary GPUs may not accelerate (needs dedicated sparse kernels);</li>
+      <li><b>Structured pruning</b>—remove whole rows/columns/attention heads, so the matrix shrinks <b>regularly</b> and runs faster on standard hardware—but at equal accuracy you can remove less.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch.nn.utils.prune <span class="kw">as</span> prune
+<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+
+layer = nn.<span class="fn">Linear</span>(1024, 1024)
+
+<span class="cmt"># Magnitude pruning: zero the 40% smallest-magnitude weights in this layer</span>
+prune.<span class="fn">l1_unstructured</span>(layer, name=<span class="str">"weight"</span>, amount=0.4)
+<span class="fn">print</span>((layer.weight == 0).<span class="fn">float</span>().<span class="fn">mean</span>())  <span class="cmt"># ≈ 0.40 sparsity</span>
+
+<span class="cmt"># Key: after pruning, fine-tune a few epochs to recover (loop omitted)</span>
+<span class="cmt"># ... train(model) ...  # surviving weights compensate for the removed</span>
+
+<span class="cmt"># Once satisfied, finalize: remove the mask so zeros are permanent</span>
+prune.<span class="fn">remove</span>(layer, <span class="str">"weight"</span>)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">"Prune 50% of weights = 2x faster"—usually false. Unstructured pruning yields a sparse matrix, but consumer GPUs have <b>no native acceleration</b> for sparse ops, so it may run no faster—you only saved storage. For real inference speedup you typically need <b>structured pruning</b> or sparsity-supporting hardware/kernels. "Compression ratio" and "speedup" are two different things; don't conflate them.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: structurally prune + fine-tune a local open-source small model to fit on your laptop or an edge device (a home mini-server), giving you an "always-on, zero-network" private assistant. What pruning buys you here is <b>the ability to run on hardware you already own</b>, not just saved cost.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Over-parameterization is a necessary cost of training, but not a necessary burden for deployment—pruning is the bridge of "train big, deploy small."<br>🤔 The lottery ticket says "a small winner hides inside a big network." This eerily mirrors the human brain forming huge numbers of neural connections early in development and then pruning them en masse—is redundancy-then-pruning a universal learning pattern for intelligent systems?</div>
+  </div>
+</div>
+
+<!-- 3. LoRA / QLoRA -->
+<div class="card">
+  <h2>Low-Rank Adaptation<span class="en">LoRA / QLoRA</span></h2>
+  <div class="tags"><span class="tag">parameter-efficient</span><span class="tag purple">incremental tuning</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Full fine-tuning is like <b>forking and rewriting an entire repo</b>—all 70B params updated, a 140GB copy stored per task, a disaster. LoRA is like a <b>git diff / patch file</b>: the original weights stay frozen (the base repo), and you train only a tiny <b>incremental patch</b>. Each task stores just that patch (a few to tens of MB), added onto the trunk at use time. One base, countless lightweight patches, swapped on demand.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + mechanism</div>
+    <p>Fully fine-tuning a large model means storing a whole weight set per downstream task—exploding storage and switching cost. The key assumption of LoRA (Hu et al. 2021): the <b>weight change ΔW during fine-tuning is intrinsically "low-rank"</b>—not that complex, approximable by the product of two skinny matrices. Instead of updating a d×k matrix, you decompose it into <b>B (d×r) × A (r×k)</b>, where the rank <b>r is tiny</b> (often 8 or 16):</p>
+    <div class="formula">W' = W + ΔW ≈ W + B·A &nbsp;&nbsp;(r ≪ min(d, k))</div>
+    <p style="margin-top:10px">Parameter count drops from <b>d×k</b> to <b>r×(d+k)</b>. Example, d=k=4096, r=8: full is 16.7M params, LoRA only 65K—<b>~250× smaller</b>. The frozen W provides "general ability," the tiny BA provides "task specialization." At inference BA merges into W with <b>zero added latency</b>. Dimension intuition below:</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Approximate one big update with two skinny matrices</b><br><br>
+Full ΔW: <span class="box r" style="padding:14px 26px">d × k<br>(4096×4096)<br>16.7M params</span><br><br>
+LoRA decomposition:<br>
+<span class="box p" style="padding:14px 10px">B<br>d×r<br>4096×8</span><span class="arrow">×</span><span class="box g" style="padding:4px 22px">A &nbsp; r×k &nbsp; (8×4096)</span> <span class="arrow">=</span> <span style="color:#8b92a8">same d×k shape</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ train only B, A = 65K params (~0.4%), W stays frozen</span>
+</div>
+
+    <p style="margin-top:14px"><b>QLoRA</b> (Dettmers et al. 2023) goes further: store the frozen base <b>quantized to 4-bit</b> in VRAM, keeping only the small LoRA adapter at high precision for training. This lets a single 48GB GPU fine-tune a 65B model. Its three key inventions: <b>NF4</b> (4-bit NormalFloat, a data type information-theoretically optimal for normally-distributed weights), <b>double quantization</b> (quantize even the quantization constants for a bit more savings), and <b>paged optimizers</b> (trade VRAM for RAM to absorb memory spikes). In short: LoRA saves "params to train," QLoRA further saves "VRAM the frozen base occupies."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, BitsAndBytesConfig
+<span class="kw">from</span> peft <span class="kw">import</span> LoraConfig, get_peft_model
+
+<span class="cmt"># QLoRA: load base quantized to 4-bit (NF4 + double quantization)</span>
+bnb = <span class="fn">BitsAndBytesConfig</span>(load_in_4bit=<span class="kw">True</span>,
+        bnb_4bit_quant_type=<span class="str">"nf4"</span>, bnb_4bit_use_double_quant=<span class="kw">True</span>)
+base = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(
+        <span class="str">"meta-llama/Llama-3-8b"</span>, quantization_config=bnb)
+
+<span class="cmt"># Attach LoRA adapters only on attention q/v projections, rank r=8</span>
+cfg = <span class="fn">LoraConfig</span>(r=8, lora_alpha=16,
+        target_modules=[<span class="str">"q_proj"</span>, <span class="str">"v_proj"</span>], lora_dropout=0.05)
+model = <span class="fn">get_peft_model</span>(base, cfg)
+
+model.<span class="fn">print_trainable_parameters</span>()
+<span class="cmt"># → trainable: ~4M / 8B (≈0.05%), everything else frozen</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">"LoRA must underperform full fine-tuning"—not absolute. On most downstream adaptation tasks LoRA matches or nearly matches full tuning, but when the task requires the model to <b>learn large amounts of brand-new knowledge</b> (rather than adjusting existing ability), the low-rank assumption becomes a bottleneck—ΔW isn't actually low-rank and r=8 can't hold it. Rule of thumb: <b>style/format/domain-tone adaptation → LoRA is enough; injecting an entirely new body of facts → may need larger r or full tuning.</b></div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: use QLoRA to fine-tune a local model on your own writing samples, getting an adapter (tens of MB) that "writes in your voice." Train another for "code comments in your voice"—same base, different patches, hot-swapped by context. This turns "personal style" into a reusable, version-controllable small file.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 LoRA's core insight: <b>adapting ≠ rewriting</b>. Most "learning a new task" is really patching a low-rank delta onto a huge ability base.<br>🤔 "Ability is the frozen base, the task is a pluggable patch"—can this architecture describe <b>human professional growth</b> in reverse? Your general judgment is W, each new job a LoRA?<br>　<a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html">Engineering counterpart → super-individual D12 (Fine-tuning in practice and trade-offs)</a></div>
+  </div>
+</div>
+
+<!-- 4. Quantization -->
+<div class="card">
+  <h2>Quantization<span class="en">Quantization</span></h2>
+  <div class="tags"><span class="tag">numeric compression</span><span class="tag orange">lower precision</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Quantization is <b>storing numbers in a smaller data type</b>—compressing FP16 (16-bit float) down to INT8 or even INT4, like turning a PNG into a JPEG or changing a <code>DOUBLE</code> column to <code>SMALLINT</code>. You trade <b>precision for space and speed</b>: model weights don't need that many significant digits, so chopping the low bits halves the size, then halves again, with memory bandwidth and compute dropping in step. The cost is <b>quantization noise</b>; the trick is keeping it from wrecking the model.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + mechanism</div>
+    <p>The bottleneck in large-model inference is often not compute but the <b>bandwidth of moving hundreds of GB of weights from VRAM into the compute units</b>. The smaller the weights, the faster they move and the more fit. The math core of quantization is a <b>linear mapping</b>: map a continuous float range [min, max] uniformly onto 2<sup>b</sup> integer buckets.</p>
+    <div class="formula">scale = (max − min) / (2<sup>b</sup> − 1)<br><br>x<sub>q</sub> = round(x / scale) &nbsp;&nbsp;→store→&nbsp;&nbsp; x̂ = x<sub>q</sub> × scale</div>
+    <p style="margin-top:10px">Intuition: <b>scale</b> is "how big a float span each integer bucket represents," and b is the bit width (8 for INT8, 4 for INT4). On store, divide the float by scale and round to a small integer <b>x<sub>q</sub></b>; on use, multiply by scale to recover an approximate float <b>x̂</b>. <b>The gap between x̂ and the original x is the quantization error.</b> Lower bit width, fewer buckets, larger error—that's the essence of "precision for space." Below: cramming continuous values into 4 buckets (2-bit):</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#ffb450">Continuous float → discrete integer buckets (2-bit = 4 buckets)</b><br><br>
+float axis ├──────┼──────┼──────┼──────┤<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; min &nbsp;&nbsp;&nbsp; ▼0.31→<span style="color:#ff8e8e">snaps to bucket 1</span><br>
+int value &nbsp;&nbsp;<span class="box">0</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="box">1</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="box">2</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="box">3</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ real values between buckets get "rounded" to the nearest point = quantization error</span>
+</div>
+
+    <p style="margin-top:14px">Two practical keys. First, <b>outliers</b>: LLM weights/activations occasionally have extreme values that stretch [min,max] wide, squeezing most normal values into a few buckets and destroying precision. The core of LLM.int8(), GPTQ and friends is <b>handling outliers</b>. Second, <b>post-training vs quantization-aware</b>:</p>
+    <ul>
+      <li><b>Post-Training Quantization (PTQ)</b>—quantize after training, zero extra training. <b>GPTQ</b> (Frantar et al. 2022) uses approximate second-order information to calibrate layer by layer, compressing 175B models to 3-4 bit with near-zero accuracy loss—the flagship of this line;</li>
+      <li><b>Quantization-Aware Training (QAT)</b>—simulate quantization error during training so the model "adapts in advance." More accurate but requires retraining, higher cost.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+
+<span class="kw">def</span> <span class="fn">quantize_int8</span>(w):
+    <span class="cmt"># Symmetric quantization: scale from the max abs value, zero-point at 0</span>
+    scale = w.<span class="fn">abs</span>().<span class="fn">max</span>() / 127.0          <span class="cmt"># INT8 range [-127,127]</span>
+    w_q = torch.<span class="fn">round</span>(w / scale).<span class="fn">clamp</span>(-127, 127).<span class="fn">to</span>(torch.int8)
+    <span class="kw">return</span> w_q, scale                       <span class="cmt"># store int8 weights + one fp scale</span>
+
+<span class="kw">def</span> <span class="fn">dequantize</span>(w_q, scale):
+    <span class="kw">return</span> w_q.<span class="fn">to</span>(torch.float32) * scale     <span class="cmt"># recover approx float at use time</span>
+
+w = torch.<span class="fn">randn</span>(4096, 4096)              <span class="cmt"># fp32 weights: 64 MB</span>
+w_q, s = <span class="fn">quantize_int8</span>(w)               <span class="cmt"># int8: 16 MB, 1/4 the size</span>
+err = (w - <span class="fn">dequantize</span>(w_q, s)).<span class="fn">abs</span>().<span class="fn">mean</span>()
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"mean quantization error {err:.5f}"</span>)  <span class="cmt"># tiny noise, model barely notices</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">"4-bit = half the size AND half the quality"—wrong. The accuracy loss is far from linear. INT8 being near-lossless is common knowledge; 4-bit with calibration methods like GPTQ/NF4 still stays close to the original on most tasks; the real cliff usually comes <b>below 3-bit</b>. "Half the bit width" and "half the quality" are nowhere near proportional—which is exactly why quantization is so popular.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: to run a local LLM on your laptop, just pick the community's <b>4-bit quantized build</b> (GGUF/GPTQ format). A 70B model needs 140GB in FP16 and simply won't run; quantized to 4-bit it's ~35-40GB and, with system RAM, runs on personal hardware—quantization is the step that takes "personally owning a strong model" from impossible to possible.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Quantization reveals a counterintuitive fact: the <b>effective information</b> in big-model weights is far below the bits they occupy—most precision is redundant.<br>🤔 If 16-bit weights compress to 4-bit with almost no loss, does that mean the model's "knowledge" is intrinsically <b>sparse / low information density</b>? Is this the same principle as the human brain storing memory in a fuzzy, approximate way?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1503.02531" target="_blank">Hinton, Vinyals, Dean 2015 — Distilling the Knowledge in a Neural Network</a> — foundational distillation paper; origin of temperature and soft labels</li>
+      <li><a href="https://arxiv.org/abs/1803.03635" target="_blank">Frankle &amp; Carbin 2018 — The Lottery Ticket Hypothesis</a> — the classic "a winning sub-network hides in a big net" pruning result</li>
+      <li><a href="https://arxiv.org/abs/2106.09685" target="_blank">Hu et al. 2021 — LoRA: Low-Rank Adaptation</a> — original low-rank adaptation paper</li>
+      <li><a href="https://arxiv.org/abs/2305.14314" target="_blank">Dettmers et al. 2023 — QLoRA</a> — 4-bit base + LoRA; NF4 / double quantization / paged optimizers</li>
+      <li><a href="https://arxiv.org/abs/2210.17323" target="_blank">Frantar et al. 2022 — GPTQ</a> — flagship post-training quantization to 3-4 bit</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Why can distillation, pruning, LoRA, and quantization "stack"? What dimension does each compress?</summary><div>Because they're orthogonal—they act on <b>different axes</b>. <b>Distillation</b> swaps "the model itself" (big architecture → small, fewer layers/width); <b>pruning</b> cuts "the number of weights" (delete redundant connections, making matrices sparse or smaller); <b>LoRA</b> cuts "params to train/store" (freeze the base, store only a low-rank delta—a training-side, not inference-side, compression); <b>quantization</b> cuts "bits per weight" (numeric precision, untouched count and structure). So real-world combos chain together: distill a small model → prune redundancy → QLoRA-adapt it to the task → quantize for deployment. Each step compresses a different dimension, and multiplied they yield tens-of-times total compression. The value of seeing this: when your bottleneck is VRAM, prioritize quantization+pruning; when it's "a copy per task is too expensive," use LoRA; when it's latency and you can swap architectures, distill. Treat the symptom, don't blindly apply all four.</div></details>
+
+    <details><summary>2. Quantization, pruning, and distillation all "drop information yet barely lose accuracy." Is there one deep reason behind this?</summary><div>Yes—it all roots in <b>the over-parameterization and redundancy of neural networks</b>. Deep nets have far more parameters than the task needs, to let high-dimensional optimization converge smoothly (a flatter loss landscape, easier to find good minima). But once training is done, that "redundancy prepared for trainability" becomes a deployment burden. The three techniques drain the same redundancy from different angles: <b>pruning</b> says "many weights are ≈0, delete them"; <b>quantization</b> says "many high-precision bits are noise, chop them"; <b>distillation</b> says "a small model's capacity is actually enough for this task's true complexity, it just can't be trained directly—let the big model teach it." The lottery ticket hypothesis says it most sharply: the useful "sub-network" was always there; the big model is just easier-to-train scaffolding. This raises a deep question—if deployment needs only this much effective capacity, what does the enormous training-time scale actually buy, "ability" or "optimizability"? The mainstream answer leans toward the latter: scale is mostly to <b>make training tractable</b>, not because it's all really used at inference.</div></details>
+
+    <details><summary>3. QLoRA quantizes the base to 4-bit and still fine-tunes fine. Why doesn't the "noisy 4-bit base" wreck training?</summary><div>Several mechanisms stack. First, <b>gradients flow only to the high-precision LoRA adapter</b>—the 4-bit base is frozen, receives no updates, so quantization error isn't amplified or accumulated in backprop; it merely provides a "good enough" reference for the forward pass. Second, the <b>NF4 data type</b> is information-theoretically optimized for normally-distributed weights—network weights are roughly normal, and NF4 packs its limited buckets more densely in high-probability regions, so error at 4-bit is far below uniform quantization. Third, <b>double quantization</b> further compresses the overhead of the quantization constants themselves with almost no added error. Fourth and most crucial: the high-precision LoRA adapter <b>can "compensate" for the base's quantization noise</b>—during training, BA automatically learns a delta that partly cancels the bias from quantization. So QLoRA isn't "training hard on a bad base," it's "freezing an adequate approximate base + a precise learnable patch that corrects it." This also explains why directly quantizing a model to 4-bit for <b>inference</b> sometimes underperforms a QLoRA-fine-tuned one—the latter has an adapter compensating.</div></details>
+
+    <details><summary>4. "Dark knowledge in soft labels" and "low-rank ΔW" seem unrelated—but are they both saying the task's "true complexity" is low?</summary><div>A beautiful connection. Distillation's soft labels reveal that a classification task's true signal isn't "the one-hot hard answer" but a <b>low-dimensional similarity structure</b> (cat≈dog≫car)—far simpler than "N independent categories," which is why a small model can learn it. LoRA's low-rank ΔW reveals that adapting a general model to a specific task requires a <b>change that is intrinsically low-dimensional</b>—you needn't rewrite the whole 16M-param matrix; a rank-8 patch suffices. Both, in different languages, state the <b>same prior: the "intrinsic dimension" of real-world tasks is far below the model's "apparent dimension."</b> There's dedicated research on this (e.g. Aghajanyan et al. on the intrinsic dimension of fine-tuning). For a complexity-science lens, it echoes a deep theme: a high-dimensional system's effective degrees of freedom often concentrate on a low-dimensional manifold—whether the order parameters of a physical system or the task representation of a neural net. Compression is possible because what "looks big" is, in information terms, not big at all.</div></details>
+
+    <details><summary>5. Compression makes "owning a strong model on personal devices" possible. What does this mean for the power structure of "AI super-individuals"?</summary><div>This is the political economy behind the technical question. Uncompressed frontier models only run in big companies' data centers, so ability is <b>centralized</b> in a few API providers—you rent intelligence but don't own it, and can be cut off, price-hiked, or censored at any time. Compression (especially quantization + LoRA) tips the balance back: 4-bit quantization fits a 70B model onto consumer hardware, LoRA lets you privatize a general model with a tens-of-MB patch, distillation lets you "download" a big model's ability into a small one you own. Together they point to a possible <b>"sovereign AI"</b>—intelligence running on your device, on your data, offline, private, not remotely shut-off-able. For those chasing "super-individual," this isn't just saving money but <b>ability sovereignty</b>: whether your core intelligence infrastructure is rented or owned sets the ceiling on your autonomy. The cost is taking on ops and alignment responsibility yourself—exactly the line between "super-individual" and "platform user." The maturation of compression is the key link that turns this path from ideal into feasible.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 31 · 2026-06-17</footer>
+
+</div>
+
+</body>
+</html>
