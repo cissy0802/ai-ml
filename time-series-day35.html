@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：时间序列预测 — Day 35</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：时间序列预测</h1>
+  <div class="meta">Day 35 · 2026-06-21</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度 中级</div>
+</header>
+
+<!-- 1. ARIMA -->
+<div class="card">
+  <h2>ARIMA 自回归积分滑动平均<span class="en">AutoRegressive Integrated Moving Average</span></h2>
+  <div class="tags"><span class="tag">经典统计</span><span class="tag purple">平稳性</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>ARIMA 预测下一个值的方式就是「<b>回归到自己的历史</b>」——用过去几个观测（AR）加上过去几次预测误差（MA）线性组合。中间那个 <b>I（差分）</b>是关键：它先把数据从「累计量」变成「增量」，正如你用 Prometheus 的 <code>rate()</code> 把一路上涨的 <b>counter</b> 转成每秒增量——counter 一直涨没法直接建模，差分之后才<b>平稳可预测</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>很多真实序列带<b>趋势</b>（一路涨），但几乎所有经典统计模型都要求序列是「<b>平稳的</b>」——均值、方差不随时间漂移。为什么非平稳不行？因为模型是在「整段历史」上估一组固定参数，若均值一直在变，这组参数就是在拟合一个根本不存在的「平均态」，外推必然失真。ARIMA(p,d,q) 三个旋钮各管一件事：</p>
+    <ul>
+      <li><b>AR(p)</b>：用前 p 个观测的加权和预测当下，<code>y_t = c + φ₁y_{t-1} + … + φ_p y_{t-p}</code>，φ 就是「每段历史值多大权重」；</li>
+      <li><b>I(d)</b>：差分 d 次去趋势。一阶差分 <code>y'_t = y_t − y_{t-1}</code> 把带趋势的非平稳序列，变成围绕固定均值波动的平稳序列；</li>
+      <li><b>MA(q)</b>：用前 q 个<b>预测误差</b>修正，吸收随机冲击的滞后影响。</li>
+    </ul>
+    <p style="margin-top:8px">直觉：先用差分把数据「拉平」，再用「历史值 + 历史误差」做一个线性外推。<b>AR 和 MA 的区别</b>在于「记什么」：AR 记的是<b>过去的真实值</b>（趋势惯性），MA 记的是<b>过去的预测偏差</b>（系统对突发冲击的余震还没消化完）。两者互补——光有 AR 抓不住一次性扰动的衰减尾巴，光有 MA 抓不住持续动量。带季节的变体叫 <b>SARIMA</b>（再加一组以季节周期为间隔的 AR/MA/差分参数），能同时建模「日内波动」和「周内波动」这种叠加节律。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> statsmodels.tsa.arima.model <span class="kw">import</span> ARIMA
+
+<span class="cmt"># series: 一列按时间排好的数值（如每月服务器成本）</span>
+series = pd.<span class="fn">read_csv</span>(<span class="str">"cost.csv"</span>, index_col=<span class="str">"month"</span>, parse_dates=<span class="kw">True</span>)[<span class="str">"usd"</span>]
+
+<span class="cmt"># order=(p,d,q): 2 阶自回归 + 1 次差分去趋势 + 2 阶滑动平均</span>
+model = <span class="fn">ARIMA</span>(series, order=(2, 1, 2))
+res = model.<span class="fn">fit</span>()
+
+<span class="cmt"># 向前预测 6 步，并给出置信区间</span>
+fc = res.<span class="fn">get_forecast</span>(steps=6)
+<span class="fn">print</span>(fc.predicted_mean)            <span class="cmt"># 点预测</span>
+<span class="fn">print</span>(fc.<span class="fn">conf_int</span>(alpha=0.05))      <span class="cmt"># 95% 区间，量化不确定性</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"ARIMA 能抓长期复杂模式"——错。它本质是<b>线性 + 短记忆</b>模型，遇到多重季节、节假日、非线性突变就吃力（那是 SARIMA / Prophet 的活）。且 d 选错（过度差分）会引入伪相关。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：预测个人项目的<b>月度云成本</b>、博客流量这类「弱趋势 + 单变量」序列，ARIMA 十几行就够，别一上来就上深度模型——杀鸡用牛刀，还更难解释。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 ARIMA = 差分把数据拉平 + 用历史值和历史误差做线性外推。简单、可解释、对小数据稳。<br>🤔 你监控系统里哪些指标是「累计量（counter）」，哪些是「增量（rate）」？哪一类才适合直接喂进 ARIMA？</div>
+  </div>
+</div>
+
+<!-- 2. 指数平滑 / Kalman -->
+<div class="card">
+  <h2>指数平滑与卡尔曼滤波<span class="en">Exponential Smoothing &amp; Kalman Filter</span></h2>
+  <div class="tags"><span class="tag">递归估计</span><span class="tag purple">状态空间</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>指数平滑就是 <b>EWMA（指数加权移动平均）</b>——你在后端到处见过它：TCP 的 RTT 估计、负载均衡的滑动平均、Prometheus 的 <code>irate</code>。一句话：<b>新估计 = α×新观测 + (1−α)×旧估计</b>，越久远的数据权重<b>指数衰减</b>。卡尔曼滤波是它的升级版：额外维护「我对当前估计有多确定」（方差），并据此<b>动态</b>决定该信新观测多一点、还是信旧预测多一点。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>真实数据有噪声，你既不能全信最新一个点（抖动），也不能死守旧均值（滞后）。指数平滑用固定 α 折中；<b>Holt-Winters</b> 把它扩展成三条并行的平滑方程，各自用独立系数追踪<b>水平（level）、趋势（trend）、季节（season）</b>三个分量，再叠加成预测。展开公式能看清「指数」二字：</p>
+    <p style="margin-top:6px"><code>s_t = αy_t + α(1−α)y_{t-1} + α(1−α)²y_{t-2} + …</code></p>
+    <p style="margin-top:6px"><b>卡尔曼滤波</b>更进一步，每步分两阶段循环：</p>
+<div class="diagram">
+<b style="color:#7b61ff">卡尔曼滤波：predict → update 循环</b><br><br>
+<span class="box p">① 预测</span> <span style="color:#5a6378">用模型推下一步状态，不确定性(方差)变大</span><br>
+<span class="arrow">↓</span> 来了一个新观测 <span style="color:#5a6378">(本身也带噪声)</span><br>
+<span class="box g">② 更新</span> <span style="color:#5a6378">按卡尔曼增益 K 加权融合 预测 vs 观测</span><br>
+<span class="arrow">↓</span> <span style="color:#ffb450">K 大→信观测；K 小→信预测（由两边方差自动算出）</span><br>
+<span class="arrow">↺</span> 回到 ① ，逐点递归
+</div>
+    <p style="margin-top:10px"><b>卡尔曼增益 K</b> 本质就是个自适应的「<b>信任度调节器</b>」——和你熟悉的自适应退避、动态 TTL 同构；也像分布式系统里融合多个不可靠副本的读数，按各自<b>可信度（方差）</b>加权。和固定 α 的指数平滑相比，卡尔曼的杀手锏是 K <b>随时间自调</b>：观测特别干净时它放大 K（快速跟随），观测噪声大时它压低 K（稳住不被带偏）——指数平滑做不到这点，它的 α 一旦定下就僵在那。代价是你得显式写出「状态如何演化」和「观测噪声多大」这两个模型，建模成本更高。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> statsmodels.tsa.holtwinters <span class="kw">import</span> ExponentialSmoothing
+
+<span class="cmt"># trend + 季节(周期=12) 的三参数指数平滑(Holt-Winters)</span>
+model = <span class="fn">ExponentialSmoothing</span>(
+    series,
+    trend=<span class="str">"add"</span>,            <span class="cmt"># 加性趋势</span>
+    seasonal=<span class="str">"add"</span>,         <span class="cmt"># 加性季节</span>
+    seasonal_periods=12,        <span class="cmt"># 12 个月一个周期</span>
+)
+res = model.<span class="fn">fit</span>()              <span class="cmt"># 自动学 α 等平滑系数</span>
+<span class="fn">print</span>(res.<span class="fn">forecast</span>(6))         <span class="cmt"># 向前预测 6 期</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"α 越大、跟得越紧就越好"——错。α 大 = 对噪声<b>过敏</b>（方差高），α 小 = 反应<b>迟钝</b>（偏差大）。这就是经典的 <b>bias-variance 权衡</b>，没有万能值，要按数据信噪比调。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：追踪个人/家庭指标（体重、每日专注时长、孩子作息）时，指数平滑给你一条<b>去噪后的趋势线</b>，比盯着原始抖动数据做决策靠谱得多——别被单日波动带节奏。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 指数平滑 = 权重指数衰减的记忆；卡尔曼 = 带「不确定性管理」的指数平滑，能自动调信任度。<br>🤔 卡尔曼的「按方差加权融合多源信号」，和你做分布式读时「按副本健康度选数据源」是不是同一个数学？</div>
+  </div>
+</div>
+
+<!-- 3. Prophet -->
+<div class="card">
+  <h2>Prophet 先知模型<span class="en">Prophet (Facebook / Meta)</span></h2>
+  <div class="tags"><span class="tag">加性模型</span><span class="tag orange">可解释</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>Prophet 把一条时间序列拆成几个<b>独立组件相加</b>：长期趋势 + 年周期 + 周周期 + 节假日效应 + 噪声——就像把一个系统拆成<b>微服务</b>，每个组件单独负责一块、单独可视化、可单独配置。它是 <b>GAM（广义加性模型）</b>，不是黑盒——你能看懂每个组件在做什么。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>ARIMA 要你懂 p,d,q 怎么调，业务分析师用不来；且对缺失值、异常点、<b>多重季节</b>（周 + 年同时存在）处理麻烦。Prophet（Taylor &amp; Letham 2018）的设计目标就是「<b>analyst-in-the-loop 的规模化预测</b>」——把模型变成几个人能直接理解和手调的旋钮：</p>
+<div class="diagram">
+<b style="color:#7b61ff">Prophet 加性分解</b><br><br>
+<span class="box">y(t)</span> <span class="arrow">=</span> <span class="box g">g(t) 趋势</span> <span class="arrow">+</span> <span class="box o">s(t) 季节</span> <span class="arrow">+</span> <span class="box p">h(t) 节假日</span> <span class="arrow">+</span> <span style="color:#5a6378">ε 噪声</span><br><br>
+<span style="color:#8b92a8">g：分段线性/逻辑趋势，自动检测拐点(changepoint)</span><br>
+<span style="color:#8b92a8">s：傅里叶级数拟合的周期成分</span><br>
+<span style="color:#8b92a8">h：你显式声明的节假日/事件 (寒暑假、大促)</span>
+</div>
+    <p style="margin-top:10px">每一项都能单独画出来看，也能注入<b>领域先验</b>（比如「这天是大促，量会翻倍」）。两个关键设计值得理解：<b>changepoint（趋势拐点）</b>——Prophet 在序列里撒一批候选拐点，用正则化让大多数权重归零、只留真正的转折，这和稀疏建模思路一致，避免趋势过拟合；<b>加性 vs 乘性季节</b>——若季节波动幅度随基数变大（量越大、波峰越高），要切成乘性，否则加性会系统性低估高峰。这正是它在业务团队火起来的原因：不是精度最高，而是<b>易用 + 可解释 + 抗缺失值和异常点</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> prophet <span class="kw">import</span> Prophet
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cmt"># Prophet 约定：两列，ds=日期，y=数值</span>
+df = pd.<span class="fn">read_csv</span>(<span class="str">"traffic.csv"</span>)        <span class="cmt"># 含 ds, y 两列</span>
+
+m = <span class="fn">Prophet</span>(yearly_seasonality=<span class="kw">True</span>,
+            weekly_seasonality=<span class="kw">True</span>)
+m.<span class="fn">add_country_holidays</span>(country_name=<span class="str">"CN"</span>)  <span class="cmt"># 注入中国节假日</span>
+m.<span class="fn">fit</span>(df)
+
+future = m.<span class="fn">make_future_dataframe</span>(periods=30)  <span class="cmt"># 未来 30 天</span>
+forecast = m.<span class="fn">predict</span>(future)
+m.<span class="fn">plot_components</span>(forecast)               <span class="cmt"># 分别画出趋势/季节/节假日</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"Prophet 是预测神器，啥都比 ARIMA 强"——错。学界对它「默认就好」有批评：在<b>短序列、无明显季节、需要外生变量复杂交互</b>的场景上未必赢。它的强项是<b>易用 + 可解释</b>，不是精度冠军。诚实地说：它常被当成强基线，而不是终点。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：预测博客/产品的<b>周/年访问量</b>，把寒暑假、长假作为节假日喂进去，Prophet 几行就给出一张可解释的分解图——一眼看清「涨是趋势还是放假效应」。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 Prophet = 把时序拆成可解释的加性组件，让「人能看懂、能手调」优先于「机器精度最高」。<br>🤔 当模型可解释（看得见每个组件）和精度更高（但黑盒）冲突时，你的个人决策场景里更看重哪个？</div>
+  </div>
+</div>
+
+<!-- 4. 时序基础模型 / TimesFM -->
+<div class="card">
+  <h2>时序基础模型<span class="en">Time-Series Foundation Models · TimesFM</span></h2>
+  <div class="tags"><span class="tag">基础模型</span><span class="tag purple">零样本</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>把「预测下一个数值」当成「预测下一个 token」——这正是 LLM 干的事。<b>TimesFM</b>（Google 2024）是个 decoder-only transformer，在<b>千亿级真实时间点</b>上预训练，然后对你从没给它见过的新序列直接 <b>zero-shot 预测</b>，不用为这条序列重新训练。类比：从「每个项目自己搭一套预测模型」升级到「调用一个通用的预训练基础设施」。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>ARIMA / Prophet 每条序列都要单独 fit，且抓不到复杂的非线性长程依赖；而以往的深度时序模型要为<b>每个数据集</b>单独训练，门槛高。基础模型路线把 LLM 那一套搬过来：</p>
+<div class="diagram">
+<b style="color:#7b61ff">TimesFM：把数值序列当 token 预测</b><br><br>
+<span class="box">原始序列</span> <span class="arrow">→</span> <span class="box o">切成不重叠 patch</span> <span class="arrow">→</span> <span class="box p">decoder-only Transformer</span> <span class="arrow">→</span> <span class="box g">预测未来 patch</span><br><br>
+<span style="color:#8b92a8">patch：把连续数值切成小段(类比 ViT 切图块)，大幅缩短序列长度</span><br>
+<span style="color:#8b92a8">因果注意力：只看过去，自回归地往前预测</span>
+</div>
+    <p style="margin-top:10px"><b>patching</b>（把连续数值切成不重叠小段，像 ViT 切图块、像把字符合成 token）有两个好处：一是把序列长度压到 1/patch，缓解注意力 O(n²) 的开销；二是让模型在「<b>局部形状（patch 内的小波形）</b>」而非「单点数值」上学习，更接近人看波形图的方式。它还输出<b>分位数预测</b>而非单点，天然给出不确定性区间。论文（arXiv 2310.10688, ICML 2024）报告：在千亿真实时间点上预训练后，zero-shot 表现可以接近为单个数据集<b>专门训练</b>的监督模型——这正是「基础模型」一词的含金量所在。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># pip install timesfm —— Google 官方 SDK</span>
+<span class="cmt"># 注意：基础模型库 API 迭代较快，以官方仓库为准</span>
+<span class="kw">import</span> timesfm
+
+tfm = timesfm.<span class="fn">TimesFm</span>(
+    hparams=timesfm.<span class="fn">TimesFmHparams</span>(horizon_len=24),
+    checkpoint=timesfm.<span class="fn">TimesFmCheckpoint</span>(
+        huggingface_repo_id=<span class="str">"google/timesfm-1.0-200m"</span>),
+)
+
+<span class="cmt"># 直接 zero-shot：给历史，要未来，无需为这条序列训练</span>
+point_forecast, _ = tfm.<span class="fn">forecast</span>(
+    inputs=[history_values],   <span class="cmt"># list，每条是一段历史数值</span>
+    freq=[0],                  <span class="cmt"># 0=高频(日/小时), 1=周/月, 2=低频</span>
+)
+<span class="fn">print</span>(point_forecast)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"有了基础模型，ARIMA / Prophet 就过时了"——错。诚实讲：大模型对<b>短序列、小数据是杀鸡用牛刀</b>，成本和延迟更高，可解释性更差；经典方法在「数据少、要解释、要快」时仍是首选。基础模型赢在「<b>海量异构序列、零样本、懒得调参</b>」。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：想对几十条不同指标<b>一次性</b>出预测、又不想为每条单独调参时，用 TimesFM 的 zero-shot 当快速基线；若某条序列特别重要，再用 ARIMA / Prophet 精雕。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 时序基础模型 = 把「预测下一段数值」变成「预测下一个 token」，用预训练换 zero-shot 通用性。<br>🤔 当一个领域出现「预训练 + zero-shot」的基础模型，原有的专用方法会被淘汰，还是退守到「数据少/要解释」的细分场景？</div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://otexts.com/fpp3/" target="_blank">Hyndman &amp; Athanasopoulos — Forecasting: Principles and Practice (FPP3)</a> — 免费在线经典教材，ARIMA / ETS / 状态空间讲得最清楚，必读</li>
+      <li><a href="https://www.statsmodels.org/stable/tsa.html" target="_blank">statsmodels 时间序列文档</a> — ARIMA / SARIMAX / Holt-Winters 官方 API</li>
+      <li><a href="https://peerj.com/preprints/3190/" target="_blank">Taylor &amp; Letham 2018 — Forecasting at Scale (Prophet)</a> — Prophet 的设计论文，加性模型 + analyst-in-the-loop 思路</li>
+      <li><a href="https://facebook.github.io/prophet/" target="_blank">Prophet 官方文档</a> — 安装、节假日、changepoint、不确定性区间用法</li>
+      <li><a href="https://arxiv.org/abs/2310.10688" target="_blank">TimesFM — A decoder-only foundation model for time-series forecasting (ICML 2024)</a> — 时序基础模型的代表作</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. ARIMA 用「差分」、Prophet 用「趋势组件」、Transformer 用「自回归」——三者处理「趋势」的哲学有何根本不同？</summary><div>三种世界观。ARIMA 把趋势当成<b>需要消除的干扰</b>：先差分拉平成平稳序列，再建模波动——趋势不是被理解的，是被「减掉」的。Prophet 把趋势当成<b>需要显式建模的可解释组件</b>：用分段线性/逻辑函数拟合，并自动找拐点，趋势是一等公民、能单独画出来看。Transformer 不预设任何趋势形式，把趋势、季节、噪声<b>一起塞进数据分布</b>，靠海量预训练让模型自己「见过各种趋势」从而泛化——趋势是被<b>隐式记忆</b>的。对应到工程：第一种是「归一化掉再处理」，第二种是「拆成可观测的子系统」，第三种是「端到端学，不做特征工程」。越往后越省人工、越吃数据、越难解释。</div></details>
+
+    <details><summary>2. 卡尔曼滤波的 predict→update 循环，和你熟悉的哪些分布式/系统模式是同构的？</summary><div>本质是<b>贝叶斯更新</b>：先验(预测) + 似然(观测) → 后验(更新估计)，每来一个数据就递归一次。同构的东西很多：(a) <b>传感器融合</b>——多个不可靠传感器按方差加权，正是卡尔曼增益在做的事；(b) <b>自适应退避 / 动态 TTL</b>——根据「最近预测有多准」调整信任新信号还是旧状态；(c) <b>分布式读的副本选择</b>——按副本健康度/延迟方差加权选数据源，数学骨架相同；(d) 更抽象地，它就是<b>在线学习</b>的雏形：用 O(1) 内存增量更新状态，不重算全部历史。理解卡尔曼增益 K = 「该信新数据多少」这个旋钮，你会在很多系统设计里反复认出它。</div></details>
+
+    <details><summary>3. 时序基础模型 zero-shot 真能取代经典方法吗？什么时候经典方法仍不可替代？</summary><div>短期内不会全面取代，而是<b>分层共存</b>。基础模型的甜区：序列多、异构、懒得逐条调参、可接受黑盒、有 GPU。经典方法不可替代的场景：(a) <b>数据极少</b>——几十个点，大模型无从发挥，ARIMA/ETS 反而稳；(b) <b>要可解释</b>——金融、医疗、需要向人解释「为什么预测涨」，Prophet 的分解图无可替代；(c) <b>要快/要省</b>——边缘设备、高频在线预测，几行统计模型延迟和成本碾压大模型；(d) <b>有强领域先验</b>——你确切知道节假日/促销规则，显式注入比让模型猜更可靠。规律和 NLP 一样：基础模型抬高了「通用 baseline」的下限，但<b>细分场景的专用方法依然有护城河</b>。</div></details>
+
+    <details><summary>4. 几乎所有经典时序方法都假设「平稳性」。这和分布式系统里假设「负载是平稳的」一样危险吗？当假设破裂会怎样？</summary><div>同样危险，而且失败方式相似。平稳性假设 = 「未来的统计规律和过去一样」，一旦发生<b>结构性突变（regime change）</b>——疫情、政策、产品爆发、相变——模型会<b>自信地错</b>：它仍按旧分布外推，置信区间还很窄，正如容量规划按历史均值估算，碰上突发流量直接被打穿。应对思路也和系统设计相通：(a) <b>监控残差/漂移</b>，像监控 SLO 一样监控预测误差，超阈值报警重训；(b) <b>用能局部适应的模型</b>（卡尔曼、滑动窗口）而非一次性全局拟合；(c) <b>别只信点预测，看区间</b>，把不确定性当一等公民；(d) 承认有些突变<b>本质不可预测</b>，转而设计「快速察觉 + 快速恢复」而不是「精准预言」。预测的成熟，是知道它何时会失效。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 35 · 2026-06-21</footer>
+
+</div>
+
+</body>
+</html>

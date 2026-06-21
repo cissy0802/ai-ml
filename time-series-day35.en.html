@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Time-Series Forecasting — Day 35</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Time-Series Forecasting</h1>
+  <div class="meta">Day 35 · 2026-06-21</div>
+  <div class="audience">For: engineers from a non-AI background · Level: Intermediate</div>
+</header>
+
+<!-- 1. ARIMA -->
+<div class="card">
+  <h2>ARIMA<span class="en">AutoRegressive Integrated Moving Average</span></h2>
+  <div class="tags"><span class="tag">classic stats</span><span class="tag purple">stationarity</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>ARIMA predicts the next value by "<b>regressing onto its own history</b>" — a linear mix of the last few observations (AR) plus the last few prediction errors (MA). The middle letter, <b>I (differencing)</b>, is the key: it first turns the data from a "cumulative total" into "increments," exactly like using Prometheus's <code>rate()</code> to turn an ever-climbing <b>counter</b> into a per-second delta. A counter that only goes up can't be modeled directly; after differencing it becomes <b>stationary and predictable</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Many real series carry a <b>trend</b> (steady climb), but nearly all classic statistical models require the series to be "<b>stationary</b>" — mean and variance that don't drift over time. Why does non-stationarity break things? The model fits one fixed set of parameters over the <b>entire history</b>; if the mean keeps moving, those parameters are fitting an "average state" that doesn't actually exist, so extrapolation must distort. ARIMA(p,d,q) has three knobs, each doing one job:</p>
+    <ul>
+      <li><b>AR(p)</b>: predict the present from a weighted sum of the last p observations, <code>y_t = c + φ₁y_{t-1} + … + φ_p y_{t-p}</code>, where φ is "how much weight each past value gets";</li>
+      <li><b>I(d)</b>: difference d times to remove trend. First-order differencing <code>y'_t = y_t − y_{t-1}</code> turns a trended non-stationary series into one that fluctuates around a fixed mean;</li>
+      <li><b>MA(q)</b>: correct using the last q <b>prediction errors</b>, absorbing the lagged effect of random shocks.</li>
+    </ul>
+    <p style="margin-top:8px">Intuition: difference to "flatten" the data, then linearly extrapolate from "past values + past errors." The difference between <b>AR and MA</b> is what they remember: AR remembers <b>past actual values</b> (trend momentum), MA remembers <b>past prediction errors</b> (the system hasn't finished digesting a sudden shock). They're complementary — AR alone misses the decay tail of a one-off disturbance, MA alone misses persistent momentum. The seasonal variant is <b>SARIMA</b> (it adds another AR/MA/differencing set spaced at the seasonal period), modeling overlapping rhythms like "within-day" plus "within-week."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> statsmodels.tsa.arima.model <span class="kw">import</span> ARIMA
+
+<span class="cmt"># series: one column of values ordered by time (e.g. monthly server cost)</span>
+series = pd.<span class="fn">read_csv</span>(<span class="str">"cost.csv"</span>, index_col=<span class="str">"month"</span>, parse_dates=<span class="kw">True</span>)[<span class="str">"usd"</span>]
+
+<span class="cmt"># order=(p,d,q): 2nd-order AR + 1 differencing + 2nd-order MA</span>
+model = <span class="fn">ARIMA</span>(series, order=(2, 1, 2))
+res = model.<span class="fn">fit</span>()
+
+<span class="cmt"># forecast 6 steps ahead, with a confidence interval</span>
+fc = res.<span class="fn">get_forecast</span>(steps=6)
+<span class="fn">print</span>(fc.predicted_mean)            <span class="cmt"># point forecast</span>
+<span class="fn">print</span>(fc.<span class="fn">conf_int</span>(alpha=0.05))      <span class="cmt"># 95% interval, quantifies uncertainty</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">"ARIMA captures long, complex patterns" — wrong. At heart it's a <b>linear, short-memory</b> model; multiple seasonalities, holidays, and nonlinear jumps stump it (that's SARIMA / Prophet territory). And picking d wrong (over-differencing) introduces spurious correlation.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: forecasting a side project's <b>monthly cloud cost</b> or blog traffic — "weak trend + single variable" series — needs only a dozen lines of ARIMA. Don't reach for a deep model first: it's overkill and harder to explain.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 ARIMA = difference to flatten the data, then linearly extrapolate from past values and past errors. Simple, interpretable, robust on small data.<br>🤔 Which of your monitoring metrics are "counters" and which are "rates"? Which kind belongs directly in ARIMA?</div>
+  </div>
+</div>
+
+<!-- 2. Exponential Smoothing / Kalman -->
+<div class="card">
+  <h2>Exponential Smoothing &amp; Kalman Filter<span class="en">Exponential Smoothing &amp; Kalman Filter</span></h2>
+  <div class="tags"><span class="tag">recursive estimation</span><span class="tag purple">state space</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Exponential smoothing is just <b>EWMA (exponentially weighted moving average)</b> — you've met it all over the backend: TCP RTT estimation, load-balancer rolling averages, Prometheus's <code>irate</code>. In one line: <b>new estimate = α×new observation + (1−α)×old estimate</b>, where older data decays <b>exponentially</b> in weight. The Kalman filter is its upgrade: it additionally tracks "how certain am I about the current estimate" (variance) and uses that to <b>dynamically</b> decide whether to trust the new observation or the old prediction more.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Real data is noisy: you can't fully trust the latest point (jitter) nor cling to the old mean (lag). Exponential smoothing compromises with a fixed α; <b>Holt-Winters</b> extends it into three parallel smoothing equations that track <b>level, trend, and season</b> with independent coefficients, then sum them into a forecast. Expanding the formula shows where "exponential" comes from:</p>
+    <p style="margin-top:6px"><code>s_t = αy_t + α(1−α)y_{t-1} + α(1−α)²y_{t-2} + …</code></p>
+    <p style="margin-top:6px">The <b>Kalman filter</b> goes further, looping through two stages each step:</p>
+<div class="diagram">
+<b style="color:#7b61ff">Kalman filter: predict → update loop</b><br><br>
+<span class="box p">① Predict</span> <span style="color:#5a6378">push state forward with a model; uncertainty (variance) grows</span><br>
+<span class="arrow">↓</span> a new observation arrives <span style="color:#5a6378">(itself noisy)</span><br>
+<span class="box g">② Update</span> <span style="color:#5a6378">fuse prediction vs observation, weighted by Kalman gain K</span><br>
+<span class="arrow">↓</span> <span style="color:#ffb450">large K → trust observation; small K → trust prediction (set by both variances)</span><br>
+<span class="arrow">↺</span> back to ① , recurse point by point
+</div>
+    <p style="margin-top:10px">The <b>Kalman gain K</b> is essentially an adaptive "<b>trust dial</b>" — isomorphic to adaptive backoff and dynamic TTLs you know; also like fusing readings from several unreliable replicas in a distributed system, weighted by each one's <b>credibility (variance)</b>. Versus fixed-α smoothing, Kalman's edge is that K <b>self-tunes over time</b>: when observations are clean it raises K (fast follow), when they're noisy it lowers K (hold steady and don't get dragged). Smoothing can't do this — once α is set, it's frozen. The cost: you must explicitly write "how the state evolves" and "how big the observation noise is," so modeling effort is higher.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> statsmodels.tsa.holtwinters <span class="kw">import</span> ExponentialSmoothing
+
+<span class="cmt"># three-parameter exponential smoothing (Holt-Winters): trend + season (period=12)</span>
+model = <span class="fn">ExponentialSmoothing</span>(
+    series,
+    trend=<span class="str">"add"</span>,            <span class="cmt"># additive trend</span>
+    seasonal=<span class="str">"add"</span>,         <span class="cmt"># additive season</span>
+    seasonal_periods=12,        <span class="cmt"># 12 months per cycle</span>
+)
+res = model.<span class="fn">fit</span>()              <span class="cmt"># learns α and other smoothing coefficients</span>
+<span class="fn">print</span>(res.<span class="fn">forecast</span>(6))         <span class="cmt"># forecast 6 periods ahead</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">"Bigger α tracks more closely, so it's better" — wrong. Large α = <b>oversensitive</b> to noise (high variance); small α = <b>sluggish</b> (high bias). This is the classic <b>bias-variance tradeoff</b> — no universal value; tune to the signal-to-noise ratio.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: when tracking personal/household metrics (weight, daily focus time, a child's routine), exponential smoothing gives you a <b>de-noised trend line</b> — far more reliable for decisions than staring at the raw jitter. Don't let a single day's swing set the tempo.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Exponential smoothing = memory with exponentially decaying weights; Kalman = smoothing with "uncertainty management" that auto-tunes trust.<br>🤔 Kalman's "fuse multiple signals weighted by variance" — is that the same math as your distributed reads "pick a source weighted by replica health"?</div>
+  </div>
+</div>
+
+<!-- 3. Prophet -->
+<div class="card">
+  <h2>Prophet<span class="en">Prophet (Facebook / Meta)</span></h2>
+  <div class="tags"><span class="tag">additive model</span><span class="tag orange">interpretable</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Prophet decomposes a time series into <b>independent components that add up</b>: long-term trend + yearly cycle + weekly cycle + holiday effects + noise — like splitting a system into <b>microservices</b>, each owning one piece, each separately visualizable and configurable. It's a <b>GAM (Generalized Additive Model)</b>, not a black box — you can read what each component is doing.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>ARIMA wants you to know how to tune p,d,q — business analysts can't. It's also fiddly with missing values, outliers, and <b>multiple seasonalities</b> (weekly + yearly at once). Prophet (Taylor &amp; Letham 2018) was designed for "<b>forecasting at scale with an analyst in the loop</b>" — turning the model into a few knobs people can understand and adjust directly:</p>
+<div class="diagram">
+<b style="color:#7b61ff">Prophet additive decomposition</b><br><br>
+<span class="box">y(t)</span> <span class="arrow">=</span> <span class="box g">g(t) trend</span> <span class="arrow">+</span> <span class="box o">s(t) seasonality</span> <span class="arrow">+</span> <span class="box p">h(t) holidays</span> <span class="arrow">+</span> <span style="color:#5a6378">ε noise</span><br><br>
+<span style="color:#8b92a8">g: piecewise linear/logistic trend, auto-detects changepoints</span><br>
+<span style="color:#8b92a8">s: periodic component fit with a Fourier series</span><br>
+<span style="color:#8b92a8">h: holidays/events you declare explicitly (school breaks, big sales)</span>
+</div>
+    <p style="margin-top:10px">Each term can be plotted on its own, and you can inject <b>domain priors</b> ("this day is a big sale, volume doubles"). Two design choices worth understanding: <b>changepoints</b> — Prophet scatters candidate trend turning points and uses regularization to zero out most weights, keeping only real inflections (a sparse-modeling idea that prevents trend overfitting); and <b>additive vs multiplicative seasonality</b> — if seasonal swings grow with the baseline (higher level, taller peaks), switch to multiplicative, otherwise additive systematically underestimates the peaks. This is why it caught on with business teams: not highest accuracy, but <b>easy + interpretable + robust to missing values and outliers</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> prophet <span class="kw">import</span> Prophet
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cmt"># Prophet convention: two columns, ds=date, y=value</span>
+df = pd.<span class="fn">read_csv</span>(<span class="str">"traffic.csv"</span>)        <span class="cmt"># has ds, y columns</span>
+
+m = <span class="fn">Prophet</span>(yearly_seasonality=<span class="kw">True</span>,
+            weekly_seasonality=<span class="kw">True</span>)
+m.<span class="fn">add_country_holidays</span>(country_name=<span class="str">"CN"</span>)  <span class="cmt"># inject China holidays</span>
+m.<span class="fn">fit</span>(df)
+
+future = m.<span class="fn">make_future_dataframe</span>(periods=30)  <span class="cmt"># next 30 days</span>
+forecast = m.<span class="fn">predict</span>(future)
+m.<span class="fn">plot_components</span>(forecast)               <span class="cmt"># plot trend/season/holidays separately</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">"Prophet is a forecasting miracle, better than ARIMA at everything" — wrong. Researchers have criticized its "good by default" reputation: on <b>short series, no clear seasonality, or complex interactions with external regressors</b>, it may not win. Its strength is <b>ease + interpretability</b>, not accuracy crown. Honestly: it's often a strong baseline, not the endpoint.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: forecasting <b>weekly/yearly traffic</b> for a blog or product, feeding in school breaks and long holidays — Prophet gives an interpretable decomposition plot in a few lines, so you can see at a glance "is the rise trend, or a holiday effect?"</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Prophet = decompose a series into interpretable additive components, prioritizing "humans can read and adjust it" over "machine accuracy is highest."<br>🤔 When interpretability (you see every component) clashes with higher accuracy (but a black box), which matters more in your own decision scenarios?</div>
+  </div>
+</div>
+
+<!-- 4. Time-Series Foundation Models / TimesFM -->
+<div class="card">
+  <h2>Time-Series Foundation Models<span class="en">Time-Series Foundation Models · TimesFM</span></h2>
+  <div class="tags"><span class="tag">foundation model</span><span class="tag purple">zero-shot</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Treat "predict the next value" as "predict the next token" — exactly what an LLM does. <b>TimesFM</b> (Google 2024) is a decoder-only transformer, pretrained on <b>hundreds of billions of real time-points</b>, that then <b>zero-shot forecasts</b> on series it has never seen, without retraining for that series. The analogy: upgrading from "every project builds its own forecasting model" to "calling a shared, pretrained piece of infrastructure."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>ARIMA / Prophet must be fit per series and can't capture complex nonlinear long-range dependencies; earlier deep time-series models had to be trained <b>per dataset</b>, a high bar. The foundation-model route ports the LLM playbook over:</p>
+<div class="diagram">
+<b style="color:#7b61ff">TimesFM: predict numbers like tokens</b><br><br>
+<span class="box">raw series</span> <span class="arrow">→</span> <span class="box o">cut into non-overlapping patches</span> <span class="arrow">→</span> <span class="box p">decoder-only Transformer</span> <span class="arrow">→</span> <span class="box g">predict future patches</span><br><br>
+<span style="color:#8b92a8">patch: cut continuous values into short segments (like ViT image patches), shortening the sequence</span><br>
+<span style="color:#8b92a8">causal attention: only look at the past, autoregress forward</span>
+</div>
+    <p style="margin-top:10px"><b>Patching</b> (cutting continuous values into short non-overlapping segments, like ViT image patches, like merging characters into tokens) has two benefits: it shrinks sequence length to 1/patch, easing attention's O(n²) cost; and it makes the model learn on "<b>local shapes (the small waveform inside a patch)</b>" rather than single points — closer to how a human reads a chart. It also outputs <b>quantile forecasts</b> rather than a single point, giving uncertainty bands for free. The paper (arXiv 2310.10688, ICML 2024) reports: after pretraining on hundreds of billions of real time-points, zero-shot performance can approach supervised models <b>trained specifically</b> on a single dataset — that's the substance behind the word "foundation model."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="cmt"># pip install timesfm —— Google's official SDK</span>
+<span class="cmt"># note: foundation-model libraries iterate fast; defer to the official repo</span>
+<span class="kw">import</span> timesfm
+
+tfm = timesfm.<span class="fn">TimesFm</span>(
+    hparams=timesfm.<span class="fn">TimesFmHparams</span>(horizon_len=24),
+    checkpoint=timesfm.<span class="fn">TimesFmCheckpoint</span>(
+        huggingface_repo_id=<span class="str">"google/timesfm-1.0-200m"</span>),
+)
+
+<span class="cmt"># zero-shot directly: give history, ask for the future, no per-series training</span>
+point_forecast, _ = tfm.<span class="fn">forecast</span>(
+    inputs=[history_values],   <span class="cmt"># list; each entry is one history segment</span>
+    freq=[0],                  <span class="cmt"># 0=high freq (daily/hourly), 1=weekly/monthly, 2=low</span>
+)
+<span class="fn">print</span>(point_forecast)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">"With foundation models, ARIMA / Prophet are obsolete" — wrong. Honestly: a big model is overkill for <b>short series and small data</b>, with higher cost and latency and worse interpretability; classic methods stay first choice when you need "few data points, explainability, or speed." Foundation models win on "<b>many heterogeneous series, zero-shot, no patience for tuning</b>."</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: when you want forecasts for dozens of different metrics <b>in one shot</b> and don't want to tune each, use TimesFM's zero-shot as a fast baseline; if one series really matters, refine it with ARIMA / Prophet.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Time-series foundation models = turn "predict the next segment of numbers" into "predict the next token," trading pretraining for zero-shot generality.<br>🤔 When a field gets a "pretrain + zero-shot" foundation model, do the existing specialized methods die out, or retreat to the "little data / need explanation" niche?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://otexts.com/fpp3/" target="_blank">Hyndman &amp; Athanasopoulos — Forecasting: Principles and Practice (FPP3)</a> — free online classic; the clearest treatment of ARIMA / ETS / state space. Must-read</li>
+      <li><a href="https://www.statsmodels.org/stable/tsa.html" target="_blank">statsmodels time-series docs</a> — official API for ARIMA / SARIMAX / Holt-Winters</li>
+      <li><a href="https://peerj.com/preprints/3190/" target="_blank">Taylor &amp; Letham 2018 — Forecasting at Scale (Prophet)</a> — the Prophet design paper: additive model + analyst-in-the-loop</li>
+      <li><a href="https://facebook.github.io/prophet/" target="_blank">Prophet official docs</a> — install, holidays, changepoints, uncertainty intervals</li>
+      <li><a href="https://arxiv.org/abs/2310.10688" target="_blank">TimesFM — A decoder-only foundation model for time-series forecasting (ICML 2024)</a> — the flagship time-series foundation model</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. ARIMA uses "differencing," Prophet uses a "trend component," Transformers use "autoregression" — how do their philosophies of handling trend fundamentally differ?</summary><div>Three worldviews. ARIMA treats trend as <b>interference to remove</b>: difference it flat into a stationary series, then model the fluctuations — trend isn't understood, it's "subtracted away." Prophet treats trend as a <b>component to model explicitly and interpretably</b>: fit it with piecewise linear/logistic functions and auto-find changepoints; trend is a first-class citizen you can plot alone. The Transformer presupposes no trend form at all — it throws trend, seasonality, and noise <b>into one data distribution</b> and lets massive pretraining make the model "have seen all kinds of trends" so it generalizes; trend is <b>memorized implicitly</b>. In engineering terms: the first is "normalize it away then process," the second is "split into observable subsystems," the third is "learn end-to-end, no feature engineering." Later means less manual work, more data hunger, harder to explain.</div></details>
+
+    <details><summary>2. The Kalman filter's predict→update loop — which distributed/systems patterns is it isomorphic to?</summary><div>At heart it's <b>Bayesian updating</b>: prior (prediction) + likelihood (observation) → posterior (updated estimate), recursing once per data point. Many things are isomorphic: (a) <b>sensor fusion</b> — multiple unreliable sensors weighted by variance, exactly what Kalman gain does; (b) <b>adaptive backoff / dynamic TTL</b> — adjust trust in the new signal vs the old state based on "how accurate were recent predictions"; (c) <b>replica selection in distributed reads</b> — pick a source weighted by replica health/latency variance, same mathematical skeleton; (d) more abstractly, it's the seed of <b>online learning</b>: O(1)-memory incremental state update without recomputing all history. Understand Kalman gain K = "how much to trust new data" and you'll recognize that dial across many system designs.</div></details>
+
+    <details><summary>3. Can time-series foundation models' zero-shot really replace classic methods? When are classic methods still irreplaceable?</summary><div>Not a full takeover soon — rather <b>layered coexistence</b>. The foundation-model sweet spot: many series, heterogeneous, no patience for per-series tuning, OK with a black box, GPU available. Where classic methods are irreplaceable: (a) <b>tiny data</b> — dozens of points, where a big model has nothing to work with and ARIMA/ETS is steadier; (b) <b>need explanation</b> — finance, medicine, anywhere you must tell a human "why it will rise," where Prophet's decomposition plots are unbeatable; (c) <b>need fast/cheap</b> — edge devices, high-frequency online prediction, where a few-line statistical model crushes a big model on latency and cost; (d) <b>strong domain priors</b> — when you know the holiday/promo rules exactly, injecting them explicitly beats letting the model guess. The pattern mirrors NLP: foundation models raise the floor of the "general baseline," but <b>specialized methods keep a moat in niche scenarios</b>.</div></details>
+
+    <details><summary>4. Almost all classic time-series methods assume "stationarity." Is that as dangerous as assuming "load is stationary" in distributed systems? What happens when the assumption breaks?</summary><div>Equally dangerous, and it fails similarly. The stationarity assumption = "the future's statistical regularities match the past's." The moment a <b>structural break (regime change)</b> hits — pandemic, policy, a product blowing up, a phase transition — the model is <b>confidently wrong</b>: it keeps extrapolating the old distribution with narrow confidence bands, exactly like capacity planning off historical means getting blown through by a traffic spike. The remedies mirror systems design: (a) <b>monitor residuals/drift</b>, watch forecast error like an SLO and alert + retrain past a threshold; (b) <b>use locally adaptive models</b> (Kalman, sliding windows) rather than one-shot global fits; (c) <b>don't trust point forecasts alone — read the interval</b>, treat uncertainty as a first-class citizen; (d) accept that some breaks are <b>fundamentally unpredictable</b>, and design for "detect fast + recover fast" instead of "prophesy precisely." Forecasting maturity is knowing when forecasting fails.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 35 · 2026-06-21</footer>
+
+</div>
+
+</body>
+</html>
