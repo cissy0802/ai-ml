@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Causal Inference — Day 36</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+table.po{border-collapse:collapse;margin-top:10px;font-size:0.85rem;font-family:"SF Mono",Menlo,monospace;width:100%}
+table.po th,table.po td{border:1px solid #1f2740;padding:7px 10px;text-align:center;color:#cfd3df}
+table.po th{color:#00d4ff;background:rgba(0,212,255,0.06)}
+table.po .miss{color:#ff8e8e}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Causal Inference</h1>
+  <div class="meta">Day 36 · 2026-06-22</div>
+  <div class="audience">For: engineers with coding experience, outside the AI field</div>
+</header>
+
+<!-- 1. Causation vs Correlation -->
+<div class="card">
+  <h2>Causation vs Correlation<span class="en">Causation vs Correlation</span></h2>
+  <div class="tags"><span class="tag">Core Distinction</span><span class="tag purple">Confounding</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>On your monitoring dashboard, CPU and latency always spike together — but the curves alone <b>can't tell you</b> whether CPU drives latency, latency drives CPU, or a <b>hidden common upstream</b> (a traffic surge) is pushing both. That hidden upstream is a <b>confounder</b> — like a <b>shared dependency</b> you never drew into the dependency graph. Reading causation off correlation is like concluding "service A calls service B" just because the two jitter at the same time.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Correlation answers an <b>observational</b> question: "given that I see X high, Y is probably high too" — formally the conditional probability <strong>P(Y | X)</strong>. Causation answers an <b>interventional</b> one: "if I <b>actively</b> raise X, does Y change?" — Judea Pearl writes this with the <strong>do-operator</strong> as <strong>P(Y | do(X))</strong>. The whole gap between them lives in confounding: when Z drives both X and Y, X and Y will correlate strongly even with zero causal link.</p>
+    <p style="margin-top:8px">Mechanically, a confounder opens a <b>backdoor path</b>: X ← Z → Y. Correlation <b>blends</b> "the true X→Y effect" with "the spurious association via Z." The core move of causal identification is to <b>close the backdoor</b> — stratify, regress, or match to "control for Z," leaving only the direct X→Y channel. This is also the root of <strong>Simpson's paradox</strong>: without controlling for Z, the aggregate trend can flatly contradict the trend inside every subgroup.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Confounding as a causal graph (DAG): Z is the backdoor</span><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="box p">Z confounder</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↘<br>
+<span class="box">X treatment</span> <span class="arrow">— ? →</span> <span class="box g">Y outcome</span><br><br>
+<span style="color:#5a6378;font-size:0.78rem">corr(X,Y) = true effect(X→Y) + backdoor spurious(X←Z→Y)<br>control for Z = close the backdoor, what remains is causal</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> pandas <span class="kw">as</span> pd, numpy <span class="kw">as</span> np
+<span class="kw">import</span> statsmodels.formula.api <span class="kw">as</span> smf
+
+np.random.seed(0)
+n = 2000
+Z = np.random.normal(size=n)          <span class="cmt"># confounder: e.g. "user's baseline activity"</span>
+X = Z + np.random.normal(size=n)      <span class="cmt"># Z raises X (active users use new feature more)</span>
+Y = Z + np.random.normal(size=n)      <span class="cmt"># Z raises Y too; true X effect on Y = 0</span>
+df = pd.DataFrame({<span class="str">"X"</span>: X, <span class="str">"Y"</span>: Y, <span class="str">"Z"</span>: Z})
+
+<span class="cmt"># Without controlling Z: X looks strongly to drive Y (spurious)</span>
+<span class="fn">print</span>(smf.<span class="fn">ols</span>(<span class="str">"Y ~ X"</span>, df).fit().params[<span class="str">"X"</span>])      <span class="cmt"># ≈ 0.5</span>
+<span class="cmt"># Controlling Z (close backdoor): X coefficient collapses to truth</span>
+<span class="fn">print</span>(smf.<span class="fn">ols</span>(<span class="str">"Y ~ X + Z"</span>, df).fit().params[<span class="str">"X"</span>])  <span class="cmt"># ≈ 0</span>
+</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + use case</div>
+    <div class="tip">"With enough data, correlation can stand in for causation" — the bigger the dataset, the worse this gets. More samples <b>narrow the confidence interval of the spurious association</b>, making you <b>more</b> certain of a false conclusion. Big data doesn't fix confounding bias; it just <b>estimates the bias more precisely</b>. Only design fixes it: randomization, or explicitly modeling the confounder.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: you notice "the weeks I used an AI assistant, my output was higher." Don't credit the tool yet. Ask: were those weeks ones where you were <b>already in good shape</b> (confounder Z = energy/task difficulty), making you both more willing to use AI <b>and</b> more productive? To test causation, make "use AI or not" <b>independent</b> of your state — e.g. randomly assign some tasks to use it and some not.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Correlation is P(Y|X), causation is P(Y|do(X)) — the entire gap hides in the common upstreams you never drew into the dependency graph.<br>🤔 Recall a recent decision you made from a "data correlation": is there a hidden common cause that could explain both ends at once?</div>
+  </div>
+</div>
+
+<!-- 2. Potential Outcomes -->
+<div class="card">
+  <h2>Potential Outcomes Framework<span class="en">Potential Outcomes / Rubin Model</span></h2>
+  <div class="tags"><span class="tag">Theoretical Framework</span><span class="tag purple">Counterfactual</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A counterfactual is "<b>what would have happened if I hadn't shipped this deploy?</b>" The catch: you <b>cannot</b> both deploy and not-deploy the same server at the same instant. This is exactly the A/B test mindset, but with an unavoidable flaw — for each unit you can only ever observe <b>one parallel universe</b>; the other is forever <b>missing data</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Rubin's potential-outcomes framework assigns each unit i two values: <strong>Y_i(1)</strong> (outcome if treated) and <strong>Y_i(0)</strong> (if not). The individual causal effect is <strong>Y_i(1) − Y_i(0)</strong>. The trouble: i is either treated or not, so you <b>only ever observe one</b>; the other is the counterfactual. This is the <strong>Fundamental Problem of Causal Inference</strong> — essentially a <b>missing-data problem</b>.</p>
+    <p style="margin-top:8px">Since individual effects are unobservable, we settle for an <b>average</b>: <strong>ATE = E[Y(1) − Y(0)]</strong>. But naively taking "treated-group mean − untreated-group mean" carries <b>selection bias</b>: people who choose treatment differ from those who don't. <b>Randomization</b> is the key — random assignment makes "treated or not" <b>independent</b> of potential outcomes, so the two groups are statistically identical pre-treatment, and the between-group difference is an unbiased ATE. That's why the RCT (randomized controlled trial) is the gold standard.</p>
+
+<table class="po">
+<tr><th>Unit</th><th>Y(0) untreated</th><th>Y(1) treated</th><th>Indiv. effect</th></tr>
+<tr><td>A (treated)</td><td class="miss">? counterfactual</td><td>8</td><td class="miss">unknowable</td></tr>
+<tr><td>B (untreated)</td><td>5</td><td class="miss">? counterfactual</td><td class="miss">unknowable</td></tr>
+<tr><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+</table>
+<div style="color:#5a6378;font-size:0.78rem;margin-top:6px">Every row has a missing red cell → individual effects are never fully seen; only group averages, via randomization</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+np.random.seed(1)
+n = 5000
+T = np.random.<span class="fn">binomial</span>(1, 0.5, n)   <span class="cmt"># random assignment: key! independent of the unit</span>
+Y0 = np.random.normal(50, 10, n)        <span class="cmt"># potential outcome if untreated</span>
+tau = 4.0                               <span class="cmt"># true causal effect +4</span>
+Y1 = Y0 + tau
+Y = np.<span class="fn">where</span>(T == 1, Y1, Y0)        <span class="cmt"># observe only the assigned arm</span>
+
+<span class="cmt"># Thanks to randomization, group diff is an unbiased ATE estimate</span>
+ate = Y[T == 1].<span class="fn">mean</span>() - Y[T == 0].<span class="fn">mean</span>()
+<span class="fn">print</span>(<span class="fn">round</span>(ate, 2))   <span class="cmt"># ≈ 4.0, close to true tau</span>
+</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + use case</div>
+    <div class="tip">"I have a treatment group and a control group, so comparing means gives the effect" — only true under <b>random assignment</b>. In observational data the two groups are inherently incomparable (selection bias), so a raw mean comparison gives correlation, not the ATE. The framework's value isn't the formula — it's that it forces you to <b>spell out what the counterfactual is</b> and why it's missing.</div>
+    <div class="exercise" style="margin-top:8px">📌 Decision-support scenario: design a "micro-RCT" for a personal project. To learn "does the Pomodoro technique actually help?", don't only use it on bad days — flip a coin to <b>randomly</b> decide each day whether to use it, then compare the two groups' output after two weeks. Randomization spreads the confounder (your daily state) evenly across both groups, sparing you from modeling a pile of control variables.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 The fundamental problem of causal inference is missing data: you only ever see one parallel universe per unit, and randomization is the only clean way to "borrow back" the other.<br>🤔 Which "obviously effective" habit of yours has never been tested against the counterfactual of "not doing it"? How would you design a minimal randomized experiment for it?</div>
+  </div>
+</div>
+
+<!-- 3. Instrumental Variables -->
+<div class="card">
+  <h2>Instrumental Variables<span class="en">Instrumental Variables (IV)</span></h2>
+  <div class="tags"><span class="tag">Quasi-experiment</span><span class="tag purple">Identification</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>When you can't randomize and have a confounder you can't shake off, hunt for a <b>natural randomizer</b> — an external nudge that <b>only</b> changes "treated or not" and is itself unrelated to the outcome or the confounder. Analogy: your canary system assigns a feature flag via a <b>random seed</b>; who gets the new feature is random and unrelated to user profile. So you treat "randomly assigned the flag" as a <b>lever</b> to pry out the feature's causal effect — even though whether users actually adopt the feature is self-selected.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>With <b>unobserved confounding</b>, "control for Z" fails — you can't even measure Z. An instrument <strong>Z</strong> sidesteps it via three conditions: <strong>(1) relevance</strong> — Z genuinely affects treatment X (Z→X is strong enough); <strong>(2) exclusion</strong> — Z affects Y <b>only through X</b>, no other path; <strong>(3) independence</strong> — Z is unrelated to the unobserved confounder, i.e. "as good as randomly assigned."</p>
+    <p style="margin-top:8px">The mechanism is <b>two-stage least squares (2SLS)</b>: stage one uses Z to predict X, isolating the part of X's variation <b>driven only by Z</b> (this part is "clean," confounder-free); stage two uses that clean prediction to explain Y. Intuitively, you use <b>only the small exogenous wiggle the instrument provides</b> to estimate the effect, discarding all the confounder-polluted variation. The cost: larger variance, and conditions (2)(3) <b>can't be tested from data</b> — only argued from domain knowledge. That's IV's most fragile point.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np, pandas <span class="kw">as</span> pd
+<span class="kw">from</span> linearmodels.iv <span class="kw">import</span> IV2SLS  <span class="cmt"># pip install linearmodels</span>
+
+np.random.seed(2)
+n = 4000
+Z = np.random.normal(size=n)              <span class="cmt"># instrument: exogenous random nudge</span>
+U = np.random.normal(size=n)              <span class="cmt"># unobserved confounder, unmeasurable</span>
+X = 0.8*Z + U + np.random.normal(size=n)  <span class="cmt"># X driven by both Z and confounder U</span>
+Y = 2.0*X + 3*U + np.random.normal(size=n)<span class="cmt"># true effect=2, but U pollutes OLS</span>
+df = pd.DataFrame({<span class="str">"Y"</span>: Y, <span class="str">"X"</span>: X, <span class="str">"Z"</span>: Z})
+
+<span class="cmt"># OLS is biased by the confounder (far from 2); IV pries out clean effect</span>
+iv = IV2SLS.<span class="fn">from_formula</span>(<span class="str">"Y ~ 1 + [X ~ Z]"</span>, df).<span class="fn">fit</span>()
+<span class="fn">print</span>(<span class="fn">round</span>(iv.params[<span class="str">"X"</span>], 2))   <span class="cmt"># ≈ 2.0, close to true causal effect</span>
+</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + use case</div>
+    <div class="tip">"A weak instrument will do" — very dangerous. When Z→X is weak (a weak instrument), stage one carries almost no information, and 2SLS <b>wildly amplifies bias and variance</b> — the result can be worse than plain OLS. Always check the stage-one F-statistic (a common rule of thumb is &gt; 10) before trusting it.</div>
+    <div class="exercise" style="margin-top:8px">📌 Cross-disciplinary scenario: in economics, "the effect of years of schooling on earnings" uses <b>quarter of birth</b> as an instrument (Angrist &amp; Krueger) — school-entry-age rules make children born in different quarters passively get slightly more/less schooling, and the "quarter" is unrelated to individual ability — a natural randomizer. Learning to spot "quasi-random events" in life (policy switches, geographic borders, lotteries) is the core skill of treating observational data like an experiment.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 An instrumental variable is "borrowed randomness" — find an exogenous lever that moves only the treatment and never touches the outcome, then estimate causation from its small clean wiggle.<br>🤔 For some "does X cause Y" question you care about, is there an event in the world that <b>near-randomly</b> changed X yet has no direct link to Y?</div>
+  </div>
+</div>
+
+<!-- 4. Difference-in-Differences -->
+<div class="card">
+  <h2>Difference-in-Differences<span class="en">Difference-in-Differences (DiD)</span></h2>
+  <div class="tags"><span class="tag">Quasi-experiment</span><span class="tag purple">Panel Data</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>You change the config on one shard (treatment) and leave another untouched (control). Just looking at the treated shard before/after won't do — the <b>whole cluster</b> may be trending up over that period due to traffic seasonality. DiD's move: <b>(treatment before-after diff) minus (control before-after diff)</b>, which <b>subtracts out the shared time trend both groups lived through</b>, leaving only the net effect of the config change.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>When treatment isn't randomly assigned, but you have <b>two time points (before/after)</b> and an <b>untreated control group</b>, DiD can identify the effect. It cancels two biases at once: the <b>first difference (before vs after)</b> removes each group's <b>time-invariant fixed differences</b> (e.g. the treated group's baseline was just higher); the <b>second difference (treated vs control)</b> removes the <b>time trend both groups share</b> (the market's seasonal swing). After both subtractions, what's left is the causal effect.</p>
+    <p style="margin-top:8px">The core assumption is <strong>parallel trends</strong>: <b>absent treatment</b>, the treated and control groups would have moved along parallel paths. This is the entire source of DiD's credibility — and it <b>can't be proven directly</b>; you can only support it by checking that the two lines ran parallel across multiple pre-treatment periods. The classic case is <strong>Card &amp; Krueger (1994)</strong> on minimum wage: New Jersey raised its minimum wage while neighboring Pennsylvania didn't; a difference-in-differences on fast-food employment found employment did <b>not</b> fall as standard theory predicted.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Parallel trends: counterfactual = control's trend shifted onto treatment</span><br><br>
+Emp.&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#00d4ff">●</span> treated (actual)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#00d4ff">●</span><span style="color:#5a6378">- - - -</span><span style="color:#ff8e8e">○</span> treated (counterfactual)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">▲</span> control<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">▲</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──────────────→ time<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;before&nbsp;&nbsp;|&nbsp;after<br>
+<span style="color:#5a6378;font-size:0.78rem">DiD effect = vertical gap between actual● and counterfactual○<br>counterfactual = control's change, shifted to the treated baseline</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> statsmodels.formula.api <span class="kw">as</span> smf
+
+<span class="cmt"># treat: in treatment group?  post: in post-treatment period?</span>
+df = pd.<span class="fn">DataFrame</span>({
+    <span class="str">"y"</span>:     [20, 22, 18, 25],   <span class="cmt"># control before/after + treated before/after</span>
+    <span class="str">"treat"</span>: [0,  0,  1,  1],
+    <span class="str">"post"</span>:  [0,  1,  0,  1],
+})
+<span class="cmt"># coefficient on interaction treat:post = the DiD causal effect</span>
+m = smf.<span class="fn">ols</span>(<span class="str">"y ~ treat + post + treat:post"</span>, df).<span class="fn">fit</span>()
+<span class="fn">print</span>(m.params[<span class="str">"treat:post"</span>])
+<span class="cmt"># = (25-18) - (22-20) = 7 - 2 = 5  ← subtracted the +2 market trend</span>
+</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + use case</div>
+    <div class="tip">"Just grab a control group and slap DiD on it" — pick the wrong control, parallel trends fails, and the conclusion is worthless. If the treated group was <b>already accelerating upward</b> before treatment (non-parallel trends to begin with), DiD will misattribute that natural difference to the treatment. Always plot multiple pre-treatment periods to confirm the lines stayed parallel (a "pre-trends test").</div>
+    <div class="exercise" style="margin-top:8px">📌 Personal-project scenario: to assess "did my weekly-review quality improve after switching note systems," don't just look at your own before/after — find a <b>similar dimension you didn't switch</b> as control (e.g. another category of notes left untouched), and use DiD to subtract out "you were generally more engaged this period," so you don't credit all the gain to the tool.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 DiD "subtracts twice" to peel off fixed between-group differences and the shared time trend — but all its credibility rests on "parallel trends," an assumption you can never prove, only support.<br>🤔 For the change you want to attribute, is there a control that "didn't undergo the change but would have fluctuated in sync"? Without it, how do you know the post-change movement wasn't just the market trend?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://mixtape.scunning.com/" target="_blank">Causal Inference: The Mixtape (Scott Cunningham)</a> — free online, engineer-friendly, covers DiD/IV/RDD; strongly recommended starting point</li>
+      <li><a href="https://miguelhernan.org/whatifbook" target="_blank">Causal Inference: What If (Hernán &amp; Robins)</a> — free PDF, the authoritative text on potential outcomes, with Python/R code</li>
+      <li><a href="https://ideas.repec.org/a/aea/aecrev/v84y1994i4p772-93.html" target="_blank">Card &amp; Krueger (1994) minimum-wage study</a> — the most classic empirical case of difference-in-differences, AER index</li>
+      <li><a href="https://en.wikipedia.org/wiki/Causality_(book)" target="_blank">Judea Pearl, <em>Causality</em></a> — the foundational work on the do-operator and DAG backdoor criterion; popular version: <em>The Book of Why</em></li>
+      <li><a href="https://www.pywhy.org/dowhy/" target="_blank">DoWhy (Microsoft open-source library)</a> — a Python library operationalizing the four-step "model assumptions → identify → estimate → refute" workflow</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. If the RCT is the gold standard for causation, why invent quasi-experimental methods like IV and DiD at all? Where do they sit on the ladder of causal credibility?</summary><div>Because RCTs are often <b>impossible</b>: unethical (you can't randomly make people smoke), infeasible (you can't randomly raise the minimum wage in some states), too costly or too slow. Quasi-experiments are "settling for letting nature randomize for you" — IV borrows an exogenous event as a randomizer; DiD borrows a control group to subtract the trend. The credibility ladder roughly: RCT &gt; natural experiment / IV / DiD / regression discontinuity &gt; confounder-controlled regression / matching &gt; raw correlation. The lower you go, the more you lean on <b>assumptions that can't be checked from data</b> (exclusion, parallel trends), and the more fragile the credibility. Key insight: causal strength depends not on how complex the model is, but on <b>how credible the identifying assumptions are</b>. A simple DiD with an airtight control beats a fancy regression stuffed with controls that still can't close unobserved confounding — isomorphic to "correctness comes from invariants, not lines of code" in distributed systems.</div></details>
+
+    <details><summary>2. ML models predict superbly — so why do ML engineers still stumble on causal questions? Are prediction and causation even the same thing?</summary><div>Not at all the same — one of the deepest traps in ML practice. Prediction optimizes "<b>given the X I observe, what is Y?</b>" — it <b>happily</b> exploits every correlation, including spurious ones from confounding, because that lowers loss too. Causation asks "<b>if I go change X, what happens to Y?</b>" — and now spurious associations are poison. A classic crash: a model finds "among hospitalized patients, asthmatics have <b>lower</b> mortality" (prediction-wise correct — asthmatics get more intensive monitoring), but concluding "asthma protects pneumonia patients" causally and triaging on it would kill people — "monitoring intensity" is the confounder. A 0.99-AUC model can still give catastrophic advice on "what happens after an intervention." So interpretability and feature importance are <b>not</b> causal attribution: a high SHAP value only says the feature is useful for <b>prediction</b>, not that changing it changes the outcome. To decide (not predict), you must switch to a causal framework.</div></details>
+
+    <details><summary>3. "Parallel trends" and "the exclusion restriction" are both assumptions data can't prove, only argument can support. How does this "depending on untestable assumptions" situation compare to engineering domains you know? How should you treat it?</summary><div>This is highly isomorphic to depending on <b>invariants you can't exhaustively test</b> in distributed systems — you can never test "linearizable under all network partitions," only argue it from protocol design plus heavy indirect evidence (Jepsen tests, formal verification). The handling transfers too: (1) <b>state the assumption explicitly</b>, don't bury it in code/model — in causal analysis, clearly declare "I assume parallel trends / exclusion"; (2) <b>shore it up with indirect evidence</b> — DiD uses multi-period pre-trend plots, IV uses related placebo tests (run the same analysis on an outcome that should show no effect; if it "shows" one, the assumption is broken); (3) <b>sensitivity analysis</b> — ask "how badly must the assumption fail before the conclusion flips," which is exactly what DoWhy's "refute" step does; (4) <b>honestly label the uncertainty</b>. Core mindset: a causal conclusion is always a conditional claim "true under assumption X"; engineering maturity shows in knowing which bets you placed and how heavily, not in pretending you placed none.</div></details>
+
+    <details><summary>4. Mapping the causal ladder (association → intervention → counterfactual) onto today's LLMs, which rung are they on? What does that mean for "can AI truly understand the world"?</summary><div>Pearl's ladder has three rungs: <b>association</b> (what would seeing X tell me), <b>intervention</b> (what happens if I do X), <b>counterfactual</b> (what if I hadn't done X). LLMs trained on massive text learn the <b>association</b> rung — they model the joint distribution of tokens, fundamentally a powerful correlation engine. They can <b>recite</b> human-written causal knowledge (because the corpus contains causal statements), but that isn't the same as doing intervention/counterfactual reasoning themselves; faced with novel out-of-distribution interventions, they often give plausible-sounding but causally wrong answers. This is the live debate: some argue pure associational learning can't reach the upper rungs and you must inject explicit causal structure; others argue enough scale plus tools (agents that can actually run experiments and change world state via APIs) can approximate the intervention rung. The lesson for the "super-individual": use LLMs for <b>prediction/generation/retrieval</b> — their home turf — but for <b>causal decisions</b> (what will this change cause), treat them as a hypothesis-proposing assistant, while real causal judgment still needs you to verify with this article's frameworks. The human-AI division of labor falls exactly along the causal ladder.</div></details>
+
+    <details><summary>5. How do you choose among this article's four tools (confounder-controlled regression, potential outcomes, IV, DiD)? Given a real problem, what's the decision path?</summary><div>Roughly a decision tree: <b>Can you randomize?</b> → if yes, run an RCT (compute the ATE via potential outcomes), don't overthink. <b>Can't randomize, but are all confounders observable?</b> → if yes, control for them via regression/matching (close the backdoor), but honestly ask "did I really observe them all?" — usually not. <b>Unobserved confounding, but can you find an exogenous instrument?</b> → if yes, and it's strong enough (stage-one F&gt;10) with a defensible exclusion restriction, use IV. <b>Have before/after panel data and a credible control group?</b> → if yes and pre-trends are parallel, use DiD. The three often combine: take a DiD main estimate, then use IV or sensitivity analysis as a robustness check. For BigCat's real case — "did the new workflow boost my output" — first choice is to <b>randomly</b> assign tasks to use it or not (micro-RCT); failing that, find an unchanged control dimension and run DiD. Always start with "<b>what is my counterfactual, and why is it credible?</b>" — the tools are just means to answer that.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 36 · 2026-06-22</footer>
+
+</div>
+</body>
+</html>
