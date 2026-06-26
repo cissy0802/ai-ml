@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: Federated & Privacy Learning — Day 40</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+table.cmp{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.86rem}
+table.cmp th,table.cmp td{border:1px solid #1f2740;padding:8px 10px;text-align:left;color:#cfd3df}
+table.cmp th{background:rgba(123,97,255,0.12);color:#a48cff;font-weight:600}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: Federated &amp; Privacy Learning</h1>
+  <div class="meta">Day 40 · 2026-06-26</div>
+  <div class="audience">For: engineers with coding experience, outside the AI field</div>
+</header>
+
+<!-- 1. Federated Learning -->
+<div class="card">
+  <h2>Federated Learning<span class="en">联邦学习</span></h2>
+  <div class="tags"><span class="tag">distributed training</span><span class="tag purple">data locality</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Traditional ML is "<b>move data to compute</b>"—pull everything into a central data center, then train. Federated learning flips this to "<b>move compute to data</b>"—the same idea as the <b>data locality</b> you know from MapReduce: don't move the data, push the code down. The difference is that the reduce stage here aggregates not data but the <b>model gradients each node computed locally</b>; raw data never leaves the user's device.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Pain point: hospital records, phone keyboard logs, bank transactions—this data is <b>both sensitive and scattered</b>; law (GDPR) and commercial interest both forbid centralizing it. But without centralizing it you can't train a good model. The federated answer: the model goes to the data, not the data to the model.</p>
+    <p style="margin-top:8px">The mechanism is <b>FedAvg (Federated Averaging)</b>, proposed by McMahan et al. in 2016—a repeating loop: the server sends the current <b>global model</b> to a batch of clients → each client trains a few steps on its <b>local data</b> → it sends back only the <b>weight update</b> (not the data) → the server takes a <b>data-size-weighted average</b> to form the new global model.</p>
+    <p style="margin-top:8px">The aggregation formula is plain: <code>w ← Σ (n_k / n) · w_k</code>. <b>w_k</b> is client k's trained local weights, <b>n_k</b> its sample count, <b>n</b> the total. Intuition: whoever has more data gets more say in the average—it's just a weighted reduce.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">One FedAvg communication round:</span><br>
+<span class="box p">Central server w</span><br>
+<span class="arrow">↓ push global model</span> <span class="arrow">↓</span> <span class="arrow">↓</span><br>
+<span class="box g">Phone A</span> <span class="box g">Hospital B</span> <span class="box g">Bank C</span> <span style="color:#5a6378">← train locally, data stays put</span><br>
+<span class="arrow">↑ upload only update Δw</span> <span class="arrow">↑</span> <span class="arrow">↑</span><br>
+<span class="box p">Server weight-averages by n_k → new w</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ loop dozens–hundreds of rounds. Communication, not compute, is the bottleneck</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># FedAvg's core is really just this weighted-average fn (frameworks: Flower/FedML)</span>
+<span class="kw">def</span> <span class="fn">fedavg</span>(client_weights, client_sizes):
+    <span class="cmt"># client_weights: list of each client's locally trained weight vectors</span>
+    <span class="cmt"># client_sizes:   each client's local sample count n_k</span>
+    total = <span class="fn">sum</span>(client_sizes)
+    <span class="cmt"># Weight by sample count: more data → larger share</span>
+    global_w = <span class="fn">sum</span>(
+        (n_k / total) * w_k
+        <span class="kw">for</span> w_k, n_k <span class="kw">in</span> <span class="fn">zip</span>(client_weights, client_sizes)
+    )
+    <span class="kw">return</span> global_w  <span class="cmt"># the global model to push next round</span>
+
+<span class="cmt"># Simulate: 3 clients, raw data never leaves them</span>
+w = <span class="fn">fedavg</span>([np.array([1.,2]), np.array([3.,4]), np.array([2.,2])],
+            [100, 50, 200])  <span class="cmt"># bank(200) has the most say</span>
+<span class="fn">print</span>(w)  <span class="cmt"># [1.857 2.286] — biased toward the data-rich client</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">Misconception: "data stays put = privacy is safe." <b>Wrong</b>. Sharing only gradients also leaks—research shows training samples can be <b>reconstructed</b> from uploaded gradients (gradient inversion / model inversion attacks). Federated learning only solves "data isn't centralized," not "is the uploaded content leaky"—so it almost always needs the three cryptographic/statistical tools below layered on top.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: you want to fine-tune a local small model on private notes spread across devices (work laptop, home machine, phone) without pooling them. The federated mindset—"each device computes updates locally, only merge weights"—is the right mental model: treat it as "distributed training" over your personal data.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Federated learning is the "move compute, not data" distributed paradigm; FedAvg is essentially a data-size-weighted reduce.<br>🤔 If a client's uploaded "update" is maliciously crafted (poisoning), does weighted averaging get contaminated? How would you design Byzantine fault tolerance on the aggregation side?</div>
+  </div>
+</div>
+
+<!-- 2. Differential Privacy -->
+<div class="card">
+  <h2>Differential Privacy<span class="en">差分隐私</span></h2>
+  <div class="tags"><span class="tag">privacy math</span><span class="tag purple">quantifiable guarantee</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Differential privacy is like a database query's "<b>controlled redaction</b>": you can ask "what's the average salary," but the system mixes in <b>carefully calibrated noise</b> so you can't reverse-engineer Zhang's salary by diffing "with Zhang vs. without Zhang." The key: privacy no longer rests on "I feel it's safe" but on a <b>guarantee quantifiable by a number ε and accumulable as a budget</b>—like the <b>rate-limit quota (token bucket)</b> you know: each query spends budget, and when it's gone you can't query more.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Pain point: traditional "anonymization" (drop names, drop IDs) keeps getting broken—a few side fields cross-referenced can re-identify a person. DP gives a harder definition: a randomized algorithm M satisfies ε-differential privacy iff for <b>any two datasets D, D′ differing by one record</b> and any output S:</p>
+    <p style="margin-top:8px;text-align:center"><code>Pr[M(D) ∈ S] ≤ e<sup>ε</sup> · Pr[M(D′) ∈ S]</code></p>
+    <p style="margin-top:8px">Intuition: <b>whether or not your record is included</b>, the output distribution barely changes (bounded by the factor e<sup>ε</sup>). So an attacker seeing the result can't tell whether you were in the dataset—your presence is "drowned out." <b>The smaller ε (the privacy budget), the more alike the two distributions, the stronger the privacy—but the more noise and lower the accuracy</b>. This is an <b>unavoidable</b> dial between privacy and utility.</p>
+    <p style="margin-top:8px">How to implement? The classic <b>Laplace mechanism</b>: add Laplace noise to the true answer, with magnitude = <b>sensitivity / ε</b>. Sensitivity = how much changing one record can shift the answer at most (a "count" query has sensitivity 1). Applied to deep learning, this is Abadi et al. 2016's <b>DP-SGD</b>: during training, first <b>clip each sample's gradient</b> (bounding single-sample influence = controlling sensitivity), then <b>add Gaussian noise</b>, and use the "moments accountant" to precisely tally the total ε spent across training.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">The ε dial's trade-off:</span><br>
+ε=0.1 strong privacy <span class="bar" style="width:30px;height:22px"></span> high noise, low accuracy<br>
+ε=1.0 balanced&nbsp; <span class="bar" style="width:70px;height:22px;opacity:0.8"></span> common range<br>
+ε=8.0 weak privacy <span class="bar" style="width:120px;height:22px;opacity:0.6"></span> low noise, high accuracy<br>
+<span style="color:#5a6378;font-size:0.78rem">↑ no "free privacy": ε is a budget you must price explicitly</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># Laplace mechanism: a differentially private release of a "count" query</span>
+<span class="kw">def</span> <span class="fn">private_count</span>(true_count, epsilon, sensitivity=<span class="str">1.0</span>):
+    <span class="cmt"># Count query: adding/removing one record shifts result by at most 1</span>
+    scale = sensitivity / epsilon       <span class="cmt"># noise magnitude ∝ 1/ε</span>
+    noise = np.random.<span class="fn">laplace</span>(loc=<span class="str">0</span>, scale=scale)
+    <span class="kw">return</span> true_count + noise          <span class="cmt"># release the noised result</span>
+
+true = <span class="str">1000</span>  <span class="cmt"># truly 1000 patients have some disease</span>
+<span class="fn">print</span>(<span class="fn">private_count</span>(true, epsilon=<span class="str">0.1</span>))   <span class="cmt"># strong privacy → big noise, maybe 987 or 1013</span>
+<span class="fn">print</span>(<span class="fn">private_count</span>(true, epsilon=<span class="str">2.0</span>))   <span class="cmt"># weak privacy → small noise, ~1000.4</span>
+
+<span class="cmt"># For neural nets, the official lib Opacus (PyTorch) takes over in one line:</span>
+<span class="cmt"># from opacus import PrivacyEngine</span>
+<span class="cmt"># model, optim, loader = PrivacyEngine().make_private(...)  # auto clip + noise</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">Misconception: "any ε is fine, I added noise anyway." <b>Wrong</b>. ε has no universal safe threshold, and it <b>accumulates</b>—querying the same data 10 times costs 10 ε's added up (composition theorem). Quietly setting ε to tens means no protection. It's a budget to be strictly accounted, not a one-time switch.</div>
+    <div class="exercise" style="margin-top:8px">📌 Decision-support scenario: when evaluating a data product that claims to be "anonymized," ask "what's your ε, and how do you account for it?"—it instantly separates real privacy engineering from marketing. It's the habit of trading a vague "sense of safety" for an auditable number.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 DP turns "privacy" from an adjective into a <b>quantifiable, accumulable, priceable</b> mathematical guarantee ε; the core is "with or without your one record, the result is nearly the same."<br>🤔 Federated learning (concept ① today) can still leak from gradients alone, while DP-SGD adds noise to gradients. When combining them, should the noise be added on the client locally or at server aggregation? What are the trust assumptions of each?</div>
+  </div>
+</div>
+
+<!-- 3. Homomorphic Encryption -->
+<div class="card">
+  <h2>Homomorphic Encryption<span class="en">同态加密</span></h2>
+  <div class="tags"><span class="tag">cryptography</span><span class="tag purple">compute on ciphertext</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Ordinary encryption is like locking data in a safe—to use it you must unlock it, and at that instant the plaintext is exposed to the server. Homomorphic encryption (HE) is a "<b>safe with gloves</b>": you can <b>operate inside the box directly</b>, never opening it. In your world: the server can run <b>SUM / dot product</b> directly on <b>encrypted database fields</b>, returns ciphertext, and only you (holding the private key) can open it—while the server <b>never saw a single plaintext</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Pain point: you want to use cloud compute or a third-party model on sensitive data (records, finances) but don't trust them. Uploading plaintext = leak; computing locally = no compute power. HE lets you "<b>outsource the computation without handing over the data</b>."</p>
+    <p style="margin-top:8px">The math core is "<b>preserving operation structure</b>": the encryption function E satisfies <code>E(a) ⊕ E(b) = E(a + b)</code>. That is, some operation ⊕ on ciphertext corresponds, after decryption, to addition on plaintext. A scheme supporting both ciphertext addition and multiplication, for <b>arbitrary depth</b>, is <b>Fully Homomorphic Encryption (FHE)</b>—first constructed by Craig Gentry in 2009 using ideal lattices, a decades-long cryptographic milestone.</p>
+    <p style="margin-top:8px">Why was it impossible before? Each ciphertext operation accumulates <b>noise</b>, multiplication especially fast, and once noise exceeds a threshold it can no longer be decrypted. Gentry's breakthrough was <b>bootstrapping</b>: use homomorphic operations to "<b>decrypt the ciphertext itself and re-encrypt</b>," resetting the noise, enabling unlimited-depth computation. The cost is <b>extreme slowness</b>—the root reason HE isn't yet mainstream. In ML the more common scheme is <b>CKKS</b> (Cheon et al. 2017), supporting <b>approximate</b> real-number arithmetic, well suited to neural inference that tolerates small errors.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Homomorphic inference (data stays encrypted throughout):</span><br>
+<span class="box g">You: plaintext x</span> <span class="arrow">→ encrypt →</span> <span class="box">ciphertext E(x)</span><br>
+<span class="arrow" style="margin-left:40px">↓ upload</span><br>
+<span class="box r">Cloud server: run model on E(x) → E(y)</span> <span style="color:#5a6378">sees neither x nor y</span><br>
+<span class="arrow" style="margin-left:40px">↓ return ciphertext</span><br>
+<span class="box g">You: decrypt E(y) with private key → plaintext y</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ security cost = orders of magnitude slower; CKKS trades precision for practicality</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> tenseal <span class="kw">as</span> ts  <span class="cmt"># OpenMined's HE library, wraps CKKS</span>
+
+<span class="cmt"># 1) Build a context = generate keys + set CKKS parameters</span>
+ctx = ts.<span class="fn">context</span>(ts.SCHEME_TYPE.CKKS, poly_modulus_degree=<span class="str">8192</span>,
+                  coeff_mod_bit_sizes=[<span class="str">60</span>, <span class="str">40</span>, <span class="str">40</span>, <span class="str">60</span>])
+ctx.global_scale = <span class="str">2</span>**<span class="str">40</span>
+ctx.<span class="fn">generate_galois_keys</span>()
+
+<span class="cmt"># 2) Encrypt two vectors (think: your private features)</span>
+a = ts.<span class="fn">ckks_vector</span>(ctx, [<span class="str">1.0</span>, <span class="str">2.0</span>, <span class="str">3.0</span>])
+b = ts.<span class="fn">ckks_vector</span>(ctx, [<span class="str">4.0</span>, <span class="str">5.0</span>, <span class="str">6.0</span>])
+
+<span class="cmt"># 3) Dot product directly on ciphertext—server-side, never sees plaintext</span>
+enc_dot = a.<span class="fn">dot</span>(b)           <span class="cmt"># entirely ciphertext arithmetic</span>
+<span class="fn">print</span>(enc_dot.<span class="fn">decrypt</span>())     <span class="cmt"># ≈ [32.0] = 1*4+2*5+3*6, approximate but accurate enough</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">Misconception: "with FHE, private computation is solved." <b>Reality</b>: FHE is thousands to tens of thousands of times slower than plaintext; running a full large-model inference is still impractical. So it's often <b>downgraded</b>—applying HE only to the most sensitive sliver (e.g., a final similarity match), with MPC / DP for the rest. Treat it as a "nuclear option," not a default switch.</div>
+    <div class="exercise" style="margin-top:8px">📌 Cross-disciplinary scenario: HE is a pure example of "<b>operating correctly on content without understanding it</b>"—it resonates directly with your interest in "form vs. meaning" and "does computation require understanding" (the Chinese Room argument). A system that computes correctly yet "doesn't understand" is itself philosophical material about mind and computation.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 HE fully decouples "computing" from "seeing"—the server can compute but can't look, at a huge performance cost kept alive by bootstrapping.<br>🤔 If one day FHE were fast enough to run full model inference, the "the cloud must be trusted" assumption would vanish. How would that reshape your judgment of "data sovereignty" and AI business models?</div>
+  </div>
+</div>
+
+<!-- 4. Secure Multi-Party Computation -->
+<div class="card">
+  <h2>Secure Multi-Party Computation<span class="en">安全多方计算</span></h2>
+  <div class="tags"><span class="tag">cryptography</span><span class="tag purple">secret sharing</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Secure multi-party computation (MPC) solves a seemingly paradoxical problem: <b>several parties jointly compute a shared result, yet none reveals its own input</b>. Analogy to the <b>distributed quorum</b> you know: data is split into "secret shares" held by each party, <b>a single share is meaningless</b>, and only combined per protocol does it yield a result—except MPC goes further: what's combined is the "computed result," not the raw data itself. The classic primer is Yao's "<b>Millionaires' Problem</b>": two millionaires want to know who is richer without revealing how much each has.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Pain point: several hospitals want to jointly study a drug's efficacy, but none may see the others' records; several banks want joint fraud detection but are limited by competition and compliance. They need "<b>collaborative computation, zero-trust sharing</b>."</p>
+    <p style="margin-top:8px">The easiest mechanism is <b>additive secret sharing</b>: split a secret number x into a sum of random numbers <code>x = x₁ + x₂ + x₃ (mod p)</code>, each party getting just one xᵢ. Any single share is a uniform random number leaking zero information; but since addition can be done <b>by each party on its own share independently</b>, summing the result shares recovers the true value of <code>x + y</code>—<b>and no one ever saw the raw x, y</b>. Multiplication is harder (needs extra protocols like Beaver triples), but the idea is the same.</p>
+    <p style="margin-top:8px">In federated learning the most important application is Bonawitz et al. 2017's <b>Secure Aggregation</b>: clients use pairwise masks to "additively share" their gradients with the server, which can only recover the <b>sum of all gradients</b>—never any single client's gradient—and it tolerates clients dropping out midway. This exactly fills the hole in concept ① ("sharing only gradients still leaks").</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Additive secret sharing: compute x+y without revealing x, y</span><br>
+<span class="box g">A holds x=5</span> <span class="arrow">split→</span> <span class="box">x₁=12</span> <span class="box">x₂=-7</span> <span style="color:#5a6378">(sum=5)</span><br>
+<span class="box g">B holds y=3</span> <span class="arrow">split→</span> <span class="box">y₁=-4</span> <span class="box">y₂=7</span> <span style="color:#5a6378">(sum=3)</span><br>
+<span class="arrow">each party adds shares locally:</span> node1: 12+(-4)=8 &nbsp; node2: -7+7=0<br>
+<span class="box p">publicly merge: 8 + 0 = 8 = x+y ✓</span> <span style="color:#5a6378">no one saw 5 or 3</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> random
+P = <span class="str">2</span>**<span class="str">31</span> - <span class="str">1</span>  <span class="cmt"># a large prime; all arithmetic is mod P</span>
+
+<span class="kw">def</span> <span class="fn">share</span>(secret, n=<span class="str">3</span>):
+    <span class="cmt"># split into n shares: first n-1 random, last makes the sum = secret</span>
+    parts = [random.<span class="fn">randrange</span>(P) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n - <span class="str">1</span>)]
+    parts.<span class="fn">append</span>((secret - <span class="fn">sum</span>(parts)) % P)
+    <span class="kw">return</span> parts  <span class="cmt"># any single share is uniform random, leaks zero info</span>
+
+<span class="cmt"># Two parties each split their secret, distribute to 3 compute nodes</span>
+sx, sy = <span class="fn">share</span>(<span class="str">5</span>), <span class="fn">share</span>(<span class="str">3</span>)  <span class="cmt"># Alice=5, Bob=3, not told to each other</span>
+
+<span class="cmt"># Each node adds only the shares it holds (local, no communication)</span>
+node_sums = [(a + b) % P <span class="kw">for</span> a, b <span class="kw">in</span> <span class="fn">zip</span>(sx, sy)]
+
+<span class="cmt"># Publicly merge node results → recover x+y, but 5 and 3 never exposed</span>
+<span class="fn">print</span>(<span class="fn">sum</span>(node_sums) % P)  <span class="cmt"># 8 ✓</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + use case</div>
+    <div class="tip">Misconception: "MPC is encrypted, so the output is safe too." <b>Wrong</b>. MPC only protects the <b>process</b> (no inputs leak mid-way), <b>not the result itself</b>. If the final "joint statistic" can itself re-identify someone (e.g., a rare disease with only one patient), it still leaks—so MPC is often layered with <b>differential privacy</b>: MPC guards the process, DP guards the result.</div>
+    <div class="exercise" style="margin-top:8px">📌 Personal-project scenario: you and a friend want to compare investment returns without revealing principal or holdings—additive secret sharing computes the "average return" without exposing anyone's numbers. It's a general template for "collaborate without showing your cards," well beyond technical settings.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 MPC achieves "collaborative computation, zero-trust sharing" via secret sharing, but it only protects the process, not the output—result privacy still needs DP.<br>🤔 These four techniques (FL/DP/HE/MPC) protect different things: data location, individual identifiability, computation visibility, input confidentiality. Why do production systems usually <b>combine</b> them rather than pick one?</div>
+  </div>
+</div>
+
+<!-- comparison -->
+<div class="card" style="border-left-color:#ffb450">
+  <h2>How They Combine<span class="en">四种技术怎么配合</span></h2>
+  <div class="section">
+    <p style="color:#cfd3df;font-size:0.95rem">They aren't mutually exclusive substitutes but building blocks protecting <b>different layers</b>; production systems usually stack them:</p>
+    <table class="cmp">
+      <tr><th>Technique</th><th>Protects</th><th>Main cost</th><th>Trust assumption</th></tr>
+      <tr><td>Federated Learning</td><td>data not centralized (location)</td><td>communication, Non-IID</td><td>semi-honest server</td></tr>
+      <tr><td>Differential Privacy</td><td>individual unidentifiable (result)</td><td>accuracy drop</td><td>noise-adder trusted</td></tr>
+      <tr><td>Homomorphic Encryption</td><td>invisible during compute (process)</td><td>orders of magnitude slower</td><td>no need to trust compute</td></tr>
+      <tr><td>Secure MPC</td><td>each party's input secret (process)</td><td>many communication rounds</td><td>majority don't collude</td></tr>
+    </table>
+    <p style="margin-top:12px;color:#cfd3df;font-size:0.95rem">Typical stack: <b>Federated learning</b> sets the frame (data stays put) → <b>Secure Aggregation / MPC</b> hides single gradients from the server → <b>Differential privacy</b> noises the model against individual re-inference → add <b>HE</b> for the most sensitive slivers if needed. In one line: <b>FL guards location, MPC/HE guard process, DP guards result</b>.</p>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">深入资源</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1602.05629" target="_blank">McMahan et al. 2017 — Communication-Efficient Learning (the FedAvg paper)</a></li>
+      <li><a href="https://arxiv.org/abs/1607.00133" target="_blank">Abadi et al. 2016 — Deep Learning with Differential Privacy (DP-SGD + moments accountant)</a></li>
+      <li><a href="https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf" target="_blank">Dwork &amp; Roth 2014 — The Algorithmic Foundations of Differential Privacy (the authoritative monograph)</a></li>
+      <li><a href="https://crypto.stanford.edu/craig/" target="_blank">Gentry 2009 — Fully Homomorphic Encryption Using Ideal Lattices (first FHE, thesis page)</a></li>
+      <li><a href="https://eprint.iacr.org/2017/281" target="_blank">Bonawitz et al. 2017 — Practical Secure Aggregation (secure aggregation for federated learning)</a></li>
+      <li><a href="https://opacus.ai/" target="_blank">Opacus — PyTorch's official differential-privacy training library</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">深入思考</span></h2>
+  <div class="section">
+    <details><summary>1. Federated learning claims "data stays put," so why still layer DP / MPC? What does sharing only gradients actually leak?</summary><div>A gradient is <b>not</b> a harmless summary of data but a high-fidelity signal of "how the data shapes the model." <b>Gradient inversion</b> research shows: with small batches and a known model architecture, you can approximately <b>reconstruct original training samples</b> from uploaded gradients—recognizable faces, readable text. Intuitively a gradient = partial derivative of loss w.r.t. parameters; it encodes "to fit this sample, which way should the model move," carrying far more information than expected. So federated learning only solves <b>physical location</b> (data not centrally stored), not <b>information leakage</b>. Two fixes: (a) <b>Secure Aggregation / MPC</b> lets the server see only "the sum of all gradients"—single-point inversion fails; (b) <b>DP-SGD</b> adds noise to gradients so inversion, even with access, reconstructs poorly. This is exactly why the three-layer defense must stack—any single layer has a gap.</div></details>
+
+    <details><summary>2. The ε "privacy budget" accumulates. What does it share with the rate-limit quotas and distributed resource accounting you know?</summary><div>Structurally identical: both are <b>global accounting of a finite resource</b>. DP's "composition theorem" says: k ε-DP queries on the same dataset cost at worst <b>k·ε</b> (advanced composition can improve this to ~√k). This maps almost one-to-one to <b>token-bucket rate limiting</b>: each query "spends budget," and when exhausted, service is refused—except here the spent resource, "privacy," is <b>non-renewable</b>: there's no "bucket refills," once spent it's lost forever. The engineering implications match distributed accounting: (a) you need a <b>centralized budget ledger</b> tracking cumulative ε per dataset; (b) guard against "same query re-skinned" bypassing the budget; (c) design a <b>budget allocation strategy</b>, giving scarce ε to the most valuable analyses first. Your quota/rate-limit experience transfers directly—just swap "QPS" for "privacy loss."</div></details>
+
+    <details><summary>3. HE "computes but can't see," MPC "collaborates without showing cards"—where's the difference and trade-off?</summary><div>Both decouple "computation" from "data visibility," but along <b>opposite routes</b>. <b>HE</b> is <b>single-party encryption, outsourced compute</b>: one person encrypts data and ships it to the cloud, which computes on ciphertext—compute is centralized, communication minimal (one round trip), but <b>compute overhead explodes</b> (thousands to tens of thousands of times slower), and usually only the data owner can decrypt. <b>MPC</b> is <b>multi-party collaboration, shared secrets</b>: data is split into shares across parties, computed jointly via <b>many communication rounds</b>—single operations far faster than HE, but <b>rounds grow with computation depth</b>, and security relies on "majority don't collude." Trade-offs: (a) <b>single-party outsourcing, poor network, shallow compute</b> (e.g., one encrypted similarity match) → HE; (b) <b>peer parties, good network, lots of interaction</b> (e.g., multi-institution joint modeling) → MPC; (c) modern systems often <b>mix</b>, picking the cheapest per segment by "multiplicative depth" and "communication cost." They're complementary, not one replacing the other.</div></details>
+
+    <details><summary>4. All four techniques have a hard "privacy vs. utility / cost" trade-off. Is there "free privacy"?</summary><div>No—and this isn't insufficient engineering effort, it's a <b>fundamental information-theoretic constraint</b>. Intuition: privacy's essence is "an attacker can't distinguish individuals from the output," while a useful result <b>necessarily</b> carries information about the input—to make the result useful it must reflect the data; to protect privacy it must be "insensitive" to any single record. The two goals are mathematically opposed. DP pays via "add noise → drop accuracy," HE/MPC via "cryptographic overhead → drop performance," federated learning via "don't centralize → communication cost + Non-IID slower convergence." <b>It's a Pareto frontier</b>: you can only pick a point between "privacy strength" and "utility/cost," not max both. So the real engineering question is never "do we want privacy" but "<b>how much loss can this scenario tolerate for how strong a guarantee</b>"—treat it as an <b>explicitly priced</b> decision, not a compliance checkbox to fudge. This is also why "what's your ε" is far more valuable than "we take privacy seriously."</div></details>
+
+    <details><summary>5. Turning "privacy" from gut feeling into a quantifiable ε—what methodological lesson does that hold for other fields?</summary><div>This is a methodological event worth savoring across disciplines. Before DP, "anonymous" and "privacy" were adjectives, legal talk; attack and defense talked past each other, unfalsifiable—every "anonymization" scheme was broken by a new attack because there was no definition <b>spelling out what "secure" means</b>. Dwork et al.'s contribution wasn't just an algorithm but <b>an adversarial, provable, composable mathematical definition of privacy</b> (ε-DP), letting defenders <b>prove</b> guarantees and bounding attackers. This "formalize the fuzzy concept" paradigm often marks a paradigm shift: cryptography defined "secure" as "indistinguishable from random," complexity theory defined "hard" as NP, information theory defined "information" as entropy. Two lessons: (a) when a field is stuck in "everyone disagrees, nothing falsifiable," <b>what's missing is often not more schemes but a good definition</b>; (b) a good definition is <b>quantifiable, composable, adversarial</b> (worst-case adversary). For the "hard concepts" you care about—consciousness, alignment—progress may likewise hinge on finding that formalization that makes people say "oh, so that's what it means."</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 40 · 2026-06-26</footer>
+
+</div>
+
+</body>
+</html>

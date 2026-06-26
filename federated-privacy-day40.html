@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：联邦与隐私学习 — Day 40</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+table.cmp{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.86rem}
+table.cmp th,table.cmp td{border:1px solid #1f2740;padding:8px 10px;text-align:left;color:#cfd3df}
+table.cmp th{background:rgba(123,97,255,0.12);color:#a48cff;font-weight:600}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：联邦与隐私学习</h1>
+  <div class="meta">Day 40 · 2026-06-26</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<!-- 1. 联邦学习 -->
+<div class="card">
+  <h2>联邦学习<span class="en">Federated Learning</span></h2>
+  <div class="tags"><span class="tag">分布式训练</span><span class="tag purple">数据本地性</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>传统机器学习是「<b>把数据搬到计算</b>」——所有数据汇总到中心机房再训练。联邦学习反过来，是「<b>把计算搬到数据</b>」——和你熟悉的 <b>MapReduce 数据本地性（data locality）</b>同一个思想：不动数据，下推代码。区别是这里 reduce 阶段聚合的不是数据，而是<b>各节点本地算出的模型梯度</b>，原始数据永远留在用户设备上。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：医院病历、手机输入法记录、银行交易流水——这些数据<b>既敏感又分散</b>，法律（GDPR）和商业利益都不允许集中上传，但不集中又训练不出好模型。联邦学习的答案是：模型去找数据，而不是数据去找模型。</p>
+    <p style="margin-top:8px">机制就是 McMahan 等人 2016 年提出的 <b>FedAvg（联邦平均）</b>，一个反复执行的循环：服务器把当前<b>全局模型</b>下发给一批客户端 → 每个客户端用<b>本地数据</b>训练几步 → 只把<b>权重更新</b>（不是数据）传回 → 服务器<b>按数据量加权平均</b>，得到新全局模型。</p>
+    <p style="margin-top:8px">聚合公式很朴素：<code>w ← Σ (n_k / n) · w_k</code>。<b>w_k</b> 是第 k 个客户端训练后的本地权重，<b>n_k</b> 是它的样本数，<b>n</b> 是总样本数。直觉：谁的数据多，谁的本地模型在平均里就更有发言权——本质就是一次加权 reduce。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">FedAvg 一轮通信：</span><br>
+<span class="box p">中心服务器 w</span><br>
+<span class="arrow">↓ 下发全局模型</span> <span class="arrow">↓</span> <span class="arrow">↓</span><br>
+<span class="box g">手机A</span> <span class="box g">医院B</span> <span class="box g">银行C</span> <span style="color:#5a6378">← 各自本地训练，数据不出门</span><br>
+<span class="arrow">↑ 只上传权重更新 Δw</span> <span class="arrow">↑</span> <span class="arrow">↑</span><br>
+<span class="box p">服务器按 n_k 加权平均 → 新 w</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 循环数十~数百轮。通信成本是主要瓶颈，不是算力</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># FedAvg 的核心其实就是这个加权平均函数（框架可用 Flower/FedML）</span>
+<span class="kw">def</span> <span class="fn">fedavg</span>(client_weights, client_sizes):
+    <span class="cmt"># client_weights: 每个客户端本地训练后的权重向量列表</span>
+    <span class="cmt"># client_sizes:   每个客户端的本地样本数 n_k</span>
+    total = <span class="fn">sum</span>(client_sizes)
+    <span class="cmt"># 按样本量加权：数据多的客户端权重占比更大</span>
+    global_w = <span class="fn">sum</span>(
+        (n_k / total) * w_k
+        <span class="kw">for</span> w_k, n_k <span class="kw">in</span> <span class="fn">zip</span>(client_weights, client_sizes)
+    )
+    <span class="kw">return</span> global_w  <span class="cmt"># 这就是下一轮要下发的全局模型</span>
+
+<span class="cmt"># 模拟：3 个客户端，原始数据从未离开它们</span>
+w = <span class="fn">fedavg</span>([np.array([1.,2]), np.array([3.,4]), np.array([2.,2])],
+            [100, 50, 200])  <span class="cmt"># 银行(200)发言权最大</span>
+<span class="fn">print</span>(w)  <span class="cmt"># [1.857 2.286] —— 偏向样本多的客户端</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「数据不出门 = 隐私安全」。<b>错</b>。只传梯度也会泄密——研究表明，从上传的梯度可以<b>反推</b>出训练样本（gradient inversion / 模型反演攻击）。联邦学习只解决了「数据不集中」，没解决「上传内容是否泄密」——所以它几乎总要叠加后面三种密码学/统计手段。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：你想用多台设备（工作笔记本、家用机、手机）上的私人笔记微调一个本地小模型，又不愿把笔记汇总到一处。联邦式的「各设备本地算更新、只合并权重」就是合适的心智模型——把它当成你个人数据的「分布式训练」。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 联邦学习是「移动计算而非移动数据」的分布式系统范式，FedAvg 本质是一次按数据量加权的 reduce。<br>🤔 如果某个客户端上传的「更新」是恶意构造的（投毒），加权平均会被污染吗？你会怎么设计聚合端的拜占庭容错？</div>
+  </div>
+</div>
+
+<!-- 2. 差分隐私 -->
+<div class="card">
+  <h2>差分隐私<span class="en">Differential Privacy</span></h2>
+  <div class="tags"><span class="tag">隐私数学</span><span class="tag purple">可量化保证</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>差分隐私像数据库查询的「<b>可控脱敏</b>」：你能问「平均工资是多少」，但系统会在答案里掺一点<b>精心校准的噪声</b>，让你无法通过「有张三 vs 没张三」两次查询的差值反推出张三的工资。关键是隐私不再靠「我觉得安全」，而是一个<b>可以用数字 ε 量化、可以累加预算</b>的数学保证——类似你熟悉的<b>限流配额（token bucket）</b>：每次查询消耗预算，用完就不能再查。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：传统「匿名化」（删名字、删身份证）反复被攻破——靠几个旁路字段交叉比对就能重新识别个人。差分隐私给出一个更硬的定义：一个随机算法 M 满足 ε-差分隐私，当且仅当对<b>任意只差一条记录</b>的两个数据集 D、D′，以及任意输出 S：</p>
+    <p style="margin-top:8px;text-align:center"><code>Pr[M(D) ∈ S] ≤ e<sup>ε</sup> · Pr[M(D′) ∈ S]</code></p>
+    <p style="margin-top:8px">直觉拆解：<b>加不加你这条记录</b>，输出的概率分布几乎不变（被 e<sup>ε</sup> 这个倍数夹住）。于是攻击者看到结果，也分不清你到底在不在数据集里——你的存在被「淹没」了。<b>ε（隐私预算）越小，两个分布越像，隐私越强，但噪声越大、精度越低</b>。这是隐私与可用性之间一个<b>没法绕开</b>的旋钮。</p>
+    <p style="margin-top:8px">怎么实现？最经典的 <b>Laplace 机制</b>：在真实答案上加 Laplace 噪声，大小 = <b>敏感度 / ε</b>。敏感度 = 改动一条记录最多让答案变多少（「计数」查询为 1）。用到深度学习就是 Abadi 等人 2016 的 <b>DP-SGD</b>：训练时先<b>裁剪每个样本的梯度</b>（控制敏感度），再<b>加高斯噪声</b>，并用「moments accountant」精确累计全程花掉的总 ε。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">ε 这个旋钮的权衡：</span><br>
+ε=0.1 强隐私 <span class="bar" style="width:30px;height:22px"></span> 噪声大、精度低<br>
+ε=1.0 平衡&nbsp; <span class="bar" style="width:70px;height:22px;opacity:0.8"></span> 常用区间<br>
+ε=8.0 弱隐私 <span class="bar" style="width:120px;height:22px;opacity:0.6"></span> 噪声小、精度高<br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 没有「免费隐私」：ε 是你必须显式定价的预算</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># Laplace 机制：对一个「计数」查询做差分隐私发布</span>
+<span class="kw">def</span> <span class="fn">private_count</span>(true_count, epsilon, sensitivity=<span class="str">1.0</span>):
+    <span class="cmt"># 计数查询：增删一条记录最多让结果变 1，故 sensitivity=1</span>
+    scale = sensitivity / epsilon       <span class="cmt"># 噪声幅度 ∝ 1/ε</span>
+    noise = np.random.<span class="fn">laplace</span>(loc=<span class="str">0</span>, scale=scale)
+    <span class="kw">return</span> true_count + noise          <span class="cmt"># 发布加噪后的结果</span>
+
+true = <span class="str">1000</span>  <span class="cmt"># 真实有 1000 个患者得某病</span>
+<span class="fn">print</span>(<span class="fn">private_count</span>(true, epsilon=<span class="str">0.1</span>))   <span class="cmt"># 强隐私 → 噪声大，可能 987 或 1013</span>
+<span class="fn">print</span>(<span class="fn">private_count</span>(true, epsilon=<span class="str">2.0</span>))   <span class="cmt"># 弱隐私 → 噪声小，约 1000.4</span>
+
+<span class="cmt"># 训练神经网络时用官方库 Opacus（PyTorch）一行接管：</span>
+<span class="cmt"># from opacus import PrivacyEngine</span>
+<span class="cmt"># model, optim, loader = PrivacyEngine().make_private(...)  # 自动裁剪+加噪</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「ε 设多少都行，反正加了噪声」。<b>错</b>。ε 没有统一安全阈值，而且<b>会累加</b>——同一份数据被查 10 次，隐私损耗是 10 个 ε 相加（组合定理）。ε 偷偷设到几十，等于没有保护。它是一笔要严格记账的<b>预算</b>，不是一次性开关。</div>
+    <div class="exercise" style="margin-top:8px">📌 决策辅助场景：当你评估一份声称「已匿名化」的数据产品时，问对方一句「你们的 ε 是多少、怎么记账的」——能立刻区分真隐私工程与营销话术。这是把模糊的「安全感」换成可审计数字的思维方式。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 差分隐私把「隐私」从形容词变成了<b>可量化、可累加、可定价</b>的数学保证 ε，核心是「有没有你这一条，结果几乎一样」。<br>🤔 联邦学习（Day 40 概念①）只传梯度仍可能泄密，而 DP-SGD 给梯度加噪。两者叠加时，噪声该加在客户端本地还是服务器聚合端？各有什么信任假设？</div>
+  </div>
+</div>
+
+<!-- 3. 同态加密 -->
+<div class="card">
+  <h2>同态加密<span class="en">Homomorphic Encryption</span></h2>
+  <div class="tags"><span class="tag">密码学</span><span class="tag purple">密文计算</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>普通加密像把数据锁进保险箱——要用就得先解锁，解锁瞬间明文就暴露给了服务器。同态加密（HE）是一个「<b>带手套的保险箱</b>」：你能隔着手套在<b>箱子里直接操作</b>，全程不打开。对应到你的世界：服务器能对<b>加密的数据库字段</b>直接做 <b>SUM / 点积</b>，算完返回的还是密文，只有持私钥的你能解开——而服务器<b>从头到尾没见过一个明文</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：你想用云端的算力或第三方模型处理敏感数据（病历、财务），但不信任对方。明文上传 = 泄密；本地算 = 没算力。HE 让你「<b>把计算外包出去，又不交出数据</b>」。</p>
+    <p style="margin-top:8px">数学核心是「<b>保持运算结构</b>」：加密函数 E 满足 <code>E(a) ⊕ E(b) = E(a + b)</code>。也就是说，密文上的某种运算 ⊕，解密后正好对应明文的加法。能同时支持密文加法和乘法、且支持<b>任意次</b>的，叫<b>全同态加密（FHE）</b>——这是 Craig Gentry 在 2009 年用理想格（ideal lattices）首次构造出来的，是密码学几十年的里程碑。</p>
+    <p style="margin-top:8px">为什么以前做不到？每次密文运算都累积<b>噪声</b>，乘法尤其涨得快，噪声超阈值就再也解不开。Gentry 的突破是 <b>bootstrapping（自举）</b>：用同态运算「<b>给密文自己解密再重新加密</b>」把噪声重置，从而支持无限深度计算。代价是<b>极慢</b>——这也是 HE 至今没普及的根因。机器学习中更常用 <b>CKKS 方案</b>（Cheon 等人 2017），支持<b>近似</b>实数运算，适合容忍少量误差的神经网络推理。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">同态推理流程（数据全程加密）：</span><br>
+<span class="box g">你: 明文 x</span> <span class="arrow">→ 加密 →</span> <span class="box">密文 E(x)</span><br>
+<span class="arrow" style="margin-left:40px">↓ 上传</span><br>
+<span class="box r">云服务器: 在 E(x) 上跑模型 → E(y)</span> <span style="color:#5a6378">看不到 x，也看不到 y</span><br>
+<span class="arrow" style="margin-left:40px">↓ 返回密文</span><br>
+<span class="box g">你: 用私钥解密 E(y) → 明文结果 y</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 安全代价 = 慢几个数量级；CKKS 牺牲精度换实用</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> tenseal <span class="kw">as</span> ts  <span class="cmt"># OpenMined 的 HE 库，封装了 CKKS</span>
+
+<span class="cmt"># 1) 建上下文 = 生成密钥 + 设定 CKKS 参数</span>
+ctx = ts.<span class="fn">context</span>(ts.SCHEME_TYPE.CKKS, poly_modulus_degree=<span class="str">8192</span>,
+                  coeff_mod_bit_sizes=[<span class="str">60</span>, <span class="str">40</span>, <span class="str">40</span>, <span class="str">60</span>])
+ctx.global_scale = <span class="str">2</span>**<span class="str">40</span>
+ctx.<span class="fn">generate_galois_keys</span>()
+
+<span class="cmt"># 2) 加密两个向量（想象成你的私密特征）</span>
+a = ts.<span class="fn">ckks_vector</span>(ctx, [<span class="str">1.0</span>, <span class="str">2.0</span>, <span class="str">3.0</span>])
+b = ts.<span class="fn">ckks_vector</span>(ctx, [<span class="str">4.0</span>, <span class="str">5.0</span>, <span class="str">6.0</span>])
+
+<span class="cmt"># 3) 直接在密文上算点积——服务器侧可执行，看不到明文</span>
+enc_dot = a.<span class="fn">dot</span>(b)           <span class="cmt"># 全程是密文运算</span>
+<span class="fn">print</span>(enc_dot.<span class="fn">decrypt</span>())     <span class="cmt"># ≈ [32.0] = 1*4+2*5+3*6，近似但够准</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「有了 FHE，隐私计算就解决了」。<b>现实</b>：FHE 比明文计算慢成千上万倍，跑一个完整大模型推理至今不现实。所以它常被<b>降级使用</b>——只对最敏感的一小段（如最后的相似度匹配）做同态加密，其余配合 MPC / DP。把它当「核选项」，不是默认开关。</div>
+    <div class="exercise" style="margin-top:8px">📌 跨学科思考场景：HE 是「<b>可以在不理解内容的前提下正确操作内容</b>」的纯粹范例——和你感兴趣的「形式 vs 语义」「计算是否需要理解」（中文房间论证）能直接呼应。一个系统能算对却「看不懂」，这本身就是关于心智与计算的哲学素材。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 同态加密让「计算」与「看见」彻底解耦——服务器能算却看不到，代价是巨大的性能开销，靠 bootstrapping 续命。<br>🤔 如果某天 FHE 快到能跑完整模型推理，「云厂商必须可信」这个假设就被取消了。这会怎样重塑你对「数据主权」和 AI 商业模式的判断？</div>
+  </div>
+</div>
+
+<!-- 4. 安全多方计算 -->
+<div class="card">
+  <h2>安全多方计算<span class="en">Secure Multi-Party Computation</span></h2>
+  <div class="tags"><span class="tag">密码学</span><span class="tag purple">秘密分享</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>安全多方计算（MPC）要解决一个看似悖论的问题：<b>几方一起算出一个共同结果，但谁都不暴露自己的输入</b>。类比你熟悉的<b>分布式 quorum</b>：数据被切成若干「秘密份额（secret share）」散在各方手里，<b>单份毫无意义</b>，只有按协议合起来才有结果——但 MPC 更狠，它合出的是「计算结果」而非原始数据本身。经典启蒙题是姚期智的「<b>百万富翁问题</b>」：两个富翁想知道谁更有钱，又都不肯说出自己有多少。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：多家医院想联合统计某药疗效，但谁都不能看别家的病历；多家银行想联合反欺诈，又受竞争与合规所限。需要「<b>合作计算，零信任共享</b>」。</p>
+    <p style="margin-top:8px">最易懂的机制是<b>加性秘密分享（additive secret sharing）</b>：把私密数 x 拆成几个随机数之和 <code>x = x₁ + x₂ + x₃ (mod p)</code>，每方只拿一个 xᵢ。单看任何一份都是均匀随机数、泄露零信息；但加法可<b>各方在自己份额上独立做</b>，最后把结果份额相加，就能还原 <code>x + y</code> 的真值——<b>全程没人见过原始数 x、y</b>。乘法更复杂（需 Beaver 三元组等协议），但思想一致。</p>
+    <p style="margin-top:8px">联邦学习里最重要的落地是 Bonawitz 等人 2017 的 <b>安全聚合（Secure Aggregation）</b>：客户端用配对掩码把梯度「加性分享」给服务器，服务器只能解出<b>所有梯度之和</b>、看不到任何单个客户端的梯度，还能容忍部分客户端掉线——正好补上概念①「只传梯度也泄密」的窟窿。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">加性秘密分享：算 x+y 而不暴露 x、y</span><br>
+<span class="box g">A 持 x=5</span> <span class="arrow">拆→</span> <span class="box">x₁=12</span> <span class="box">x₂=-7</span> <span style="color:#5a6378">(和=5)</span><br>
+<span class="box g">B 持 y=3</span> <span class="arrow">拆→</span> <span class="box">y₁=-4</span> <span class="box">y₂=7</span> <span style="color:#5a6378">(和=3)</span><br>
+<span class="arrow">各方本地相加份额：</span> 节点1: 12+(-4)=8 &nbsp; 节点2: -7+7=0<br>
+<span class="box p">公开合并: 8 + 0 = 8 = x+y ✓</span> <span style="color:#5a6378">没人见过 5 或 3</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> random
+P = <span class="str">2</span>**<span class="str">31</span> - <span class="str">1</span>  <span class="cmt"># 一个大素数，所有运算在 mod P 下进行</span>
+
+<span class="kw">def</span> <span class="fn">share</span>(secret, n=<span class="str">3</span>):
+    <span class="cmt"># 拆成 n 份随机份额，前 n-1 份随机，最后一份兜底使总和=secret</span>
+    parts = [random.<span class="fn">randrange</span>(P) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n - <span class="str">1</span>)]
+    parts.<span class="fn">append</span>((secret - <span class="fn">sum</span>(parts)) % P)
+    <span class="kw">return</span> parts  <span class="cmt"># 任何单份都是均匀随机数，泄露零信息</span>
+
+<span class="cmt"># 两方各自把私密数拆成份额，分发到 3 个计算节点</span>
+sx, sy = <span class="fn">share</span>(<span class="str">5</span>), <span class="fn">share</span>(<span class="str">3</span>)  <span class="cmt"># Alice=5, Bob=3，互不告知</span>
+
+<span class="cmt"># 每个节点只在自己手里的份额上相加（本地、无需通信）</span>
+node_sums = [(a + b) % P <span class="kw">for</span> a, b <span class="kw">in</span> <span class="fn">zip</span>(sx, sy)]
+
+<span class="cmt"># 最后公开合并各节点结果 → 还原 x+y，但 5 和 3 从未暴露</span>
+<span class="fn">print</span>(<span class="fn">sum</span>(node_sums) % P)  <span class="cmt"># 8 ✓</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「MPC 加密了，所以输出也安全」。<b>错</b>。MPC 只保护<b>过程</b>（中间不泄露输入），<b>不保护结果本身</b>。如果最终输出的「联合统计量」本身能反推某人（比如某稀有病只有一个患者），照样泄密——所以 MPC 常要和<b>差分隐私</b>叠加：MPC 管过程，DP 管结果。</div>
+    <div class="exercise" style="margin-top:8px">📌 个人项目场景：你和朋友想比较各自的投资收益率、又不愿露出本金与持仓，加性秘密分享就能算出「平均收益」而不暴露任何人的数字。这是「合作但不交底」类问题的通用模板，远不止技术场景。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 MPC 用秘密分享实现「合作计算、零信任共享」，但它只保护计算过程，不保护输出——结果隐私要靠差分隐私补。<br>🤔 这四种技术（联邦/DP/HE/MPC）保护的对象不同：数据位置、个体可识别性、计算可见性、输入机密性。生产系统为什么往往要<b>组合</b>而非二选一？</div>
+  </div>
+</div>
+
+<!-- 四技术对比 -->
+<div class="card" style="border-left-color:#ffb450">
+  <h2>四种技术怎么配合<span class="en">How They Combine</span></h2>
+  <div class="section">
+    <p style="color:#cfd3df;font-size:0.95rem">它们不是互斥的替代品，而是保护<b>不同层面</b>的积木，生产系统通常叠加：</p>
+    <table class="cmp">
+      <tr><th>技术</th><th>保护什么</th><th>主要代价</th><th>信任假设</th></tr>
+      <tr><td>联邦学习</td><td>数据不集中（位置）</td><td>通信成本、Non-IID</td><td>聚合服务器半可信</td></tr>
+      <tr><td>差分隐私</td><td>个体不可识别（结果）</td><td>精度下降</td><td>加噪方可信</td></tr>
+      <tr><td>同态加密</td><td>计算中不可见（过程）</td><td>慢几个数量级</td><td>无需信任算力方</td></tr>
+      <tr><td>安全多方计算</td><td>各方输入机密（过程）</td><td>通信轮次多</td><td>多数方不合谋</td></tr>
+    </table>
+    <p style="margin-top:12px;color:#cfd3df;font-size:0.95rem">典型组合：<b>联邦学习</b>定框架（数据不出门）→ <b>安全聚合 / MPC</b> 让服务器看不到单个梯度 → <b>差分隐私</b>给模型加噪防个体反推 → 必要时对最敏感片段加 <b>HE</b>。一句话：<b>FL 管位置，MPC/HE 管过程，DP 管结果</b>。</p>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1602.05629" target="_blank">McMahan et al. 2017 — Communication-Efficient Learning（FedAvg 奠基论文）</a></li>
+      <li><a href="https://arxiv.org/abs/1607.00133" target="_blank">Abadi et al. 2016 — Deep Learning with Differential Privacy（DP-SGD + moments accountant）</a></li>
+      <li><a href="https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf" target="_blank">Dwork &amp; Roth 2014 — The Algorithmic Foundations of Differential Privacy（差分隐私权威专著）</a></li>
+      <li><a href="https://crypto.stanford.edu/craig/" target="_blank">Gentry 2009 — Fully Homomorphic Encryption Using Ideal Lattices（首个 FHE，博士论文页）</a></li>
+      <li><a href="https://eprint.iacr.org/2017/281" target="_blank">Bonawitz et al. 2017 — Practical Secure Aggregation（联邦学习的安全聚合协议）</a></li>
+      <li><a href="https://opacus.ai/" target="_blank">Opacus — PyTorch 官方差分隐私训练库</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. 联邦学习号称「数据不出门」，为什么仍需叠加 DP / MPC？只传梯度到底泄露了什么？</summary><div>梯度<b>不是</b>数据的无害摘要，而是「数据如何影响模型」的高保真信号。<b>gradient inversion（梯度反演）</b>研究表明：在 batch 较小、模型结构已知时，可从上传的梯度近似<b>重建出原始训练样本</b>——能认出的人脸、能读出的文本。直觉上梯度 = 损失对参数的偏导，它编码了「为拟合这条样本，模型该往哪调」，信息量远超想象。所以联邦学习只解决了<b>物理位置</b>（数据没集中存储），没解决<b>信息泄露</b>。补法两层：(a) <b>安全聚合 / MPC</b> 让服务器只看到「所有梯度之和」——单点反演失效；(b) <b>DP-SGD</b> 给梯度加噪，让反演即便拿到也重建不准。这正是三层防御要叠加的根本原因——任何单层都有缺口。</div></details>
+
+    <details><summary>2. ε「隐私预算」会累加。这和你熟悉的限流配额、分布式资源记账有什么共通之处？</summary><div>本质同构：都是<b>有限资源的全局记账问题</b>。差分隐私的「组合定理」说：对同一数据集做 k 次 ε-DP 查询，整体损耗最坏是 <b>k·ε</b>（高级组合可优化到 √k 量级）。这和<b>令牌桶限流</b>几乎一一对应：每次查询「扣预算」，耗尽即拒绝——区别是这里扣的是「隐私」这种<b>不可再生</b>资源，没有「桶会回填」，花掉就永久损失。工程含义和分布式记账一致：(a) 需要<b>中心化预算账本</b>记每个数据集累计花了多少 ε；(b) 要防「同一查询换皮再问」绕过预算；(c) 要设计<b>预算分配策略</b>，把有限 ε 优先给最有价值的分析。你做过的配额/速率限制系统，心智模型可直接迁移，只是把「QPS」换成「隐私损耗」。</div></details>
+
+    <details><summary>3. 同态加密「能算但看不见」，安全多方计算「合作但不交底」——区别和取舍在哪？</summary><div>都让「计算」与「数据可见性」解耦，但<b>路线相反</b>。<b>HE</b> 是<b>单方加密、外包算力</b>：一个人把数据加密扔给云，云在密文上算，算力集中、通信极少（一来一回），但<b>计算开销爆炸</b>（慢几千到几万倍），且通常只有数据所有者能解密。<b>MPC</b> 是<b>多方协作、分摊秘密</b>：数据拆成份额散在多方，靠<b>多轮通信</b>协同算结果，单次运算比 HE 快得多，但<b>通信轮次随计算深度增长</b>，安全性依赖「多数方不合谋」。取舍：(a) <b>单方外包、网络差、计算浅</b>（如一次加密相似度匹配）→ HE；(b) <b>多方对等、网络好、要反复交互</b>（如多机构联合建模）→ MPC；(c) 现代系统常<b>混合</b>，按每段计算的「乘法深度」与「通信成本」挑最划算的。它们互补，不是谁取代谁。</div></details>
+
+    <details><summary>4. 这四种技术都有「隐私 vs 可用性 / 成本」的硬权衡。有「免费的隐私」吗？</summary><div>没有——而且这不是工程不够努力，是<b>信息论层面的根本约束</b>。直觉：隐私的本质是「让攻击者无法从输出区分个体」，而有用的结果<b>必然</b>携带输入的信息——想让结果有用就得反映数据，想保护隐私就得对单个数据「不敏感」，两个目标数学上直接对立。DP 用「加噪→降精度」付费，HE/MPC 用「密码学开销→降性能」付费，联邦学习用「不集中→通信成本 + Non-IID 收敛变差」付费。<b>本质是一条帕累托前沿</b>：只能在「隐私强度」和「可用性/成本」之间选点，不能同时拉满。所以工程上真问题从来不是「要不要隐私」，而是「<b>这个场景能容忍多少损失，换多强的保证</b>」——把它当<b>显式定价</b>的决策，而非能糊弄的合规复选框。这也是为什么「ε 是多少」比「我们很重视隐私」有价值得多。</div></details>
+
+    <details><summary>5. 把「隐私」从直觉感受变成可量化的 ε，对其他领域有什么方法论启发？</summary><div>这是值得跨学科品味的方法论事件。在差分隐私之前，「匿名」「隐私」是形容词、是法务话术，攻防各说各话、无法证伪——每个「匿名化」方案都被新攻击打穿，因为根本没有<b>说清「安全」意味着什么</b>的定义。Dwork 等人的贡献不只是算法，而是<b>给隐私下了一个对抗式、可证明、可组合的数学定义</b>（ε-DP），从此防御方能<b>证明</b>保证、攻击方的边界被框定。这种「把模糊概念形式化」的范式，往往是范式跃迁的标志：密码学把「安全」定义成「与随机不可区分」、复杂性理论把「难」定义成 NP、信息论把「信息量」定义成熵。启发有二：(a) 当一个领域陷入「各执一词、无法证伪」，<b>缺的常不是更多方案，而是一个好定义</b>；(b) 好定义的特征是<b>可量化、可组合、对抗式</b>（考虑最坏对手）。你关心的意识、对齐这些「难概念」，进展关键或许同样在于：能否找到那个让人「原来它就是这个意思」的形式化定义。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 40 · 2026-06-26</footer>
+
+</div>
+
+</body>
+</html>
