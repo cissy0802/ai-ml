@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Neuro-Symbolic — Day 42</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Neuro-Symbolic</h1>
+  <div class="meta">Day 42 · 2026-06-28 · Difficulty ★★★★☆</div>
+  <div class="audience">For: engineers with coding experience, outside AI</div>
+</header>
+
+<!-- 1. Neuro-Symbolic Integration -->
+<div class="card">
+  <h2>Neuro-Symbolic Integration<span class="en">Neuro-Symbolic Integration</span></h2>
+  <div class="tags"><span class="tag">paradigm</span><span class="tag purple">hybrid</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A neural net is like a <b>cache + fuzzy index</b>: it learns statistical intuition from massive data, fast and generalizing, but occasionally "hits the wrong entry" and can't explain why. A symbolic system is like a <b>database's constraints + transaction engine</b>: precise, auditable, consistency-guaranteed, but only knows the logic you explicitly wrote, and freezes on inputs it hasn't seen. Neuro-symbolic AI = <b>layering the two</b>—perception/intuition goes to the neural net, verification/reasoning goes to the symbolic engine—just as you wouldn't make Redis your only store, nor let every query hit the primary DB.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Pure neural nets (LLMs included) have two structural weaknesses: <b>unreliable multi-step reasoning</b> (they fabricate plausible-looking intermediate steps) and <b>unverifiability</b> (they can't guarantee outputs satisfy hard constraints, like "no schedule conflicts" or "balanced chemical equation"). Pure symbolic systems, conversely, <b>can't learn perception</b>—you can't hand-write rules to recognize a cat photo. The core insight of neuro-symbolic: these strengths and weaknesses are <b>exactly complementary</b>, mapping onto Kahneman's System 1 (fast, intuitive, neural) and System 2 (slow, logical, symbolic).</p>
+    <p style="margin-top:8px">Henry Kautz's <strong>6-type taxonomy</strong> (systematized by Garcez &amp; Lamb in <em>Neurosymbolic AI: The 3rd Wave</em>) arranges the whole design space along a "<b>coupling tightness</b>" spectrum:</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Coupling spectrum: from "tool call" to "logic dissolved into the net"</b><br><br>
+<span class="box g">loose</span> <span style="color:#5a6378">neural net <b>calls</b> an external symbolic tool</span> — e.g. LLM calls a calculator/SAT solver<br>
+<span class="box o">medium</span> <span style="color:#5a6378">symbols <b>constrain</b> neural output</span> — e.g. a logic layer filters/re-ranks candidates<br>
+<span class="box p">tight</span> <span style="color:#5a6378">logic <b>compiled into</b> a differentiable graph</span> — e.g. DeepProbLog (concept 3)<br><br>
+<span style="color:#8b92a8">rightward ←→ more learnable (end-to-end); leftward ←→ more verifiable (hard logic guarantees)</span>
+</div>
+
+    <p style="margin-top:14px">This spectrum makes an important point clear: <b>"neuro-symbolic" is not one architecture but a family of trade-offs</b>. Today's most deployed form is loose coupling (LLM + tool calling is its most basic shape); the research frontier sits at tight coupling.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Simplest neuro-symbolic: LLM (neural) translates natural language</span>
+<span class="cmt"># into symbolic constraints; a solver (symbolic) finds the exact answer</span>
+<span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+<span class="kw">from</span> z3 <span class="kw">import</span> Ints, Solver, sat  <span class="cmt"># pip install z3-solver</span>
+client = Anthropic()
+
+q = <span class="str">"3 kids, ages sum to 13, eldest is 2 older than middle, middle is 2x youngest. Ages?"</span>
+<span class="cmt"># Neural side: only extracts constraints (bad at exact arithmetic, good at language)</span>
+spec = client.messages.<span class="fn">create</span>(model=<span class="str">"claude-opus-4-8"</span>, max_tokens=300,
+    messages=[{<span class="str">"role"</span>:<span class="str">"user"</span>,
+    <span class="str">"content"</span>:<span class="fn">f</span><span class="str">"Translate to z3 constraints, code only: {q}"</span>}]).content[0].text
+
+a, b, c = <span class="fn">Ints</span>(<span class="str">"a b c"</span>); s = <span class="fn">Solver</span>()
+s.<span class="fn">add</span>(a+b+c==13, a==b+2, b==2*c, a&gt;0, b&gt;0, c&gt;0)  <span class="cmt"># Symbolic: guarantees exactness</span>
+<span class="kw">print</span>(s.<span class="fn">check</span>()==sat, s.<span class="fn">model</span>())  <span class="cmt"># → verifiable unique solution, can't "miscompute"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">Pitfall: "LLMs can reason now, symbolic systems are obsolete." An LLM's "reasoning" is <b>statistical mimicry</b>—it generates token sequences that <i>look like</i> reasoning, with no <b>verifiable guarantee</b>. On an 8-digit multiplication or a scheduling constraint, it may fluently give a <b>confident, wrong</b> answer. A symbolic engine is slow and dumb, but its output is <b>either correct or an error</b>—never "hallucinated correctness." They are not substitutes.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: when planning a trip/budget, let the LLM "understand your fuzzy preferences + generate candidates," but hand hard constraints ("under budget," "no time conflicts") to deterministic check code (even an Excel formula). Layering intuition and verification is far more reliable than the LLM carrying the whole task alone.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Neuro-symbolic isn't a model; it's the architectural principle "perception to what learns, verification to what proves."<br>🤔 In tasks you let AI do end-to-end, which step is actually a <b>hard constraint</b> that should go to deterministic code instead of the model?</div>
+  </div>
+</div>
+
+<!-- 2. Knowledge Graph Embeddings -->
+<div class="card">
+  <h2>Knowledge Graph Embeddings<span class="en">Knowledge Graph Embeddings</span></h2>
+  <div class="tags"><span class="tag">representation</span><span class="tag purple">link prediction</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A knowledge graph is just a <b>graph database</b>: nodes are entities, edges are relations, stored as countless <code>(head, relation, tail)</code> triples—exactly like a <code>(user, follows, user)</code> relation table. But a graph DB can only query edges that <b>already exist</b>. KG embedding maps each entity and relation to a <b>vector</b>, turning "relation" into a <b>geometric operation</b> in vector space—so <b>missing edges can be inferred geometrically</b>, giving your relation table an "auto-complete the missing foreign key" engine.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Real knowledge graphs (Freebase, Wikidata, enterprise KBs) are always <b>incomplete</b>—many relations that should exist were never recorded. The task is <strong>link prediction</strong>: given <code>(Beijing, capital-of, ?)</code>, infer the tail. Hand-written rules don't scale (thousands of relations). The founding embedding method is <strong>TransE</strong> (Bordes et al., NeurIPS 2013), whose design intuition is elegant:</p>
+    <p style="margin-top:8px"><b>Model a "relation" as a translation of vectors.</b> If triple (h, r, t) holds, make <code>head vector + relation vector ≈ tail vector</code>, i.e. <strong>h + r ≈ t</strong>. Training minimizes ‖h+r−t‖ for true triples while pushing apart false ones.</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">TransE: relation = a "shift" in vector space</b><br><br>
+<span class="box">Beijing</span> <span class="arrow">+</span> <span class="box o">capital-of</span> <span class="arrow">≈</span> <span class="box g">China</span><br>
+<span class="box">Paris</span> <span class="arrow">+</span> <span class="box o">capital-of</span> <span class="arrow">≈</span> <span class="box g">France</span><br><br>
+<span style="color:#8b92a8">The same "capital-of" vector holds wherever it shifts → model learned the <b>direction of the relation</b></span><br>
+<span style="color:#5a6378">So querying (Tokyo + capital-of ≈ ?), the nearest neighbor is "Japan"—even if that edge was never in training</span>
+</div>
+
+    <p style="margin-top:14px">Why does this <b>generalize</b>? Because similar relations get compressed into similar geometric transforms. But TransE has a famous <b>weakness</b>: it can't handle symmetric relations ("friend-of" is symmetric, yet h+r≈t and t+r≈h can't both hold). The later <strong>RotatE</strong> (Sun et al., ICLR 2019) replaces translation with <b>rotation in complex space</b>, expressing symmetric, antisymmetric, inverse, and composition patterns at once—the key upgrade from "shift" to "rotation."</p>
+    <p style="margin-top:10px">⚠️ Boundary note: this is <b>statistical soft reasoning</b>, giving a "ranked likelihood," not the "provable hard conclusion" of symbolic logic—complementary to concept 1's symbolic side, not a replacement.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Pure-numpy demo of TransE's core: the geometric intuition of h + r ≈ t</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+np.random.seed(0)
+<span class="cmt"># Entities/relations are low-dim vectors (learned in practice; hand-set here)</span>
+ent = {<span class="str">"Beijing"</span>:np.array([0.,0.]), <span class="str">"China"</span>:np.array([2.,1.]),
+       <span class="str">"Tokyo"</span>:np.array([5.,3.]), <span class="str">"Japan"</span>:np.array([7.,4.])}
+rel_capital = np.array([2.,1.])  <span class="cmt"># the translation vector for "capital-of"</span>
+
+<span class="kw">def</span> <span class="fn">predict_tail</span>(head, rel):
+    target = ent[head] + rel              <span class="cmt"># h + r</span>
+    <span class="cmt"># find the entity nearest to target (nearest neighbor = predicted tail)</span>
+    <span class="kw">return</span> <span class="fn">min</span>(ent, key=<span class="kw">lambda</span> e: np.linalg.<span class="fn">norm</span>(ent[e]-target))
+
+<span class="kw">print</span>(<span class="fn">predict_tail</span>(<span class="str">"Tokyo"</span>, rel_capital))  <span class="cmt"># → Japan (inferred without that edge)</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">Pitfall: "embedding-inferred relations are all correct." Link prediction gives a <b>confidence ranking</b>; top results can be plausible-but-wrong (semantically near entities sneak in). In production you must add a <b>threshold + human/symbolic check</b>, treating it as a "candidate generator," not a "fact arbiter."</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: build your personal knowledge base (papers, concepts, people) as a triple graph, and use embeddings to recommend "<b>links you may have missed</b>"—e.g. spotting that "dependent origination in Buddhism" and "emergence in complex systems" are neighbors in vector space, hinting at a cross-disciplinary bridge you never drew.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 KG embeddings turn "relation" into a geometric operation, so "inferring a missing edge" becomes "finding the nearest neighbor"—a discrete graph problem translated into a continuous vector one.<br>🤔 If "relation = geometric transform," what kind of transform does a <b>symmetric</b> relation need versus a <b>hierarchical</b> one? (Exactly the motivation for TransE→RotatE.)</div>
+  </div>
+</div>
+
+<!-- 3. Differentiable Reasoning -->
+<div class="card">
+  <h2>Differentiable Reasoning<span class="en">Differentiable Reasoning</span></h2>
+  <div class="tags"><span class="tag">tight coupling</span><span class="tag purple">end-to-end</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Classic logic reasoning is like a <b>Prolog / SQL rule engine</b>: a rule either fires or it doesn't—a <b>discrete switch</b>, untunable and unlearnable from data. Differentiable reasoning rewrites those hard rules into a <b>continuous, backprop-able computation graph</b>—effectively attaching a <b>learnable confidence weight</b> to each if-else rule, so the whole reasoning chain can be optimized by gradient descent. It turns hard-coded business rules into soft rules that get <b>tuned by training data</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Concept 1's "loose coupling" bolts neural and symbolic together as two black boxes, with one drawback: <b>they can't be trained jointly</b>—a neural-side error can't propagate back to correct the symbolic side. Differentiable reasoning pursues <b>tight coupling</b>: make reasoning itself differentiable, so <b>perception and reasoning learn under one shared gradient</b>. The core difficulty is that logic is discrete (true/false, fire/no-fire), where gradients don't exist. Two mainstream cracks:</p>
+    <ul>
+      <li><b>① Probabilistic relaxation</b>—replace "true/false" with a [0,1] probability, and logical ops (AND/OR) with differentiable arithmetic (e.g. a∧b → a×b). The landmark is <strong>DeepProbLog</strong> (Manhaeve et al., 2018): it introduces "<b>neural predicates</b>" into Prolog—a fact's probability is output by a neural net, and the whole logic program's inference result is <b>differentiable</b> w.r.t. the net's parameters;</li>
+      <li><b>② Soft unification</b>—neural theorem provers relax symbol matching from "exact equality" to "vector similarity," so "cat" and "kitten" can approximately match, making the proof process differentiable.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">DeepProbLog: neural predicates wire gradients into a logic program</b><br><br>
+image <span class="arrow">→</span> <span class="box r">neural net</span> <span class="arrow">→</span> <span class="box o">digit(🖼️)=7 prob 0.9</span> <span style="color:#5a6378">← neural predicate</span><br>
+<span style="color:#5a6378">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓ fed into logic rule</span><br>
+<span class="box p">rule: add(A,B,C) :- digit(A,X), digit(B,Y), C is X+Y</span><br>
+<span style="color:#5a6378">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓ inference result (differentiable)</span><br>
+<span class="box g">prob that sum of two images = 12</span> <span class="arrow">→</span> compare to label <span class="arrow">→</span> <b style="color:#ff8e8e">gradient back to neural net</b><br><br>
+<span style="color:#8b92a8">Key: the net <b>never saw single-digit labels</b>, only "sum of two images." The logic rule <b>backprops</b> weak supervision into single-digit recognition.</span>
+</div>
+
+    <p style="margin-top:14px">The power here: using only "sum = 12" as a <b>high-level weak label</b>, the logical structure automatically <b>decomposes</b> the supervision signal down to each image's digit recognition—symbolic knowledge acts as an <b>inductive bias</b>, drastically cutting the labels needed. That sample efficiency is beyond a pure neural net.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Minimal demo of a differentiable "logical AND": relax AND as multiplication</span>
+<span class="kw">import</span> torch
+<span class="cmt"># Two neural predicates' "probability of truth" (from a net in practice)</span>
+p_digit_a = torch.<span class="fn">tensor</span>(0.9, requires_grad=<span class="kw">True</span>)  <span class="cmt"># P(A is 7)</span>
+p_digit_b = torch.<span class="fn">tensor</span>(0.8, requires_grad=<span class="kw">True</span>)  <span class="cmt"># P(B is 5)</span>
+
+<span class="cmt"># Hard rule "both A and B hold" is and(true,true)=true;</span>
+<span class="cmt"># relaxed: P(A∧B) = P(A)*P(B), differentiable</span>
+p_rule = p_digit_a * p_digit_b
+target = torch.<span class="fn">tensor</span>(1.0)           <span class="cmt"># we know this rule should hold</span>
+loss = (p_rule - target)**2
+loss.<span class="fn">backward</span>()                       <span class="cmt"># gradient flows back to both predicates</span>
+<span class="kw">print</span>(p_digit_a.grad, p_digit_b.grad)  <span class="cmt"># → nonzero: logic guides neural learning</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">Pitfall: "differentiable reasoning is fast and strong, it should replace rule engines." Relaxation has costs: turning discrete logic continuous introduces <b>approximation error</b>, and the combinatorial space gets <b>hard to scale</b> fast. Its sweet spot is <b>small-scale, learning-from-weak-supervision, interpretable-chain</b> tasks; large-scale exact reasoning still belongs to classic symbolic solvers.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: grasp this principle and you'll see why "have the LLM call tools / write code then execute" (loose coupling) is currently more practical than differentiable reasoning—the latter is elegant but hard to scale. Knowing <b>when not to use</b> a frontier method is itself judgment.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 The essence of differentiable reasoning: treat symbolic logic as a <b>learnable inductive bias</b>, using it to backprop high-level weak supervision into low-level skill—buying remarkable sample efficiency.<br>🤔 By "relaxing" discrete logic into continuous probability we gain learnability—what do we <b>lose</b>? (Hint: provability and scalability.)</div>
+  </div>
+</div>
+
+<!-- 4. Program Synthesis -->
+<div class="card">
+  <h2>Program Synthesis<span class="en">Program Synthesis</span></h2>
+  <div class="tags"><span class="tag">induction</span><span class="tag purple">library learning</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Program synthesis is like <b>property-based testing run in reverse</b>: testing means "given an implementation, verify it satisfies a property for all inputs"; synthesis means "given a set of input→output examples, <b>derive a program that satisfies them</b>." Add a layer of DreamCoder-style <b>library learning</b> and it's like refactoring where you keep <b>extracting repeated code into a shared function library</b>—except the extraction is done automatically during search, and the library keeps getting stronger.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Program synthesis is the "<b>holy grail</b>" of neuro-symbolic: a program is itself a <b>symbolic structure</b> (executable, verifiable, composable), yet the space of programs is so vast it must be <b>guided by a neural net</b>. It hits the LLM's weak spot—LLMs write code by recalling patterns, and become unreliable on new problems needing genuine <b>search + verification</b>; whereas once a program is synthesized, running it <b>verifies exactly</b> whether it's right.</p>
+    <p style="margin-top:8px">The landmark <strong>DreamCoder</strong> (Ellis et al., 2020/PLDI 2021) is elegant in its <strong>wake-sleep loop</strong>, growing two kinds of knowledge at once:</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">DreamCoder's wake-sleep loop</b><br><br>
+<span class="box o">🌅 Wake</span> use the current library + neural net to <b>search</b> for programs that solve tasks<br>
+<span style="color:#5a6378">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓ solved programs share repeated fragments</span><br>
+<span class="box g">😴 Sleep-abstraction</span> extract common substructures into <b>new library functions</b> (like refactoring)<br>
+<span style="color:#5a6378">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓ library grows stronger, search space shrinks</span><br>
+<span class="box p">😴 Sleep-dreaming</span> use the library to <b>self-generate practice problems</b>, training the net on "when to use which function"<br>
+<span style="color:#5a6378">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↺ back to Wake, capability spirals up</span><br><br>
+<span style="color:#8b92a8">The library (explicit symbolic knowledge) and the neural search policy (implicit intuition) <b>bootstrap each other</b>, learning faster over time.</span>
+</div>
+
+    <p style="margin-top:14px">In the paper, starting from basic primitives, DreamCoder <b>rediscovers on its own</b> the building blocks of functional programming, vector algebra, even classical physics (forms of Newton's and Coulomb's laws). That's the dividend of symbolic representation: what's learned isn't a blob of weights but a <b>human-readable, reusable function library</b>. As of 2026, LLMs have become stronger "neural search guides," but the "<b>generate→execute→fix-from-feedback</b>" skeleton that closes the loop between neural generation and symbolic verification is exactly DreamCoder's lineage—and the source of today's code agents' reliability.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Minimal synthesis kernel: enumerate in "program space," verify with I/O examples</span>
+<span class="kw">from</span> itertools <span class="kw">import</span> product
+<span class="cmt"># Example: find a program mapping input to output: f(x) = x * a + b</span>
+examples = [(1, 5), (2, 8), (3, 11)]   <span class="cmt"># spec = a set of I/O pairs</span>
+
+<span class="cmt"># library = the search space of candidate ops (DreamCoder grows this automatically)</span>
+<span class="kw">for</span> a, b <span class="kw">in</span> <span class="fn">product</span>(<span class="fn">range</span>(-5,6), <span class="fn">repeat</span>=2):
+    prog = <span class="kw">lambda</span> x, a=a, b=b: x*a + b
+    <span class="cmt"># symbolic verification: must hold exactly for all examples (what LLMs can't guarantee)</span>
+    <span class="kw">if</span> <span class="fn">all</span>(<span class="fn">prog</span>(x)==y <span class="kw">for</span> x, y <span class="kw">in</span> examples):
+        <span class="kw">print</span>(<span class="fn">f</span><span class="str">"found program: f(x) = x*{a} + {b}"</span>)  <span class="cmt"># → x*3 + 2</span>
+        <span class="kw">break</span>
+<span class="cmt"># The neural net's role: "guess" which a,b to try first, turning brute force into smart search</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">Pitfall: "LLMs write code, so program synthesis is solved." LLMs excel at <b>common-pattern</b> code, but stay unreliable on new problems needing <b>exact search + formal verification</b> (few-shot, must-be-correct). Synthesis's value isn't "generation" but "<b>generation + verifiable guarantee + learned reusable abstractions</b>"—precisely the piece pure LLMs lack.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: when building personal automation, rather than having the LLM write a whole script in one shot, have it <b>"write code → you give a few real I/O pairs → it self-tests → fix on failure."</b> This "synthesize-verify" mini-loop is far more reliable than one-shot generation—you're manually recreating DreamCoder's wake-sleep spirit.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Program synthesis = neural net "searches the vast program space smartly," symbolic execution "verifies exactly," library learning "compounds results into reusable assets"—all three together are the full picture.<br>🤔 Is DreamCoder's "library grows stronger, search gets faster" the same phenomenon as your "toolbox gets handier" as you code? Is human "experience accumulation" also a kind of library learning?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/2012.05876" target="_blank">Garcez &amp; Lamb 2020 — Neurosymbolic AI: The 3rd Wave</a> — the programmatic survey, includes the Kautz taxonomy</li>
+      <li><a href="https://proceedings.neurips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html" target="_blank">Bordes et al. 2013 — TransE (NeurIPS)</a> — founding work of KG embeddings, h+r≈t</li>
+      <li><a href="https://arxiv.org/abs/1902.10197" target="_blank">Sun et al. 2019 — RotatE</a> — rotation in complex space, unifying relation patterns</li>
+      <li><a href="https://arxiv.org/abs/1805.10872" target="_blank">Manhaeve et al. 2018 — DeepProbLog</a> — neural predicates wire gradients into logic, the differentiable-reasoning landmark</li>
+      <li><a href="https://arxiv.org/abs/2006.08381" target="_blank">Ellis et al. 2020 — DreamCoder</a> — wake-sleep library learning, a program-synthesis milestone</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Since today's LLMs can "call tools" and "write code then execute," do they themselves count as a neuro-symbolic system? Does that mean neuro-symbolic has "won"?</summary><div>By the Kautz taxonomy, <b>LLM + tool calling</b> is the most basic <b>loose-coupling</b> neuro-symbolic system: the LLM handles understanding/generation, the symbolic side (calculator, code executor, solver) handles exact computation and verification. So rather than "won," it's been <b>absorbed by the mainstream in its most practical form</b>—just under a different name. But this only occupies the "loose" end. <b>Tight coupling</b> (logic compiled into differentiable graphs, end-to-end joint training) is far from replaced, because LLM "reasoning" is still statistical mimicry lacking verifiable guarantees. The real judgment: neuro-symbolic isn't a problem to be "solved" but a design spectrum perpetually tuning "learnable ↔ verifiable." It's isomorphic to "eventual vs strong consistency" in distributed systems—no silver bullet, only choosing coupling strength per scenario.</div></details>
+
+    <details><summary>2. Concept 2 (KG embeddings) and concept 3 (differentiable reasoning) both "turn discrete into continuous." Do they relax different things? What's the cost of this "softening"?</summary><div>Different objects, shared philosophy. <b>KG embeddings</b> relax "<b>entities and relations</b>"—nodes/edges become continuous vectors, relations become geometric transforms, link prediction becomes nearest-neighbor. <b>Differentiable reasoning</b> relaxes "<b>logical operations</b>"—true/false becomes probability, "exact equality" becomes "vector similarity," so the chain becomes differentiable. The shared dividend is learnability + generalization. The shared cost has three layers: (a) <b>loss of provability</b>—you get a confidence ranking, not "necessarily true"; (b) <b>approximation error</b>—relaxation isn't logic's exact equivalent, errors accumulate on long chains; (c) <b>scalability</b>—a large combinatorial space gets hard to scale. So "softening" trades <b>determinism for learnability</b>, isomorphic to trading "consistency for availability."</div></details>
+
+    <details><summary>3. Neural nets do System 1 (fast intuition), symbolic systems do System 2 (slow logic)—an elegant mapping, but is it an over-simplification?</summary><div>The analogy captures the complementarity but has three risks. First, <b>the brain's System 2 is not a symbolic engine</b>—it still runs on neural substrate, a "slow, controlled neural process"; equating symbolic systems with System 2 conflates "function" (controlled reasoning) with "implementation" (discrete symbol ops). Second, LLMs already show some "slow thinking" (chain-of-thought, o1-style test-time compute)—that's a neural net approximating System 2 <b>internally</b>, challenging the assumption that "System 2 must be symbolic." Third, cognition is likely a <b>continuum</b>, not two clean boxes. Yet the analogy stays useful because it gives clear engineering guidance: generalizing perception to what learns, verifiable guarantees to what proves. For a BigCat probing consciousness, there's an open tension here: must verifiable reasoning be symbolic, or can it emerge at sufficient scale?</div></details>
+
+    <details><summary>4. Is program synthesis's "library learning" (library grows stronger, search gets faster) the same as human "expertise accumulation"? What does it suggest for becoming a super-individual?</summary><div>Structurally highly isomorphic. Library learning <b>extracts recurring substructures into reusable abstractions</b>, so new problems are solved at a higher abstraction layer with shorter "programs"—exactly the expert/novice difference: experts don't "think faster," they <b>own a better chunk library</b>. Cognitive science calls it chunking; DreamCoder is almost its algorithmic incarnation. Three takeaways: (a) <b>abstraction beats memorization</b>—distilling solved problems into reusable thinking templates compounds far more than hoarding cases; (b) <b>bootstrap compounding</b>—library and search policy reinforce each other; train "toolbox" and "intuition for using it" together; (c) <b>the human-AI leverage</b>—not letting AI think for you, but co-building an ever-growing "personal abstraction library" (prompt templates, workflows, decision frameworks). A super-individual's compounding is, at heart, a joint human-machine library learning.</div></details>
+
+    <details><summary>5. As neural models grow stronger, will the "learnable ↔ verifiable" spectrum "collapse" to the pure-neural end? Or is verifiability some incompressible need?</summary><div>My judgment: it won't collapse, because <b>verifiability's source is not model capability but the nature of the problem</b>. However strong a net, its output is sampling from a probability distribution—it can drive error toward zero but can't provide a "necessarily true" <b>guarantee</b>. Many domains want exactly the latter: chip formal verification, conflict-free scheduling, chemical balancing, auditable financial/legal decisions—here "99.99% right" and "provably right" are a <b>qualitative</b> difference. Just as requiring strong consistency in distributed systems can't bypass consensus protocols, no amount of reliability substitutes for "guarantee." So the likelier future isn't collapse but <b>solidified division of labor</b>: the neural side keeps eating "perception + fuzzy reasoning," the hard core goes to symbolic/formal methods, the two cooperating through ever-smoother interfaces (e.g. LLM auto-generates a spec, hands it to a solver). Neural will make symbolic <b>cheaper to use, but won't make it disappear</b>.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 42 · 2026-06-28</footer>
+
+</div>
+
+</body>
+</html>
