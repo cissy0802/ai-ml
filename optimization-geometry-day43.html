@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：优化的几何与前沿 — Day 43</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.formula{background:#0a0e1a;border:1px dashed #7b61ff;border-radius:8px;padding:14px 16px;margin:10px 0;text-align:center;color:#cfd3df;font-family:"SF Mono",Menlo,monospace;font-size:1.02rem;overflow-x:auto}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：优化的几何与前沿</h1>
+  <div class="meta">Day 43 · 2026-06-29 · 难度：进阶（数学密集）</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<p style="color:#8b92a8;font-size:0.92rem;margin-bottom:24px">
+Day 10 我们讲了「怎么走」——AdamW、学习率、梯度下降的基础机制。今天往深一层问：训练的「<strong>地形</strong>」长什么样？为什么有的谷底泛化好、有的差？以及当 Adam 不够用时，前沿优化器从哪些方向突破。这是一期关于<strong>优化的几何学</strong>的内容。
+</p>
+
+<!-- 1. 损失景观与平坦极小 -->
+<div class="card">
+  <h2>损失景观与平坦极小<span class="en">Loss Landscape &amp; Flat Minima</span></h2>
+  <div class="tags"><span class="tag">几何直觉</span><span class="tag purple">泛化</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>训练神经网络 = 在一个<strong>上亿维的「地形」</strong>里找谷底。但谷底有两种：一种是宽阔平坦的盆地，一种是窄而深的尖缝。类比你的系统配置——平坦极小像<strong>容差大的配置</strong>（某个参数漂移一点照常工作），尖锐极小像<strong>踩在钢丝上的配置</strong>（任意参数偏一点点系统就崩）。一个模型泛化好不好，很大程度上取决于它停在哪种谷底。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>损失函数 <code>L(w)</code> 是参数 <code>w</code>（动辄上亿维）的函数，训练就是用梯度下降找 <code>L</code> 的极小点。但这里有个谜：<strong>两个训练 loss 都接近 0 的模型，为什么一个测试集表现好、一个差？</strong></p>
+    <p style="margin-top:8px">关键洞察（「平坦极小」概念由 Hochreiter &amp; Schmidhuber 1990 年代提出）：测试集的 loss 曲面相对训练集会有<strong>微小平移</strong>（因为训练/测试数据分布略有差异）。如果你停在的极小点很「平」，平移后你仍处在低 loss 区——泛化好；如果很「尖」，平移一点 loss 就飙升——泛化差。<strong>平坦 = 对数据分布的扰动鲁棒。</strong></p>
+    <p style="margin-top:8px">Li et al. 2018 用一种叫 <strong>filter normalization</strong> 的技术，把上亿维曲面投影到 2D 画出来，做出一个漂亮的发现：ResNet 的<strong>残差连接（skip connection）</strong>会显著把原本尖锐、混乱、布满沟壑的地形「<strong>抚平</strong>」成光滑盆地——这从几何上解释了为什么深网加了 skip connection 之后突然变得好训练。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">同一维度的 loss 横截面（实线=训练集，虚线=测试集，二者略有平移）</span><br><br>
+<b style="color:#7ed6a0">平坦极小（泛化好）</b><br>
+<span style="color:#7ed6a0">＼＿＿＿＿＿＿＿＿／</span>  ← 训练谷底<br>
+<span style="color:#5a6378">　＼.＿.＿.＿.＿.＿／</span>  ← 测试平移后，<b style="color:#7ed6a0">仍在低 loss 区</b><br><br>
+<b style="color:#ff8e8e">尖锐极小（泛化差）</b><br>
+<span style="color:#ff8e8e">＼　　／</span>  ← 训练谷底（一样低）<br>
+<span style="color:#5a6378">　＼./　</span><span style="color:#ff8e8e"> ↑ 测试平移一点，loss 就<b>飙升</b></span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 训练 loss 相同，几何形状决定了泛化天差地别</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch, copy
+
+<span class="cmt"># 量化一个训练好的模型所在极小点的"锐度"：</span>
+<span class="cmt"># 在权重邻域里随机扰动，看 loss 最多涨多少</span>
+<span class="kw">def</span> <span class="fn">sharpness</span>(model, loss_fn, batch, rho=0.05, trials=10):
+    base = loss_fn(model, batch).<span class="fn">item</span>()
+    worst = base
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(trials):
+        m2 = copy.<span class="fn">deepcopy</span>(model)
+        <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+            <span class="kw">for</span> p <span class="kw">in</span> m2.<span class="fn">parameters</span>():
+                <span class="cmt"># 半径正比于参数自身尺度的随机扰动</span>
+                p.<span class="fn">add_</span>(torch.<span class="fn">randn_like</span>(p) * rho * p.<span class="fn">norm</span>())
+        worst = <span class="fn">max</span>(worst, loss_fn(m2, batch).<span class="fn">item</span>())
+    <span class="kw">return</span> worst - base   <span class="cmt"># 邻域最坏 loss 比中心高多少 = 锐度</span>
+<span class="cmt"># 锐度越小 → 极小点越"平" → 通常泛化越好</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「训练 loss 越低越好」。<strong>错。</strong>两个 loss 都逼近 0 的模型，泛化可能天差地别——决定性因素是极小点的<strong>几何形状</strong>，不是 loss 数值本身。盯着训练 loss 调到极致，反而可能掉进尖锐的过拟合谷。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：BigCat 微调出一个小模型准备上线时，除了看验证 loss，可以用上面的 <code>sharpness</code> 跑一下——同样验证表现下，<strong>锐度更低的那个版本对线上数据漂移更稳</strong>，值得优先上线。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 神经网络的泛化能力，写在「极小点的几何形状」里，而不只在 loss 数值里。<br>🤔 「平坦 = 鲁棒」这个直觉，和你做分布式系统时刻意「留容差余量、不把参数卡在临界值」的工程哲学，是不是同一件事的两种说法？</div>
+  </div>
+</div>
+
+<!-- 2. 锐度感知最小化 SAM -->
+<div class="card">
+  <h2>锐度感知最小化<span class="en">Sharpness-Aware Minimization (SAM)</span></h2>
+  <div class="tags"><span class="tag">优化目标</span><span class="tag orange">鲁棒</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>如果平坦极小更好，能不能把「找平坦」<strong>直接写进训练目标</strong>？SAM 就是这么做的。它像<strong>混沌工程 / 故障注入</strong>——不满足于「当前配置能跑」，而是主动问「<strong>在我周围最坏的扰动下还能跑吗？</strong>」，专挑邻域里最糟的点来优化，逼自己进入宽盆地。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>普通 SGD 只最小化当前点的 loss <code>L(w)</code>。但 Keskar et al. 2016 发现一个著名现象——<strong>大 batch 泛化鸿沟</strong>：用大 batch 训练容易掉进<strong>尖锐</strong>极小（因为大 batch 的梯度噪声小，少了把模型「抖出尖缝」的随机扰动），导致泛化变差。</p>
+    <p style="margin-top:8px">Foret et al. 2020 提出的 SAM 把优化目标从「最小化当前 loss」改成 <strong>min-max</strong>：</p>
+    <div class="formula">min<sub>w</sub> &nbsp; max<sub>‖ε‖≤ρ</sub> &nbsp; L(w + ε)</div>
+    <p>逐符号拆解：<code>w</code> 是参数，<code>ε</code> 是加在权重上的<strong>扰动向量</strong>，<code>ρ</code>（rho）是<strong>邻域半径</strong>（一个超参，比如 0.05），<code>‖·‖</code> 是向量范数。内层 <code>max</code> 的含义是「在半径 ρ 的小球里，loss 最高能到多少」；外层 <code>min</code> 是「最小化那个<strong>最坏值</strong>」。直觉：<strong>不再问脚下 loss 多低，而问邻域内最高的 loss 多低</strong>——只有宽平的盆地才能让「邻域最坏值」也很低。</p>
+    <p style="margin-top:8px">实现上每步要做<strong>两次前向</strong>：第一次算梯度，找到「最锐方向」 <code>ε̂ = ρ·g/‖g‖</code>（往坡最陡处先爬一步）；第二次在 <code>w+ε̂</code> 处重新算梯度，<strong>这个梯度才用来真正更新</strong>。代价是训练慢约一倍，换更好的泛化。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">SAM 的两步（在尖锐谷里）</span><br><br>
+<span style="color:#ff8e8e">　／＼</span>　　当前点 w 在尖谷底<br>
+<span style="color:#ff8e8e">／　●＼</span><br>
+&nbsp;&nbsp;<span class="arrow">①</span> 先沿梯度<b style="color:#ffb450">爬到邻域最坏点</b> w+ε̂（看清这个谷有多尖）<br>
+&nbsp;&nbsp;<span class="arrow">②</span> 用<b style="color:#7ed6a0">那一点的梯度</b>更新 → 把 w 推离尖谷、推向宽盆地<br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 普通 SGD 只看 ● 处梯度；SAM 看"最坏邻居"处的梯度</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># SAM 的一步：先爬到邻域最差点，再从那里下降（两次前向）</span>
+<span class="kw">def</span> <span class="fn">sam_step</span>(model, loss_fn, batch, optimizer, rho=0.05):
+    loss_fn(model, batch).<span class="fn">backward</span>()
+    <span class="cmt"># 1) 计算扰动 ê = ρ·g/‖g‖，把权重推到"最锐"方向</span>
+    gn = torch.<span class="fn">norm</span>(torch.<span class="fn">stack</span>(
+        [p.grad.<span class="fn">norm</span>() <span class="kw">for</span> p <span class="kw">in</span> model.<span class="fn">parameters</span>()]))
+    eps = {}
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        <span class="kw">for</span> p <span class="kw">in</span> model.<span class="fn">parameters</span>():
+            e = p.grad * rho / (gn + 1e-12); eps[p] = e; p.<span class="fn">add_</span>(e)
+    optimizer.<span class="fn">zero_grad</span>()
+    <span class="cmt"># 2) 在扰动点重新算梯度——这才是真正用于更新的方向</span>
+    loss_fn(model, batch).<span class="fn">backward</span>()
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        <span class="kw">for</span> p <span class="kw">in</span> model.<span class="fn">parameters</span>(): p.<span class="fn">sub_</span>(eps[p])  <span class="cmt"># 退回原点</span>
+    optimizer.<span class="fn">step</span>()      <span class="cmt"># 用"邻域最差点"的梯度更新 → 逼向平整区</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「SAM 总能提升，无脑加上就行」。<strong>不一定。</strong>它翻倍了计算成本；在本来就很平的任务上收益很小；收益最显著的是<strong>数据量小、容易过拟合</strong>的场景（如小数据集视觉任务）。</div>
+    <div class="exercise" style="margin-top:8px">📌 个人项目场景：BigCat 在<strong>小数据集</strong>上微调模型（最容易过拟合）时，SAM 是性价比很高的「泛化保险」——多花一倍训练时间，换一个对新数据更稳的模型。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 SAM 把「找鲁棒解」从训练后的事后祈祷，变成了<strong>优化目标本身</strong>。<br>🤔 min-max「对最坏情况优化」的思路，和对抗训练、以及你做容量规划时按 <strong>p99 而非均值</strong>设计系统——是不是同一个数学骨架？</div>
+  </div>
+</div>
+
+<!-- 3. 二阶方法 K-FAC / Shampoo -->
+<div class="card">
+  <h2>二阶方法<span class="en">Second-Order Methods (K-FAC / Shampoo)</span></h2>
+  <div class="tags"><span class="tag">曲率</span><span class="tag purple">预条件</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>一阶方法（SGD / Adam）像<strong>只看脚下坡度</strong>走路——在又窄又长的「山谷」里会左右横跳、走 Z 字，半天下不到底。二阶方法多看一样东西：<strong>曲率</strong>（地形怎么弯的），于是能直接朝谷底斜切过去。类比：一阶像只看瞬时梯度的拥塞控制，二阶像还掌握了「这条链路的曲率特性」从而一步切到位。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>梯度 <code>g</code> 是一阶导（坡度）。理论上最优的 <strong>Newton 法</strong>用 <strong>Hessian 矩阵 H</strong>（二阶导，描述曲率）做<strong>预条件（preconditioner）</strong>：</p>
+    <div class="formula">Δw = − H<sup>−1</sup> g</div>
+    <p>它能纠正「<strong>病态</strong>」山谷——即各方向尺度差异巨大、Adam 会横跳的那种地形。但 pain point 致命：<code>H</code> 是 <code>n×n</code>，<code>n</code> = 上亿参数 → <strong>既存不下、也求不了逆</strong>（复杂度 O(n²)~O(n³)）。这就像你绝不会去存一个上亿节点的<strong>全连接邻接矩阵</strong>。</p>
+    <p style="margin-top:8px">于是有两条「用结构假设把 O(n²) 砍成可承受」的近似路线：</p>
+    <ul style="margin-top:6px">
+      <li><strong>K-FAC</strong>（Martens &amp; Grosse 2015）：把每一层的 Fisher 矩阵（曲率的一种）近似成<strong>两个小矩阵的 Kronecker 积</strong> <code>A⊗B</code>——把一个大块分解成两个小因子，既存得下、又可逆。</li>
+      <li><strong>Shampoo</strong>（Gupta et al. 2018）：为参数张量的<strong>每个维度各维护一个小预条件矩阵</strong>，而不是一个跨所有参数的巨阵。</li>
+    </ul>
+    <p style="margin-top:8px">两者本质都是「<strong>用结构化分解逼近全曲率</strong>」。2024–2025 年这类方法（及其变体，如 SOAP）在大模型预训练里重新走红，因为它们能用<strong>更少的步数</strong>收敛——在超大规模下，步数省下来就是真金白银的 wall-clock。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">病态山谷俯视图（横向陡、纵向缓）</span><br><br>
+<b style="color:#ff8e8e">一阶 (SGD/Adam)</b>　&nbsp;　<b style="color:#7ed6a0">二阶 (K-FAC/Shampoo)</b><br>
+<span style="color:#ff8e8e">●╲</span>　　　　　　　　&nbsp;&nbsp;<span style="color:#7ed6a0">●</span><br>
+<span style="color:#ff8e8e">　╱●</span>　　　　　　　　&nbsp;&nbsp;<span style="color:#7ed6a0">　╲</span><br>
+<span style="color:#ff8e8e">●╲</span>　← Z 字横跳　　&nbsp;&nbsp;<span style="color:#7ed6a0">　　╲</span> ← 用曲率拉直<br>
+<span style="color:#ff8e8e">　╱●</span>　　　　　　　　&nbsp;&nbsp;<span style="color:#7ed6a0">　　　◎</span> 直奔谷底<br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 曲率信息让步子在"陡方向缩、缓方向放"，少走弯路</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># Adam 只用对角"自适应"（把每个参数当独立的）；</span>
+<span class="cmt"># 二阶方法用曲率做预条件，能感知参数间的耦合。</span>
+<span class="kw">from</span> torch_optimizer <span class="kw">import</span> Shampoo  <span class="cmt"># pip install torch-optimizer</span>
+
+opt = <span class="fn">Shampoo</span>(
+    model.<span class="fn">parameters</span>(), lr=1e-3,
+    <span class="cmt"># 为张量每个维度各维护一个小预条件矩阵，</span>
+    <span class="cmt"># 而非一个 n×n 巨阵——把"全曲率"分解成小因子</span>
+    update_freq=20)   <span class="cmt"># 每 20 步才更新一次预条件子（摊薄开销）</span>
+
+<span class="kw">for</span> batch <span class="kw">in</span> loader:
+    opt.<span class="fn">zero_grad</span>()
+    loss_fn(model, batch).<span class="fn">backward</span>()
+    opt.<span class="fn">step</span>()</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「二阶一定比 Adam 快」。<strong>不一定。</strong>每步的预条件计算和存储开销大，只有当「省下的步数」<strong>超过</strong>「每步变贵的成本」时才划算；而且实现复杂、对超参更敏感。所以它不是处处适用，而是<strong>超大规模预训练</strong>这种「步数极贵」场景里的利器。</div>
+    <div class="exercise" style="margin-top:8px">📌 跨学科理解场景：当 BigCat 读到大厂预训练用了 Shampoo / SOAP，能一眼看穿——这<strong>不是炫技</strong>，而是在超大规模下「用每步更多计算，换更少总步数」的工程换算。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 二阶方法的全部艺术，是「<strong>在不存全曲率矩阵的前提下，尽量利用曲率信息</strong>」。<br>🤔 Kronecker 分解「用结构假设把 O(n²) 降维」的思路，和你用稀疏 / 分块 / 低秩近似处理大矩阵，是不是同一套压缩哲学？</div>
+  </div>
+</div>
+
+<!-- 4. Lion / Sophia -->
+<div class="card">
+  <h2>符号动量与现代优化器<span class="en">Lion &amp; Sophia</span></h2>
+  <div class="tags"><span class="tag">前沿</span><span class="tag orange">优化器</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>Adam 统治了近十年后，2023 年冒出两个挑战者。<strong>Lion</strong> 像「<strong>极简主义重构</strong>」——砍掉 Adam 一半的状态（只留动量），更新只取方向的符号；<strong>Sophia</strong> 像「<strong>轻量二阶</strong>」——偷偷估一点曲率，但只花极小代价。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>Adam 给每个参数存<strong>两个状态</strong>：一阶矩 <code>m</code>（动量）和二阶矩 <code>v</code>（梯度平方的滑动平均）。显存 ≈ 2× 参数量。pain point：到百亿参数时，<strong>优化器状态本身就吃掉巨量显存</strong>。两个挑战者从不同方向找便宜的更新规则：</p>
+    <ul style="margin-top:6px">
+      <li><strong>Lion（Chen et al. 2023，「符号动量」）</strong>：它本身是用<strong>程序搜索</strong>（把「找优化算法」当成在程序空间里搜索）<strong>自动发现</strong>的，不是人手设计。它<strong>只存动量 m</strong>（显存减半），更新量取符号：<code>update = sign(β₁·m + (1−β₁)·g)</code>。<code>sign</code> 意味着<strong>每个参数的步长幅度都一样</strong>（只有方向不同），这本身是一种隐式正则。因为符号更新的等效步长偏大，论文指出 Lion 通常要用比 Adam <strong>小 3–10 倍</strong>的学习率。</li>
+      <li><strong>Sophia（Liu et al. 2023）</strong>：专为 LLM 预训练设计，每隔几步才<strong>轻量估一次对角 Hessian</strong> 当预条件子，再对更新做<strong>逐元素裁剪（clipping）</strong>控制最坏步长——用很小的二阶信息换更快收敛。</li>
+    </ul>
+    <p style="margin-top:8px">共同主题：在「<strong>Adam 够用、但不够省 / 不够快</strong>」的缝隙里，从显存（Lion）和曲率（Sophia）两个方向各找了一条出路。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">优化器状态对比（每个参数要存什么）</b><br><br>
+<span class="box r">SGD</span> 0 个 <span style="color:#5a6378">（最省，但慢/糙）</span><br>
+<span class="box">Adam</span> 2 个：动量 m + 二阶矩 v <span style="color:#5a6378">（最稳的默认）</span><br>
+<span class="box g">Lion</span> 1 个：只有动量 m <span style="color:#7ed6a0">（显存减半，更新取符号）</span><br>
+<span class="box p">Sophia</span> ~2 个：m + 偶尔更新的对角 Hessian <span style="color:#a48cff">（轻量二阶）</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 优化器的进化，是在显存/计算/泛化之间重新分配预算</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> lion_pytorch <span class="kw">import</span> Lion  <span class="cmt"># pip install lion-pytorch</span>
+
+<span class="cmt"># Lion 只存动量（不存 Adam 的二阶矩 v）→ 优化器显存减半</span>
+opt = <span class="fn">Lion</span>(model.<span class="fn">parameters</span>(),
+           lr=1e-4,            <span class="cmt"># 通常取 Adam 的 1/3~1/10</span>
+           weight_decay=1e-2)
+
+<span class="cmt"># 核心更新规则（概念示意）：</span>
+<span class="cmt">#   update = sign(β1·m + (1-β1)·g)   ← 只取符号，步长幅度统一</span>
+<span class="cmt">#   m      = β2·m + (1-β2)·g          ← 动量用另一组系数更新</span>
+<span class="kw">for</span> batch <span class="kw">in</span> loader:
+    opt.<span class="fn">zero_grad</span>()
+    loss_fn(model, batch).<span class="fn">backward</span>()
+    opt.<span class="fn">step</span>()</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「新优化器一定全面碾压 Adam」。<strong>现实</strong>：Lion / Sophia 只在特定规模 / 任务上有优势，<strong>AdamW 仍是最稳的默认</strong>。而且换优化器必须<strong>重新调学习率</strong>（Lion 尤其敏感），盲目照搬常常比 Adam 更差。</div>
+    <div class="exercise" style="margin-top:8px">📌 决策辅助场景：当 BigCat 读到「某新模型用 Lion 省了显存」，能理解这不是玄学，而是「<strong>砍掉一半优化器状态 + 符号更新</strong>」的明确取舍——并据此判断它是否适合自己的资源约束。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 优化器的进化史，是一部「<strong>在显存、计算、泛化之间反复重新分配预算</strong>」的历史。<br>🤔 Lion 由程序搜索自动发现、而非人手设计——当「设计算法」本身可以被自动化，研究者的角色会怎么变？</div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1712.09913" target="_blank">Li et al. 2018 — Visualizing the Loss Landscape of Neural Nets</a> — 损失景观可视化的奠基作，解释 skip connection 如何抚平地形</li>
+      <li><a href="https://arxiv.org/abs/1609.04836" target="_blank">Keskar et al. 2016 — On Large-Batch Training: Sharp Minima</a> — 「大 batch 泛化鸿沟」与尖锐极小的经典实证</li>
+      <li><a href="https://arxiv.org/abs/2010.01412" target="_blank">Foret et al. 2020 — Sharpness-Aware Minimization (SAM)</a> — 把「找平坦」写进优化目标的 min-max 方法</li>
+      <li><a href="https://arxiv.org/abs/1802.09568" target="_blank">Gupta et al. 2018 — Shampoo: Preconditioned Tensor Optimization</a> — 按张量维度做预条件的二阶方法</li>
+      <li><a href="https://arxiv.org/abs/2302.06675" target="_blank">Chen et al. 2023 — Symbolic Discovery of Optimization Algorithms (Lion)</a> — 用程序搜索自动发现优化器</li>
+      <li><a href="https://arxiv.org/abs/2305.14342" target="_blank">Liu et al. 2023 — Sophia: Scalable Second-order Optimizer</a> — 面向 LLM 预训练的轻量二阶方法</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. 「平坦极小一定泛化好」是定论吗？有没有反例？</summary><div>不是定论，恰恰是个<strong>活跃争论</strong>。Dinh et al. 2017（<a href="https://arxiv.org/abs/1703.04933" target="_blank">Sharp Minima Can Generalize For Deep Nets</a>）给出一个犀利反驳：利用 ReLU 网络的<strong>正缩放不变性</strong>——把某层权重 ×k、下一层 ÷k，函数完全不变，但参数空间里的曲率（锐度）可以被任意放大或缩小。也就是说，<strong>同一个函数</strong>既能显得「尖」也能显得「平」，取决于你怎么参数化。这说明朴素的「锐度」定义<strong>不是泛化的可靠度量</strong>。后续工作（如自适应锐度、对重参数化不变的锐度度量）试图修补这个漏洞。这个争论的深层启示：geometry 直觉很有力，但<strong>「在什么坐标系下度量」本身就是个陷阱</strong>——和物理里「曲率依赖于度规」是同一类问题。所以 SAM 之所以仍然有效，更准确的解释或许不是「它找到了客观平坦的点」，而是「它的扰动机制在实践中起到了正则化作用」。</div></details>
+
+    <details><summary>2. 为什么"梯度噪声"反而对泛化有益？小 batch 的随机性到底在做什么？</summary><div>这是理解现代优化的核心反直觉之一。把 SGD 看成「梯度下降 + 噪声」：每个 batch 算出的梯度 ≈ 真梯度 + 一个随机扰动，batch 越小噪声越大。这个噪声有两个作用：(1) <strong>逃离尖锐极小</strong>——尖谷又窄又陡，噪声容易把模型「抖出去」，最后只有<strong>宽平的盆地</strong>能「困住」带噪的轨迹，于是 SGD 天然偏好平坦解（这正好呼应 Keskar 的发现：大 batch 噪声小 → 困在尖谷 → 泛化差）；(2) 类似<strong>退火</strong>——训练早期大噪声广泛探索，学习率衰减后噪声变小、精细收敛。换句话说，梯度噪声<strong>不是要消除的 bug，而是隐式正则化的 feature</strong>。这解释了为什么单纯「加大 batch + 等比例加大学习率」并不能无损加速训练——你同时也削弱了这个有益的噪声。这和你在分布式系统里见过的「适度抖动（jitter）反而避免惊群、避免共振」是同构的智慧。</div></details>
+
+    <details><summary>3. Adam 是一种"对角近似的二阶方法"。既然如此，为什么真正的二阶方法没能取代它？</summary><div>Adam 的 <code>v</code>（梯度平方滑动平均）其实可以看作 Fisher / Hessian <strong>对角线</strong>的粗略估计——它给每个参数一个自适应步长，相当于「只保留曲率矩阵的对角线，忽略所有参数间的耦合」。真正的二阶方法（K-FAC / Shampoo）多保留了<strong>非对角的耦合信息</strong>，理论上更准。但 Adam 统治十年靠的是<strong>极致的性价比</strong>：对角近似让每步成本几乎和 SGD 一样，且对超参鲁棒、几乎到处能用。二阶方法的耦合信息虽好，但「计算 + 存储预条件子」的成本，常常吃掉「步数变少」带来的收益——<strong>只有在步数极其昂贵的超大规模预训练里，这笔账才翻正</strong>。这是一个经典的工程权衡题：<strong>近似的精度 vs 每步的成本</strong>，没有普适最优，只有「在你的规模下哪个划算」。它也解释了 Sophia 的设计哲学——别求全 Hessian，只要对角 + 偶尔更新 + 裁剪，把二阶的好处压到 Adam 量级的成本里。</div></details>
+
+    <details><summary>4. Lion 由"算法搜索算法"自动发现。如果优化器能被搜索出来，这件事的边界在哪里？</summary><div>Lion 来自一个迷人的范式：把「设计优化算法」形式化成<strong>在程序空间里搜索</strong>，让机器自己进化出更新规则。它的成功提出一个尖锐问题：<strong>哪些原本属于「研究者创造力」的东西，正在变成可搜索的优化问题？</strong>边界目前在几处：(1) <strong>搜索空间的设计</strong>仍由人定义——你能搜出的算法不会超出你允许的算子组合，框定空间本身是创造性工作；(2) <strong>泛化鸿沟</strong>——在小代理任务上搜出的算法未必在大规模上仍好，论文专门花力气做「程序选择与简化」来跨越这道沟；(3) <strong>可解释性</strong>——搜出的规则（如 sign 动量）事后需要人去理解「为什么有效」，否则只是黑箱。深层意涵：这是 AI 研究的<strong>自指时刻</strong>——用机器学习改进机器学习的工具。它不会让研究者失业，而是把研究者的角色从「手工设计具体算法」上移到「<strong>设计搜索空间、定义目标、解释发现</strong>」。这和 BigCat 追求「AI 超级个体」的内核一致：把可自动化的下移给机器，把自己上移到更高的抽象层。</div></details>
+
+    <details><summary>5. 把这一期串起来：从"地形"到"优化器"，贯穿的是什么样的统一视角？</summary><div>四个概念其实是同一个故事的不同切面，主线是「<strong>几何决定一切</strong>」。损失景观（概念 1）是<strong>地形</strong>本身——它的平坦/尖锐决定泛化；SAM（概念 2）是<strong>主动选择落点</strong>——不让你停在尖谷；二阶方法（概念 3）是<strong>读懂地形的曲率</strong>——好让步子走得更聪明；Lion/Sophia（概念 4）是在<strong>资源约束下对地形的实用近似</strong>。把它们连起来看，「训练神经网络」就从一个模糊的「调参炼丹」，变成一个清晰的命题：<strong>在一个上亿维的、形状由架构决定的地形上，用有限的显存和计算，找到一个对扰动鲁棒的宽盆地。</strong>每个工具都在回答这句话里的某个词——架构怎么塑形（skip connection 抚平地形）、怎么主动找宽盆地（SAM）、怎么走得快（二阶）、怎么走得省（Lion）。这种「<strong>把复杂现象还原为一个几何 + 资源的统一框架</strong>」的思维方式，正是复杂性科学、分布式系统、乃至佛学「缘起」观共享的底层美感——表象千变万化，结构可以惊人地简洁。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 43 · 2026-06-29</footer>
+
+</div>
+
+</body>
+</html>
