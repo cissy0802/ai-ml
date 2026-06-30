@@ -76,7 +76,7 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 
 <!-- 1. Cross-Entropy Loss -->
 <div class="card">
-  <h2>Cross-Entropy Loss<span class="en">交叉熵损失</span></h2>
+  <h2>Cross-Entropy Loss</h2>
   <div class="tags"><span class="tag">objective</span><span class="tag purple">information theory</span></div>
 
   <div class="section">
@@ -138,7 +138,7 @@ manual_loss = -log_probs[<span class="fn">range</span>(<span class="str">2</span
 
 <!-- 2. AdamW -->
 <div class="card">
-  <h2>AdamW Optimizer<span class="en">AdamW 优化器</span></h2>
+  <h2>AdamW Optimizer</h2>
   <div class="tags"><span class="tag">optimizer</span><span class="tag purple">adaptive</span></div>
 
   <div class="section">
@@ -215,7 +215,7 @@ optimizer = <span class="fn">AdamW</span>(
 
 <!-- 3. LR Schedule -->
 <div class="card">
-  <h2>Learning Rate Schedule<span class="en">学习率调度</span></h2>
+  <h2>Learning Rate Schedule</h2>
   <div class="tags"><span class="tag">scheduling</span><span class="tag orange">hyperparameter</span></div>
 
   <div class="section">
@@ -293,7 +293,7 @@ scheduler = <span class="fn">get_cosine_schedule_with_warmup</span>(
 
 <!-- 4. Gradient Clipping -->
 <div class="card">
-  <h2>Gradient Clipping<span class="en">梯度裁剪</span></h2>
+  <h2>Gradient Clipping</h2>
   <div class="tags"><span class="tag">stability</span><span class="tag purple">circuit breaker</span></div>
 
   <div class="section">
@@ -370,7 +370,7 @@ CLIP_VALUE = <span class="str">1.0</span>   <span class="cmt"># GPT-3/Llama defa
 
 <!-- Further reading -->
 <div class="card" style="border-left-color:#7b61ff">
-  <h2>Further Reading<span class="en">深入资源</span></h2>
+  <h2>Further Reading</h2>
   <div class="section">
     <ul>
       <li><a href="https://arxiv.org/abs/1412.6980" target="_blank">Adam: A Method for Stochastic Optimization (Kingma &amp; Ba 2014)</a> — original Adam paper, one of the most cited papers in deep learning</li>
@@ -387,7 +387,7 @@ CLIP_VALUE = <span class="str">1.0</span>   <span class="cmt"># GPT-3/Llama defa
 
 <!-- Deep questions -->
 <div class="card think" style="border-left-color:#7ed6a0">
-  <h2>Deep Questions<span class="en">深入思考</span></h2>
+  <h2>Deep Questions</h2>
   <div class="section">
     <details><summary>1. Ilya Sutskever says "compression is intelligence" — how does the cross-entropy objective support this claim? Is it metaphor or literal truth?</summary><div>Literal truth. Cross-entropy <code>H(p, q) = -Σ p(x) log q(x)</code> has a <b>precise physical meaning</b> in information theory: average bits per symbol if you use <b>arithmetic coding</b> with model distribution q on data drawn from true distribution p. Minimizing cross-entropy = <b>making the model the optimal compressor of real data</b>. GPT-2/3/4 training reaches per-token loss of ~1.5-2.5 nats (≈ 2.2-3.6 bits/token); raw UTF-8 text is ~5 bits/byte, so a well-trained LLM compresses human text to <b>30-50% of original size</b> — substantially better than gzip (~70%). Deeper: <b>to predict the next token down to this low a loss, the model must genuinely "understand" context</b> — syntax, world knowledge, reasoning chains, character intent. So "understanding is compression" is not metaphor: compress → must predict → must understand structure. Marcus Hutter (inventor of AIXI; the same Hutter from the AdamW paper) has long argued "AI evaluation = compression ratio," and his Hutter Prize still rewards the best text-compression algorithms. BigCat, your backend intuition for Parquet/dictionary encoding/protobuf varint solves the same problem: <b>find structure in data, encode in fewer bits</b>. LLMs just made "find structure" general-purpose — that's their essential difference from traditional compressors.</div></details>
 

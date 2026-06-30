@@ -73,7 +73,7 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 
 <!-- 1. Federated Learning -->
 <div class="card">
-  <h2>Federated Learning<span class="en">联邦学习</span></h2>
+  <h2>Federated Learning</h2>
   <div class="tags"><span class="tag">distributed training</span><span class="tag purple">data locality</span></div>
 
   <div class="section">
@@ -134,7 +134,7 @@ w = <span class="fn">fedavg</span>([np.array([1.,2]), np.array([3.,4]), np.array
 
 <!-- 2. Differential Privacy -->
 <div class="card">
-  <h2>Differential Privacy<span class="en">差分隐私</span></h2>
+  <h2>Differential Privacy</h2>
   <div class="tags"><span class="tag">privacy math</span><span class="tag purple">quantifiable guarantee</span></div>
 
   <div class="section">
@@ -192,7 +192,7 @@ true = <span class="str">1000</span>  <span class="cmt"># truly 1000 patients ha
 
 <!-- 3. Homomorphic Encryption -->
 <div class="card">
-  <h2>Homomorphic Encryption<span class="en">同态加密</span></h2>
+  <h2>Homomorphic Encryption</h2>
   <div class="tags"><span class="tag">cryptography</span><span class="tag purple">compute on ciphertext</span></div>
 
   <div class="section">
@@ -250,7 +250,7 @@ enc_dot = a.<span class="fn">dot</span>(b)           <span class="cmt"># entirel
 
 <!-- 4. Secure Multi-Party Computation -->
 <div class="card">
-  <h2>Secure Multi-Party Computation<span class="en">安全多方计算</span></h2>
+  <h2>Secure Multi-Party Computation</h2>
   <div class="tags"><span class="tag">cryptography</span><span class="tag purple">secret sharing</span></div>
 
   <div class="section">
@@ -308,7 +308,7 @@ node_sums = [(a + b) % P <span class="kw">for</span> a, b <span class="kw">in</s
 
 <!-- comparison -->
 <div class="card" style="border-left-color:#ffb450">
-  <h2>How They Combine<span class="en">四种技术怎么配合</span></h2>
+  <h2>How They Combine</h2>
   <div class="section">
     <p style="color:#cfd3df;font-size:0.95rem">They aren't mutually exclusive substitutes but building blocks protecting <b>different layers</b>; production systems usually stack them:</p>
     <table class="cmp">
@@ -324,7 +324,7 @@ node_sums = [(a + b) % P <span class="kw">for</span> a, b <span class="kw">in</s
 
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
-  <h2>Further Reading<span class="en">深入资源</span></h2>
+  <h2>Further Reading</h2>
   <div class="section">
     <ul>
       <li><a href="https://arxiv.org/abs/1602.05629" target="_blank">McMahan et al. 2017 — Communication-Efficient Learning (the FedAvg paper)</a></li>
@@ -339,7 +339,7 @@ node_sums = [(a + b) % P <span class="kw">for</span> a, b <span class="kw">in</s
 
 <!-- Deep Questions -->
 <div class="card think" style="border-left-color:#7ed6a0">
-  <h2>Deep Questions<span class="en">深入思考</span></h2>
+  <h2>Deep Questions</h2>
   <div class="section">
     <details><summary>1. Federated learning claims "data stays put," so why still layer DP / MPC? What does sharing only gradients actually leak?</summary><div>A gradient is <b>not</b> a harmless summary of data but a high-fidelity signal of "how the data shapes the model." <b>Gradient inversion</b> research shows: with small batches and a known model architecture, you can approximately <b>reconstruct original training samples</b> from uploaded gradients—recognizable faces, readable text. Intuitively a gradient = partial derivative of loss w.r.t. parameters; it encodes "to fit this sample, which way should the model move," carrying far more information than expected. So federated learning only solves <b>physical location</b> (data not centrally stored), not <b>information leakage</b>. Two fixes: (a) <b>Secure Aggregation / MPC</b> lets the server see only "the sum of all gradients"—single-point inversion fails; (b) <b>DP-SGD</b> adds noise to gradients so inversion, even with access, reconstructs poorly. This is exactly why the three-layer defense must stack—any single layer has a gap.</div></details>
 
