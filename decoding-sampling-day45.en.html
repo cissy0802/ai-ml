@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: The Math of Decoding & Sampling — Day 45</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.formula{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:14px 16px;margin-top:10px;font-family:"SF Mono",Menlo,monospace;font-size:0.92rem;color:#a48cff;text-align:center;overflow-x:auto}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: The Math of Decoding & Sampling</h1>
+  <div class="meta">Day 45 · 2026-07-01</div>
+  <div class="audience">For: engineers with coding experience, not from an AI background</div>
+</header>
+
+<div class="card" style="border-left-color:#7b61ff;background:rgba(123,97,255,0.06)">
+  <div class="section">
+    <p style="font-size:0.95rem;color:#cfd3df">One forward pass of the model produces <b>not</b> a word, but an entire probability distribution over tens of thousands of vocabulary tokens. <b>Picking the next word out of that distribution</b> is "decoding." Same model, same prompt — swap the decoding method and the output can go from "dull and repetitive" to "wildly creative," even from "factually accurate" to "confidently wrong." Today we make the math of this final step precise: deterministic search, the distribution-reshaping of random sampling, and two elegant contrast-based mechanisms.</p>
+  </div>
+</div>
+
+<!-- 1. Greedy & Beam Search -->
+<div class="card">
+  <h2>Greedy & Beam Search<span class="en">Greedy & Beam Search</span></h2>
+  <div class="tags"><span class="tag">Deterministic Decoding</span><span class="tag purple">Search</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Greedy is a <b>greedy algorithm</b> — each step just takes the highest-probability token, like making change by always grabbing the largest coin: simple, but prone to getting stuck in a <b>local optimum</b>. Beam search is the query-optimizer's approach: it won't bet on a single execution plan, so it <b>maintains a bounded priority queue of k candidates</b>, expanding all k paths each step, pruning by cumulative score, keeping only the top-k. It spends k× compute to buy a little global foresight.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Generating a whole sentence is, at heart, finding the <b>token sequence with the highest joint probability</b>. In theory you'd enumerate all sequences — a 50K vocabulary and a 20-word sentence is 50K²⁰ possibilities, utterly infeasible. Greedy is the crudest approximation: take the argmax word by word. The catch is that <b>local optimum ≠ global optimum</b> — the highest-probability word now may corner you into a dead end later.</p>
+    <p style="margin-top:8px">Beam search softens this: keep the k best prefixes, expand each against the full vocabulary, then take the global top-k by <b>sum of log probabilities</b>.</p>
+    <div class="formula">score(sequence) = Σᵢ log P(tokenᵢ | context)</div>
+    <p style="margin-top:8px">Summing logs instead of multiplying probabilities avoids <b>underflow to 0</b> when many small decimals multiply (the same trick you use in backends for long-chain probabilities). Beam width k=1 degenerates to greedy.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Beam search, width k=2 (keep only 2 best paths per step)</span><br><br>
+start <span class="arrow">→</span> <span class="box g">The</span><br>
+<span style="margin-left:40px">├→ <span class="box">cat</span> <span style="color:#5a6378">logP=-0.9 ✓keep</span></span><br>
+<span style="margin-left:40px">├→ <span class="box">dog</span> <span style="color:#5a6378">logP=-1.2 ✓keep</span></span><br>
+<span style="margin-left:40px">└→ <span class="box r">sky</span> <span style="color:#5a6378">logP=-3.1 ✗prune</span></span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ each layer ranks 2×vocab candidates, carries forward only the 2 highest cumulative logP</span>
+</div>
+
+    <p style="margin-top:14px"><b>The core counter-intuition</b> (revealed by Holtzman et al. 2019): for <b>open-ended generation</b> (writing, dialogue), chasing the "highest-probability sequence" produces <b>dull, eerily repetitive</b> text. Real human language is full of "lower-probability but more informative" choices; maximizing probability makes the model converge on safe, "the the the"-style filler. This is why <b>chat models almost never use pure beam search</b> — it suits translation and summarization, where the answer is nearly unique, not creation.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)
+model = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)
+ids = tok(<span class="str">"The future of AI is"</span>, return_tensors=<span class="str">"pt"</span>).input_ids
+
+<span class="cmt"># Greedy: argmax each step, fully deterministic</span>
+greedy = model.<span class="fn">generate</span>(ids, max_new_tokens=30, do_sample=<span class="kw">False</span>)
+
+<span class="cmt"># Beam: keep 5 paths, pick the whole sentence with highest cumulative logP</span>
+beam = model.<span class="fn">generate</span>(ids, max_new_tokens=30, num_beams=5,
+                      early_stopping=<span class="kw">True</span>)
+<span class="fn">print</span>(tok.<span class="fn">decode</span>(beam[0], skip_special_tokens=<span class="kw">True</span>))</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">❌ Misconception: "the highest-probability sequence = the best text." This is exactly the intuition Holtzman's paper overturned — maximizing likelihood slides into repetitive degeneration. <b>"Good text" doesn't live at the peak of the distribution, but in a slightly lower, wider region.</b> That's the whole reason the next three concepts exist.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: when you need <b>reproducible, auditable</b> output (extracting structured fields from a filing, running the same prompt across versions), use deterministic decoding (temperature=0, which is essentially greedy); when you want it to <b>write or diverge</b>, switch to sampling. First decide whether the task is "search" or "creation."</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Decoding is a search problem, but "the optimum" is a trap for open-ended generation — high probability ≠ high quality.<br>🤔 Which of your AI tasks truly need "a single correct answer," and which actually need "diverse but reasonable"? That distinction decides search vs. sampling.</div>
+  </div>
+</div>
+
+<!-- 2. Temperature & Truncation Sampling -->
+<div class="card">
+  <h2>Temperature & Truncation Sampling<span class="en">Temperature · Top-k · Top-p · Min-p</span></h2>
+  <div class="tags"><span class="tag">Random Sampling</span><span class="tag purple">Distribution Reshaping</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>If greedy is "always read the hottest cached row," sampling is "draw a row at <b>weighted random</b> by heat." Temperature is the <b>master valve</b> on that randomness — like "sharpening / blurring" the softmax distribution; while top-k / top-p / min-p are three <b>truncation strategies that chop off the long tail</b> of junk candidates first, so an absurd low-probability token doesn't get drawn.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p><b>Temperature (T)</b> divides each logit by T inside the softmax:</p>
+    <div class="formula">Pᵢ = exp(zᵢ / T) / Σⱼ exp(zⱼ / T)</div>
+    <p style="margin-top:8px">zᵢ is the raw logit of token i. <b>Intuition</b>: T &lt; 1 (say 0.3) amplifies the gaps between logits → sharper distribution → high-probability words dominate more (approaching greedy); T &gt; 1 (say 1.5) flattens the gaps → more uniform → rare words get a chance; T → 0 is argmax, T → ∞ is uniform random. Key point: <b>temperature doesn't change what the model "knows," it only reshapes the sharpness of the distribution it already computed.</b></p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Same logits, distribution under different temperatures</span><br><br>
+T=0.5 <span style="color:#5a6378">(sharp/conservative)</span><br>
+&nbsp;&nbsp;<span class="bar" style="width:130px;height:22px"></span> <span class="bar" style="width:24px;height:22px;opacity:.6"></span> <span class="bar" style="width:10px;height:22px;opacity:.4"></span><br>
+T=1.0 <span style="color:#5a6378">(raw)</span><br>
+&nbsp;&nbsp;<span class="bar" style="width:90px;height:22px"></span> <span class="bar" style="width:48px;height:22px;opacity:.7"></span> <span class="bar" style="width:28px;height:22px;opacity:.5"></span><br>
+T=1.6 <span style="color:#5a6378">(flat/divergent)</span><br>
+&nbsp;&nbsp;<span class="bar" style="width:60px;height:22px"></span> <span class="bar" style="width:46px;height:22px;opacity:.75"></span> <span class="bar" style="width:38px;height:22px;opacity:.6"></span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ higher temperature = flatter distribution = rarer words more likely to be drawn</span>
+</div>
+
+    <p style="margin-top:14px">Temperature alone isn't enough: at high T the <b>absurd tail words</b> also get their probability lifted. The three truncations chop the tail first, then re-normalize and sample among the survivors:</p>
+    <ul>
+      <li><b>Top-k</b> — keep only the k highest-probability tokens. Downside: k is <b>fixed</b> — it still forces in k candidates when the distribution is sharp, and prunes reasonable options when it's flat;</li>
+      <li><b>Top-p / Nucleus sampling</b> (Holtzman 2019) — keep the smallest set whose <b>cumulative probability ≥ p</b>. It <b>dynamically</b> adjusts candidate count: small set when the model is confident, large when it's uncertain. Like "keep the hot rows covering 90% of cumulative heat";</li>
+      <li><b>Min-p</b> (Nguyen 2024) — threshold = top probability × min_p, chop everything below it. When the model is confident (top prob 0.9) it truncates hard, keeping just the best; when uncertain (top prob 0.2) it relaxes, keeping diversity. More stable than top-p at high temperature.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># HuggingFace: the three truncations stack; sampling runs among survivors</span>
+out = model.<span class="fn">generate</span>(
+    ids, max_new_tokens=40,
+    do_sample=<span class="kw">True</span>,       <span class="cmt"># turn on random sampling (else all params below ignored)</span>
+    temperature=0.8,      <span class="cmt"># sharpness: &lt;1 conservative, &gt;1 divergent</span>
+    top_k=50,             <span class="cmt"># sample only within the top 50 by probability</span>
+    top_p=0.9,            <span class="cmt"># and within the nucleus of cumulative prob ≥0.9 (dynamic count)</span>
+    min_p=0.05,           <span class="cmt"># and keep only tokens with prob ≥ 0.05×top prob</span>
+)
+<span class="fn">print</span>(tok.<span class="fn">decode</span>(out[0], skip_special_tokens=<span class="kw">True</span>))
+<span class="cmt"># You rarely max out all three; the key is grasping "dynamic vs fixed"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">❌ Misconception: "temperature is the model's 'creativity knob' — turn it up to get smarter." Wrong. Temperature <b>injects no new information</b>; it merely redistributes the probability mass the model already computed. High temperature isn't "more creative," it's "more willing to bet on low-probability tokens" — bet right, we call it creativity; bet wrong, we call it hallucination. Creativity comes from the model's knowledge, not from this division.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: understand "what physical quantity you're actually tuning" — fact-checking / code generation with low temperature (concentrate the distribution on what it's most sure of), cross-disciplinary brainstorming with high temperature + top-p (widen the nucleus, let the model jump to adjacent concepts). You're not tuning "smartness," you're choosing "how far it's willing to stray from the peak."</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Sampling = temperature reshapes the distribution + truncation chops the tail. The core divide is "fixed candidate count (top-k)" vs. "scaling with the model's confidence (top-p / min-p)."<br>🤔 If the model is extremely confident about the next word (one word at 0.99), does high temperature still matter? (Hint: think about why min-p lets almost nothing else through here.)</div>
+  </div>
+</div>
+
+<!-- 3. Contrastive Decoding -->
+<div class="card">
+  <h2>Contrastive Decoding<span class="en">Contrastive Decoding</span></h2>
+  <div class="tags"><span class="tag">Contrast Mechanism</span><span class="tag orange">Quality</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Like <b>taking a diff / controlled experiment</b>: use an "amateur (weak, small) model" as the control group, and <b>subtract</b> it from the "expert (strong, large) model's" log probabilities. The cheap bad habits both models <b>share</b> — repetition, boilerplate syntax, mindless high-frequency words — cancel out in the subtraction, leaving only the knowledge and judgment <b>unique</b> to the strong model. It's not two models voting by sum, it's using the weak model to do <b>subtraction</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Following concept 1's dilemma: greedy is too dull, pure sampling can drift. Contrastive decoding (Li et al. 2022) takes a different angle — <b>what do bad texts have in common?</b> Answer: the errors both large and small models make (repetition, generic filler). A GPT-2 small and a GPT-2 XL both assign "the" high probability; only the large model can produce a truly apt rare word. So the scoring function becomes their difference:</p>
+    <div class="formula">score = log P<sub>expert</sub>(token) − λ · log P<sub>amateur</sub>(token)</div>
+    <p style="margin-top:8px">λ controls the strength of the subtraction. <b>Intuition</b>: a token both expert and amateur love (like "the") has its advantage wiped out after subtraction; a token the expert loves but the amateur doesn't (a word the expert chose from knowledge) <b>stands out</b>. But pure subtraction has a pitfall: a reasonable word the amateur strongly dislikes gets over-rewarded, producing gibberish. So add a <b>plausibility constraint</b>: run the contrast only among candidates where the expert's probability is <b>high enough</b> (≥ α × top probability, same idea as min-p) — first mark out the "expert-approved safe zone," then rank within it using the amateur.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Contrastive decoding: "expert − amateur" surfaces the real knowledge signal</span><br><br>
+candidate <span class="box">"the"</span>: expert 0.30 · amateur 0.28 <span class="arrow">→</span> diff <span class="box r">≈0 (shared cliché, suppressed)</span><br>
+candidate <span class="box">"photosynthesis"</span>: expert 0.20 · amateur 0.02 <span class="arrow">→</span> diff <span class="box g">large (expert-only, rewarded)</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ first the plausibility constraint circles expert-approved candidates, then rank by diff</span>
+</div>
+
+    <p style="margin-top:14px">The effect: the <b>coherence</b> of greedy plus the <b>richness</b> of sampling, with less repetitive degeneration. Follow-up work (Contrastive Decoding Improves Reasoning, 2023) even found it boosts reasoning accuracy — because "the amateur model's wrong intuitions" are exactly what you want subtracted away.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
+expert  = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-large"</span>)
+amateur = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)  <span class="cmt"># small = amateur</span>
+
+lp_e = F.<span class="fn">log_softmax</span>(expert(ids).logits[:, -1], dim=-1)
+lp_a = F.<span class="fn">log_softmax</span>(amateur(ids).logits[:, -1], dim=-1)
+
+<span class="cmt"># plausibility: keep candidates with expert prob ≥ α×top, else -inf</span>
+alpha, lam = 0.1, 1.0
+mask = lp_e &lt; (lp_e.<span class="fn">max</span>() + torch.<span class="fn">log</span>(torch.<span class="fn">tensor</span>(alpha)))
+score = lp_e - lam * lp_a          <span class="cmt"># core: expert − λ×amateur</span>
+score[mask] = -float(<span class="str">"inf"</span>)      <span class="cmt"># drop words even the expert rejects</span>
+next_id = score.<span class="fn">argmax</span>(-1)          <span class="cmt"># take the contrast-best within the safe zone</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">❌ Misconception: "contrastive decoding is just an ensemble — let two models vote (sum/average)." Quite the opposite — it's <b>subtraction</b>. An ensemble is "three heads are better than one"; contrast is "use the amateur as a cautionary example": the amateur's value isn't that it's right, it's that it represents "the mistakes you can make without any real knowledge." Subtract that, and what remains is genuine skill.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: the "subtract with a weak baseline" idea transfers to human-AI collaboration — when evaluating an AI proposal, first ask "what answer could a clueless person give just by following the playbook," mentally "subtract" that from the model's output, and what's left is the real information gain it contributed.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Contrastive decoding: bad habits are common to both large and small models; subtracting with a weak model filters out the commonality and keeps the strong model's unique knowledge.<br>🤔 "Shared errors" is a deep concept — can you think of other fields where "a weak baseline cancels a systematic bias"? (Hint: control groups in causal inference, hedging in finance.)</div>
+  </div>
+</div>
+
+<!-- 4. Speculative Decoding -->
+<div class="card">
+  <h2>Speculative Decoding<span class="en">Speculative Decoding</span></h2>
+  <div class="tags"><span class="tag">Acceleration</span><span class="tag purple">Lossless</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>This is the CPU's <b>speculative execution + branch prediction</b>, or the database's <b>optimistic concurrency control (OCC)</b>, applied to decoding: let a cheap small model <b>optimistically guess a string of tokens</b>, then have the expensive large model <b>verify that guess in one parallel pass</b>. Correct guesses are accepted (saving the time of generating them one by one), wrong ones roll back from there. The crucial part — <b>the final output is mathematically identical to what the large model would have generated token by token</b>. Lossless acceleration.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>The pain point of autoregressive generation: it's <b>serial, token by token</b>. Generating 100 words means 100 large-model forward passes, each dragging the entire giant model through memory — GPU compute sits idle, the bottleneck is <b>memory bandwidth</b>, not computation. Leviathan et al.'s (2022) insight: <b>many tokens are "easy"</b> ("the," "of," "." and such) — a small model gets them right too, so why invoke the large one?</p>
+    <p style="margin-top:8px">The flow: the draft model q autoregressively generates γ tokens; the large model p forwards those γ tokens <b>in one parallel pass</b> (computing the distributions at all γ positions at once — this is key: verification is parallel, only generation is serial). Then, token by token, <b>rejection sampling</b> decides acceptance:</p>
+    <div class="formula">P(accept token x) = min(1, P<sub>large</sub>(x) / q<sub>small</sub>(x))</div>
+    <p style="margin-top:8px"><b>Intuition</b>: if the small model's confidence in x doesn't exceed the large model's (q ≤ p), accept unconditionally; if the small model is over-confident (q &gt; p), accept with probability p/q. Once a token is rejected, discard all drafts after it and resample one from the corrected distribution <b>norm(max(0, p − q))</b> — it can be proven that this accept/resample rule makes the final distribution <b>strictly equal to the large model's p</b>. So it <b>sacrifices no quality</b>, only compressing the cost of "a string of easy tokens" from "γ large-model passes" to "1 large-model pass + γ small-model passes."</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">One round of speculative decoding (γ=4 draft)</span><br><br>
+<span class="box g">small drafts</span> <span class="arrow">→</span> <span class="box">is</span><span class="box">a</span><span class="box">new</span><span class="box">era</span> <span style="color:#5a6378">(serial, but cheap)</span><br>
+<span class="box p">large verifies</span> <span class="arrow">→</span> one forward computes all 4 positions' distributions<br>
+<span style="margin-left:20px"><span class="box">is</span>✓ <span class="box">a</span>✓ <span class="box">new</span>✓ <span class="box r">era</span>✗ <span class="arrow">→</span> reject here, resample correct word</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ accept 3 + resample 1 = 4 tokens per round, at the cost of 1 large-model forward</span>
+</div>
+
+    <p style="margin-top:14px">The closer the draft model is to the large one, the higher the acceptance rate and the greater the speedup; the paper reports roughly 2–3× on T5-XXL with <b>byte-for-byte identical</b> output. DeepMind's concurrent speculative sampling (Chen et al. 2023) gives an equivalent independent derivation.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># HuggingFace built-in: pass a small assistant_model to enable speculative decoding</span>
+big   = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-xl"</span>)   <span class="cmt"># target (slow/accurate)</span>
+draft = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)      <span class="cmt"># draft (fast)</span>
+
+out = big.<span class="fn">generate</span>(
+    ids, max_new_tokens=60,
+    assistant_model=draft,   <span class="cmt"># ← small guesses, large verifies; distribution unchanged</span>
+    do_sample=<span class="kw">True</span>, temperature=0.7,
+)
+<span class="fn">print</span>(tok.<span class="fn">decode</span>(out[0], skip_special_tokens=<span class="kw">True</span>))
+<span class="cmt"># result matches the distribution without assistant_model — just faster</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">❌ Misconception: "speculative decoding is approximate acceleration — it trades a bit of quality for speed." Wrong — it's <b>mathematically lossless</b>. The rejection-sampling accept/resample rule is carefully designed to guarantee the final token distribution is <b>strictly identical</b> to the large model generating alone. A bad draft model only lowers the acceptance rate (less speedup); it <b>never pollutes the output</b>. That's its elegance: speed is gambled, correctness is proven.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: understand why your everyday API got faster without getting dumber. More broadly, the mental model — <b>"guess optimistically + verify cheaply + roll back only if wrong"</b>: when writing code, let the AI generate boldly and quickly verify the critical parts yourself; when deciding, draft first then verify assumptions. Speculative execution is a general philosophy of efficiency.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Speculative decoding = speculative execution for decoding: the small model guesses, the large model verifies in parallel, rejection sampling keeps the output distribution byte-for-byte unchanged. A (nearly) free lunch.<br>🤔 Speculative decoding trades speed via "cheap guessing + provable verification." Which parts of your workflow could "execute optimistically, then verify cheaply" instead of "confirming cautiously step by step"?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1904.09751" target="_blank">Holtzman et al. 2019 — The Curious Case of Neural Text Degeneration</a> — the founding paper of nucleus (top-p) sampling, and the classic evidence for "high probability ≠ good text"</li>
+      <li><a href="https://arxiv.org/abs/2210.15097" target="_blank">Li et al. 2022 — Contrastive Decoding</a> — the original expert-minus-amateur contrastive decoding paper</li>
+      <li><a href="https://arxiv.org/abs/2211.17192" target="_blank">Leviathan et al. 2022 — Fast Inference from Transformers via Speculative Decoding</a> — speculative decoding and the losslessness proof</li>
+      <li><a href="https://arxiv.org/abs/2302.01318" target="_blank">Chen et al. 2023 — Accelerating LLM Decoding with Speculative Sampling</a> — DeepMind's equivalent independent derivation</li>
+      <li><a href="https://arxiv.org/abs/2407.01082" target="_blank">Nguyen et al. 2024 — Min-p Sampling</a> — truncation sampling that scales with model confidence</li>
+      <li><a href="https://huggingface.co/docs/transformers/generation_strategies" target="_blank">HuggingFace — Generation Strategies</a> — official API docs for greedy / beam / sampling / assisted generation</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Of the four methods, which change the model's "output distribution" and which don't? Why does this distinction matter?</summary><div>Splitting them into two classes is the key to today's whole picture. <b>Change the distribution</b>: greedy (collapses to a point), temperature (sharpen/flatten), top-k/p/min-p (truncate the tail), contrastive decoding (expert minus amateur, a full reshaping of the score) — all actively "rewriting what the model says." <b>Don't change the distribution</b>: only speculative decoding — it's pure <b>engineering acceleration</b>, output strictly identical to the large model generating token by token. The significance is <b>attribution</b>: if the model hallucinates, the first four are results of "you chose to let it stray further from the peak" (tunable), whereas speculative decoding is never at fault (it just faster-reproduces what the large model would have said anyway). When debugging a "model suddenly talks nonsense" issue, first check whether it's the sampling parameters (temperature too high, top-p too wide) rather than the model itself — the most common, most overlooked layer.</div></details>
+
+    <details><summary>2. Top-p, min-p, and the contrastive plausibility constraint differ in math form, but share one "spirit" — what is it?</summary><div>All three answer the same question: <b>"how many candidate words should we keep to be reasonable?"</b> And every answer is <b>dynamic, adapting to the model's confidence</b>, not a fixed threshold. Top-p uses "cumulative probability ≥ p" — the more confident the model, the fewer candidates needed to reach p. Min-p uses "≥ top probability × ratio" — anchored directly on the top-1's confidence. The contrastive plausibility constraint "≥ α × top probability" is nearly the same formula as min-p. The shared spirit: <b>narrow when the model is confident (trust it), widen when it's uncertain (give it room).</b> This is more intuitive than top-k's fixed k — because "the number of reasonable candidates" was never meant to be a constant; it depends on how confident the model is at this step. It also echoes concept 1's insight: good text lives in a region that "scales with context," not a fixed-size neighborhood.</div></details>
+
+    <details><summary>3. Why is speculative decoding's "small model guesses + large model verifies" lossless? What if you replaced it with a "weighted average of small and large outputs"?</summary><div>The losslessness hinges on <b>rejection sampling</b>, not on "averaging." The acceptance probability min(1, p/q) plus the "resample from norm(max(0,p−q)) when rejected" rule can be shown algebraically to make any token's final output probability exactly equal the large model's p. Intuitively, the small model merely provides a <b>proposal distribution</b>; rejection sampling "corrects" it back to the target p — the small model guessing well affects only the acceptance rate (efficiency), not the final distribution (correctness). If you instead used a "weighted average" (say 0.5p+0.5q), the output distribution becomes a <b>brand-new one that is neither p nor q</b> — that's the <b>contrastive-decoding class</b> of "actively rewriting output," which sacrifices/changes quality and is no longer lossless. Same "two models collaborating," but speculative decoding is "accelerate with the small model, guarantee correctness with math," while contrastive decoding is "use the small model's errors as a cautionary example to rewrite the output" — utterly different goals; don't conflate them.</div></details>
+
+    <details><summary>4. Concept 1 says "the highest-probability sequence is actually bad text," a shock to the naive "higher probability is better." What does it reveal about language models?</summary><div>It reveals a deep mismatch: <b>the model is trained to "maximize likelihood," but the value of human language does not lie at the peak of likelihood.</b> Information-theoretically, a perfectly predictable (high-probability) word carries almost no information (self-information = −log p, larger p means less information). Holtzman's observation is precisely that human text's token probabilities <b>fluctuate</b>, whereas beam search pulls generation toward "a smooth curve of sustained high probability" — hence dull repetition. This also explains why sampling is <b>necessary</b> for open-ended generation, not just "adding a bit of noise to make do." More philosophically: it echoes complexity science's "interesting systems live at the edge of order and chaos" — good generation also lives in the narrow band between greedy (over-ordered) and high-temperature random (over-chaotic).</div></details>
+
+    <details><summary>5. If we liken "decoding strategy" to human "modes of thought," what cognitive state does each of the four map to? What does this suggest for how you use AI?</summary><div>An interesting mapping. <b>Greedy</b> ≈ snap intuition, always saying the smoothest first reaction — efficient but prone to mental ruts (local optima). <b>Beam search</b> ≈ deliberating, weighing several options before deciding, good for problems with a clear optimum, but for open creation it "overthinks into mediocrity." <b>High-temperature sampling</b> ≈ brainstorming, free association, allows leaps but may go off-topic. <b>Contrastive decoding</b> ≈ critical thinking — "how would a mediocre me answer? Subtract that part," actively fighting one's own clichés. <b>Speculative decoding</b> ≈ draft fast then refine, rather than chiseling word by word. The takeaway: <b>when collaborating with AI, you too are implicitly choosing a "cognitive temperature" for each task.</b> The true "super-individual" isn't one who always uses the same mode, but one who can <b>consciously switch decoding strategies for the task at hand</b> — for AI and for one's own brain alike.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 45 · 2026-07-01</footer>
+
+</div>
+
+</body>
+</html>

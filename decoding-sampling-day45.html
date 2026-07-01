@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：解码与采样数学 — Day 45</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.formula{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:14px 16px;margin-top:10px;font-family:"SF Mono",Menlo,monospace;font-size:0.92rem;color:#a48cff;text-align:center;overflow-x:auto}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：解码与采样数学</h1>
+  <div class="meta">Day 45 · 2026-07-01</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<div class="card" style="border-left-color:#7b61ff;background:rgba(123,97,255,0.06)">
+  <div class="section">
+    <p style="font-size:0.95rem;color:#cfd3df">模型 forward 一次，输出的<b>不是</b>一个词，而是词表上几万个 token 的一整张概率分布。<b>从这张分布里挑出下一个词</b>，就是「解码（decoding）」。同一个模型、同一段 prompt，换一种解码方式，输出可以从「呆板重复」变成「天马行空」——甚至从「事实准确」变成「一本正经胡说」。今天讲清楚这最后一步的数学：确定性搜索、随机采样的分布重塑、以及两个漂亮的对照机制。</p>
+  </div>
+</div>
+
+<!-- 1. Greedy & Beam Search -->
+<div class="card">
+  <h2>贪心与束搜索<span class="en">Greedy & Beam Search</span></h2>
+  <div class="tags"><span class="tag">确定性解码</span><span class="tag purple">搜索</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>Greedy 就是<b>贪心算法</b>——每一步只挑当前概率最高的 token，像找零钱时每次都拿面值最大的硬币，简单但容易陷入<b>局部最优</b>。Beam search 则是查询优化器的思路：不敢只押一条执行计划，而是<b>维护一个固定容量为 k 的候选队列</b>（bounded priority queue），每步让 k 条路径各自展开、按累积得分剪枝、只留 top-k 继续。它用 k 倍算力买一点全局视野。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>生成一整句话，本质是找一个<b>联合概率最大的 token 序列</b>。理论上要枚举所有序列——词表 5 万、句子 20 词就是 5万²⁰ 种，绝无可能。Greedy 是最粗暴的近似：逐词取 argmax。问题在于<b>局部最优 ≠ 全局最优</b>——这一步概率最高的词，可能把后面逼进死胡同。</p>
+    <p style="margin-top:8px">Beam search 缓解这点：保留 k 条最优前缀，每步把每条前缀 × 词表全部候选算出，再按<b>对数概率之和</b>取全局 top-k。</p>
+    <div class="formula">score(序列) = Σᵢ log P(tokenᵢ | 前文)</div>
+    <p style="margin-top:8px">用 log 相加而非概率相乘，是为了避免几十个小数连乘<b>下溢到 0</b>（和你在后端算长链路概率时取对数是同一招）。beam 宽度 k=1 就退化成 greedy。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Beam search，宽度 k=2（每步只留 2 条最优路径）</span><br><br>
+起点 <span class="arrow">→</span> <span class="box g">The</span><br>
+<span style="margin-left:40px">├→ <span class="box">cat</span> <span style="color:#5a6378">logP=-0.9 ✓保留</span></span><br>
+<span style="margin-left:40px">├→ <span class="box">dog</span> <span style="color:#5a6378">logP=-1.2 ✓保留</span></span><br>
+<span style="margin-left:40px">└→ <span class="box r">sky</span> <span style="color:#5a6378">logP=-3.1 ✗剪枝</span></span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 每层把 2×词表 条候选排序，只带走累积 logP 最高的 2 条进入下一层</span>
+</div>
+
+    <p style="margin-top:14px"><b>核心反直觉</b>（Holtzman et al. 2019 揭示）：对<b>开放式生成</b>（写作、对话），追求「最高概率序列」反而产出<b>枯燥且诡异重复</b>的文本。因为人类真实语言里充满了「不那么高概率但更有信息量」的选择；一味最大化概率，模型会收敛到「the the the」式的安全废话。这就是为什么<b>聊天模型几乎从不用纯 beam search</b>——它适合翻译、摘要这类「答案接近唯一」的任务，不适合创造。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)
+model = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)
+ids = tok(<span class="str">"The future of AI is"</span>, return_tensors=<span class="str">"pt"</span>).input_ids
+
+<span class="cmt"># 贪心：每步 argmax，完全确定性</span>
+greedy = model.<span class="fn">generate</span>(ids, max_new_tokens=30, do_sample=<span class="kw">False</span>)
+
+<span class="cmt"># 束搜索：保留 5 条路径，选累积 logP 最高的整句</span>
+beam = model.<span class="fn">generate</span>(ids, max_new_tokens=30, num_beams=5,
+                      early_stopping=<span class="kw">True</span>)
+<span class="fn">print</span>(tok.<span class="fn">decode</span>(beam[0], skip_special_tokens=<span class="kw">True</span>))</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">❌ 误区：「概率最高的序列 = 质量最好的文本」。这正是 Holtzman 论文推翻的直觉——最大化似然会滑向重复退化。<b>「好文本」并不住在概率分布的最高峰，而在一个略低、更宽的区域</b>。这也是后面三个概念存在的根本理由。</div>
+    <div class="exercise" style="margin-top:8px">📌 超个体场景：当你需要模型<b>可复现、可审计</b>的输出（如从财报抽取结构化字段、跑同一个 prompt 对比不同版本），用确定性解码（temperature=0，本质就是 greedy）；当你要它<b>写作、发散</b>，就该切到采样——先分清任务属于「搜索」还是「创造」。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 解码是一道搜索题，但「最优解」对开放式生成是个陷阱——高概率不等于高质量。<br>🤔 你的哪些 AI 任务真正需要「唯一正确答案」，哪些其实需要「多样但合理」？这个区分决定了该用搜索还是采样。</div>
+  </div>
+</div>
+
+<!-- 2. Temperature & Truncation Sampling -->
+<div class="card">
+  <h2>温度与截断采样<span class="en">Temperature · Top-k · Top-p · Min-p</span></h2>
+  <div class="tags"><span class="tag">随机采样</span><span class="tag purple">概率重塑</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>如果 greedy 是「永远读缓存里最热的那一行」，采样就是「按热度<b>加权随机</b>抽一行」。Temperature 是控制这个随机性的<b>总阀门</b>——像给 softmax 的分布做「锐化 / 模糊」；而 top-k / top-p / min-p 是三种<b>把长尾垃圾候选先砍掉</b>的截断策略，防止小概率的荒唐 token 被抽中。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p><b>Temperature（温度 T）</b>在 softmax 里给每个 logit 除以 T：</p>
+    <div class="formula">Pᵢ = exp(zᵢ / T) / Σⱼ exp(zⱼ / T)</div>
+    <p style="margin-top:8px">zᵢ 是第 i 个 token 的原始 logit。<b>直觉</b>：T &lt; 1（如 0.3）放大了 logit 之间的差距 → 分布更尖 → 高概率词更霸道（趋近 greedy）；T &gt; 1（如 1.5）压平差距 → 分布更均匀 → 冷门词更有机会；T → 0 就是 argmax，T → ∞ 就是完全均匀乱选。关键：<b>temperature 不改变模型「知道」什么，只重塑它已经算出的那张分布的锐度</b>。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">同一组 logits，不同温度下的概率分布</span><br><br>
+T=0.5 <span style="color:#5a6378">(尖锐/保守)</span><br>
+&nbsp;&nbsp;<span class="bar" style="width:130px;height:22px"></span> <span class="bar" style="width:24px;height:22px;opacity:.6"></span> <span class="bar" style="width:10px;height:22px;opacity:.4"></span><br>
+T=1.0 <span style="color:#5a6378">(原始)</span><br>
+&nbsp;&nbsp;<span class="bar" style="width:90px;height:22px"></span> <span class="bar" style="width:48px;height:22px;opacity:.7"></span> <span class="bar" style="width:28px;height:22px;opacity:.5"></span><br>
+T=1.6 <span style="color:#5a6378">(平坦/发散)</span><br>
+&nbsp;&nbsp;<span class="bar" style="width:60px;height:22px"></span> <span class="bar" style="width:46px;height:22px;opacity:.75"></span> <span class="bar" style="width:38px;height:22px;opacity:.6"></span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 温度越高，分布越平，冷门词被抽中的概率越大</span>
+</div>
+
+    <p style="margin-top:14px">光调温度不够：高温下<b>长尾的荒唐词</b>也被抬起了概率。三种截断先把尾巴砍掉，再在剩下的候选里按概率归一化采样：</p>
+    <ul>
+      <li><b>Top-k</b>——只留概率最高的 k 个 token。缺点：k 是<b>固定</b>的，分布很尖时还是塞进 k 个候选，分布很平时又砍掉了合理选项；</li>
+      <li><b>Top-p / 核采样（Nucleus）</b>（Holtzman 2019）——留下<b>累积概率刚好 ≥ p</b> 的最小候选集。它<b>动态</b>调整候选数：模型很确定时集合小，很犹豫时集合大。类比：只保留「命中累积热度 90% 的热点行」；</li>
+      <li><b>Min-p</b>（Nguyen 2024）——阈值 = 最高概率 × min_p，砍掉所有低于它的 token。当模型很确定（最高概率 0.9）时截断极狠，只留最优；不确定（最高概率 0.2）时放宽，保留多样。在高温下比 top-p 更稳。</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># HuggingFace：三种截断可叠加，采样在剩余候选里进行</span>
+out = model.<span class="fn">generate</span>(
+    ids, max_new_tokens=40,
+    do_sample=<span class="kw">True</span>,       <span class="cmt"># 打开随机采样（否则忽略下面所有参数）</span>
+    temperature=0.8,      <span class="cmt"># 分布锐度：&lt;1 保守，&gt;1 发散</span>
+    top_k=50,             <span class="cmt"># 只在概率最高的 50 个里采</span>
+    top_p=0.9,            <span class="cmt"># 且累积概率 ≥0.9 的核内采（动态候选数）</span>
+    min_p=0.05,           <span class="cmt"># 且概率 ≥ 0.05×最高概率 的才保留</span>
+)
+<span class="fn">print</span>(tok.<span class="fn">decode</span>(out[0], skip_special_tokens=<span class="kw">True</span>))
+<span class="cmt"># 通常不会同时用满三种；理解各自的「动态 vs 固定」差异是关键</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">❌ 误区：「temperature 是模型的『创造力旋钮』，调高就更聪明」。错。温度<b>不注入任何新信息</b>，它只是重新分配模型本已算出的概率质量。高温不是「更有创意」，而是「更愿意赌小概率」——赌对了叫创意，赌错了叫幻觉。创造力来自模型的知识，不来自这个除法。</div>
+    <div class="exercise" style="margin-top:8px">📌 超个体场景：理解「你调的到底是什么物理量」——事实核查/代码生成用低温（让分布集中在它最确信的答案），跨学科头脑风暴用高温 + top-p（放宽核，允许模型跳到相邻概念）。你不是在调「聪明度」，而是在选「愿意离开高峰多远」。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 采样 = 温度重塑分布 + 截断砍掉长尾。核心分野是「固定候选数（top-k）」还是「随模型信心动态伸缩（top-p / min-p）」。<br>🤔 如果模型对下一个词极度确定（一个词 0.99），高温还有意义吗？（提示：想想 min-p 为什么此时几乎不放行别的词。）</div>
+  </div>
+</div>
+
+<!-- 3. Contrastive Decoding -->
+<div class="card">
+  <h2>对比解码<span class="en">Contrastive Decoding</span></h2>
+  <div class="tags"><span class="tag">对照机制</span><span class="tag orange">质量</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>像<b>做 diff / 控制变量法</b>：拿一个「业余（弱小）模型」当对照组，用「专家（强大）模型」的对数概率<b>减去</b>它。两个模型<b>共有</b>的廉价坏毛病——重复、语法套话、无脑高频词——会在相减中被抵消掉，只留下强模型<b>独有</b>的知识和判断。不是让两个模型投票求和，而是用弱模型做<b>减法</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>接续概念 1 的难题：greedy 太呆、纯采样又可能跑偏。对比解码（Li et al. 2022）换个思路——<b>坏文本的共性是什么？</b>答案：那些无论大小模型都爱犯的错（重复、通用废话）。一个 GPT-2 small 和一个 GPT-2 XL 都会给「the」很高概率；但只有大模型能给出真正贴切的罕见词。于是打分函数变成两者之差：</p>
+    <div class="formula">score = log P<sub>专家</sub>(token) − λ · log P<sub>业余</sub>(token)</div>
+    <p style="margin-top:8px">λ 控制减法力度。<b>直觉</b>：一个 token 如果专家和业余都爱（如「the」），相减后优势被抹平；如果专家爱、业余不爱（专家凭知识才选的词），相减后<b>脱颖而出</b>。但纯做减法有个坑：业余模型极度厌恶的合理词会被过度奖励，产出乱码。所以加一条<b>合理性约束（plausibility constraint）</b>：只在专家模型概率<b>足够高</b>（≥ α × 最高概率，思路和 min-p 同源）的候选里做对比，先划定「专家认可的安全区」，再在区内用业余模型排座次。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">对比解码：用「专家 − 业余」凸显真正的知识信号</span><br><br>
+候选词 <span class="box">"the"</span>：专家 0.30 · 业余 0.28 <span class="arrow">→</span> 差值 <span class="box r">≈0（共有俗套，压制）</span><br>
+候选词 <span class="box">"photosynthesis"</span>：专家 0.20 · 业余 0.02 <span class="arrow">→</span> 差值 <span class="box g">大（专家独有，奖励）</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 先用合理性约束圈出专家认可的候选，再按差值排序</span>
+</div>
+
+    <p style="margin-top:14px">效果：兼得 greedy 的<b>连贯</b>和采样的<b>丰富</b>，且更少重复退化。后续工作（Contrastive Decoding Improves Reasoning，2023）还发现它能提升推理准确率——因为「业余模型的错误直觉」正是要被减掉的东西。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
+expert  = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-large"</span>)
+amateur = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)  <span class="cmt"># 小=业余</span>
+
+lp_e = F.<span class="fn">log_softmax</span>(expert(ids).logits[:, -1], dim=-1)
+lp_a = F.<span class="fn">log_softmax</span>(amateur(ids).logits[:, -1], dim=-1)
+
+<span class="cmt"># 合理性约束：只保留专家概率 ≥ α×最高 的候选，其余置 -inf</span>
+alpha, lam = 0.1, 1.0
+mask = lp_e &lt; (lp_e.<span class="fn">max</span>() + torch.<span class="fn">log</span>(torch.<span class="fn">tensor</span>(alpha)))
+score = lp_e - lam * lp_a          <span class="cmt"># 核心：专家 − λ×业余</span>
+score[mask] = -float(<span class="str">"inf"</span>)      <span class="cmt"># 砍掉专家都不认可的词</span>
+next_id = score.<span class="fn">argmax</span>(-1)          <span class="cmt"># 在安全区内取对比最优</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">❌ 误区：「对比解码就是集成两个模型让它们投票（求和/平均）」。恰恰相反——它是<b>减法</b>。集成是「三个臭皮匠」，对比是「用臭皮匠当反面教材」：业余模型的价值不在于它对，而在于它代表了「不需要真知识就能犯的错」，把它减掉剩下的才是真本事。</div>
+    <div class="exercise" style="margin-top:8px">📌 超个体场景：这个「用弱基线做减法」的思想可迁移到人机协同——评估一个 AI 方案时，先问「一个啥都不懂的人靠套路也能给出的答案是什么」，把这部分从模型输出里心理上「减掉」，剩下的才是它真正贡献的信息增量。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 对比解码：坏毛病是大小模型的共性，用弱模型做减法就能滤掉共性、留住强模型独有的知识。<br>🤔 「共有的错误」这个概念很深——你能想到别的领域里，「用一个弱基线去抵消系统性偏差」的例子吗？（提示：因果推断里的对照组、金融里的对冲。）</div>
+  </div>
+</div>
+
+<!-- 4. Speculative Decoding -->
+<div class="card">
+  <h2>推测解码<span class="en">Speculative Decoding</span></h2>
+  <div class="tags"><span class="tag">加速机制</span><span class="tag purple">无损</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>这是 CPU 的<b>投机执行（speculative execution）+ 分支预测</b>，或数据库的<b>乐观并发控制（OCC）</b>搬到了解码上：先让一个便宜的小模型<b>乐观地猜一串 token</b>，再让昂贵的大模型<b>一次性并行验证</b>这串猜测。猜对的直接采纳（省下了逐个生成的时间），猜错的从那里回滚重来。关键是——<b>最终输出和「大模型自己逐字生成」在数学上完全一致</b>，是无损加速。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>自回归生成的痛点：<b>逐 token 串行</b>。生成 100 个词就要 100 次大模型 forward，每次都得把整个巨型模型从显存过一遍——GPU 算力闲置，瓶颈在<b>访存带宽</b>而非计算。Leviathan et al.（2022）的洞察：<b>很多 token 是「容易的」</b>（「the」「of」「.」这种），小模型也能猜对，何必动用大模型？</p>
+    <p style="margin-top:8px">流程：草稿模型 q 先自回归生成 γ 个 token；大模型 p 把这 γ 个 token <b>一次并行 forward</b>（一次算完 γ 个位置的分布，这是关键——验证是并行的，生成才是串行的）。然后逐个用<b>拒绝采样</b>决定接受与否：</p>
+    <div class="formula">接受 token x 的概率 = min(1, P<sub>大</sub>(x) / q<sub>小</sub>(x))</div>
+    <p style="margin-top:8px"><b>直觉</b>：小模型对 x 的信心若不超过大模型（q ≤ p），无条件接受；若小模型过度自信（q &gt; p），则以 p/q 的概率接受。一旦某个 token 被拒，就丢弃它之后的所有草稿，并从修正分布 <b>norm(max(0, p − q))</b> 里重采一个——数学上可证明，这套接受 / 重采规则让最终分布<b>严格等于大模型 p 的分布</b>。所以它<b>不牺牲任何质量</b>，只把「一串容易 token」的成本从「γ 次大模型」压到「1 次大模型 + γ 次小模型」。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">推测解码一轮（γ=4 草稿）</span><br><br>
+<span class="box g">小模型草稿</span> <span class="arrow">→</span> <span class="box">is</span><span class="box">a</span><span class="box">new</span><span class="box">era</span> <span style="color:#5a6378">(串行，但便宜)</span><br>
+<span class="box p">大模型验证</span> <span class="arrow">→</span> 一次 forward 并行算 4 个位置的分布<br>
+<span style="margin-left:20px"><span class="box">is</span>✓ <span class="box">a</span>✓ <span class="box">new</span>✓ <span class="box r">era</span>✗ <span class="arrow">→</span> 拒于此，重采正确词</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ 接受 3 + 重采 1 = 一轮拿到 4 个 token，只花 1 次大模型 forward</span>
+</div>
+
+    <p style="margin-top:14px">草稿模型越接近大模型，接受率越高、加速越大；论文在 T5-XXL 上报告约 2–3 倍加速且输出<b>逐字不变</b>。DeepMind 同期的 speculative sampling（Chen et al. 2023）给出了等价的独立推导。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># HuggingFace 内置：传一个小的 assistant_model 即启用推测解码</span>
+big   = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-xl"</span>)   <span class="cmt"># 目标(慢/准)</span>
+draft = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)      <span class="cmt"># 草稿(快)</span>
+
+out = big.<span class="fn">generate</span>(
+    ids, max_new_tokens=60,
+    assistant_model=draft,   <span class="cmt"># ← 小模型猜、大模型验，输出分布不变</span>
+    do_sample=<span class="kw">True</span>, temperature=0.7,
+)
+<span class="fn">print</span>(tok.<span class="fn">decode</span>(out[0], skip_special_tokens=<span class="kw">True</span>))
+<span class="cmt"># 结果与不加 assistant_model 时分布一致，只是更快</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">❌ 误区：「推测解码是近似加速，会牺牲一点质量换速度」。错——它是<b>数学上无损</b>的。拒绝采样的接受 / 重采规则经过精心设计，保证最终 token 分布与大模型单独生成<b>严格相同</b>。草稿模型烂只会让接受率低（加速少），<b>永远不会污染输出</b>。这正是它优雅之处：速度是赌来的，正确性是证明来的。</div>
+    <div class="exercise" style="margin-top:8px">📌 超个体场景：理解你日常用的 API 为何变快、且没变笨。更普适的是这个思维模型——<b>「乐观地猜 + 廉价地验证 + 错了才回滚」</b>：写代码时先让 AI 大胆生成、自己快速核验关键处；做决策时先出草案再验证假设。投机执行是通用的效率哲学。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 推测解码 = 解码版的投机执行：小模型猜、大模型并行验、拒绝采样保证输出分布一字不改。免费的午餐（几乎）。<br>🤔 推测解码用「便宜的猜测 + 可证明的验证」换速度。你的工作流里，哪些环节可以「先乐观执行，再廉价验证」，而不是「小心翼翼逐步确认」？</div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1904.09751" target="_blank">Holtzman et al. 2019 — The Curious Case of Neural Text Degeneration</a> — 核采样（top-p）奠基作，也是「高概率≠好文本」的经典证据</li>
+      <li><a href="https://arxiv.org/abs/2210.15097" target="_blank">Li et al. 2022 — Contrastive Decoding</a> — 专家减业余的对比解码原始论文</li>
+      <li><a href="https://arxiv.org/abs/2211.17192" target="_blank">Leviathan et al. 2022 — Fast Inference from Transformers via Speculative Decoding</a> — 推测解码与无损性证明</li>
+      <li><a href="https://arxiv.org/abs/2302.01318" target="_blank">Chen et al. 2023 — Accelerating LLM Decoding with Speculative Sampling</a> — DeepMind 的等价独立推导</li>
+      <li><a href="https://arxiv.org/abs/2407.01082" target="_blank">Nguyen et al. 2024 — Min-p Sampling</a> — 随信心动态伸缩的截断采样</li>
+      <li><a href="https://huggingface.co/docs/transformers/generation_strategies" target="_blank">HuggingFace — Generation Strategies</a> — greedy / beam / 采样 / 辅助生成的官方 API 文档</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. 四种方法里，哪些改变模型的「输出分布」，哪些不改变？为什么这个区分很重要？</summary><div>把它们分成两类是理解今天全部内容的钥匙。<b>改变分布</b>的：greedy（塌缩成一个点）、temperature（锐化/压平）、top-k/p/min-p（截断长尾）、对比解码（专家减业余，彻底重塑打分）——这些都在「主动改写模型说什么」。<b>不改变分布</b>的：只有推测解码——它是纯粹的<b>工程加速</b>，输出与大模型逐字生成严格相同。这个区分的意义在于<b>责任归属</b>：如果模型输出了幻觉，前四种是「你选择了让它离高峰更远」的结果（可调），而推测解码永远无责（它只是更快地复现了大模型本来就会说的话）。当你调试一个「模型突然胡说」的问题，先看是不是采样参数（temperature 太高、top-p 太宽）而非模型本身——这是最常见、最容易忽略的一层。</div></details>
+
+    <details><summary>2. Top-p、min-p、对比解码的合理性约束，三者的数学形式不同，但「精神」是一致的——是什么？</summary><div>三者都在回答同一个问题：<b>「该保留多少候选词才算合理？」</b>而且答案都是<b>动态的、随模型信心自适应的</b>，而非固定阈值。top-p 用「累积概率 ≥ p」——模型越确定，达到 p 需要的候选越少。min-p 用「≥ 最高概率 × 比例」——直接锚定在 top-1 的信心上。对比解码的合理性约束「≥ α × 最高概率」几乎和 min-p 是同一个式子。共同精神：<b>模型很确定时收窄(相信它)、很犹豫时放宽(给它余地)</b>。这比 top-k 的固定 k 更符合直觉——因为「合理候选的数量」本就不该是常数，它取决于当前这一步模型有多确定。这也呼应了概念 1 的洞察：好文本住在一个「随上下文伸缩」的区域里，而不是固定大小的邻域。</div></details>
+
+    <details><summary>3. 推测解码「小模型猜 + 大模型验」为什么能无损？如果换成「小模型和大模型输出加权平均」会怎样？</summary><div>无损的关键是<b>拒绝采样（rejection sampling）</b>这个数学工具，而非「平均」。接受概率 min(1, p/q) 加上「被拒时从 norm(max(0,p−q)) 重采」这两条规则，经代数展开可证明：任意一个 token 最终被输出的概率恰好等于大模型 p。直觉上，小模型只是提供了一个<b>提议分布(proposal)</b>，拒绝采样把它「校正」回目标分布 p——小模型猜得准只影响接受率(效率)，不影响最终分布(正确性)。而如果改成「加权平均」(如 0.5p+0.5q)，输出分布就变成了一个<b>全新的、既不是 p 也不是 q 的分布</b>——那是<b>对比解码那一类</b>「主动改写输出」的做法，会牺牲/改变质量，不再无损。同样是「两个模型协作」，推测解码是「用小模型加速、用数学保正确」，对比解码是「用小模型的错误当反面教材改写输出」——目标截然不同，别混为一谈。</div></details>
+
+    <details><summary>4. 概念 1 说「最高概率序列反而是坏文本」，这对「概率越大越好」的朴素直觉是个冲击。它揭示了语言模型什么本质？</summary><div>它揭示了一个深刻的错位：<b>模型被训练去「最大化似然」，但人类语言的价值并不在似然的最高峰</b>。信息论上，一个完全可预测(高概率)的词几乎不携带信息(自信息 = −log p，p 越大信息越少)。Holtzman 论文的观察正是：人类文本的 token 概率是<b>起伏的</b>，而 beam search 会把生成拉向「一条持续高概率的平滑曲线」，结果枯燥重复。这也解释了为什么采样对开放式生成是<b>必需</b>而非「加点噪声凑合」。更哲学一点：这和复杂性科学里「有趣的系统活在有序与混沌的边缘」遥相呼应——好的生成也活在 greedy(过度有序)与高温乱采(过度混沌)之间那条窄带上。</div></details>
+
+    <details><summary>5. 如果把「解码策略」类比成人类的「思维模式」，四种方法分别对应什么认知状态？这对你使用 AI 有何启发？</summary><div>这是个有趣的映射。<b>Greedy</b> ≈ 直觉快答，永远说最顺口的第一反应——高效但容易陷入思维定式(局部最优)。<b>Beam search</b> ≈ 深思熟虑权衡多个方案再定，适合有明确最优解的问题，但对开放创作会「想太多反而平庸」。<b>高温采样</b> ≈ 头脑风暴、自由联想，允许跳跃但可能离题。<b>对比解码</b> ≈ 批判性思维——「一个平庸的我会怎么答？把那部分剔除」，主动对抗自己的套路。<b>推测解码</b> ≈ 先快速打草稿再回头精修，而非逐字雕琢。启发在于：<b>你和 AI 协作时，其实也在为每个任务隐式选择一种「认知温度」</b>。真正的「超个体」不是永远用同一种模式，而是<b>能有意识地为当前任务切换解码策略</b>——无论对 AI 还是对自己的大脑。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 45 · 2026-07-01</footer>
+
+</div>
+
+</body>
+</html>
