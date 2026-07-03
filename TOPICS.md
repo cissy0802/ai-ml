@@ -73,3 +73,4 @@
 - Day 51: 公平、偏见与去偏 — 偏见来源(数据/标签/目标), 公平性度量(机会均等 vs 人口均等), 公平的不可能定理, 去偏方法与因果公平
 - Day 52: 持续学习与灾难性遗忘 — 灾难性遗忘机制, EWC/正则化, 重放与生成重放, 参数隔离, 稳定性-可塑性权衡（区别于 Day 49 知识编辑）
 - Day 53: 音频与语音模型 — STT(Whisper/wav2vec/CTC), TTS 架构(自回归/diffusion/神经声码器), 音频 codec 与离散化, 实时与流式机制（语音工程见 super-individual Day 46）
+- Day 54: LLM-as-Judge 的偏差与校准 — 位置/冗长/措辞伪影偏差, 自我偏好与错误趋同(correlated errors), 生成-验证鸿沟(GV-Gap), 多裁判聚合与校准实务(钩子·源自 deep-research #2)
