@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Hallucination &amp; Calibration — Day 48</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Hallucination &amp; Calibration</h1>
+  <div class="meta">Day 48 · 2026-07-05 · Difficulty ★★★☆☆</div>
+  <div class="audience">For: engineers with coding experience, non-AI background</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering companion → super-individual D10: Hallucination mitigation (guardrails, verification in production)
+  </a>
+  <div style="color:#8b92a8;font-size:0.84rem;margin-top:6px">This issue covers the <b>mechanism</b>: why models fabricate, why confidence is untrustworthy, why alignment makes it worse. "How to fix it" lives in the engineering weekly.</div>
+</div>
+
+
+<!-- 1. Statistical Origin -->
+<div class="card">
+  <h2>Statistical Origin of Hallucination<span class="en">Statistical Origin</span></h2>
+  <div class="tags"><span class="tag">mechanism</span><span class="tag purple">training objective</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Think of an LLM as <b>an API that always returns 200 OK</b>: query a record that doesn't exist and it won't return <code>404</code> or <code>null</code>—it <b>fabricates a perfectly-formatted response on the spot</b>. The problem isn't that it "wants to deceive you"—it's that its architecture <b>has no "not found" return value at all</b>. At every step it must emit a token; "silence" or "unknown" is never the default option.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>First, dispel a misconception: hallucination <b>is not a bug, it's a mathematical inevitability of the training objective</b>. An LLM does <strong>next-token prediction</strong>—essentially <b>density estimation</b> over language, learning a distribution P(next word | context). This objective contains <b>no fact-checking term whatsoever</b>: the model is rewarded for "sounding like the training data," not for "being correct."</p>
+    <p style="margin-top:8px">OpenAI's Kalai et al. (2025) nailed this down: <b>even with 100% error-free training data</b>, the cross-entropy objective itself forces hallucination. The intuition—generating a valid answer is no easier than a <b>binary classification</b> task "is this statement true?"; and for a rare fact seen only once or twice in training (a person's birthday, a paper's author), the model has <b>insufficient statistical signal</b> to tell it apart from plausible wrong answers, so the error rate has an <b>irreducible lower bound</b>.</p>
+    <p style="margin-top:8px">The nastier layer is <strong>evaluation incentives</strong>: nearly every benchmark scores "1 point for correct, 0 for both wrong and blank." Under this rule, the expected score of <b>guessing</b> is strictly higher than <b>honestly saying "I don't know"</b>—just like on a standardized test, leaving it blank beats guessing. So the entire training-evaluation pipeline systematically <b>trains the model into a confident test-taker</b>, not an honest knower.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+client = OpenAI()  <span class="cmt"># needs OPENAI_API_KEY</span>
+
+<span class="cmt"># Ask about a purely fictional entity—the model has no "not found" return</span>
+r = client.chat.completions.<span class="fn">create</span>(
+    model=<span class="str">"gpt-5"</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+               <span class="str">"content"</span>: <span class="str">"Describe the contributions of 2019 Turing Award winner Zael Kirmani"</span>}],
+    logprobs=<span class="kw">True</span>,  <span class="cmt"># get per-token log probabilities</span>
+)
+msg = r.choices[0].message.content
+<span class="fn">print</span>(msg)  <span class="cmt"># → likely a fluent but entirely fabricated biography</span>
+
+<span class="cmt"># Key observation: token probabilities of the fabrication are often NOT low—</span>
+<span class="cmt"># the model "confidently fabricates." High confidence != grounded.</span>
+lp = r.choices[0].logprobs.content
+<span class="fn">print</span>(<span class="fn">sum</span>(t.logprob <span class="kw">for</span> t <span class="kw">in</span> lp) / <span class="fn">len</span>(lp))  <span class="cmt"># mean logprob</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"Hallucination comes from errors in training data, so cleaning the data will cure it"—wrong. Kalai et al.'s core conclusion is precisely that <b>perfect data cannot cure it</b>, because the root cause is the objective function and scoring rules, not dirty corpora. Cleaning data reduces some hallucinations, but as long as "guessing beats blank," the model always has an incentive to fabricate.</div>
+    <div class="exercise" style="margin-top:8px">📌 Scenario: when using AI for a literature review, <b>treat every "specific citation" it gives (title, author, year, page) as a guess to be verified by default</b>, not as fact. Rare, low-frequency information is exactly where hallucination concentrates—allocate your verification effort by "how common is this fact in the training corpus."</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + reflection</div>
+    <div class="takeaway">💡 Hallucination isn't the model being "broken"—it's been trained into a test-taker that "guesses rather than leaves blank." The root cause is the objective and scoring, not the data.<br>🤔 If we changed the scoring to "wrong answers penalized, blanks get 0," would the model automatically learn to say "I don't know"? What does that hint about mitigation?</div>
+  </div>
+</div>
+
+
+<!-- 2. Calibration -->
+<div class="card">
+  <h2>Calibration<span class="en">Calibration</span></h2>
+  <div class="tags"><span class="tag">metric</span><span class="tag orange">confidence</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Whether calibration is good is easiest to grasp via <b>weather forecasting</b>: a forecaster who said "70% chance of rain" 100 times is <b>well-calibrated</b> if it <b>actually rained on about 70 of those days</b>. That's separate from how "accurate" he is—he can always say 70% and never 100% (not sharp enough), but as long as the frequencies match, his confidence is a <b>trustworthy signal</b>. Whether an LLM's confidence can be used as an alert threshold depends on the same thing.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>The model attaches an implicit confidence (token probability) to every answer. <strong>Calibration</strong> asks: <b>does its stated confidence match the actual accuracy?</b> Bin predictions by confidence; ideally "in the confidence-0.8 bin, exactly 80% are correct." The metric is <strong>ECE (Expected Calibration Error)</strong>—the weighted absolute difference between each bin's "average confidence" and "actual accuracy," closer to 0 is better:</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Reliability Diagram: x=model confidence, y=actual accuracy</span><br><br>
+1.0 ┤ <span style="color:#5a6378">ideal = diagonal (say p% → p% correct)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5a6378">╱</span><br>
+0.7 ┤ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5a6378">╱</span> &nbsp;<span class="bar" style="width:14px;height:16px"></span> <span style="color:#8b92a8">← ideal</span><br>
+0.5 ┤ &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5a6378">╱</span> &nbsp;<span class="bar" style="width:14px;height:34px;background:linear-gradient(180deg,#ff6b6b,#ff8e8e)"></span> <span style="color:#ff8e8e">← actual</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│ <span style="color:#5a6378">╱</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;└────────────────────→ confidence<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.7&nbsp;&nbsp;&nbsp;&nbsp;0.9<br>
+<span style="color:#ff8e8e">↑ curve falling below the diagonal = overconfident: says 0.9 but only 0.6 correct</span>
+</div>
+
+    <p style="margin-top:14px">The classic fix is <strong>Temperature Scaling (Guo et al. 2017)</strong>: don't touch model weights, just divide the output logits by a learned temperature T, then softmax. <b>T&gt;1 flattens an over-peaked distribution</b>, pulling confidence back in line with true accuracy—one parameter, post-hoc, no accuracy loss. Note it fixes "<b>the confidence number is untrustworthy</b>," it <b>doesn't fix hallucination itself</b>: calibration tells you <b>how much to believe</b>, but won't make a wrong answer right.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">expected_calibration_error</span>(confs, correct, n_bins=10):
+    <span class="cmt"># confs: confidence per prediction (0~1); correct: whether right (0/1)</span>
+    bins = np.<span class="fn">linspace</span>(0, 1, n_bins + 1)
+    ece = 0.0
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n_bins):
+        <span class="cmt"># predictions falling in this confidence bin</span>
+        m = (confs &gt; bins[i]) &amp; (confs &lt;= bins[i + 1])
+        <span class="kw">if</span> m.<span class="fn">sum</span>() == 0: <span class="kw">continue</span>
+        acc  = correct[m].<span class="fn">mean</span>()   <span class="cmt"># actual accuracy of this bin</span>
+        conf = confs[m].<span class="fn">mean</span>()     <span class="cmt"># mean confidence of this bin</span>
+        <span class="cmt"># gap × fraction of samples in bin, accumulate</span>
+        ece += (m.<span class="fn">sum</span>() / <span class="fn">len</span>(confs)) * <span class="fn">abs</span>(acc - conf)
+    <span class="kw">return</span> ece
+
+<span class="cmt"># Overconfident model: confidence broadly above true accuracy → large ECE</span>
+confs   = np.<span class="fn">array</span>([0.9, 0.9, 0.8, 0.95, 0.7])
+correct = np.<span class="fn">array</span>([1,   0,   0,   1,    0])   <span class="cmt"># 5 questions, only 2 right</span>
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"ECE = {expected_calibration_error(confs, correct):.3f}"</span>)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"Well-calibrated = the model is accurate"—two different things. A model that only guesses, with 50% accuracy, is <b>perfectly calibrated</b> as long as it <b>honestly reports 0.5 confidence</b> every time. Calibration measures "<b>is the confidence trustworthy</b>," not "<b>is the answer correct</b>." You want both: high accuracy <b>and</b> honest confidence.</div>
+    <div class="exercise" style="margin-top:8px">📌 Scenario: when building an "AI-assisted decision" pipeline, don't take model output as conclusion directly—first <b>run a batch of questions with known answers and plot a reliability diagram</b> to see if it's overconfident in your domain. If it's only right 60% of the time when it says "very confident," you know to discount its "certainty" by 30% before trusting it.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + reflection</div>
+    <div class="takeaway">💡 Calibration = confidence aligned with true accuracy; it tells you "how much to believe," but won't make a wrong answer right.<br>🤔 Which of the AI's judgments do you currently trust because you were persuaded by <b>the certainty of its tone</b> rather than by <b>calibrated confidence</b>?</div>
+  </div>
+</div>
+
+
+<!-- 3. Why RLHF Hurts Calibration -->
+<div class="card">
+  <h2>Why RLHF Hurts Calibration<span class="en">RLHF &amp; Calibration</span></h2>
+  <div class="tags"><span class="tag">alignment</span><span class="tag purple">mode collapse</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Picture <b>an honest advisor who says "I'm not too sure about this"</b>, optimized for half a year against a "customer satisfaction KPI"—he gradually becomes <b>a salesman who's always emphatic</b>. Sounds more credible, more reassuring, yet is actually less accurate. That's exactly what RLHF does to a model: to please human preferences, it sacrifices the honesty of its confidence. You know the old distributed-systems tradeoff—<b>sacrificing consistency for p99 experience</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>A counterintuitive fact: the raw model right after <b>pretraining</b> (the base model) is actually <b>quite well-calibrated</b>—it only does next-token prediction, so its probabilities are its true statistical beliefs about language. But after <strong>RLHF (Reinforcement Learning from Human Feedback, aligning the model to human preferences)</strong> and instruction tuning, calibration <b>degrades markedly</b>. The GPT-4 technical report has a famous figure: pretrained GPT-4's reliability curve hugs the diagonal, while after RLHF the curve <b>visibly bulges toward the overconfident side</b>.</p>
+    <p style="margin-top:8px">The mechanism lies in <strong>the shape of human preference</strong>. When annotators score responses, they systematically prefer answers that are <b>confident, fluent, and give a clear conclusion</b>, and dislike hedging like "it depends…" or "I'm not sure." The reward model learns this preference, and PPO optimization <b>squeezes probability mass onto a few high-confidence phrasings</b>—this is <strong>mode collapse</strong>: the distribution collapses from "honestly spreading out uncertainty" into "always looking very certain."</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Confidence on the same uncertain question, across two stages</b><br><br>
+Base (pretrained): <span class="box g">0.55</span> <span style="color:#5a6378">← spreads out uncertainty, near true accuracy, well-calibrated</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓ RLHF optimizes "humans prefer confident answers"</span><br>
+After RLHF:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="box r">0.92</span> <span style="color:#ff8e8e">← tone gets certain, actual accuracy unchanged → overconfident</span><br><br>
+<span style="color:#5a6378">Cost: more likeable · more fluent · but confidence no longer trustworthy (calibration tax)</span>
+</div>
+
+    <p style="margin-top:14px">This explains a daily observation: aligned models like ChatGPT / Claude <b>read as more assured</b> than raw base models, and therefore <b>lower your guard more easily</b>. It's not that the model "got dumber"—it was optimized into <b>a tone that feels good</b>. After RLHF, the certainty of tone and the reliability of content have <b>become decoupled</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = Anthropic()  <span class="cmt"># needs ANTHROPIC_API_KEY</span>
+
+<span class="cmt"># One prompting trick against overconfidence: explicitly ask for a "calibrated"</span>
+<span class="cmt"># numeric confidence, and require thinking "when would I be wrong" first—</span>
+<span class="cmt"># forcing the model to spread out its uncertainty</span>
+prompt = <span class="str">"""Answer the question, then give a confidence 0-100.
+Confidence definition: across all questions where you give this confidence,
+exactly that fraction should be correct.
+First list scenarios where you might be wrong, then give the score.
+
+Question: What is the exact depth in meters of the deepest point in the Pacific?"""</span>
+
+r = client.messages.<span class="fn">create</span>(
+    model=<span class="str">"claude-opus-4-8"</span>, max_tokens=400,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}])
+<span class="fn">print</span>(r.content[0].text)
+<span class="cmt"># "Calibration definition + reason-about-errors first" usually yields a more</span>
+<span class="cmt"># honest score than just asking "how confident are you"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"Just ask the model 'how confident are you' and use the number"—not necessarily. After RLHF, the model's <b>verbalized confidence</b> is also polluted by "appearing confident is more likeable" and tends to be inflated. Having it <b>first list failure scenarios, then give a score with a calibration definition</b> is closer to the truth than plainly asking "how confident"—but still validate against your own historical data, don't take it at face value.</div>
+    <div class="exercise" style="margin-top:8px">📌 Scenario: when using AI for high-stakes judgments like investing or tech selection, <b>be wary that its assured tone is itself an optimized artifact</b>. Deliberately ask "under what premises would you be wrong? Give me the strongest counterargument"—you're manually <b>prying back open</b> the uncertainty that RLHF flattened.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + reflection</div>
+    <div class="takeaway">💡 RLHF makes the model more usable and likeable, at the cost of calibration—the certainty of tone and the reliability of content are now decoupled.<br>🤔 An assistant that's "honest but often unsure" vs one that's "confident but occasionally wrong"—which would you trust more? Humans' answer to this is the very source of the sacrificed calibration.<br><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">Engineering companion → super-individual D10: hallucination mitigation in practice</a></div>
+  </div>
+</div>
+
+
+<!-- 4. Knowledge Boundary -->
+<div class="card">
+  <h2>Knowledge Boundary &amp; Self-Knowledge<span class="en">Self-Knowledge</span></h2>
+  <div class="tags"><span class="tag">mechanism</span><span class="tag orange">P(True)</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Like a <b>cache-miss signal</b>: internally the system actually <b>knows</b> this was a miss, but if it doesn't <b>expose the miss signal to the upper layer</b>, the caller wrongly assumes every access hit. A model is the same—internally it <b>has a signal</b> distinguishing "I know" from "I'm fabricating" (e.g. the entropy of the output distribution, internal activations), but by default it <b>doesn't report it</b>. Having it self-evaluate means explicitly exposing that cache-miss signal.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>The core question: <b>does the model know what it doesn't know?</b> Anthropic's Kadavath et al. (2022, the paper is literally titled "Language Models (Mostly) Know What They Know") gave a somewhat optimistic answer: <b>large models to a substantial degree "know whether they know."</b> They used two operational probes:</p>
+    <ul>
+      <li><strong>P(True)</strong>—the model first gives an answer, then <b>evaluates the probability that this answer is true</b>. Across diverse tasks this self-assessment is <b>reasonably calibrated</b> and improves with model scale;</li>
+      <li><strong>P(IK)</strong> (Probability I Know)—without looking at any specific answer, the model directly predicts "can I answer this?" The model can be trained to produce a usable P(IK) signal.</li>
+    </ul>
+    <p style="margin-top:8px">The mechanistic intuition: when the model is confident, the output distribution is <b>sharp</b> (a few tokens with very high probability, low entropy); when unsure, the distribution is <b>flat</b> (many tokens with similar probability, high entropy). This "internal uncertainty" is a genuine signal—<b>the problem was never that the model lacks a sense of boundary, but that the default generation pipeline throws this signal away</b>, emitting only the final answer. Having it explicitly do a P(True) self-eval picks the discarded signal back up.</p>
+    <p style="margin-top:8px">Of course it's "Mostly," not "Always": the more a question is <b>unseen in training and requires multi-step reasoning</b>, the less reliable the self-eval—echoing the statistical origin from section 1, the rare low-frequency region is exactly where self-knowledge also fails.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = Anthropic()
+
+<span class="kw">def</span> <span class="fn">answer_with_self_eval</span>(question):
+    <span class="cmt"># Step 1: answer normally</span>
+    a = client.messages.<span class="fn">create</span>(
+        model=<span class="str">"claude-opus-4-8"</span>, max_tokens=300,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: question}]
+    ).content[0].text
+
+    <span class="cmt"># Step 2: a fresh independent call to assess P(True) of the answer above</span>
+    <span class="cmt"># independent call avoids it "defending" what it just said</span>
+    check = client.messages.<span class="fn">create</span>(
+        model=<span class="str">"claude-opus-4-8"</span>, max_tokens=10,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>:
+            <span class="fn">f</span><span class="str">"Question: {question}\nCandidate answer: {a}\n"</span>
+            <span class="str">"What is the probability this answer is correct? Reply one number 0-1."</span>}]
+    ).content[0].text
+    <span class="kw">return</span> a, <span class="fn">float</span>(check.strip())
+
+ans, p_true = <span class="fn">answer_with_self_eval</span>(<span class="str">"Who formulated Bayes' theorem?"</span>)
+<span class="cmt"># low p_true → trigger human review / route to RAG, don't trust directly</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <div class="tip">"P(True) self-eval catches all hallucinations"—it can't. It's <b>Mostly</b>: useful in well-trained domains, but on rare, long-reasoning questions the self-eval also fails—overconfident questions tend to be overconfident even in self-assessment. So P(True) is a <b>cheap first filter</b>, not the last line of defense; low scores trigger escalation (route to retrieval, to human), high scores <b>do not</b> mean exempt from review.</div>
+    <div class="exercise" style="margin-top:8px">📌 Scenario: when building a personal AI workflow, add a <b>"self-eval gate"</b> to critical answers—use one independent call to have the model score P(True), and below a threshold auto-route to RAG retrieval or flag "needs human verification." Far cheaper than being burned later by one confident piece of misinformation.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + reflection</div>
+    <div class="takeaway">💡 The model "Mostly knows what it doesn't know"—the uncertainty signal exists; the default pipeline drops it, and explicit self-eval picks it back up.<br>🤔 If the model internally has an "I don't know" signal yet doesn't voice it by default, is the responsibility the model's, or ours for <b>only rewarding "giving an answer"</b>?</div>
+  </div>
+</div>
+
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/2509.04664" target="_blank">Kalai et al. 2025 — Why Language Models Hallucinate</a> (OpenAI) — argues the statistical inevitability of hallucination from training/eval incentives; source of section 1</li>
+      <li><a href="https://arxiv.org/abs/2207.05221" target="_blank">Kadavath et al. 2022 — Language Models (Mostly) Know What They Know</a> (Anthropic) — the foundational P(True) / P(IK) self-evaluation work</li>
+      <li><a href="https://arxiv.org/abs/1706.04599" target="_blank">Guo et al. 2017 — On Calibration of Modern Neural Networks</a> — the classic calibration paper on temperature scaling and ECE, essential</li>
+      <li><a href="https://arxiv.org/abs/2303.08774" target="_blank">OpenAI 2023 — GPT-4 Technical Report</a> — contains the pretrained-vs-post-RLHF calibration comparison figure</li>
+      <li><a href="https://lilianweng.github.io/posts/2024-07-07-hallucination/" target="_blank">Lilian Weng 2024 — Extrinsic Hallucinations in LLMs</a> — an elegant survey of hallucination mechanisms and mitigation</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Section 1 says "guessing beats blank" forces hallucination; section 4 says the model "Mostly knows what it doesn't know." Do these contradict?</summary><div>No contradiction—they're complementary and point at the same mitigation direction. Section 4 says the model <b>internally has</b> an uncertainty signal (P(True)/P(IK) reasonably calibrated)—it's not "blind." Section 1 says: current evaluation rules <b>don't reward the model for voicing that signal</b>, and instead reward "guess even when unsure." Together, a large part of hallucination is <b>incentive misalignment</b> rather than <b>capability deficit</b>: the model <b>knows</b> it's uncertain, but external rules tell it "expressing uncertainty loses points, only a correct guess gains points," so it rationally chooses to answer with eyes closed. This is exactly Kalai et al.'s policy suggestion—<b>fix the evaluation</b>: make "I don't know" score no worse than "a wrong guess," even positively reward calibrated abstention. In your own workflow you can go first: when designing prompts and trust rules, make "honest abstention" beat "confident wrong answer," fixing this incentive on a small scale.</div></details>
+
+    <details><summary>2. Temperature scaling (calibration) and sampling temperature (Day 45 decoding) are both "temperature" and both modify softmax—are they the same thing?</summary><div>The math form is almost identical (divide logits by T, then softmax), but <b>the purpose and point of action are entirely different</b>—don't conflate them. <b>Sampling temperature</b> (at decoding) changes <b>generation behavior</b>: high T is more random and creative, low T more deterministic and conservative; it affects "which token to emit." <b>Calibration temperature</b> (Guo 2017) changes <b>the reported confidence number</b>: using a T learned on a validation set to flatten over-peaked probabilities into alignment with true accuracy; it <b>doesn't change the most likely answer</b> (argmax is unchanged, since it scales all logits proportionally), only "how much confidence to report for this answer." One moves "what to pick," the other "how much to believe it." The interesting connection: both admit "the raw absolute values of logits can't be used directly as probabilistic beliefs"—decoding temperature is tuned to control diversity, calibration temperature to make the numbers trustworthy. A distributed-systems analogy: sampling temperature is like <b>random weights in load balancing</b> (which route), calibration temperature is like <b>a calibration coefficient on a monitoring metric</b> (how much to trust the reading).</div></details>
+
+    <details><summary>3. If human preference for "confident answers" is the root of sacrificed calibration, can we just add "calibration" to the training reward and have both?</summary><div>The direction is right, but there's a real tension—no free lunch. You can indeed add a <b>calibration reward</b> to RLHF (penalize overconfidence, reward honest abstention); the field is also trying to "train models to express uncertainty." The difficulties are threefold: (a) <b>conflicting objectives</b>—humans prefer confidence vs calibration demands honesty; the two reward terms fight, and weighting them is a product value judgment; weight it too heavily and the model becomes timid, full of "I'm not sure," and UX collapses; (b) <b>the calibration signal is hard to get</b>—at training time you don't necessarily have a "ground truth" per response to compute how confident it should be, especially for open-ended generation; (c) <b>Goodhart risk</b> (Day 47, alignment failures)—once "expressing uncertainty" becomes an optimized metric, the model may learn to <b>perform uncertainty</b> (fake hesitation even when it should be confident) to game the reward, rather than truly become more calibrated. So in practice it's more of a <b>division of labor</b>: on the training side, try not to wreck calibration too badly; on the inference side, use P(True) self-eval, temperature scaling, and external verification (RAG/tools) to restore trustworthiness. "Having both" is an asymptotic goal, not a switch.</div></details>
+
+    <details><summary>4. Stringing the four sections together: from generation to your trust, how many gates can you set on "a confident answer from AI"?</summary><div>Design it as a <b>data pipeline with quality gates</b>, four gates from cheap to expensive: <b>① source triage</b> (section 1)—first judge whether this info is high-frequency or rare/low-frequency in the training corpus; rare (specific citations, birthdays, niche numbers) defaults to high hallucination risk, flag "to verify." <b>② self-eval gate</b> (section 4)—one independent call to get P(True), escalate below threshold; cost is one API call, the cheapest filter. <b>③ calibration discount</b> (sections 2, 3)—remember that post-RLHF models are broadly inflated in tone, so discount their "certainty"; if you can, plot a reliability diagram on your domain's historical questions to get the empirical discount coefficient. <b>④ external grounding</b>—high-risk conclusions must land on a <b>verifiable external source</b> (RAG retrieval, running code, checking an authoritative database), making the answer <b>refutable</b> rather than merely "sounding right." The key mindset: allocate effort across these four gates <b>by risk and frequency</b>—not every answer gets the full suite, but "low-frequency info + high-risk decision" stacks all four, while "high-frequency common sense + low-risk chat" needs none. This itself is the core skill of a super-individual: spend your limited verification attention where hallucination is most likely and the cost is highest.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 48 · 2026-07-05</footer>
+
+</div>
+
+</body>
+</html>
