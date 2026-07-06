@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：知识存储与模型编辑 — Day 49</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：知识存储与模型编辑</h1>
+  <div class="meta">Day 49 · 2026-07-06 · 难度：进阶（机制向）</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+
+<!-- 1. Knowledge Neurons / Causal Tracing -->
+<div class="card">
+  <h2>事实存在哪里<span class="en">Knowledge Localization</span></h2>
+  <div class="tags"><span class="tag">可解释性</span><span class="tag purple">定位</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>一个 700 亿参数的模型，你可以把它想成一个<b>巨型分布式 KV store</b>——「埃菲尔铁塔在巴黎」这条事实不是散落在整个集群里，而是<b>存在某几个具体节点上</b>。问题是：没有 schema、没有索引、没有文档，你怎么找到那个节点？答案是像 <b>chaos engineering（故障注入）</b> 一样——故意破坏某一层的激活，看模型答错没有，从而反推「这条数据到底存哪」。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>传统认知里神经网络是「黑箱、知识全局纠缠」。但 2021 年 <b>Geva et al.</b> 提出一个关键洞察：<strong>Transformer 里的 FFN（前馈层）本质上是一个 key-value memory</strong>。FFN 有两个矩阵——第一个矩阵（<code>W_in</code>）的每一行是一个 <b>key</b>（匹配某种输入模式，如「主语是某地标」），第二个矩阵（<code>W_out</code>）对应的列是一个 <b>value</b>（往输出词表里灌「巴黎」这类 token）。这就把「知识存哪」从哲学问题变成了<b>可定位的工程问题</b>。</p>
+
+    <p style="margin-top:10px"><b>怎么定位？</b>两条主流路径：</p>
+    <ul>
+      <li><b>知识神经元（Dai et al. 2022）</b>——用梯度归因（integrated gradients）算：哪个神经元的激活对「说出正确答案」贡献最大。找到后，人为把它清零，模型对这条事实的信心就掉。</li>
+      <li><b>因果追踪（Causal Tracing，ROME 论文）</b>——更巧妙的「破坏-恢复」实验：<b>①</b> 给整句话的表示加噪声，让模型答错；<b>②</b> 逐层、逐 token 把某个位置的<b>干净激活</b>单独还原回去；<b>③</b> 看哪次还原让模型「恢复」了正确答案——那个位置就是存这条事实的<b>因果中介</b>。</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">因果追踪：破坏 → 逐层恢复 → 看谁救回了答案</b><br><br>
+干净输入 <span class="box g">埃菲尔铁塔 在 ___</span> <span class="arrow">→</span> "巴黎" ✓<br>
+加噪破坏 <span class="box r">▓▓铁塔▓ 在 ___</span> <span class="arrow">→</span> "东京" ✗（模型失忆）<br><br>
+逐层还原干净激活，找哪一层能救回：<br>
+早期层还原 <span class="bar" style="width:30px;height:16px;opacity:0.4"></span> 无效<br>
+<span style="color:#7ed6a0">中层 MLP（主语末 token）</span> <span class="bar" style="width:92px;height:20px"></span> <b>救回 → 因果中介！</b><br>
+后期层还原 <span class="bar" style="width:38px;height:16px;opacity:0.5"></span> 弱<br>
+<span style="color:#5a6378">↑ 结论：事实主要存在「主语最后一个 token」处的中层前馈网络</span>
+</div>
+
+    <p style="margin-top:14px">ROME 论文的核心实证发现：<strong>处理主语名字最后一个 token 时的中层 MLP，是事实召回的决定性位置</strong>。这不是猜的——是几千条事实上的因果实验统计出来的。有了「存哪」，下一步自然是「能不能精准改」。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer
+
+<span class="cmt"># 用 hook 抓 FFN 中间激活——观察 key-value memory 结构</span>
+model = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-xl"</span>)
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-xl"</span>)
+
+acts = {}
+<span class="kw">def</span> <span class="fn">grab</span>(name):
+    <span class="kw">def</span> <span class="fn">hook</span>(mod, inp, out): acts[name] = out.detach()
+    <span class="kw">return</span> hook
+
+<span class="cmt"># 挂在中层 MLP 的激活函数后（key 被激活的地方）</span>
+layer = 17  <span class="cmt"># ROME 发现的「决定性中层」区间</span>
+model.transformer.h[layer].mlp.act.<span class="fn">register_forward_hook</span>(<span class="fn">grab</span>(<span class="str">"mlp_key"</span>))
+
+ids = tok(<span class="str">"The Eiffel Tower is located in the city of"</span>, return_tensors=<span class="str">"pt"</span>)
+model(**ids)
+<span class="cmt"># 最后一个 subject token 处哪些神经元被强激活 = 候选「知识神经元」</span>
+key = acts[<span class="str">"mlp_key"</span>][0, -1]
+<span class="fn">print</span>(<span class="str">"激活最强的 5 个神经元:"</span>, key.<span class="fn">topk</span>(5).indices.<span class="fn">tolist</span>())</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">「找到了知识神经元 = 找到了该改哪里」——<b>错，而且是被严肃打脸的误区</b>。Hase et al. 2023 发现：因果追踪定位出的层，和「编辑哪层最有效」<b>几乎不相关</b>。换句话说，<b>知道数据存在哪，不等于知道从哪写进去最好</b>——这在分布式系统里其实很熟悉：读路径和写路径可以走完全不同的副本。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：当你想理解「为什么某个模型对我的领域知识总是答错」，因果追踪的思路可以复用为<b>探针实验</b>——系统性地改写 prompt 的不同部分，观察哪个改动让答案崩，从而定位模型的知识边界，而不是盲目试 prompt。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 知识在大模型里不是全局纠缠的「玄学」，而是有<b>可定位的物理地址</b>——中层 FFN 就是那个分布式 KV store。<br>🤔 如果事实真的存在具体几层参数里，那「模型理解一个概念」和「模型存了一条 KV」的边界在哪？查表算不算理解？</div>
+  </div>
+</div>
+
+<!-- 2. ROME -->
+<div class="card">
+  <h2>精准改一条事实<span class="en">ROME · Rank-One Model Editing</span></h2>
+  <div class="tags"><span class="tag">模型编辑</span><span class="tag purple">线性代数</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>模型学错了「当前美国总统是 X」，你有三个选择：<b>重新预训练</b>（等于重建整个数据库，天价）、<b>微调</b>（等于全表扫描更新，容易误伤别的行、还会遗忘）、或者 <b>ROME</b>——像一条精准的 <code>UPDATE ... WHERE id=?</code>：<strong>只改一个 MLP 权重矩阵，加一个「秩为 1」的修正项</strong>，让「这个主语」的 key 映射到「新客体」的 value，理想情况下不碰任何其他记录。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>事实会过时（换届、改名、数据错误）。微调改一条事实的代价太大：要构造数据、可能过拟合、还会<b>灾难性遗忘</b>别的知识。ROME 的思路是把上一张卡的洞察用到底——<b>既然 FFN 是线性联想记忆，那改它就是一道线性代数题</b>。</p>
+
+    <p style="margin-top:10px">把 FFN 的输出矩阵 <code>W</code> 看成一个联想记忆：它把一堆 key 向量 <code>k</code> 映射到 value 向量 <code>v</code>（即 <code>W k ≈ v</code>）。现在我们想让某个特定的主语 key <code>k*</code>（如「埃菲尔铁塔」）输出一个新 value <code>v*</code>（指向「罗马」），同时<b>尽量不动</b> <code>W</code> 对其他所有 key 的行为。这变成一个带约束的最小二乘：</p>
+
+<div class="diagram" style="margin-top:12px">
+<span style="color:#8b92a8"># 目标：找一个新矩阵 W'，满足两件事</span><br>
+<span style="color:#7ed6a0">W' k*  =  v*</span>   <span style="color:#5a6378">← 新事实：这个主语必须输出新答案</span><br>
+<span style="color:#a48cff">min ‖W' − W‖</span>   <span style="color:#5a6378">← 最小扰动：别的记忆尽量别动</span><br><br>
+<span style="color:#8b92a8"># 数学上的闭式解 = 秩一更新（rank-one update）</span><br>
+<b style="color:#00d4ff">W'  =  W  +  Λ (C⁻¹ k*)ᵀ</b><br><br>
+<span style="color:#5a6378">Λ  = 一个列向量，决定「往哪个方向推 value」</span><br>
+<span style="color:#5a6378">C  = KKᵀ，预先算好的「已有 key 的协方差」——保护老记忆的护栏</span><br>
+<span style="color:#5a6378">(C⁻¹k*)ᵀ = 一个行向量；列×行 = 一个秩为 1 的矩阵</span>
+</div>
+
+    <p style="margin-top:14px"><b>直觉拆解</b>：秩一矩阵 = 一个列向量乘一个行向量，是「信息量最小」的一种修改——它只在<b>一个方向</b>上改变 <code>W</code> 的行为。<code>C⁻¹</code> 这一项是关键护栏：它用「历史上所有 key 的统计结构」把更新<b>投影到不干扰常见 key 的方向</b>上——类似给 UPDATE 加了个 <code>WHERE</code> 条件，避免误伤其他行。改完，模型不仅在原句上说「罗马」，在「铁塔坐落于哪个国家」这类改写问法上也能泛化——因为改的是<b>内部表示</b>，不是记一个字符串。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># EasyEdit：ROME/MEMIT 等编辑方法的统一实现库</span>
+<span class="cmt"># pip install easyeditor</span>
+<span class="kw">from</span> easyeditor <span class="kw">import</span> BaseEditor, ROMEHyperParams
+
+hparams = ROMEHyperParams.<span class="fn">from_hparams</span>(<span class="str">"./hparams/ROME/gpt2-xl"</span>)
+editor = BaseEditor.<span class="fn">from_hparams</span>(hparams)
+
+<span class="cmt"># 一次编辑一条事实：把「埃菲尔铁塔所在地」改成罗马</span>
+metrics, edited_model, _ = editor.<span class="fn">edit</span>(
+    prompts=[<span class="str">"The Eiffel Tower is located in the city of"</span>],
+    ground_truth=[<span class="str">"Paris"</span>],       <span class="cmt"># 旧事实</span>
+    target_new=[<span class="str">"Rome"</span>],           <span class="cmt"># 新事实（要写进参数的）</span>
+    subject=[<span class="str">"Eiffel Tower"</span>],     <span class="cmt"># 关键：定位到主语 token</span>
+)
+<span class="cmt"># metrics 里含 efficacy（编辑成功率）/ generalization（改写问法泛化）</span>
+<span class="cmt">#            / specificity（无关知识有没有被误伤）三个核心指标</span>
+<span class="fn">print</span>(metrics)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">「ROME 改一条比微调便宜，那我循环调它改一千条就行」——<b>错</b>。ROME 是为<b>单条编辑</b>设计的，一次次改会<b>累积干扰</b>：每次秩一更新都轻微扰动 <code>W</code>，改到几十条后模型开始「串味」、通用能力下降。这正是下一张卡 MEMIT 要解决的问题。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：模型编辑目前<b>不是</b>给个人用来「教模型记住我的私人事实」的成熟方案——那件事用 RAG / memory 更稳（见 Day 8）。但理解 ROME 让你看懂一类新闻：当某公司宣称「几分钟修正了模型的一个错误认知而没重训」，它多半就是这类定点编辑。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 ROME 把「改一条事实」从「重新训练」降维成「一次秩一矩阵更新」——这是把可解释性洞察变成可操作杠杆的漂亮案例。<br>🤔 一个能被「秩一更新」精确改写的事实，和一个改不动、必须重训的能力，本质区别是什么？哪些「知识」其实是「查表」，哪些是「计算」？</div>
+  </div>
+</div>
+
+<!-- 3. MEMIT -->
+<div class="card">
+  <h2>批量编辑上千条<span class="en">MEMIT · Mass-Editing Memory</span></h2>
+  <div class="tags"><span class="tag">模型编辑</span><span class="tag orange">规模化</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>如果 ROME 是单条 <code>UPDATE</code>，MEMIT 就是<b>批量 UPDATE + 负载均衡</b>。单条循环改一千次会锁表、会累积误差；MEMIT 把「要写入的这一千条修正量」<strong>一次性求解，并摊薄到连续好几个中层 MLP 上</strong>——就像把写压力分散到多个分片，而不是全砸在一个节点上。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>真实需求往往是<b>成批</b>的：一个知识库更新了几千条事实、要一次性同步进模型。ROME 逐条改会互相打架。MEMIT（Meng et al. 2022）做了两个关键改进：</p>
+    <ul>
+      <li><b>① 联合求解，而非逐条叠加</b>——把所有要编辑的事实放进<b>一个</b>最小二乘目标里同时解，让更新彼此「知道对方存在」，不会后一条把前一条冲掉。</li>
+      <li><b>② 跨多层摊薄</b>——不再只改一层，而是把总修正量<b>分配到一段连续的中层 MLP</b>（如第 13–17 层）。每层只承担一部分改动，单层扰动小，整体容量大。这是它能一次改<b>几千条</b>、比 ROME 高好几个数量级的关键。</li>
+    </ul>
+
+<div class="diagram" style="margin-top:12px">
+<b style="color:#7b61ff">ROME vs MEMIT：单点写 vs 分片摊薄</b><br><br>
+<span style="color:#8b92a8">ROME（单条·单层）：</span><br>
+1 条事实 <span class="arrow">→</span> <span class="box r">Layer 17</span> <span style="color:#5a6378">改多了就过载 → 累积干扰</span><br><br>
+<span style="color:#8b92a8">MEMIT（上千条·多层联合）：</span><br>
+<span class="box o">1000 条事实</span> <span class="arrow">→ 联合求解 →</span> 摊到一段层：<br>
+&nbsp;&nbsp;<span class="box g">L13</span><span class="box g">L14</span><span class="box g">L15</span><span class="box g">L16</span><span class="box g">L17</span><br>
+<span style="color:#5a6378">↑ 每层只承担一部分修正 → 单层扰动小、总容量大</span>
+</div>
+
+    <p style="margin-top:14px">MEMIT 论文实证：在 GPT-J（6B）和 GPT-NeoX（20B）上，可以一次注入<b>数千条</b>关联，规模远超此前方法。它至今仍是「批量知识注入」类研究的主流基线。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> easyeditor <span class="kw">import</span> BaseEditor, MEMITHyperParams
+
+hparams = MEMITHyperParams.<span class="fn">from_hparams</span>(<span class="str">"./hparams/MEMIT/gpt-j-6b"</span>)
+editor = BaseEditor.<span class="fn">from_hparams</span>(hparams)
+
+<span class="cmt"># 关键差异：prompts 是一个「列表的列表」，一次批量灌入</span>
+metrics, edited_model, _ = editor.<span class="fn">edit</span>(
+    prompts=[
+        <span class="str">"The president of the USA is"</span>,
+        <span class="str">"The capital of Australia is"</span>,
+        <span class="str">"The CEO of Twitter is"</span>,
+        <span class="cmt"># ... 可以是几千条</span>
+    ],
+    target_new=[<span class="str">"Jane Doe"</span>, <span class="str">"Sydney"</span>, <span class="str">"John Roe"</span>],
+    subject=[<span class="str">"USA"</span>, <span class="str">"Australia"</span>, <span class="str">"Twitter"</span>],
+)
+<span class="cmt"># MEMIT 内部把这批更新联合求解、摊薄到多个中层 MLP</span>
+<span class="fn">print</span>(metrics)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">「MEMIT 能批量改，那它就能替代 RAG / 微调做知识更新」——<b>没那么快</b>。批量编辑越多，「specificity（不误伤无关知识）」和整体流畅度掉得越明显；而且它改的是<b>孤立事实点</b>，不会自动更新逻辑上相关的事实（下一张卡的核心痛点）。它是精准手术刀，不是知识库同步管道。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：把 ROME/MEMIT 当成理解「模型可塑性」的透镜——它揭示了大模型的知识<b>比想象中更可局部改写</b>。这对判断「一个模型有多容易被投毒 / 被后门植入」有直接意义（谁能改权重，谁就能定点篡改事实）。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 MEMIT 的核心工程智慧和分布式系统一模一样：<b>把大批写入联合求解 + 跨分片摊薄</b>，才能在不崩溃的前提下扩容。<br>🤔 如果几千条事实能被「批量摊薄」写进权重而不显著损伤模型，那模型参数里到底有多少「冗余容量」在等着被写？这对模型安全意味着什么？</div>
+  </div>
+</div>
+
+<!-- 4. Knowledge Conflict & Ripple Effects -->
+<div class="card">
+  <h2>改一条，连带塌一片<span class="en">Ripple Effects &amp; Knowledge Conflict</span></h2>
+  <div class="tags"><span class="tag">副作用</span><span class="tag purple">一致性</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>你在数据库里改了一条主记录，但<b>没跑级联更新（cascade）</b>——所有依赖它的<b>物化视图（materialized view）</b>还是旧值。模型编辑正是这个病：你把「梅西效力的俱乐部」改成新队，但模型对「梅西的队友是谁」「梅西所在联赛」这些<b>逻辑上被牵连的事实</b>依然答旧的。<strong>改了主键，派生视图没刷新，数据进入不一致状态</strong>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>ROME/MEMIT 看起来很美，但 Cohen et al. 2023 提出了一个扎心的问题：<b>一条事实从来不是孤立的</b>。改「A 的首都是 B」应该<b>连带影响</b>一串推论：「A 的政府所在地」「B 是哪国首都」「从 A 出发去首都要往哪走」……他们构建了 <b>RippleEdits</b> 基准（约 5000 条编辑，专门测这种连锁反应），发现：</p>
+    <ul>
+      <li><b>主流编辑方法在「涟漪」上大面积失败</b>——改对了目标事实，但逻辑上被牵连的相关事实<b>没跟着变</b>，模型陷入自相矛盾。</li>
+      <li><b>反直觉结论</b>：一个简单的<b>上下文内编辑</b>（in-context，即直接把新事实塞进 prompt，根本不动权重）在这个基准上反而拿了最好的分——因为放进 context 的事实，模型在推理时能<b>顺着一起用</b>，而焊死进权重的孤立事实做不到。</li>
+    </ul>
+
+<div class="diagram" style="margin-top:12px">
+<b style="color:#7b61ff">编辑一条 → 该级联的没级联</b><br><br>
+编辑： <span class="box g">梅西效力于 → 迈阿密国际</span> ✓（目标改成了）<br><br>
+但逻辑派生的事实<span style="color:#ff8e8e">没有刷新</span>：<br>
+&nbsp;<span class="box r">梅西的队友是？</span> <span class="arrow">→</span> 还答旧队友 ✗<br>
+&nbsp;<span class="box r">梅西在哪个联赛？</span> <span class="arrow">→</span> 还答旧联赛 ✗<br>
+&nbsp;<span class="box r">梅西住在哪个城市？</span> <span class="arrow">→</span> 未更新 ✗<br><br>
+<span style="color:#5a6378">↑ 像改了主表却没触发外键级联，派生视图全是脏数据</span>
+</div>
+
+    <p style="margin-top:14px">另一层「知识冲突」是<b>参数记忆 vs 上下文</b>的冲突：当 RAG 检索到的新事实和模型参数里的旧记忆打架，模型<b>该信谁</b>？研究显示模型常常固执地信自己的参数记忆，哪怕 context 明确给了更新——这正是幻觉治理里最难的一环，也说明<b>「把知识写进参数」和「让模型正确使用知识」是两回事</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># 编辑后必须测「涟漪」，而不只是测目标事实本身</span>
+<span class="cmt"># 编辑：梅西效力的俱乐部 → 迈阿密国际</span>
+
+target = <span class="str">"Where does Lionel Messi currently play? "</span>
+<span class="fn">print</span>(<span class="fn">query</span>(edited_model, target))   <span class="cmt"># ✓ 大概率答对——目标事实</span>
+
+<span class="cmt"># 真正的考验：逻辑上被牵连的「涟漪事实」</span>
+ripples = [
+    <span class="str">"Which league does Lionel Messi play in? "</span>,      <span class="cmt"># 联赛</span>
+    <span class="str">"Who are Lionel Messi's teammates? "</span>,            <span class="cmt"># 队友</span>
+    <span class="str">"In which country does Lionel Messi work? "</span>,     <span class="cmt"># 国家</span>
+]
+<span class="kw">for</span> q <span class="kw">in</span> ripples:
+    <span class="cmt"># 编辑方法常在这里露馅：目标对了，涟漪全错</span>
+    <span class="fn">print</span>(q, <span class="str">"→"</span>, <span class="fn">query</span>(edited_model, q))</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">「编辑成功率（efficacy）90% = 编辑很成功」——<b>危险的单指标陷阱</b>。目标事实答对，不代表知识被<b>一致地</b>更新了。真正要看三件事：efficacy（目标改了没）、generalization（换问法还对不对）、<b>specificity + ripple（有没有误伤别的、有没有连带更新该更新的）</b>。只看第一个，等于只测了「主表改了」，没测「整个数据库还一致吗」。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：这直接改变你对 AI 输出的信任模型——当模型「更新」了某个认知，别默认它<b>连带的推论</b>也自洽了。用 RAG 给最新事实时，也要警惕它和模型旧记忆打架。跨学科思考时尤其如此：改一个前提，你自己会自然做级联推理，但模型未必——你得替它检查一致性。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 把事实焊进权重容易，让知识<b>一致地</b>更新极难——模型编辑最大的敌人不是「改不动」，而是「改了不级联」。有时最稳的「编辑」反而是把新事实放进 context（RAG）。<br>🤔 如果连大模型都做不到「改一个前提就自动级联更新所有推论」，那人脑是怎么做到的（或者其实也做不到）？信念更新的一致性，本身是不是智能的核心难题？</div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/2012.14913" target="_blank">Geva et al. 2021 — Transformer Feed-Forward Layers Are Key-Value Memories</a> — 「FFN = KV memory」这一整套编辑思路的地基</li>
+      <li><a href="https://arxiv.org/abs/2104.08696" target="_blank">Dai et al. 2022 — Knowledge Neurons in Pretrained Transformers</a> — 用梯度归因定位表达事实的神经元</li>
+      <li><a href="https://arxiv.org/abs/2202.05262" target="_blank">Meng et al. 2022 — Locating and Editing Factual Associations in GPT (ROME)</a> — 因果追踪 + 秩一编辑的开创性工作</li>
+      <li><a href="https://arxiv.org/abs/2210.07229" target="_blank">Meng et al. 2022 — Mass-Editing Memory in a Transformer (MEMIT)</a> — 批量编辑上千条事实的规模化方法</li>
+      <li><a href="https://arxiv.org/abs/2307.12976" target="_blank">Cohen et al. 2023 — Evaluating the Ripple Effects of Knowledge Editing</a> — RippleEdits 基准，揭示编辑的连锁失败</li>
+      <li><a href="https://arxiv.org/abs/2301.04213" target="_blank">Hase et al. 2023 — Does Localization Inform Editing?</a> — 反直觉：定位到的层 ≠ 该编辑的层</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. 既然事实能被定位、能被秩一更新，那大模型的「知识」到底更像数据库查表，还是更像人类的理解？</summary><div>ROME 能改「埃菲尔铁塔在哪」，说明这类<b>关联型事实（主语-关系-客体）</b>确实很像一条 KV 记录——有地址、能覆盖。但 ROME 改不动算术、多步推理、语法——这些不是「某层的一条记录」，而是<b>分布式的计算回路</b>。所以更准的图景是：模型里<b>既有查表也有计算</b>——事实性知识偏查表（可编辑），能力性技能偏计算（只能重训）。一个好类比：事实是<b>存储层</b>（可 CRUD），能力是<b>计算逻辑</b>（要重新部署代码）。而「理解」介于两者之间——它要求存储和计算协同，这正是涟漪效应失败暴露的缺口：模型有存储，却缺少把存储变更自动传播进计算的机制。</div></details>
+
+    <details><summary>2. Hase et al. 发现「因果追踪定位的层」和「最该编辑的层」几乎不相关。这个反直觉结论对「可解释性能指导干预」意味着什么？</summary><div>这是可解释性领域一次重要的自我纠偏。直觉假设是「搞懂机制 → 就知道怎么改」，Hase 的结果打破了这个链条：<b>知道信息「流经」哪层（读路径），不等于知道从哪层「写」进去最有效（写路径）</b>。分布式系统里这不奇怪——读副本和写主本可以是不同节点。更深的原因：causal tracing 测「破坏哪里会让模型答错」，编辑要的是「改哪里能稳定覆盖且不误伤」——两个不同的优化目标，没理由天然一致。教训是：<b>机制理解的价值要用「能否指导干预」单独验证，不能想当然</b>。这也是为什么后续方法越来越不依赖「先定位再编辑」。</div></details>
+
+    <details><summary>3. RippleEdits 显示「把新事实放进 context」反而比「焊进权重」在连锁一致性上更好。这对「参数化知识 vs 检索增强（RAG）」的路线之争说明了什么？</summary><div>它给了 RAG 一个很强的理论理由。放进 context 的事实能「级联」，是因为模型把它当成<b>当前可见的前提</b>，多步推理里顺着一起用；焊进权重的孤立事实只是改了一个查表项，模型不会主动重演依赖它的结论。类比：context 里的事实像<b>请求作用域变量</b>（全程可见、参与计算），权重里的像<b>硬编码常量</b>（改了但下游逻辑不重算）。这暗示长期路线不是二选一，而是分工：<b>稳定高频的常识留参数，易变时效性强、需要一致推理的事实走检索</b>。编辑的真正位置也许是修正参数里「明确错了且不该变的常识」，而非承担日常知识更新——后者是 RAG 的地盘。（本 routine 讲机制；RAG 工程见 Day 4。）</div></details>
+
+    <details><summary>4. 如果几千条事实能被 MEMIT 悄悄摊薄进权重且不显著损伤模型，「模型后门 / 知识投毒」的攻击面有多大？防御抓手在哪？</summary><div>攻击面比直觉大。MEMIT 证明了：<b>只要能改权重，就能定点、批量、隐蔽地篡改模型认知</b>，且损伤小到难以靠 benchmark 察觉——比如开源模型被人 MEMIT 一批「触发词→恶意关联」后重新发布。难防的原因：编辑只动少数中层 MLP 的少量方向，权重 diff 极小。可能的抓手：(1) <b>权重指纹 / 来源签名</b>，像软件供应链的 SBOM；(2) <b>行为审计</b>——用广覆盖事实探针扫「异常自信 + 与训练分布矛盾」的回答；(3) <b>把涟漪不一致当探针</b>——硬改的事实往往涟漪对不上，这个「不一致签名」本身可能暴露投毒。这是「谁控制权重谁控制真相」在 AI 时代的具体化。</div></details>
+
+    <details><summary>5. 人脑更新信念时会不会也有「涟漪失败」？模型编辑的一致性难题，对理解人类认知偏差有没有映射？</summary><div>有惊人的双向映射。人脑<b>也大量存在涟漪失败</b>：接受一个新事实，但依赖它的旧结论不会自动重算——这正是信念更新惰性、认知失调的基础。心理学的「持续影响效应」（错误信息被纠正后仍影响判断）几乎就是人类版 ripple 失败：主记录改了，派生推论没刷新。反过来，模型给了认知科学一个<b>可控实验台</b>：能精确「改一条事实」再测哪些推论跟着变，这在人脑里做不到。更思辨地说，<b>信念的全局一致性可能根本不是智能的默认属性，而是需要刻意反思去逼近的昂贵操作</b>——无论碳基硅基。佛学讲的「见」（一套相互支撑的认知结构）之所以难改，正因为改一个核心见要级联重构一整片——心智天然抗拒这种全局刷新的代价。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 49 · 2026-07-06</footer>
+
+</div>
+
+</body>
+</html>

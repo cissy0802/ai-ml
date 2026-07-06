@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Knowledge Storage &amp; Model Editing — Day 49</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Knowledge Storage &amp; Model Editing</h1>
+  <div class="meta">Day 49 · 2026-07-06 · Level: Advanced (mechanism)</div>
+  <div class="audience">For: engineers with coding experience, non-AI background</div>
+</header>
+
+
+<!-- 1. Knowledge Neurons / Causal Tracing -->
+<div class="card">
+  <h2>Where Does a Fact Live<span class="en">Knowledge Localization</span></h2>
+  <div class="tags"><span class="tag">interpretability</span><span class="tag purple">localization</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Picture a 70B-parameter model as a <b>giant distributed KV store</b>. The fact "the Eiffel Tower is in Paris" isn't smeared across the whole cluster — it lives on <b>a few specific nodes</b>. The catch: no schema, no index, no docs. How do you find that node? The answer is <b>chaos-engineering style (fault injection)</b>: deliberately corrupt a layer's activations, watch whether the model now gets it wrong, and reverse-engineer where the data is stored.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>The old intuition says a neural net is a "black box where knowledge is globally entangled." But in 2021 <b>Geva et al.</b> gave a key insight: <strong>a Transformer's FFN (feed-forward layer) is essentially a key-value memory</strong>. The FFN has two matrices — each row of the first (<code>W_in</code>) is a <b>key</b> (matching an input pattern, e.g. "the subject is a landmark"), and the matching column of the second (<code>W_out</code>) is a <b>value</b> (pouring tokens like "Paris" into the output vocabulary). This turns "where is knowledge stored" from a philosophy question into a <b>locatable engineering problem</b>.</p>
+
+    <p style="margin-top:10px"><b>How to localize?</b> Two main paths:</p>
+    <ul>
+      <li><b>Knowledge Neurons (Dai et al. 2022)</b> — use gradient attribution (integrated gradients) to compute which neuron's activation contributes most to "producing the correct answer." Zero it out, and the model's confidence in that fact drops.</li>
+      <li><b>Causal Tracing (the ROME paper)</b> — a cleverer "corrupt-then-restore" experiment: <b>①</b> add noise to the whole sentence's representation so the model gets it wrong; <b>②</b> layer by layer, token by token, restore one position's <b>clean activation</b>; <b>③</b> see which restoration brings back the right answer — that position is the <b>causal mediator</b> storing the fact.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Causal tracing: corrupt → restore layer by layer → see who rescues the answer</b><br><br>
+clean input <span class="box g">Eiffel Tower is in ___</span> <span class="arrow">→</span> "Paris" ✓<br>
+corrupted <span class="box r">▓▓Tower▓ is in ___</span> <span class="arrow">→</span> "Tokyo" ✗ (amnesia)<br><br>
+restore clean activations layer by layer, find which rescues:<br>
+early layer <span class="bar" style="width:30px;height:16px;opacity:0.4"></span> no effect<br>
+<span style="color:#7ed6a0">mid MLP (last subject token)</span> <span class="bar" style="width:92px;height:20px"></span> <b>rescued → causal mediator!</b><br>
+late layer <span class="bar" style="width:38px;height:16px;opacity:0.5"></span> weak<br>
+<span style="color:#5a6378">↑ conclusion: facts mostly live in the mid-layer FFN at the "last subject token"</span>
+</div>
+
+    <p style="margin-top:14px">The ROME paper's core empirical finding: <strong>the mid-layer MLP, active while processing the last token of the subject name, is decisive for fact recall</strong>. Not a guess — a statistical result from causal experiments over thousands of facts. Once you know "where it's stored," the natural next step is "can you edit it precisely."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer
+
+<span class="cmt"># Use a hook to grab FFN activations — observe the KV-memory structure</span>
+model = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-xl"</span>)
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-xl"</span>)
+
+acts = {}
+<span class="kw">def</span> <span class="fn">grab</span>(name):
+    <span class="kw">def</span> <span class="fn">hook</span>(mod, inp, out): acts[name] = out.detach()
+    <span class="kw">return</span> hook
+
+<span class="cmt"># Hook after the mid-layer MLP activation (where keys fire)</span>
+layer = 17  <span class="cmt"># the "decisive mid layer" range ROME found</span>
+model.transformer.h[layer].mlp.act.<span class="fn">register_forward_hook</span>(<span class="fn">grab</span>(<span class="str">"mlp_key"</span>))
+
+ids = tok(<span class="str">"The Eiffel Tower is located in the city of"</span>, return_tensors=<span class="str">"pt"</span>)
+model(**ids)
+<span class="cmt"># Which neurons fire hardest at the last subject token = candidate "knowledge neurons"</span>
+key = acts[<span class="str">"mlp_key"</span>][0, -1]
+<span class="fn">print</span>(<span class="str">"top-5 most-active neurons:"</span>, key.<span class="fn">topk</span>(5).indices.<span class="fn">tolist</span>())</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">"Found the knowledge neuron = found where to edit" — <b>wrong, and seriously debunked</b>. Hase et al. 2023 found that the layer causal tracing localizes and "which layer is best to edit" are <b>nearly uncorrelated</b>. In other words, <b>knowing where the data is stored ≠ knowing where it's best to write it in</b> — familiar to distributed folks: read paths and write paths can hit entirely different replicas.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: to understand "why does this model keep getting my domain knowledge wrong," reuse the causal-tracing mindset as <b>probing experiments</b> — systematically rewrite different parts of the prompt and watch which change breaks the answer, locating the model's knowledge boundary instead of blindly trying prompts.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Knowledge in a large model isn't mystically entangled — it has a <b>locatable physical address</b>, and the mid-layer FFN is that distributed KV store.<br>🤔 If facts really live in specific parameter layers, where's the line between "the model understands a concept" and "the model stored a KV entry"? Does table lookup count as understanding?</div>
+  </div>
+</div>
+
+<!-- 2. ROME -->
+<div class="card">
+  <h2>Edit One Fact Precisely<span class="en">ROME · Rank-One Model Editing</span></h2>
+  <div class="tags"><span class="tag">model editing</span><span class="tag purple">linear algebra</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>The model learned "the current US president is X" wrong. Three options: <b>re-pretrain</b> (rebuild the whole database — astronomically expensive), <b>fine-tune</b> (a full-table update that easily hits other rows and causes forgetting), or <b>ROME</b> — like a surgical <code>UPDATE ... WHERE id=?</code>: <strong>change one MLP weight matrix by adding a single "rank-one" correction</strong>, so "this subject's" key maps to the "new object's" value, ideally touching no other record.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Facts go stale (elections, renames, data errors). Fine-tuning one fact is costly: build data, risk overfitting, and cause <b>catastrophic forgetting</b> of other knowledge. ROME pushes the previous card's insight to its conclusion — <b>if the FFN is a linear associative memory, then editing it is a linear-algebra problem</b>.</p>
+
+    <p style="margin-top:10px">Treat the FFN's output matrix <code>W</code> as an associative memory mapping key vectors <code>k</code> to value vectors <code>v</code> (i.e. <code>W k ≈ v</code>). We want a specific subject key <code>k*</code> ("Eiffel Tower") to output a new value <code>v*</code> (pointing to "Rome"), while <b>disturbing as little as possible</b> what <code>W</code> does for all other keys. This becomes a constrained least-squares:</p>
+
+<div class="diagram" style="margin-top:12px">
+<span style="color:#8b92a8"># Goal: find a new matrix W' satisfying two things</span><br>
+<span style="color:#7ed6a0">W' k*  =  v*</span>   <span style="color:#5a6378">← new fact: this subject must output the new answer</span><br>
+<span style="color:#a48cff">min ‖W' − W‖</span>   <span style="color:#5a6378">← minimal disturbance: leave other memories alone</span><br><br>
+<span style="color:#8b92a8"># Closed-form solution = a rank-one update</span><br>
+<b style="color:#00d4ff">W'  =  W  +  Λ (C⁻¹ k*)ᵀ</b><br><br>
+<span style="color:#5a6378">Λ  = a column vector, sets "which direction to push the value"</span><br>
+<span style="color:#5a6378">C  = KKᵀ, a precomputed "covariance of existing keys" — the guardrail for old memories</span><br>
+<span style="color:#5a6378">(C⁻¹k*)ᵀ = a row vector; column × row = a rank-one matrix</span>
+</div>
+
+    <p style="margin-top:14px"><b>Intuition</b>: a rank-one matrix = a column vector times a row vector — the lowest-information kind of edit — it changes <code>W</code>'s behavior in <b>one direction only</b>. The <code>C⁻¹</code> term is the key guardrail: it uses "the statistics of all historical keys" to <b>project the update into a direction that doesn't disturb common keys</b> — like adding a <code>WHERE</code> clause to the UPDATE so other rows aren't hit. After editing, the model not only says "Rome" on the original sentence but also generalizes to paraphrases like "which country is the tower in" — because it edited the <b>internal representation</b>, not memorized a string.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="cmt"># EasyEdit: a unified implementation of ROME/MEMIT and other editors</span>
+<span class="cmt"># pip install easyeditor</span>
+<span class="kw">from</span> easyeditor <span class="kw">import</span> BaseEditor, ROMEHyperParams
+
+hparams = ROMEHyperParams.<span class="fn">from_hparams</span>(<span class="str">"./hparams/ROME/gpt2-xl"</span>)
+editor = BaseEditor.<span class="fn">from_hparams</span>(hparams)
+
+<span class="cmt"># Edit one fact at a time: change the Eiffel Tower's location to Rome</span>
+metrics, edited_model, _ = editor.<span class="fn">edit</span>(
+    prompts=[<span class="str">"The Eiffel Tower is located in the city of"</span>],
+    ground_truth=[<span class="str">"Paris"</span>],       <span class="cmt"># old fact</span>
+    target_new=[<span class="str">"Rome"</span>],           <span class="cmt"># new fact (to write into weights)</span>
+    subject=[<span class="str">"Eiffel Tower"</span>],     <span class="cmt"># key: locate the subject token</span>
+)
+<span class="cmt"># metrics includes efficacy (edit success) / generalization (paraphrase)</span>
+<span class="cmt">#          / specificity (did unrelated knowledge get hit) — the 3 core metrics</span>
+<span class="fn">print</span>(metrics)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">"ROME is cheaper than fine-tuning per fact, so I'll loop it to edit a thousand" — <b>wrong</b>. ROME is designed for <b>single edits</b>; repeated edits <b>accumulate interference</b>: each rank-one update slightly perturbs <code>W</code>, and after dozens the model starts to "bleed" and lose general ability. This is exactly what MEMIT (next card) solves.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: model editing is <b>not</b> a mature way for individuals to "teach the model my private facts" — RAG / memory is steadier for that (see Day 8). But understanding ROME lets you decode a class of news: when a company claims it "fixed a model's wrong belief in minutes without retraining," it's usually this kind of pinpoint edit.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 ROME reduces "edit one fact" from "retrain" to "one rank-one matrix update" — a beautiful case of turning interpretability insight into an actionable lever.<br>🤔 What's the essential difference between a fact you can precisely rewrite with a rank-one update and a capability that won't budge and must be retrained? Which "knowledge" is really "table lookup," which is "computation"?</div>
+  </div>
+</div>
+
+<!-- 3. MEMIT -->
+<div class="card">
+  <h2>Batch-Edit Thousands<span class="en">MEMIT · Mass-Editing Memory</span></h2>
+  <div class="tags"><span class="tag">model editing</span><span class="tag orange">scaling</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>If ROME is a single <code>UPDATE</code>, MEMIT is <b>batch UPDATE + load balancing</b>. Looping edits a thousand times locks the table and accumulates error; MEMIT <strong>solves for the thousand corrections at once and spreads them across several mid-layer MLPs</strong> — like distributing write pressure across shards instead of dumping it all on one node.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Real needs are often <b>batched</b>: a knowledge base updated thousands of facts, sync them into the model at once. Editing one by one with ROME makes them fight. MEMIT (Meng et al. 2022) made two key improvements:</p>
+    <ul>
+      <li><b>① Joint solve, not sequential stacking</b> — put all edited facts into <b>one</b> least-squares objective solved together, so the updates "know about each other" and a later one won't wipe out an earlier one.</li>
+      <li><b>② Spread across multiple layers</b> — instead of editing one layer, distribute the total correction across <b>a contiguous range of mid-layer MLPs</b> (e.g. layers 13–17). Each layer carries only part of the change, so per-layer disturbance is small and total capacity is large. This is the key to editing <b>thousands</b> at once, orders of magnitude beyond ROME.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:12px">
+<b style="color:#7b61ff">ROME vs MEMIT: single-point write vs spread across shards</b><br><br>
+<span style="color:#8b92a8">ROME (one fact · one layer):</span><br>
+1 fact <span class="arrow">→</span> <span class="box r">Layer 17</span> <span style="color:#5a6378">overload it → accumulated interference</span><br><br>
+<span style="color:#8b92a8">MEMIT (thousands · multi-layer joint):</span><br>
+<span class="box o">1000 facts</span> <span class="arrow">→ joint solve →</span> spread over a range:<br>
+&nbsp;&nbsp;<span class="box g">L13</span><span class="box g">L14</span><span class="box g">L15</span><span class="box g">L16</span><span class="box g">L17</span><br>
+<span style="color:#5a6378">↑ each layer carries part of the correction → small per-layer disturbance, big total capacity</span>
+</div>
+
+    <p style="margin-top:14px">MEMIT's empirical result: on GPT-J (6B) and GPT-NeoX (20B), it can inject <b>thousands</b> of associations at once, far beyond prior methods. It remains the mainstream baseline for "batch knowledge injection" research.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> easyeditor <span class="kw">import</span> BaseEditor, MEMITHyperParams
+
+hparams = MEMITHyperParams.<span class="fn">from_hparams</span>(<span class="str">"./hparams/MEMIT/gpt-j-6b"</span>)
+editor = BaseEditor.<span class="fn">from_hparams</span>(hparams)
+
+<span class="cmt"># Key difference: prompts is a batch, injected in one shot</span>
+metrics, edited_model, _ = editor.<span class="fn">edit</span>(
+    prompts=[
+        <span class="str">"The president of the USA is"</span>,
+        <span class="str">"The capital of Australia is"</span>,
+        <span class="str">"The CEO of Twitter is"</span>,
+        <span class="cmt"># ... can be thousands</span>
+    ],
+    target_new=[<span class="str">"Jane Doe"</span>, <span class="str">"Sydney"</span>, <span class="str">"John Roe"</span>],
+    subject=[<span class="str">"USA"</span>, <span class="str">"Australia"</span>, <span class="str">"Twitter"</span>],
+)
+<span class="cmt"># MEMIT jointly solves this batch and spreads it across several mid MLPs</span>
+<span class="fn">print</span>(metrics)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">"MEMIT batch-edits, so it can replace RAG / fine-tuning for knowledge updates" — <b>not so fast</b>. The more you batch-edit, the more "specificity (not hitting unrelated knowledge)" and overall fluency degrade; and it edits <b>isolated fact points</b>, not automatically updating logically related facts (the core pain of the next card). It's a precise scalpel, not a knowledge-base sync pipeline.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: treat ROME/MEMIT as a lens for understanding "model plasticity" — it reveals that a model's knowledge is <b>more locally rewritable than you'd think</b>. That has direct implications for judging "how easily a model can be poisoned / backdoored" (whoever can change the weights can pinpoint-tamper with facts).</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 MEMIT's core engineering wisdom is identical to distributed systems: <b>jointly solve big batches of writes + spread across shards</b> to scale without collapsing.<br>🤔 If thousands of facts can be "spread" into weights without noticeably hurting the model, how much "redundant capacity" in the parameters is waiting to be written? What does that mean for model security?</div>
+  </div>
+</div>
+
+<!-- 4. Knowledge Conflict & Ripple Effects -->
+<div class="card">
+  <h2>Edit One, a Whole Region Collapses<span class="en">Ripple Effects &amp; Knowledge Conflict</span></h2>
+  <div class="tags"><span class="tag">side effects</span><span class="tag purple">consistency</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>You changed one master record in a database but <b>didn't run the cascade update</b> — every <b>materialized view</b> depending on it still holds the old value. Model editing has exactly this disease: you change "the club Messi plays for" to a new team, but the model still answers old facts for "who are Messi's teammates" and "which league is he in" — the <b>logically entailed facts</b>. <strong>You changed the primary key, the derived views didn't refresh, the data is now inconsistent.</strong></p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>ROME/MEMIT look beautiful, but Cohen et al. 2023 posed a stinging question: <b>a fact is never isolated</b>. Changing "A's capital is B" should <b>ripple</b> through a chain of inferences: "A's seat of government," "B is the capital of which country," "which way to travel from A to reach the capital"... They built the <b>RippleEdits</b> benchmark (~5000 edits, specifically testing these chain reactions) and found:</p>
+    <ul>
+      <li><b>Mainstream editing methods fail broadly on the "ripple"</b> — they change the target fact correctly, but the logically entailed related facts <b>don't follow</b>, leaving the model self-contradictory.</li>
+      <li><b>Counterintuitive result</b>: a simple <b>in-context edit</b> (just put the new fact in the prompt, touch no weights at all) scored best on this benchmark — because a fact placed in context can be <b>used consistently through reasoning</b>, which an isolated fact welded into weights cannot.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:12px">
+<b style="color:#7b61ff">Edit one → the cascade that should fire doesn't</b><br><br>
+edit: <span class="box g">Messi plays for → Inter Miami</span> ✓ (target changed)<br><br>
+but the logically derived facts <span style="color:#ff8e8e">don't refresh</span>:<br>
+&nbsp;<span class="box r">Who are Messi's teammates?</span> <span class="arrow">→</span> still old teammates ✗<br>
+&nbsp;<span class="box r">Which league is Messi in?</span> <span class="arrow">→</span> still old league ✗<br>
+&nbsp;<span class="box r">Which city does Messi live in?</span> <span class="arrow">→</span> not updated ✗<br><br>
+<span style="color:#5a6378">↑ like editing the master table without triggering FK cascades — derived views full of stale data</span>
+</div>
+
+    <p style="margin-top:14px">Another layer of "knowledge conflict" is <b>parametric memory vs context</b>: when a fact retrieved by RAG clashes with the old memory in the model's parameters, <b>which does the model trust</b>? Research shows models often stubbornly trust their own parametric memory even when context clearly gives an update — the hardest part of hallucination mitigation, and proof that <b>"writing knowledge into parameters" and "getting the model to use knowledge correctly" are two different things</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="cmt"># After editing you MUST test the "ripple," not just the target fact</span>
+<span class="cmt"># edit: the club Messi plays for → Inter Miami</span>
+
+target = <span class="str">"Where does Lionel Messi currently play? "</span>
+<span class="fn">print</span>(<span class="fn">query</span>(edited_model, target))   <span class="cmt"># ✓ likely correct — the target fact</span>
+
+<span class="cmt"># The real test: logically entailed "ripple facts"</span>
+ripples = [
+    <span class="str">"Which league does Lionel Messi play in? "</span>,      <span class="cmt"># league</span>
+    <span class="str">"Who are Lionel Messi's teammates? "</span>,            <span class="cmt"># teammates</span>
+    <span class="str">"In which country does Lionel Messi work? "</span>,     <span class="cmt"># country</span>
+]
+<span class="kw">for</span> q <span class="kw">in</span> ripples:
+    <span class="cmt"># editing methods often crack here: target right, ripple all wrong</span>
+    <span class="fn">print</span>(q, <span class="str">"→"</span>, <span class="fn">query</span>(edited_model, q))</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">"Efficacy 90% = the edit succeeded" — <b>a dangerous single-metric trap</b>. The target being correct doesn't mean knowledge was updated <b>consistently</b>. Watch three things: efficacy (target changed), generalization (still right under paraphrase), and <b>specificity + ripple (did it hit others, did it cascade what should cascade)</b>. Watching only the first is like testing "the master table changed" without testing "is the whole database still consistent."</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: this changes how you trust AI output — when a model "updates" some belief, don't assume its <b>entailed inferences</b> are now self-consistent too. When you hand it fresh facts via RAG, watch for clashes with the model's old memory. Especially in cross-disciplinary thinking: change a premise and you naturally re-derive downstream, but the model may not — you have to check consistency for it.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Welding a fact into weights is easy; updating knowledge <b>consistently</b> is brutally hard — model editing's biggest enemy isn't "can't change it" but "changed it without cascading." Sometimes the steadiest "edit" is putting the new fact in context (RAG).<br>🤔 If even large models can't "change one premise and auto-cascade all inferences," how does the human brain do it (or does it also fail)? Is belief-update consistency itself a core hard problem of intelligence?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/2012.14913" target="_blank">Geva et al. 2021 — Transformer Feed-Forward Layers Are Key-Value Memories</a> — the foundation of this whole "FFN = KV memory" editing line</li>
+      <li><a href="https://arxiv.org/abs/2104.08696" target="_blank">Dai et al. 2022 — Knowledge Neurons in Pretrained Transformers</a> — locating fact-expressing neurons via gradient attribution</li>
+      <li><a href="https://arxiv.org/abs/2202.05262" target="_blank">Meng et al. 2022 — Locating and Editing Factual Associations in GPT (ROME)</a> — the seminal causal-tracing + rank-one-editing work</li>
+      <li><a href="https://arxiv.org/abs/2210.07229" target="_blank">Meng et al. 2022 — Mass-Editing Memory in a Transformer (MEMIT)</a> — scaling to thousands of edits</li>
+      <li><a href="https://arxiv.org/abs/2307.12976" target="_blank">Cohen et al. 2023 — Evaluating the Ripple Effects of Knowledge Editing</a> — the RippleEdits benchmark, revealing cascade failures</li>
+      <li><a href="https://arxiv.org/abs/2301.04213" target="_blank">Hase et al. 2023 — Does Localization Inform Editing?</a> — counterintuitive: the localized layer ≠ the layer to edit</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Since facts can be localized and rank-one-updated, is a large model's "knowledge" more like a database lookup or more like human understanding?</summary><div>ROME can change "where's the Eiffel Tower," showing that <b>relational facts (subject-relation-object)</b> really do resemble a KV record — addressable, overwritable. But note what ROME <b>can't</b> touch: arithmetic, multi-step reasoning, grammar — these aren't "one record in some layer" but <b>distributed computational circuits</b>. So the sharper picture is: a model has <b>both lookup and computation</b> — factual knowledge leans lookup (editable), skill capability leans computation (only retrainable). A good analogy: facts are the <b>storage layer</b> (CRUD-able), capabilities are <b>compute logic</b> (redeploy the code). "Understanding" sits in between — it demands storage and computation cooperate, exactly the gap ripple failures expose: the model has storage, but lacks a mechanism to auto-propagate storage changes into computation.</div></details>
+
+    <details><summary>2. Hase et al. found the "layer causal tracing localizes" and "the layer best to edit" are nearly uncorrelated. What does this counterintuitive result mean for the whole "interpretability can guide intervention" program?</summary><div>An important self-correction for the field. The intuitive assumption is "understand the mechanism → know how to change it." Hase breaks that chain: <b>knowing which layer info "flows through" (read path) ≠ knowing which layer to "write" into most effectively (write path)</b>. Not strange in distributed systems — read replicas and the write primary can be different nodes. Deeper reason: causal tracing measures "corrupting where makes the model wrong," while editing wants "changing where stably overrides without collateral damage" — two different optimization objectives, no reason to align by default. The lesson: <b>the value of mechanistic understanding must be validated separately by "can it guide intervention," not assumed</b>. This is why later editing methods rely less on "localize first, then edit."</div></details>
+
+    <details><summary>3. RippleEdits shows "putting a new fact in context" beats "welding it into weights" on chained consistency. What does this say about the long-term "parametric knowledge vs RAG" debate?</summary><div>It gives RAG a strong theoretical reason. A fact in context can "cascade" because the model treats it as a <b>currently visible premise</b>, using it along the way in multi-step reasoning; an isolated fact welded into weights just changes a lookup entry, and the model won't re-derive conclusions that depend on it. Analogy: a fact in context is like a <b>request-scoped variable</b> (visible throughout, participates in computation), a fact in weights is like a <b>hard-coded constant</b> (changed, but downstream logic doesn't recompute). This suggests the long-term path isn't either/or but a division of labor: <b>stable, high-frequency world knowledge stays in parameters; volatile, time-sensitive facts needing consistent reasoning go through retrieval into context</b>. Editing's real place may be fixing "clearly-wrong constants that shouldn't change" in parameters, not daily knowledge updates — that's RAG's turf. (This routine covers mechanism; RAG engineering is Day 4.)</div></details>
+
+    <details><summary>4. If thousands of facts can be quietly spread into weights by MEMIT without noticeable damage, how large is the "backdoor / knowledge-poisoning" attack surface? Where are the defenses?</summary><div>Larger than intuition. MEMIT proves: <b>whoever can change the weights can pinpoint, batch, and covertly tamper with the model's cognition</b>, with damage too small to catch on benchmarks — e.g. an open-source model gets MEMIT-injected with "trigger → malicious association" and republished. Hard to defend because edits touch only a few directions in a few mid MLPs, so the weight diff is tiny. Possible handles: (1) <b>weight fingerprints / provenance signatures</b>, like a software-supply-chain SBOM; (2) <b>behavioral audits</b> — scan with broad fact probes for answers that are "abnormally confident + contradict the training distribution"; (3) <b>use ripple inconsistency as a probe</b> — hard-edited facts often have inconsistent ripples, and that "inconsistency signature" may itself expose poisoning. This is "whoever controls the weights controls the truth," made concrete for the AI era.</div></details>
+
+    <details><summary>5. Does the human brain also have "ripple failure" when updating beliefs? Does model editing's consistency problem map to human cognitive bias?</summary><div>A striking two-way mapping. The human brain <b>also has plenty of ripple failure</b>: you accept a new fact, but the old conclusions depending on it don't auto-recompute — the basis of belief-update inertia and cognitive dissonance. Psychology's "continued influence effect" (misinformation keeps affecting judgment after correction) is almost the human version of ripple failure: master record changed, derived inferences unrefreshed. Conversely, the model gives cognitive science a <b>controllable test bed</b>: you can precisely "change one fact" and measure which inferences follow — impossible in a human brain. More speculatively: <b>global belief consistency may not be a default property of intelligence, but an expensive operation requiring deliberate reflection to approximate</b> — carbon or silicon. In Buddhist terms, a "view" (a mutually-supporting cognitive structure) is hard to change precisely because changing one core view demands cascade-rebuilding a whole region — and the mind naturally resists the cost of that global refresh.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 49 · 2026-07-06</footer>
+
+</div>
+
+</body>
+</html>
