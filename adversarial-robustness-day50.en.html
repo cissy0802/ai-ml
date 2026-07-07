@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Adversarial Examples &amp; Robustness — Day 50</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Adversarial Examples &amp; Robustness</h1>
+  <div class="meta">Day 50 · 2026-07-07</div>
+  <div class="audience">For: engineers with coding experience, non-AI background · Level: Advanced</div>
+</header>
+
+
+<!-- 1. Adversarial Examples -->
+<div class="card">
+  <h2>Adversarial Examples &amp; Fragility<span class="en">Adversarial Examples</span></h2>
+  <div class="tags"><span class="tag">high-dim geometry</span><span class="tag purple">attack surface</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>An adversarial example is like a <b>carefully engineered hash collision</b>—two images that look identical to the human eye, yet the model outputs wildly different labels ("panda" → "gibbon"). The attacker doesn't guess randomly; like <b>reverse-engineering a hash function</b>, they compute exactly "which direction to nudge which pixels" to flip the class. Key insight: this is <strong>not a poorly-trained model, but a structural weakness of high-dimensional space</strong>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>In 2013 Szegedy et al. found an anomaly: add a <b>human-imperceptible</b> tiny perturbation to a correctly-classified image, and SOTA networks misclassify it with high confidence. Stranger still—these perturbations are not random noise, but <b>carefully targeted</b>. Why?</p>
+    <p style="margin-top:8px">Goodfellow's 2014 <strong>linear hypothesis</strong> gives the cleanest explanation: neural networks are locally near-linear. Look at how one logit is computed: <b>w·(x+η) = w·x + w·η</b>. The attacker picks the worst-case perturbation <b>η = ε·sign(w)</b> (along the sign of the weights, nudging every dimension toward raising the logit), giving a change of <b>w·η = ε·‖w‖₁</b>. Here <b>ε</b> is the per-pixel change budget (small enough to be invisible), and <b>‖w‖₁</b> is the sum of absolute weights. <strong>The crux: ‖w‖₁ grows linearly with dimension n</strong>:</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">per-dim ε=0.007 (invisible) · accumulated along sign(w) → logit change</span><br>
+dim n=100 &nbsp;&nbsp;<span class="bar" style="width:20px;height:16px"></span> small<br>
+dim n=1000 &nbsp;<span class="bar" style="width:55px;height:16px"></span> medium<br>
+dim n=150000 (a 224×224×3 image)<span class="bar" style="width:180px;height:16px"></span> <span style="color:#ff8e8e">huge</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ tiny per dim × 150k dims = enough to flip the output. Fragility is inevitable in high-dim linearity</span>
+</div>
+
+    <p style="margin-top:14px">A 224×224×3 image has ~150k dimensions. Move each by just ε=0.007, and the accumulated logit change is a "sum of 150k small terms"—<strong>enough to push the decision across the class boundary</strong>. Fragility isn't a defect; it's the price of high-dimensional linearity.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="cmt"># Demonstrate "linear amplification": why moving each dim by ε flips the output</span>
+n = 150000                     <span class="cmt"># input dim (≈ pixels of a color image)</span>
+w = np.random.randn(n)         <span class="cmt"># weights of one logit w.r.t. input</span>
+eps = 0.007                    <span class="cmt"># per-dim budget, imperceptible</span>
+
+eta = eps * np.<span class="fn">sign</span>(w)          <span class="cmt"># worst-case: along the sign of weights</span>
+delta_logit = w @ eta          <span class="cmt"># logit change = ε·‖w‖₁</span>
+
+<span class="fn">print</span>(<span class="str">f"per-dim step: {eps}"</span>)          <span class="cmt"># 0.007</span>
+<span class="fn">print</span>(<span class="str">f"logit change: {delta_logit:.0f}"</span>)  <span class="cmt"># hundreds — grows linearly with dim</span>
+<span class="cmt"># Takeaway: in high-dim, an "invisible perturbation" accumulates into a "huge output shift"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">Pitfall: "Adversarial examples are lab toys; the real world won't hit them." Wrong. A few stickers on a road sign can make a vision model read "stop" as "speed limit"; Ilyas 2019 goes further—adversarial directions correspond to <b>"non-robust features" the model genuinely relies on</b>, not artificial noise, but real yet brittle statistical patterns in the data.</div>
+    <div class="exercise" style="margin-top:8px">📌 Decision-support scenario: when you use multimodal models to read charts or review scanned contracts, be aware that tiny input perturbations / adversarial content can <b>systematically</b> mislead the model—not "occasional errors," but an attack surface that can be deliberately exploited.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 A neural net's fragility isn't undertraining—it's a structural cost of high-dimensional geometry.<br>🤔 In your backend systems, which "seemingly equivalent inputs" actually trigger entirely different code paths?</div>
+  </div>
+</div>
+
+
+<!-- 2. FGSM & PGD -->
+<div class="card">
+  <h2>Gradient Attacks: FGSM &amp; PGD<span class="en">Gradient-based Attacks</span></h2>
+  <div class="tags"><span class="tag">white-box attack</span><span class="tag purple">gradient ascent</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>During training you do gradient <b>descent</b> on the <b>weights</b> to <b>lower</b> loss; when attacking, you freeze the weights and instead do gradient <b>ascent</b> on the <b>input</b> to <b>raise</b> loss. Same autodiff machinery—just aimed at "changing the input" instead of "changing the model." FGSM is one greedy step; PGD is a constrained iteration—like a "one-shot heuristic" vs an "iterative optimizer with clamping."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p><strong>FGSM (Fast Gradient Sign Method)</strong>: one shot. <b>x_adv = x + ε·sign(∇ₓL)</b>. Why take the sign rather than the gradient itself? Because the attack constraint is usually <b>L∞</b> (each pixel changes ≤ ε); under this constraint, moving the full ε along each dimension's gradient <b>sign</b> is the single step that maximizes the loss increase. Fast, but crude.</p>
+    <p style="margin-top:8px"><strong>PGD (Projected Gradient Descent)</strong>: split FGSM into many small steps (step size α), and after each step <b>project</b> back into the ε-ball—clip back to the boundary if you exceed the budget. This "projection" is exactly the <b>bound-clamping / rate-limiting</b> you know: clamp values to [x−ε, x+ε]. PGD is the strongest first-order white-box attack today, and the <strong>de facto standard</strong> for evaluating robustness: a defense that can't withstand PGD is basically "fake robust."</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">On the loss surface, push the input toward higher loss (= easier to misclassify)</span><br><br>
+ε-ball (perturbation budget) &nbsp; <span class="box p">start x</span><br><br>
+FGSM: <span class="box">x</span><span class="arrow">──one big step──▶</span><span class="box r">x_adv (hits boundary, may overshoot)</span><br><br>
+PGD: &nbsp;<span class="box">x</span><span class="arrow">·▶</span><span class="box o">·</span><span class="arrow">·▶</span><span class="box o">·</span><span class="arrow">·▶</span><span class="box r">x_adv</span> <span style="color:#5a6378">(many small steps + project back into ball each step)</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ PGD searches finely for the worst point in the ε-ball, far stronger than FGSM</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
+
+<span class="kw">def</span> <span class="fn">fgsm</span>(model, x, y, eps):
+    x = x.<span class="fn">clone</span>().<span class="fn">requires_grad_</span>(<span class="kw">True</span>)
+    loss = F.<span class="fn">cross_entropy</span>(model(x), y)   <span class="cmt"># loss w.r.t. the true label</span>
+    loss.<span class="fn">backward</span>()                        <span class="cmt"># gradient w.r.t. the INPUT, not weights</span>
+    <span class="kw">return</span> (x + eps * x.grad.<span class="fn">sign</span>()).<span class="fn">detach</span>()  <span class="cmt"># one step raising the loss</span>
+
+<span class="kw">def</span> <span class="fn">pgd</span>(model, x, y, eps, alpha, steps):
+    x_adv = x.<span class="fn">clone</span>().<span class="fn">detach</span>()
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(steps):                 <span class="cmt"># iterative FGSM</span>
+        x_adv.<span class="fn">requires_grad_</span>(<span class="kw">True</span>)
+        loss = F.<span class="fn">cross_entropy</span>(model(x_adv), y)
+        grad = torch.autograd.<span class="fn">grad</span>(loss, x_adv)[<span class="str">0</span>]
+        x_adv = x_adv.<span class="fn">detach</span>() + alpha * grad.<span class="fn">sign</span>()
+        x_adv = torch.<span class="fn">min</span>(torch.<span class="fn">max</span>(x_adv, x - eps), x + eps)  <span class="cmt"># project into ε-ball</span>
+        x_adv = x_adv.<span class="fn">clamp</span>(<span class="str">0</span>, <span class="str">1</span>)          <span class="cmt"># keep valid pixel range</span>
+    <span class="kw">return</span> x_adv</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">Pitfall: "Bigger ε means stronger attacks, so set a tiny ε and you're safe." ε is only the <b>definition of the perturbation budget</b>, not a safety valve. At a fixed ε, it's the PGD iteration count and random restarts that determine attack strength; "robustness" measured with a weak attack is easily overturned by a strong one—precisely why many defense papers were later broken.</div>
+    <div class="exercise" style="margin-top:8px">📌 Cross-domain transfer: when evaluating any "resistance to interference," first ask <b>how strong an attack was used to test it</b>. Like load testing—don't only send sequential requests; you need adversarial load, or you get a fake SLA.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Attacking and training are two sides of one coin: gradients can change the model or the input. Evaluating robustness demands the strongest attack.<br>🤔 If an attacker could do "gradient-style probing" on your system (nudging inputs, watching outputs), which interfaces would leak exploitable directions?</div>
+  </div>
+</div>
+
+
+<!-- 3. Adversarial Training & Transferability -->
+<div class="card">
+  <h2>Adversarial Training &amp; Transferability<span class="en">Adversarial Training &amp; Transferability</span></h2>
+  <div class="tags"><span class="tag">robust optimization</span><span class="tag orange">trade-off</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Ordinary training feeds "normal samples"; adversarial training <b>manufactures the worst-case sample on the fly</b> with PGD inside each batch, then learns from it. It's essentially <strong>bringing chaos engineering into the training loop</strong>: don't wait to be attacked in production—continuously inject worst-case perturbations during training, forcing the model to "get it right even in the worst case."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Madry 2017 formalized defense as a <strong>min-max robust optimization</strong> problem:</p>
+    <p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">min<sub>θ</sub> &nbsp; 𝔼<sub>(x,y)</sub> [ &nbsp; max<sub>‖δ‖≤ε</sub> &nbsp; L(θ, x+δ, y) &nbsp; ]</p>
+    <p style="margin-top:8px">How to read it: the <b>inner max<sub>δ</sub></b> = find the worst perturbation within budget ε (approximated by PGD); the <b>outer min<sub>θ</sub></b> = do SGD on those worst-case samples and update the weights. This saddle-point view elegantly unifies attack and defense in one objective.</p>
+    <p style="margin-top:8px">The cost is the <strong>robustness–accuracy trade-off</strong>: after adversarial training, accuracy on <b>clean samples</b> tends to drop. The intuition is that the model is forced to give up "highly predictive but brittle" <b>non-robust features</b> and keep only the stable ones—safer, but also more "dull."</p>
+    <p style="margin-top:8px"><strong>Transferability</strong> is another key phenomenon: adversarial examples crafted on model A often fool a completely different model B. Why? Because different models learned the <b>same non-robust features</b> from the <b>same data</b> (Ilyas 2019). The practical consequence: an attacker needn't access your model—craft samples on their own <b>surrogate model</b> and hit you—<strong>black-box attacks</strong> become possible, like a zero-day that works across implementations.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Adversarial training loop: inner max approximated by PGD, outer min by SGD</span>
+<span class="kw">for</span> x, y <span class="kw">in</span> loader:
+    <span class="cmt"># (1) inner: craft this batch's "worst input" with PGD first</span>
+    x_adv = <span class="fn">pgd</span>(model, x, y, eps=<span class="str">0.03</span>, alpha=<span class="str">0.007</span>, steps=<span class="str">10</span>)
+
+    <span class="cmt"># (2) outer: do normal gradient descent on the worst input</span>
+    loss = F.<span class="fn">cross_entropy</span>(model(x_adv), y)
+    opt.<span class="fn">zero_grad</span>()
+    loss.<span class="fn">backward</span>()
+    opt.<span class="fn">step</span>()
+    <span class="cmt"># corresponds to  min_θ  E[ max_δ  L(θ, x+δ, y) ]</span>
+    <span class="cmt"># note: training cost ≈ normal × (PGD steps+1), since each step runs a full PGD</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">Pitfall: "Do adversarial training and you're absolutely safe." Adversarial training is robust only to <b>the ε and the norm you trained on</b> (e.g. L∞); switch the norm (L2) or use a larger ε and it breaks. It's an <b>empirical defense</b> with no mathematical proof.</div>
+    <div class="exercise" style="margin-top:8px">📌 Cross-domain thinking: transferability means "an attack on one system generalizes to similar systems"—isomorphic to <b>supply-chain vulnerabilities</b> you know: a shared underlying component = a shared attack surface.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Adversarial training = chaos engineering at training time; it buys robustness at the cost of clean accuracy, and only defends the attack type you trained on.<br>🤔 Transferability means "independent development" ≠ "independent failure"—which invisible vulnerabilities does your system share with competitors'?</div>
+  </div>
+</div>
+
+
+<!-- 4. Certified Robustness -->
+<div class="card">
+  <h2>Certified Robustness &amp; Randomized Smoothing<span class="en">Certified Robustness &amp; Randomized Smoothing</span></h2>
+  <div class="tags"><span class="tag">provable guarantee</span><span class="tag purple">consensus vote</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>An empirical defense says "every attack we tried failed"—like "never been hacked" ≠ "secure"; certified robustness wants a <strong>provable guarantee</strong>. Randomized smoothing works remarkably like a <b>quorum read</b>: don't trust a single prediction; add lots of Gaussian noise to the input, sample thousands of times, and take the <b>majority vote</b>. A single adversarial flip can't overturn a strong consensus.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Pain point: the attack-defense arms race never ends—every empirical defense gets broken by a stronger attack months later. <strong>Certified robustness</strong> escapes this loop: it gives a radius R and a <b>mathematical guarantee</b> that no perturbation with L2 norm ≤ R can change the output.</p>
+    <p style="margin-top:8px"><strong>Randomized smoothing (Cohen 2019)</strong> is the most practical method: wrap the base classifier f into a new one, <b>g(x) = the majority-vote class of f after adding noise N(0, σ²I) to x</b>. The theorem gives the certified radius:</p>
+    <p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">R = σ · Φ⁻¹(p<sub>A</sub>)</p>
+    <p style="margin-top:8px">Meaning of the symbols: <b>σ</b> is the noise level added; <b>p<sub>A</sub></b> is the <b>vote share</b> of the top class under noise; <b>Φ⁻¹</b> is the <b>inverse CDF</b> of the standard normal (translating "vote share" into "distance in std deviations"). Intuition: <strong>if you add lots of noise and the model still overwhelmingly votes A, then A's "vote reserve" is deep and a small perturbation can't move it</strong>. The closer p<sub>A</sub> is to 1, the larger the certified radius.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Sprinkle a Gaussian noise cloud on the input → each sample casts a vote → majority + certified radius</span><br><br>
+&nbsp;&nbsp;<span class="box g">·</span> <span class="box g">·</span> <span class="box">x</span> <span class="box g">·</span> <span class="box g">·</span> &nbsp;&nbsp;950/1000 votes in the cloud go to A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ p<sub>A</sub> = 0.95 → R = σ·Φ⁻¹(0.95)<br><br>
+<span class="box r">◀── R ──▶</span> <span style="color:#5a6378">within this L2 radius, no perturbation can flip the majority (provable)</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ larger σ = more robust, but a blurrier model (clean accuracy drops)—a clean trade-off</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> scipy.stats <span class="kw">import</span> norm   <span class="cmt"># norm.ppf is Φ⁻¹</span>
+
+<span class="kw">def</span> <span class="fn">smoothed_predict</span>(model, x, sigma=<span class="str">0.25</span>, n=<span class="str">1000</span>, k=<span class="str">10</span>):
+    votes = torch.<span class="fn">zeros</span>(k)               <span class="cmt"># ballot box for k classes</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n):                    <span class="cmt"># n noisy predictions (= quorum read)</span>
+        noisy = x + sigma * torch.<span class="fn">randn_like</span>(x)
+        votes[model(noisy).<span class="fn">argmax</span>()] += <span class="str">1</span>   <span class="cmt"># cast one vote each time</span>
+    top = votes.<span class="fn">argmax</span>()
+    p_A = (votes[top] / n).<span class="fn">item</span>()       <span class="cmt"># vote share of the top class</span>
+    radius = sigma * norm.<span class="fn">ppf</span>(p_A)        <span class="cmt"># certified radius R = σ·Φ⁻¹(p_A)</span>
+    <span class="kw">return</span> top.<span class="fn">item</span>(), radius           <span class="cmt"># within L2 radius R, guaranteed not to flip</span>
+    <span class="cmt"># a single adversarial pixel flip can't shake a 950:50 strong consensus</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">Pitfall: "Certified robust = absolutely safe." Certification only covers perturbations inside a <b>specific norm ball</b> (usually L2); outside the ball, or semantic-level attacks (shoot from a different angle, reword a sentence), are not guaranteed at all—and the radius you can actually certify is usually tiny, far from "practical safety."</div>
+    <div class="exercise" style="margin-top:8px">📌 Decision-support scenario: distinguishing "no counterexample seen" (empirical) from "provably no counterexample" (certified) is a key piece of <b>epistemic literacy</b>—the same order-of-magnitude confidence gap as "tests passed" vs "formally verified" in your distributed systems.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Empirical defense gives "confidence"; certified defense gives a "guarantee"—at the cost of a smaller scope and a blurrier model.<br>🤔 How much performance would you sacrifice for "provable safety"? Is choosing this σ the same kind of wisdom as the trade-offs in CAP?</div>
+  </div>
+</div>
+
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1312.6199" target="_blank">Szegedy et al. 2013 — Intriguing Properties of Neural Networks</a> — first discovery of adversarial examples; the field's origin</li>
+      <li><a href="https://arxiv.org/abs/1412.6572" target="_blank">Goodfellow et al. 2014 — Explaining and Harnessing Adversarial Examples</a> — the linear hypothesis + FGSM, the classic mechanistic explanation</li>
+      <li><a href="https://arxiv.org/abs/1706.06083" target="_blank">Madry et al. 2017 — Towards Deep Learning Models Resistant to Adversarial Attacks</a> — the foundational work on PGD and min-max robust optimization</li>
+      <li><a href="https://arxiv.org/abs/1902.02918" target="_blank">Cohen et al. 2019 — Certified Robustness via Randomized Smoothing</a> — tight analysis of randomized smoothing, scalable to ImageNet</li>
+      <li><a href="https://arxiv.org/abs/1905.02175" target="_blank">Ilyas et al. 2019 — Adversarial Examples Are Not Bugs, They Are Features</a> — the non-robust-features view that explains the root of transferability</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Adversarial examples vs SQL injection / hash collisions—all "carefully crafted legal inputs triggering anomalous behavior." What defense philosophy do they share?</summary><div>All three are structurally isomorphic: <b>the attacker exploits the system's implicit assumptions about input</b>—SQL injection assumes input is data not code, hash collisions assume "finding a collision is computationally infeasible," adversarial examples assume "human-equivalent ⇒ model-equivalent." Two shared defense philosophies: (a) <b>Distrust the input boundary</b>—SQL uses parameterized queries to physically separate "data" from "code"; adversarial defense must decouple "model decision" from "input surface" (exactly what randomized smoothing does: look at the neighborhood's consensus, not a single point). (b) <b>Upgrade from "empirical patch" to "provable guarantee"</b>—SQL injection went from WAF rules (empirical, bypassable) → parameterized queries (structural fix); adversarial defense goes from adversarial training (empirical) → certified robustness (provable). Deep lesson: as long as a gap exists between the system's "input-semantics assumption" and the attacker's operating space, there's an attack surface. Your distributed-systems instinct—"always validate boundaries, always assume input is malicious"—transfers directly to AI security.</div></details>
+
+    <details><summary>2. Why do "empirical defenses" keep getting broken by stronger attacks (arms race), while certified robustness escapes the loop? Is this the same as "unbroken" vs "provably secure" in cryptography?</summary><div>It's the same kind of epistemic difference. The empirical claim is "<b>all attacks we tried failed</b>"—a statement of <b>existence not yet falsified</b>, forever open to being overturned by the next cleverer attack; the field repeatedly saw "new defense released → broken by an adaptive attack three months later," because defenders often inadvertently <b>mask gradients</b>, defeating weak attacks but not strong ones. The certified claim is "<b>within radius R, no perturbation can flip the output</b>"—a <b>universal guarantee over the entire perturbation space</b>, independent of "which attacks were tried." This is fully isomorphic to cryptography: an algorithm "unbroken to date" (like some heuristics) and one "reducible to the discrete-log problem" (provably secure) are two orders of confidence apart. But be honest: certified robustness costs a small scope (usually only a small L2 ball) and a duller model—like how the one-time pad's "information-theoretic security" is theoretically perfect but engineering-clumsy. Security is always a trade-off between "guarantee strength" and "practicality"; AI and cryptography share this wisdom.</div></details>
+
+    <details><summary>3. Ilyas says "adversarial examples aren't bugs, but real (yet brittle) features the model learned." What does this mean for "what a model actually learns"? Why doesn't human vision have this problem?</summary><div>This is the most subversive view here. The traditional intuition is that adversarial examples are "model defects"; Ilyas 2019 argues experimentally that those human-meaningless <b>non-robust features</b> are actually <b>real, highly-predictive</b> statistical patterns in the data distribution—the model learns them not by mistake, but as a rational choice under the "maximize accuracy" objective. Deep implications: (a) The model and humans are <b>optimizing different things</b>—human vision, shaped by eons of evolution, encodes priors for "robustness to lighting, angle, small perturbation"; the model is only asked to "classify correctly on the training set," so it copies whatever works, including brittle shortcuts. (b) A microcosm of "alignment": a model's internal representations aren't naturally aligned with human semantics—<b>high accuracy ≠ using reasons a human would use</b>. (c) It explains the robustness–accuracy trade-off: forcing the model to use only robust features means giving up some real-but-brittle predictive power. Humans "don't have this problem" perhaps only because our "attacker" (evolutionary pressure) already filtered out the non-robust features—in other words, we're models trained adversarially for eons.</div></details>
+
+    <details><summary>4. The robustness–accuracy trade-off: adversarial training lowers clean accuracy. Why must "safer" cost "dumber"? Is this an essential contradiction or a limitation of current methods?</summary><div>Both readings coexist; the field has no verdict. The <b>"essential contradiction" camp</b> (Tsipras et al.'s observation): on a data distribution containing non-robust features, the robust classifier and the accuracy-optimal classifier <b>may simply be two different functions</b>—the former abandons brittle-but-useful signal, so its accuracy ceiling is naturally lower. This isn't undertuning; it's goal conflict. The <b>"current-limitation" camp</b>: the severity of the trade-off depends on data volume, model capacity, and method—bigger models, more data, better training substantially ease it; in principle "robust and accurate" may be attainable, just more expensive. Engineering implication: the question isn't whether to pay this trade-off but <b>how much, and where to stop</b>—just like consistency vs availability, or latency vs throughput, it's a design dimension to be priced explicitly, not a free lunch. For your pursuit of "AI super-individual," the real lesson: doubt any scheme claiming "most secure AND most powerful"—first ask on which axis it's secretly paying.</div></details>
+
+    <details><summary>5. The certified radius depends on noise level σ: larger σ is more robust but blurrier. Is this the same class of problem as CAP and quorum-size trade-offs in distributed consistency?</summary><div>Structurally very similar—both are "<b>turn one knob, and the two ends trade off</b>" continuous trade-offs. In randomized smoothing, σ↑ → certified radius R↑ (more robust), but the decision boundary gets smeared → clean accuracy↓ (duller); this echoes the <b>read/write replica count R+W relative to N</b> in quorums: R+W&gt;N guarantees strong consistency (tolerates more node failures) but each operation waits on more replicas → latency↑, availability↓. Their common mathematical skeleton: <b>trade redundant sampling + majority rule for tolerance to "local perturbation/failure"</b>—the certified radius R is "how large an adversarial perturbation you can tolerate," just as a quorum tolerates how many unreachable nodes. The difference is the nature of the cost: distributed pays in latency and availability, smoothing pays in model accuracy and inference cost (running thousands of samples). The shared engineering wisdom: <b>there's no "have it all" point</b>; you set the knob by "how scary the worst case is"—crank σ / quorum up for safety-critical, down for performance-sensitive. A neat lesson in transferring distributed fault-tolerance intuition to AI robustness.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 50 · 2026-07-07</footer>
+
+</div>
+
+</body>
+</html>
