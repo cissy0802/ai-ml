@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Continual Learning & Catastrophic Forgetting — Day 52</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Continual Learning &amp; Catastrophic Forgetting</h1>
+  <div class="meta">Day 52 · 2026-07-09</div>
+  <div class="audience">For: engineers with coding experience, non-AI background</div>
+</header>
+
+
+<!-- 1. Catastrophic Forgetting -->
+<div class="card">
+  <h2>Catastrophic Forgetting &amp; Stability-Plasticity<span class="en">Catastrophic Forgetting</span></h2>
+  <div class="tags"><span class="tag">Mechanism</span><span class="tag purple">Neural Nets</span><span class="tag orange">Core Tension</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A neural net's weights are a piece of <b>globally shared mutable state</b>. Learning a new task B means an <b>in-place update</b>—directly overwriting that state. No version isolation, no transactions: the weights task A relies on get silently rewritten by B's gradients, and A is <b>catastrophically forgotten</b>. This isn't "memory is full"—it's a <b>write-write conflict with no isolation mechanism</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p><b>Catastrophic forgetting</b> means: when a network learns several tasks in sequence, learning the later ones sharply erases what it learned earlier. McCloskey &amp; Cohen documented it back in 1989. The root cause: task A's knowledge is distributed across <b>one specific setting of all the weights</b>, while SGD on task B optimizes only B's loss—it neither knows nor cares which weights are A's "load-bearing walls"; it just pushes wherever lowers B's loss.</p>
+    <p style="margin-top:8px">This gives the field's central tension—the <b>stability-plasticity dilemma</b>: weights too <b>stable</b> (can't change) → can't learn new tasks (no plasticity); weights too <b>plastic</b> (freely changed) → learning the new forgets the old. It's isomorphic to system trade-offs you know: a read-only replica is forever consistent but can't be written; a write-anywhere cache has high throughput but no consistency. Continual learning is about finding a compromise on this spectrum:</p>
+    <div class="diagram">
+      <b>Stability ←──────────────────────→ Plasticity</b><br><br>
+      <span class="box r">freeze all</span><span class="arrow">·</span>
+      <span class="box o">EWC reg.</span><span class="arrow">·</span>
+      <span class="box g">replay</span><span class="arrow">·</span>
+      <span class="box p">isolation</span><span class="arrow">·</span>
+      <span class="box">free fine-tune</span><br>
+      <span style="color:#5a6378">remembers, won't learn &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; learns fast, forgets all</span>
+    </div>
+    <p style="margin-top:8px">The next 3 concepts are three mainstream remedies on this spectrum: <b>constrain weights (regularization), rehearse old data (replay), give each task dedicated parameters (isolation)</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+    <pre><span class="cmt"># "See" catastrophic forgetting: learn A, then B, then re-test A</span>
+<span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+net = nn.<span class="fn">Sequential</span>(nn.<span class="fn">Linear</span>(20, 64), nn.<span class="fn">ReLU</span>(), nn.<span class="fn">Linear</span>(64, 2))
+opt = torch.optim.<span class="fn">Adam</span>(net.<span class="fn">parameters</span>(), lr=1e-3)
+loss_fn = nn.<span class="fn">CrossEntropyLoss</span>()
+
+<span class="kw">def</span> <span class="fn">make_task</span>(seed):                       <span class="cmt"># two different binary tasks</span>
+    g = torch.<span class="fn">Generator</span>().<span class="fn">manual_seed</span>(seed)
+    X = torch.<span class="fn">randn</span>(400, 20, generator=g)
+    y = (X @ torch.<span class="fn">randn</span>(20, generator=g) &gt; 0).<span class="fn">long</span>()
+    <span class="kw">return</span> X, y
+
+<span class="kw">def</span> <span class="fn">train</span>(X, y):
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(200):
+        opt.<span class="fn">zero_grad</span>(); loss_fn(net(X), y).<span class="fn">backward</span>(); opt.<span class="fn">step</span>()
+<span class="kw">def</span> <span class="fn">acc</span>(X, y): <span class="kw">return</span> (net(X).<span class="fn">argmax</span>(1) == y).<span class="fn">float</span>().<span class="fn">mean</span>().<span class="fn">item</span>()
+
+Xa, ya = <span class="fn">make_task</span>(1); Xb, yb = <span class="fn">make_task</span>(2)
+<span class="fn">train</span>(Xa, ya); print(<span class="str">"after A, acc on A:"</span>, <span class="fn">acc</span>(Xa, ya))   <span class="cmt"># ~0.95</span>
+<span class="fn">train</span>(Xb, yb); print(<span class="str">"after B, acc on A:"</span>, <span class="fn">acc</span>(Xa, ya))   <span class="cmt"># drops to ~0.55 → forgot</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">Pitfall: "Forgetting is just insufficient capacity—scale up the params." Wrong. Catastrophic forgetting happens in massively <b>over-parameterized</b> nets too: there's enough capacity to hold A and B at once, but SGD has <b>no reason</b> to seek the "both-satisfying" solution—it just follows the current task's gradient. The problem is in the <b>objective</b>, not the capacity.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: you keep fine-tuning an open model on business data, and after the second batch it regresses on the first batch's task—that's catastrophic forgetting. Understanding it tells you whether to "mix the data" or "add a constraint," rather than blindly enlarging the model or tweaking lr.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Catastrophic forgetting is fundamentally "shared mutable state + unisolated in-place writes"; stability-plasticity is the core trade-off it forces.<br>🤔 Biological brains learn new things while retaining old memories, almost never "catastrophically forgetting." What isolation mechanism pulls that off? (Hint: hippocampus vs. neocortex, a dual system.)</div>
+  </div>
+</div>
+
+
+<!-- 2. EWC -->
+<div class="card" style="border-left-color:#ffb450">
+  <h2>Elastic Weight Consolidation (EWC)<span class="en">Elastic Weight Consolidation</span></h2>
+  <div class="tags"><span class="tag orange">Regularization</span><span class="tag">Fisher Info</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>EWC puts a <b>soft write-lock</b> on each weight, with lock strength set by "how important this weight is to the old task." Like giving <b>hot rows / load-bearing indexes</b> in a database high-priority protection: not "no writes allowed," but "want to change these critical weights? Sure—but it'll cost you dearly." Changing irrelevant weights is nearly free; changing load-bearing ones incurs a steep penalty—learning gets <b>elastically</b> pulled back.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Replay needs old data; isolation needs extra parameters. <b>EWC (Kirkpatrick et al. 2017)</b> aims for <b>zero old data, zero new parameters</b>—fighting forgetting purely by constraining weights. The key question: how do you know which weights are task A's "load-bearing walls"? The answer is <b>Fisher information</b>—it measures "if I nudge weight i slightly, how much does task A's output change." Big change = load-bearing = lock it tight; near-zero change = irrelevant = let it go.</p>
+    <p style="margin-top:8px">When learning task B, EWC adds a <b>quadratic penalty</b> on top of B's loss:</p>
+    <pre>L(θ) = L_B(θ) + Σ_i (λ/2) · F_i · (θ_i − θ*_A,i)²</pre>
+    <p style="margin-top:4px">Symbol by symbol: <b>L_B(θ)</b> is the new task B's loss (to be minimized); <b>θ*_A,i</b> is weight i's value after learning A (the "old-memory anchor"); <b>F_i</b> is weight i's Fisher information (importance); <b>λ</b> tunes "how much you care about not forgetting A." Intuition: hang a <b>spring</b> on each weight pulling it toward "its value under task A," θ*_A,i; the spring's stiffness is F_i·λ—load-bearing weights get very stiff springs (barely movable), irrelevant weights get soft springs (free for B to use). So B can only optimize in "directions that don't disturb A." This is an explicit knob on the stability-plasticity spectrum: bigger λ = more stable, smaller = more plastic.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+    <pre><span class="cmt"># EWC core: after A, estimate Fisher; when learning B, add quadratic penalty</span>
+<span class="kw">def</span> <span class="fn">estimate_fisher</span>(net, X, y, loss_fn):
+    fisher = {n: torch.<span class="fn">zeros_like</span>(p) <span class="kw">for</span> n, p <span class="kw">in</span> net.<span class="fn">named_parameters</span>()}
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(X)):
+        net.<span class="fn">zero_grad</span>()
+        loss_fn(net(X[i:i+1]), y[i:i+1]).<span class="fn">backward</span>()
+        <span class="kw">for</span> n, p <span class="kw">in</span> net.<span class="fn">named_parameters</span>():
+            fisher[n] += p.grad.<span class="fn">pow</span>(2) / <span class="fn">len</span>(X)   <span class="cmt"># squared grad ≈ Fisher diagonal</span>
+    <span class="kw">return</span> fisher
+
+<span class="cmt"># after A: star = weight snapshot (θ*_A), fisher = importance</span>
+star = {n: p.<span class="fn">clone</span>().<span class="fn">detach</span>() <span class="kw">for</span> n, p <span class="kw">in</span> net.<span class="fn">named_parameters</span>()}
+fisher = <span class="fn">estimate_fisher</span>(net, Xa, ya, loss_fn)
+
+<span class="kw">def</span> <span class="fn">ewc_penalty</span>(net, lam=1000.):     <span class="cmt"># add to total loss when learning B</span>
+    <span class="kw">return</span> lam * <span class="fn">sum</span>((fisher[n] * (p - star[n]).<span class="fn">pow</span>(2)).<span class="fn">sum</span>()
+                     <span class="kw">for</span> n, p <span class="kw">in</span> net.<span class="fn">named_parameters</span>())
+<span class="cmt"># total = loss_fn(net(Xb), yb) + ewc_penalty(net)  → A's accuracy preserved</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">Pitfall: "EWC is the perfect, once-and-for-all fix." No. Its weakness is that <b>penalties accumulate and Fisher is an approximation</b>: as tasks pile up, a stack of quadratic constraints locks the weights ever tighter, plasticity dries up, and by task 10 it can barely move; also Fisher takes only the diagonal, ignoring inter-weight correlations, so the estimate is biased. <b>Honest conclusion: EWC pays off when tasks are few and old data can't be stored; over long task sequences, replay is usually more robust.</b></div>
+    <div class="exercise" style="margin-top:8px">📌 Decision-support scenario: think of λ as a "conservatism knob." When injecting new-domain knowledge while fearing loss of general ability, the EWC mindset (constrain the critical params from wandering) is more controllable than "blind full-parameter fine-tuning"—it's also the intuition behind "only touch some layers / add regularization" in a lot of LLM continued pre-training.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 EWC = hang a spring on each weight by "importance (Fisher)," pulling it back to the old task's value—a quadratic penalty buying zero old data, zero new params.<br>🤔 Fisher information approximates weight importance via "squared gradient." How does that resemble your intuition for "which DB table is hot, the one that crashes the whole site if touched"?</div>
+  </div>
+</div>
+
+
+<!-- 3. Replay / Generative Replay -->
+<div class="card" style="border-left-color:#7ed6a0">
+  <h2>Experience &amp; Generative Replay<span class="en">Experience / Generative Replay</span></h2>
+  <div class="tags"><span class="tag purple">Replay</span><span class="tag">Generative Model</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Replay is like a database's <b>WAL (write-ahead log) replay</b>: to keep old and new consistent, you re-run old transactions alongside. <b>Experience replay</b> stores a small set of old samples and feeds old+new mixed. <b>Generative replay</b> is cleverer—instead of storing raw old data, it trains a <b>generator</b> to synthesize "fake old data," effectively replacing a full backup with a <b>compressed snapshot generator</b>, balancing privacy and storage.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Forgetting's root cause is "not seeing A's data while learning B." The most direct fix: <b>rehearse A while learning B</b>. Experience replay keeps a small <b>memory buffer</b> of A's samples and mixes a few old ones into each batch, so the gradient lowers both old and new losses at once and the weights don't drift. Crude but extremely effective—it's nearly the strongest baseline in continual learning.</p>
+    <p style="margin-top:8px">But storing old data has two hard constraints: <b>storage blowup</b> (tasks grow without bound) and <b>privacy/compliance</b> (medical or user data can't be retained). <b>Generative replay (Shin et al. 2017, Deep Generative Replay)</b> offers an elegant fix: train a pair of cooperating models—a <b>generator</b> that learns to produce "data that looks like old tasks," and a <b>solver</b> that does the real classify/predict work. When learning a new task, the generator first emits a batch of synthetic old samples (labeled by the old solver), then trains on a mix with the new data. The inspiration is the hippocampus "replaying" experiences during sleep to consolidate memory. Flow:</p>
+    <div class="diagram">
+      <span class="box p">Generator G</span><span class="arrow">──synth. old──▶</span><span class="box g">mixed batch</span><span class="arrow">◀──new data──</span><span class="box o">new data</span><br>
+      <span style="margin-left:180px">│</span><br>
+      <span style="margin-left:150px">▼</span><br>
+      <span class="box" style="margin-left:120px">train Solver</span><span class="arrow">──▶</span><span class="box p">update G (learns new dist.)</span><br>
+      <span style="color:#5a6378;margin-left:10px">↑ next task, G can generate both "old+new," rolling forward—no raw data stored</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+    <pre><span class="cmt"># Experience replay: the minimal, strongest baseline. Keep a buffer, mix in</span>
+<span class="kw">import</span> random
+buffer = []                                  <span class="cmt"># stores (x, y) old samples</span>
+
+<span class="kw">def</span> <span class="fn">reservoir_add</span>(buf, sample, cap=200):    <span class="cmt"># reservoir sampling: uniform retention</span>
+    <span class="kw">if</span> <span class="fn">len</span>(buf) &lt; cap: buf.<span class="fn">append</span>(sample)
+    <span class="kw">else</span>:
+        j = random.<span class="fn">randint</span>(0, len(buf))      <span class="cmt"># random replace, stay representative</span>
+        <span class="kw">if</span> j &lt; cap: buf[j] = sample
+
+<span class="kw">def</span> <span class="fn">train_with_replay</span>(net, opt, loss_fn, Xb, yb, k=32):
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(200):
+        xb, yb_ = Xb, yb                     <span class="cmt"># current task batch</span>
+        <span class="kw">if</span> buffer:                           <span class="cmt"># mix in old samples, joint loss</span>
+            old = random.<span class="fn">sample</span>(buffer, <span class="fn">min</span>(k, <span class="fn">len</span>(buffer)))
+            ox = torch.<span class="fn">stack</span>([o[0] <span class="kw">for</span> o <span class="kw">in</span> old])
+            oy = torch.<span class="fn">tensor</span>([o[1] <span class="kw">for</span> o <span class="kw">in</span> old])
+            xb = torch.<span class="fn">cat</span>([xb, ox]); yb_ = torch.<span class="fn">cat</span>([yb_, oy])
+        opt.<span class="fn">zero_grad</span>(); loss_fn(net(xb), yb_).<span class="fn">backward</span>(); opt.<span class="fn">step</span>()
+<span class="cmt"># while learning A, reservoir_add into buffer; learning B auto-rehearses A → forgetting eased</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">Pitfall: "Generative replay perfectly reproduces old data, so it equals full replay." No. The generator is itself continually learning and <b>degrades generation-over-generation (quality drift)</b>: its synthetic "old samples" look less and less real, errors <b>compound</b> down the task chain, and over long sequences old tasks collapse anyway. Generative replay's effectiveness is <b>capped by the generator's fidelity</b>—the more complex the old task (high-res images, long text), the less you can count on it.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: to make a local model keep absorbing new knowledge without forgetting old, <b>experience replay is actually the least fussy</b>—just keep a representative small sample of old data and mix it into the next training round; simpler and more robust than fancy regularization. It also explains why LLM continued training industry-wide "mixes old and new data in proportion" rather than feeding only new data.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Replay = rehearse the old while learning the new; generative replay swaps storage for a "generator that synthesizes old data," capped by fidelity. Mixing old data is continual learning's strongest and plainest baseline.<br>🤔 Generative replay fights forgetting by "synthesizing fake old memories." Human memory is itself reconstructive, not playback—every recall rewrites. Is this "imprecise replay" a bug or a feature?</div>
+  </div>
+</div>
+
+
+<!-- 4. Parameter Isolation -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Parameter Isolation<span class="en">Parameter Isolation</span></h2>
+  <div class="tags"><span class="tag purple">Isolation</span><span class="tag">PackNet / Progressive</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Parameter isolation is a <b>partitioning / sharding</b> idea: since shared mutable state causes write conflicts, give each task <b>its own dedicated block of parameters</b> and set it <b>read-only</b> once learned. Other tasks use other shards—physically no write conflict, and old tasks are <b>structurally protected</b>—just like microservices deployed independently, never overwriting each other.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Regularization and replay are "soft" protections—old knowledge can still be slowly eroded. Parameter isolation gives a "hard" guarantee: <b>any weight allocated to an old task is frozen and never updated again</b>, killing forgetting at the root. Two representative approaches:</p>
+    <p style="margin-top:8px"><b>① PackNet (Mallya &amp; Lazebnik 2018)—"pack" multiple tasks into fixed capacity.</b> Large nets are highly redundant; many weights can be pruned with almost no accuracy loss. Recipe: learn task A → <b>prune</b> away a batch of unimportant weights → <b>freeze</b> the remaining "A weights" → use the <b>just-freed spare weights</b> to learn task B → prune, freeze again... Like carving new partitions on a fixed disk for new tasks until space runs out. Zero storage growth, but the <b>task count is capped by a hard capacity limit</b>.</p>
+    <p style="margin-top:8px"><b>② Progressive Networks (Rusu et al. 2016)—add a new column per task.</b> Each new task adds a fresh <b>column</b> of parameters, with all old columns frozen; the new column reads features learned by old columns via <b>lateral connections</b> (enabling forward transfer), but can't modify the old ones. Truly zero forgetting and it reuses old knowledge—at the cost of <b>parameters growing linearly with the number of tasks</b>, like spinning up a new replica per task that may only read the old replicas.</p>
+    <div class="diagram">
+      <b>PackNet (fixed capacity · prune to free space)</b><br>
+      <span class="box r">A weights·frozen</span><span class="box o">B weights·frozen</span><span class="box g">C weights·spare</span><br><br>
+      <b>Progressive (column per task · read old laterally)</b><br>
+      <span class="box r">col A·frozen</span><span class="arrow">─lateral→</span><span class="box o">col B·frozen</span><span class="arrow">─lateral→</span><span class="box p">col C·training</span><br>
+      <span style="color:#5a6378">old columns read-only, features borrowable; new column's gradient can't reach old ones</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+    <pre><span class="cmt"># PackNet-style: after A, prune+freeze, hand "off" weights to B</span>
+<span class="kw">import</span> torch
+
+<span class="kw">def</span> <span class="fn">prune_and_freeze</span>(weight, keep=0.5):
+    <span class="cmt"># keep top-`keep` by magnitude as task A's "locked partition"</span>
+    flat = weight.<span class="fn">abs</span>().<span class="fn">flatten</span>()
+    thresh = flat.<span class="fn">kthvalue</span>(<span class="fn">int</span>(<span class="fn">len</span>(flat) * (1 - keep))).values
+    taskA_mask = weight.<span class="fn">abs</span>() &gt;= thresh    <span class="cmt"># True = belongs to A, frozen</span>
+    weight.data *= taskA_mask                     <span class="cmt"># prune the unimportant (zero, leave for B)</span>
+    <span class="kw">return</span> taskA_mask
+
+<span class="kw">def</span> <span class="fn">masked_grad_hook</span>(mask):
+    <span class="cmt"># zero the "A partition" gradient on backward → A weights never updated by B</span>
+    <span class="kw">def</span> <span class="fn">hook</span>(grad): <span class="kw">return</span> grad * (~mask)
+    <span class="kw">return</span> hook
+
+W = net[0].weight
+maskA = <span class="fn">prune_and_freeze</span>(W, keep=0.5)   <span class="cmt"># call after learning A</span>
+W.<span class="fn">register_hook</span>(<span class="fn">masked_grad_hook</span>(maskA))  <span class="cmt"># from now, learning B hard-protects A's partition</span>
+<span class="cmt"># training B: only ~50% spare weights update, A's accuracy stays exactly the same</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">Pitfall: "Parameter isolation is zero-forgetting, so it's the best." Its zero-forgetting has costs: (1) <b>you must know which task is current</b> (pick the right partition/column at inference), so it fails when task boundaries are fuzzy; (2) PackNet has a hard capacity limit, Progressive Nets grow linearly; (3) <b>transfer is one-way only</b> (new borrows old)—later data can't feed back to improve an already-learned old task. <b>It fits scenarios with clear, limited tasks where old tasks must never degrade at all.</b></div>
+    <div class="exercise" style="margin-top:8px">📌 Personal-project scenario: train a separate LoRA adapter per client/domain, freeze the backbone, each adapter is an independent "partition"—exactly parameter isolation's practical variant in the LLM era: zero mutual interference, load on demand, mount whichever adapter the task needs.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Parameter isolation gives old tasks a hard guarantee via "partition + freeze read-only": PackNet prunes to free space within fixed capacity, Progressive Nets add a column per task. Zero forgetting, at the cost of needing task identity and limited capacity/params.<br>🤔 The three remedies (reg / replay / isolation) map neatly onto three concurrency-control ideas you know: locking, log replay, data sharding. Which one is most like "optimistic locking," which most like "pessimistic locking"?</div>
+  </div>
+</div>
+
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#00d4ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1612.00796" target="_blank">Kirkpatrick et al. 2017 — Overcoming Catastrophic Forgetting (EWC)</a> — the founding regularization work; Fisher info + quadratic constraint, a must-read</li>
+      <li><a href="https://arxiv.org/abs/1705.08690" target="_blank">Shin et al. 2017 — Deep Generative Replay</a> — generator+solver dual model, a hippocampus-inspired replay framework</li>
+      <li><a href="https://arxiv.org/abs/1711.05769" target="_blank">Mallya &amp; Lazebnik 2018 — PackNet</a> — prune+freeze to "pack" multiple tasks into a fixed-capacity net</li>
+      <li><a href="https://arxiv.org/abs/1606.04671" target="_blank">Rusu et al. 2016 — Progressive Neural Networks</a> — a column per task, lateral connections transfer old features</li>
+      <li><a href="https://arxiv.org/abs/1706.08840" target="_blank">Lopez-Paz &amp; Ranzato 2017 — Gradient Episodic Memory (GEM)</a> — constrain gradient direction with old samples, balancing anti-forgetting and forward transfer</li>
+      <li><a href="https://arxiv.org/abs/1904.07734" target="_blank">van de Ven &amp; Tolias 2019 — Three Scenarios for Continual Learning</a> — clarifies task/domain/class-incremental settings; a framework for fair comparison</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Regularization (EWC), replay, and isolation all "constrain optimization to not destroy the old solution." If they're one thing done three ways, what is that one thing?</summary><div>The shared core is: <b>in parameter space, protect the "good-solution region" of old tasks, so new-task optimization proceeds only within a subspace that doesn't break the old solution</b>. The three schools just <b>characterize and protect that subspace differently</b>: EWC uses a Fisher quadratic penalty to <b>approximate</b> the old solution as an ellipsoid and penalize leaving it; replay/GEM <b>sample</b> the old constraint from old data (real or synthetic)—GEM is most direct, requiring the new gradient's inner product with old-sample gradients be non-negative ("don't move in directions that raise old loss"); isolation is most <b>brutal</b>, freezing the old solution's dimensions into constants that never enter optimization. Hence their different spots on the stability-plasticity spectrum: isolation is most stable (hard constraint, zero forgetting, limited plasticity), EWC in the middle (soft constraint, plastic but accumulates rigidity), replay most flexible (data-driven, strong but needs storage/generation). With this unifying view, choosing a method isn't memorizing 3 tricks but asking: "in my scenario, at what cost should I characterize the old solution's protected subspace?"—the same thinking as choosing a consistency protocol in distributed systems.</div></details>
+
+    <details><summary>2. Some argue "big model + mixed-data full retraining" makes continual learning a pseudo-problem—you retrain from scratch each time anyway. Does that hold?</summary><div>Partly, with hard boundaries. <b>Where it holds</b>: when you can get all historical data and the compute budget allows, "periodic full retraining" (with old+new mixed) is indeed industry's most robust approach, sidestepping forgetting—which is why many production models skip fancy CL algorithms and just retrain once enough data accrues. Experience replay's success essentially validates the "mix the data" path. <b>Where it breaks</b>: (1) <b>data can't be kept</b>—privacy/compliance/expired licenses make old data physically vanish, leaving only "no-old-data" methods like EWC or generative replay; (2) <b>compute won't allow it</b>—edge devices and robots must learn <b>online</b> in deployment, with no chance to "re-melt and retrain"; (3) <b>real-time</b>—need to adapt to new distributions in minutes (recommendation, risk control), can't wait for a retraining cycle; (4) <b>cost</b>—retraining a frontier model for a bit of incremental knowledge is uneconomical. So continual learning isn't a pseudo-problem but is <b>pushed into harsher-constraint scenarios</b>: data can't be kept, compute is limited, adaptation must be online. For the super-individual, local small-model continual fine-tuning falls exactly within these boundaries.</div></details>
+
+    <details><summary>3. Catastrophic forgetting barely happens in the human brain. Which biological mechanisms map onto this issue's three schools, and what's the lesson for AI?</summary><div>Strikingly one-to-one. (1) <b>Complementary Learning Systems (hippocampus + neocortex) ↔ replay</b>: the hippocampus rapidly encodes new experiences and, during sleep, repeatedly "replays" them to the neocortex for slow consolidation—the direct inspiration for generative replay (Shin et al. explicitly cite the hippocampus). (2) <b>Synaptic consolidation ↔ EWC</b>: important synapses become "harder to overwrite" via molecular mechanisms—EWC's Fisher penalty is its mathematical incarnation, and "consolidation" is literally in the paper title. (3) <b>Functional partitioning / neurogenesis ↔ parameter isolation</b>: different brain regions handle different functions—akin to allocating new capacity per task. The lesson: the brain relies not on a <b>single</b> mechanism but on <b>all three in concert</b>; most AI methods use just one, while the strongest CL systems tend to be <b>hybrid</b> (replay+regularization). A deeper point: brain memory is <b>lossy reconstruction</b> (recall rewrites), and it <b>actively</b> forgets the unimportant—"smart forgetting" may be a feature, not a flaw, a dimension most CL methods haven't taken seriously.</div></details>
+
+    <details><summary>4. If "BigCat working long-term with AI" is a continual-learning system, which of the three schools should you (the human) play?</summary><div>An interesting mismatch: <b>today's AI tools have almost no real continual learning</b>—each conversation is stateless, weights don't update. "Memory" is outsourced to the <b>outer system</b> (the context/memory architecture from Day 8), not the model's internals. This means <b>you</b> play the "replay" school—re-feeding "old context" to a stateless model via shared memory / an operating manual is human-powered experience replay; the vendor's "periodic retraining of new versions" is full retraining. Lessons: (1) don't expect today's model to "remember" you—crucial memory should be <b>structured and persisted outside</b> (isolation mindset: one dedicated memory partition per project); (2) "rehearse" periodically—important preferences/conclusions must be re-injected, or a new session equals forgetting; (3) beware <b>your own</b> forgetting: over-outsourcing lets your brain's "load-bearing weights" (core judgment) get quietly eroded by daily convenience unless you add "EWC-style protection" (deliberate practice, don't outsource core thinking).</div></details>
+
+    <details><summary>5. Can the "stability-plasticity dilemma" be fully solved, or is it an essential trade-off like CAP?</summary><div>Leaning toward: <b>an essential trade-off, but its Pareto frontier can be raised</b>—like CAP can't be fully satisfied at once, yet engineering can make both C and A great for a given partition tolerance. Under <b>fixed capacity and fixed information</b>, learning the new must rewrite some representation, and rewriting damages old tasks—an information-theoretic tension that can't vanish. But many ways raise the frontier: (1) <b>add capacity</b> (isolation)—trade params for having both, at the cost of scale; (2) <b>add information</b> (replay)—keep old data to turn "sequential" back into "joint" learning, at the cost of storage; (3) <b>better representations</b>—if different tasks' representations are naturally <b>orthogonal/sparse</b> (don't share weights), conflict shrinks, the hope of modular/sparse architectures; (4) <b>forward transfer</b>—ideally learning the new even <b>improves</b> the old (GEM's aim), no longer zero-sum. Pragmatic answer: the principle can't be removed, but via capacity, information, representation, and transfer, real systems can push it to "acceptable" or even "near win-win"—the same mature stance you take toward CAP: don't eliminate the trade-off, tune it to the optimum for the concrete scenario.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 52 · 2026-07-09</footer>
+
+</div>
+
+</body>
+</html>

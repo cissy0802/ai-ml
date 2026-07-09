@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：持续学习与灾难性遗忘 — Day 52</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：持续学习与灾难性遗忘</h1>
+  <div class="meta">Day 52 · 2026-07-09</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+
+<!-- 1. Catastrophic Forgetting -->
+<div class="card">
+  <h2>灾难性遗忘 & 稳定性-可塑性权衡<span class="en">Catastrophic Forgetting</span></h2>
+  <div class="tags"><span class="tag">机制</span><span class="tag purple">神经网络</span><span class="tag orange">核心矛盾</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>神经网络的权重是一份<b>全局共享的可变状态（shared mutable state）</b>。学新任务 B 时做的是<b>原地更新（in-place update）</b>——直接覆写这份状态。没有版本隔离、没有事务，任务 A 依赖的那些权重被 B 的梯度悄悄改写，A 就<b>灾难性地全忘了</b>。这不是"记忆容量满了"，而是<b>并发写冲突（write-write conflict）没有隔离机制</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p><b>灾难性遗忘（catastrophic forgetting）</b>指：网络顺序学多个任务时，学后面的会急剧抹掉前面学到的能力。McCloskey &amp; Cohen 1989 年就发现了它。根因在于：任务 A 的知识分布式地编码在<b>所有权重的一组特定取值</b>里，而 SGD 学任务 B 时只优化 B 的损失——它不知道也不在乎哪些权重是 A 的"承重墙"，只要能降低 B 的 loss 就往哪个方向推。</p>
+    <p style="margin-top:8px">这引出持续学习的核心矛盾——<b>稳定性-可塑性困境（stability-plasticity dilemma）</b>：权重太<b>稳定</b>（不许改）→ 学不进新任务（没有可塑性）；权重太<b>可塑</b>（随便改）→ 一学新的就忘旧的。这跟你熟悉的系统权衡同构：一个只读副本永远一致但没法写入；一个人人可写的缓存吞吐高但一致性全无。持续学习就是要在这条谱系上找折中：</p>
+    <div class="diagram">
+      <b>稳定性 ←──────────────────────→ 可塑性</b><br><br>
+      <span class="box r">冻结全部权重</span><span class="arrow">·</span>
+      <span class="box o">EWC 正则</span><span class="arrow">·</span>
+      <span class="box g">经验重放</span><span class="arrow">·</span>
+      <span class="box p">参数隔离</span><span class="arrow">·</span>
+      <span class="box">自由微调</span><br>
+      <span style="color:#5a6378">记得牢但学不动 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 学得快但全忘光</span>
+    </div>
+    <p style="margin-top:8px">下面 3 个概念，就是这条谱系上三种主流对策：<b>约束权重（正则）、复习旧数据（重放）、给每任务独立参数（隔离）</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+    <pre><span class="cmt"># 用最小实验"看见"灾难性遗忘：先学任务A，再学任务B，回头测A</span>
+<span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+net = nn.<span class="fn">Sequential</span>(nn.<span class="fn">Linear</span>(20, 64), nn.<span class="fn">ReLU</span>(), nn.<span class="fn">Linear</span>(64, 2))
+opt = torch.optim.<span class="fn">Adam</span>(net.<span class="fn">parameters</span>(), lr=1e-3)
+loss_fn = nn.<span class="fn">CrossEntropyLoss</span>()
+
+<span class="kw">def</span> <span class="fn">make_task</span>(seed):                       <span class="cmt"># 两个不同的二分类任务</span>
+    g = torch.<span class="fn">Generator</span>().<span class="fn">manual_seed</span>(seed)
+    X = torch.<span class="fn">randn</span>(400, 20, generator=g)
+    y = (X @ torch.<span class="fn">randn</span>(20, generator=g) &gt; 0).<span class="fn">long</span>()
+    <span class="kw">return</span> X, y
+
+<span class="kw">def</span> <span class="fn">train</span>(X, y):
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(200):
+        opt.<span class="fn">zero_grad</span>(); loss_fn(net(X), y).<span class="fn">backward</span>(); opt.<span class="fn">step</span>()
+<span class="kw">def</span> <span class="fn">acc</span>(X, y): <span class="kw">return</span> (net(X).<span class="fn">argmax</span>(1) == y).<span class="fn">float</span>().<span class="fn">mean</span>().<span class="fn">item</span>()
+
+Xa, ya = <span class="fn">make_task</span>(1); Xb, yb = <span class="fn">make_task</span>(2)
+<span class="fn">train</span>(Xa, ya); print(<span class="str">"学完A，A准确率:"</span>, <span class="fn">acc</span>(Xa, ya))   <span class="cmt"># ~0.95</span>
+<span class="fn">train</span>(Xb, yb); print(<span class="str">"再学B，A准确率:"</span>, <span class="fn">acc</span>(Xa, ya))   <span class="cmt"># 掉到 ~0.55 → 遗忘</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区："遗忘是因为网络容量不够，参数量堆大就好了。"——错。灾难性遗忘在<b>严重过参数化</b>的大网络里照样发生：容量足够同时装下 A 和 B，但 SGD <b>没有理由</b>去找那个"两个都兼顾"的解，它只沿着当前任务的梯度走。问题出在<b>优化目标</b>，不在容量。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：你拿业务数据持续微调一个开源模型，跑第二批数据后发现它在第一批任务上退化了——这就是灾难性遗忘。理解它，你才知道该"混着训"还是"加约束"，而不是盲目加大模型或调 lr。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 灾难性遗忘的本质是"共享可变状态 + 无隔离的原地写"，稳定性-可塑性是它逼出的核心权衡。<br>🤔 生物大脑边学新东西边保留旧记忆，几乎不"灾难性遗忘"。它靠什么隔离机制做到的？（提示：海马体 vs 新皮层的双系统）</div>
+  </div>
+</div>
+
+
+<!-- 2. EWC -->
+<div class="card" style="border-left-color:#ffb450">
+  <h2>弹性权重固化（EWC）<span class="en">Elastic Weight Consolidation</span></h2>
+  <div class="tags"><span class="tag orange">正则化派</span><span class="tag">Fisher 信息</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>EWC 相当于给每个权重装一把<b>软写锁（soft write-lock）</b>，锁的力度按"这个权重对旧任务有多重要"来定。像数据库里给<b>热点行、承重索引</b>加高优先级保护：不是禁止改，而是"你想改这些关键权重？可以，但代价很大"。改无关权重几乎免费，改承重权重要付高额惩罚——学习被<b>弹性地</b>拉回。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>重放需要存旧数据，隔离要额外参数。<b>EWC（Kirkpatrick 等 2017）</b>想做到<b>零旧数据、零新增参数</b>，纯靠约束权重防遗忘。关键问题是：怎么知道哪些权重是任务 A 的"承重墙"？答案是 <b>Fisher 信息（Fisher information）</b>——衡量"轻微扰动权重 i，任务 A 的输出会变多剧烈"。变化剧烈 = 这个权重承重 = 锁紧；变化几乎为零 = 无关紧要 = 放开。</p>
+    <p style="margin-top:8px">学任务 B 时，EWC 在 B 的损失上加一个<b>二次惩罚项</b>：</p>
+    <pre>L(θ) = L_B(θ) + Σ_i (λ/2) · F_i · (θ_i − θ*_A,i)²</pre>
+    <p style="margin-top:4px">逐符号拆解：<b>L_B(θ)</b> 是新任务 B 的损失（要降低它）；<b>θ*_A,i</b> 是学完 A 后权重 i 的取值（"旧记忆锚点"）；<b>F_i</b> 是权重 i 的 Fisher 信息（重要度）；<b>λ</b> 调节"多在乎不忘 A"。直觉：每个权重上挂一根<b>弹簧</b>，把它往"任务 A 时的老位置"θ*_A,i 拉；弹簧劲度就是 F_i·λ——承重权重的弹簧很硬（几乎拉不动），无关权重弹簧很软（自由让 B 用）。于是 B 只能在"不惊动 A 的方向"上优化。这正是稳定性-可塑性谱系上的一个显式旋钮：λ 越大越稳定、越小越可塑。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+    <pre><span class="cmt"># EWC 核心：学完A后估计 Fisher，学B时加二次惩罚</span>
+<span class="kw">def</span> <span class="fn">estimate_fisher</span>(net, X, y, loss_fn):
+    fisher = {n: torch.<span class="fn">zeros_like</span>(p) <span class="kw">for</span> n, p <span class="kw">in</span> net.<span class="fn">named_parameters</span>()}
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(X)):
+        net.<span class="fn">zero_grad</span>()
+        loss_fn(net(X[i:i+1]), y[i:i+1]).<span class="fn">backward</span>()
+        <span class="kw">for</span> n, p <span class="kw">in</span> net.<span class="fn">named_parameters</span>():
+            fisher[n] += p.grad.<span class="fn">pow</span>(2) / <span class="fn">len</span>(X)   <span class="cmt"># 梯度平方 ≈ Fisher 对角</span>
+    <span class="kw">return</span> fisher
+
+<span class="cmt"># 学完A后：star = 权重快照(θ*_A)，fisher = 重要度</span>
+star = {n: p.<span class="fn">clone</span>().<span class="fn">detach</span>() <span class="kw">for</span> n, p <span class="kw">in</span> net.<span class="fn">named_parameters</span>()}
+fisher = <span class="fn">estimate_fisher</span>(net, Xa, ya, loss_fn)
+
+<span class="kw">def</span> <span class="fn">ewc_penalty</span>(net, lam=1000.):     <span class="cmt"># 学B时加进总loss</span>
+    <span class="kw">return</span> lam * <span class="fn">sum</span>((fisher[n] * (p - star[n]).<span class="fn">pow</span>(2)).<span class="fn">sum</span>()
+                     <span class="kw">for</span> n, p <span class="kw">in</span> net.<span class="fn">named_parameters</span>())
+<span class="cmt"># total = loss_fn(net(Xb), yb) + ewc_penalty(net)  → A 的准确率被保住</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区："EWC 是完美方案，一劳永逸。"——不。EWC 的弱点是<b>惩罚会累积、Fisher 是近似</b>：任务一多，一堆二次约束把权重锁得越来越死，可塑性枯竭，学第 10 个任务时几乎动不了；且 Fisher 只取对角、忽略权重间相关性，估计有偏。<b>诚实结论：任务数少、无法存旧数据时 EWC 划算；长序列任务上，重放通常更稳。</b></div>
+    <div class="exercise" style="margin-top:8px">📌 决策辅助场景：把 λ 想成"保守度旋钮"。给模型注入新领域知识又怕它忘掉通用能力时，EWC 式思路（约束关键参数别乱动）比"无脑全参微调"更可控——这也是很多 LLM 持续预训练里"只动部分层/加正则"的直觉来源。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 EWC = 给每个权重按"重要度（Fisher）"挂一根弹簧，把它拉回旧任务的取值，用二次惩罚换取零旧数据、零新参数。<br>🤔 Fisher 信息用"梯度平方"近似权重重要度。这和你判断"数据库哪张表是热点、动了会全站崩"的直觉，有什么共通之处？</div>
+  </div>
+</div>
+
+
+<!-- 3. Replay / Generative Replay -->
+<div class="card" style="border-left-color:#7ed6a0">
+  <h2>经验重放 & 生成重放<span class="en">Experience / Generative Replay</span></h2>
+  <div class="tags"><span class="tag purple">重放派</span><span class="tag">生成模型</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>重放就像数据库的 <b>WAL（write-ahead log）重演</b>：为了让新旧一致，把旧事务混进来一起重跑。<b>经验重放</b>存一小份旧样本，训练时新旧混着喂。<b>生成重放（generative replay）</b>更聪明——不存原始旧数据，而是训一个<b>生成器</b>去合成"假的旧数据"，相当于用一个<b>压缩快照生成器</b>替代全量备份，兼顾隐私与存储。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>遗忘的根源是"学 B 时看不到 A 的数据"。最直接的解法：<b>学 B 时顺便复习 A</b>。经验重放（experience replay）留一个小 <b>记忆缓冲区（memory buffer）</b>存 A 的少量样本，每个 batch 混入若干旧样本，梯度就同时压低新旧任务的 loss，权重不会跑偏。简单粗暴但极其有效——它几乎是持续学习里最强的基线。</p>
+    <p style="margin-top:8px">但存旧数据有两个硬约束：<b>存储爆炸</b>（任务无限增长）和<b>隐私/合规</b>（医疗、用户数据不能留档）。<b>生成重放（Shin 等 2017，Deep Generative Replay）</b>的解法优雅：训一对协作模型——<b>生成器（generator）</b>学会产出"像旧任务的数据"，<b>求解器（solver）</b>是真正干活的分类/预测模型。学新任务时，生成器先吐出一批合成旧样本、并由旧求解器打上标签，再和新数据混合训练。灵感来自海马体在睡眠中"回放"经历以巩固记忆。流程：</p>
+    <div class="diagram">
+      <span class="box p">生成器 G</span><span class="arrow">──合成旧样本──▶</span><span class="box g">混合 batch</span><span class="arrow">◀──新任务数据──</span><span class="box o">新数据</span><br>
+      <span style="margin-left:180px">│</span><br>
+      <span style="margin-left:150px">▼</span><br>
+      <span class="box" style="margin-left:120px">求解器 Solver 训练</span><span class="arrow">──▶</span><span class="box p">更新 G（也学新分布）</span><br>
+      <span style="color:#5a6378;margin-left:10px">↑ 下一任务时 G 已能同时生成"旧+新"，滚动传承，无需存原始数据</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+    <pre><span class="cmt"># 经验重放：最小、最强的基线。留一个缓冲区，混着训</span>
+<span class="kw">import</span> random
+buffer = []                                  <span class="cmt"># 存 (x, y) 旧样本</span>
+
+<span class="kw">def</span> <span class="fn">reservoir_add</span>(buf, sample, cap=200):    <span class="cmt"># 蓄水池采样：等概率保留</span>
+    <span class="kw">if</span> <span class="fn">len</span>(buf) &lt; cap: buf.<span class="fn">append</span>(sample)
+    <span class="kw">else</span>:
+        j = random.<span class="fn">randint</span>(0, len(buf))      <span class="cmt"># 随机替换，保持代表性</span>
+        <span class="kw">if</span> j &lt; cap: buf[j] = sample
+
+<span class="kw">def</span> <span class="fn">train_with_replay</span>(net, opt, loss_fn, Xb, yb, k=32):
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(200):
+        xb, yb_ = Xb, yb                     <span class="cmt"># 当前任务 batch</span>
+        <span class="kw">if</span> buffer:                           <span class="cmt"># 混入旧样本一起算 loss</span>
+            old = random.<span class="fn">sample</span>(buffer, <span class="fn">min</span>(k, <span class="fn">len</span>(buffer)))
+            ox = torch.<span class="fn">stack</span>([o[0] <span class="kw">for</span> o <span class="kw">in</span> old])
+            oy = torch.<span class="fn">tensor</span>([o[1] <span class="kw">for</span> o <span class="kw">in</span> old])
+            xb = torch.<span class="fn">cat</span>([xb, ox]); yb_ = torch.<span class="fn">cat</span>([yb_, oy])
+        opt.<span class="fn">zero_grad</span>(); loss_fn(net(xb), yb_).<span class="fn">backward</span>(); opt.<span class="fn">step</span>()
+<span class="cmt"># 学A时把样本 reservoir_add 进 buffer；学B时自动复习A → 遗忘大幅缓解</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区："生成重放能完美复现旧数据，等价于全量重放。"——不。生成器本身也在持续学习，会<b>逐代退化（生成质量漂移）</b>：它合成的"旧样本"越来越不像真的，误差在任务链上<b>累积放大</b>，长序列后旧任务照样崩。生成重放的效果<b>被生成器的保真度封顶</b>——旧任务越复杂（高清图像、长文本），越难指望它救场。</div>
+    <div class="exercise" style="margin-top:8px">📌 超级个体场景：想让本地模型持续吸收新知识又不忘旧的，<b>最省心的其实是经验重放</b>——留一份有代表性的旧数据小样本混进新一轮训练即可，比复杂正则简单且更稳。这也解释了为什么 LLM 持续训练时业界普遍"新旧数据按比例混合"而非只喂新数据。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 重放 = 学新时复习旧；生成重放用"生成器合成旧数据"换掉存储，代价是受生成保真度封顶。混合旧数据是持续学习最强也最朴素的基线。<br>🤔 生成重放靠"合成假的旧记忆"防遗忘。人脑的记忆本就是重构而非回放——每次回忆都在改写。这种"不精确的重放"是 bug 还是 feature？</div>
+  </div>
+</div>
+
+
+<!-- 4. Parameter Isolation -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>参数隔离<span class="en">Parameter Isolation</span></h2>
+  <div class="tags"><span class="tag purple">隔离派</span><span class="tag">PackNet / 渐进网络</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>参数隔离 = <b>分区/分片（partitioning / sharding）</b>思路：既然共享可变状态会写冲突，那就给每个任务<b>划一块专属参数</b>，学完就把它设成<b>只读（read-only）</b>。别的任务用别的分片，物理上没有写冲突，旧任务被<b>结构性地保护</b>——就像微服务各自独立部署，互不覆盖。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>正则和重放都是"软"保护——旧知识仍可能被慢慢侵蚀。参数隔离给出"硬"保证：<b>凡是分配给旧任务的权重，一律冻结不再更新</b>，遗忘从根上被杜绝。两个代表思路：</p>
+    <p style="margin-top:8px"><b>① PackNet（Mallya &amp; Lazebnik 2018）——固定容量里"打包"多任务。</b> 大网络高度冗余，很多权重可裁剪而几乎不掉精度。做法：学完任务 A → <b>剪枝</b>掉一批不重要权重 → 剩下的"A 权重"<b>冻结锁死</b> → 用<b>刚释放出的空闲权重</b>去学任务 B → 再剪枝、再冻结……像在一块固定磁盘上不断"划新分区"给新任务，直到空间用尽。存储零增长，但<b>任务数受容量硬上限约束</b>。</p>
+    <p style="margin-top:8px"><b>② 渐进网络（Progressive Networks，Rusu 等 2016）——每任务加一列新网络。</b> 每来一个任务就<b>新增一列（column）</b>参数，旧列全部冻结；新列通过<b>横向连接（lateral connections）</b>读取旧列学到的特征（能正向迁移），但反过来改不动旧列。彻底零遗忘、且能复用旧知识——代价是<b>参数随任务数线性膨胀</b>，像每来一个任务就起一个新副本、只允许读旧副本。</p>
+    <div class="diagram">
+      <b>PackNet（固定容量 · 剪枝腾位）</b><br>
+      <span class="box r">A 权重·冻结</span><span class="box o">B 权重·冻结</span><span class="box g">C 权重·空闲待用</span><br><br>
+      <b>渐进网络（每任务加一列 · 横向读旧）</b><br>
+      <span class="box r">列A·冻结</span><span class="arrow">─横向→</span><span class="box o">列B·冻结</span><span class="arrow">─横向→</span><span class="box p">列C·训练中</span><br>
+      <span style="color:#5a6378">旧列只读、可被新列借用特征；新列的梯度进不了旧列</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+    <pre><span class="cmt"># PackNet 风格：学完A后剪枝+冻结，把"关掉的"权重留给B</span>
+<span class="kw">import</span> torch
+
+<span class="kw">def</span> <span class="fn">prune_and_freeze</span>(weight, keep=0.5):
+    <span class="cmt"># 按幅度保留 top-keep 的权重作为"任务A的锁定分区"</span>
+    flat = weight.<span class="fn">abs</span>().<span class="fn">flatten</span>()
+    thresh = flat.<span class="fn">kthvalue</span>(<span class="fn">int</span>(<span class="fn">len</span>(flat) * (1 - keep))).values
+    taskA_mask = weight.<span class="fn">abs</span>() &gt;= thresh    <span class="cmt"># True = 属于A、冻结</span>
+    weight.data *= taskA_mask                     <span class="cmt"># 剪掉不重要的（置0，留给B）</span>
+    <span class="kw">return</span> taskA_mask
+
+<span class="kw">def</span> <span class="fn">masked_grad_hook</span>(mask):
+    <span class="cmt"># 反向时把"A分区"的梯度清零 → A权重永不被B更新</span>
+    <span class="kw">def</span> <span class="fn">hook</span>(grad): <span class="kw">return</span> grad * (~mask)
+    <span class="kw">return</span> hook
+
+W = net[0].weight
+maskA = <span class="fn">prune_and_freeze</span>(W, keep=0.5)   <span class="cmt"># 学完A调用</span>
+W.<span class="fn">register_hook</span>(<span class="fn">masked_grad_hook</span>(maskA))  <span class="cmt"># 此后学B，A分区被硬保护</span>
+<span class="cmt"># 训练B时：只有 ~50% 空闲权重会更新，A的准确率精确保持不变</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区："参数隔离零遗忘，所以最好。"——它的零遗忘是有代价的：(1) <b>必须知道当前是哪个任务</b>（推理时要选对分区/列），做不到"任务边界模糊"的场景；(2) PackNet 容量有硬上限，渐进网络参数线性膨胀；(3) <b>任务间只能单向迁移</b>（新借旧），学好旧任务后来的新数据反哺不了它。<b>它适合任务清晰、数量有限、要求旧任务绝对不退化的场景。</b></div>
+    <div class="exercise" style="margin-top:8px">📌 个人项目场景：给不同客户/领域各训一套 LoRA 适配器（adapter），主干冻结、每个 adapter 是独立"分区"——这正是参数隔离在 LLM 时代的实用变体：零互相干扰、按需加载，用哪个任务挂哪个 adapter。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 参数隔离用"分区 + 冻结只读"给旧任务硬保证：PackNet 在固定容量里剪枝腾位，渐进网络每任务加一列。零遗忘，代价是需知任务身份、容量/参数受限。<br>🤔 三派对策（正则/重放/隔离）恰好对应你熟悉的三种并发控制：加锁、重演日志、数据分片。哪一派最像"乐观锁"，哪一派最像"悲观锁"？</div>
+  </div>
+</div>
+
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#00d4ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1612.00796" target="_blank">Kirkpatrick 等 2017 — Overcoming Catastrophic Forgetting (EWC)</a> — 正则化派奠基作，Fisher 信息 + 二次约束，必读</li>
+      <li><a href="https://arxiv.org/abs/1705.08690" target="_blank">Shin 等 2017 — Deep Generative Replay</a> — 生成器+求解器双模型，海马体启发的重放框架</li>
+      <li><a href="https://arxiv.org/abs/1711.05769" target="_blank">Mallya &amp; Lazebnik 2018 — PackNet</a> — 剪枝+冻结把多任务"打包"进固定容量网络</li>
+      <li><a href="https://arxiv.org/abs/1606.04671" target="_blank">Rusu 等 2016 — Progressive Neural Networks</a> — 每任务加一列、横向连接迁移旧特征</li>
+      <li><a href="https://arxiv.org/abs/1706.08840" target="_blank">Lopez-Paz &amp; Ranzato 2017 — Gradient Episodic Memory (GEM)</a> — 用旧样本约束梯度方向，兼顾防遗忘与正向迁移</li>
+      <li><a href="https://arxiv.org/abs/1904.07734" target="_blank">van de Ven &amp; Tolias 2019 — Three Scenarios for Continual Learning</a> — 厘清任务/域/类增量三种设定，评测对比的框架性工作</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. 正则（EWC）、重放、隔离三派，本质上都在"约束优化不要毁掉旧解"。若把它们统一看成同一件事的不同实现，那件事是什么？</summary><div>共同内核是：<b>在参数空间里，为旧任务的"好解区域"加保护，让新任务的优化只在"不破坏旧解"的子空间里进行</b>。三派只是<b>用不同手段刻画并保护那个子空间</b>：EWC 用 Fisher 二次惩罚，<b>近似</b>地把旧解画成一个椭球，惩罚离开它；重放/GEM 用旧数据（真实或合成）<b>采样</b>出旧解约束——GEM 更直接，它要求新梯度和旧样本梯度的内积非负（"别往增加旧 loss 的方向走"）；参数隔离最<b>暴力</b>，直接把旧解占用的维度冻结成常数、根本不进优化。所以它们在稳定性-可塑性谱系上的位置不同：隔离最稳（硬约束、零遗忘、可塑性受限），EWC 居中（软约束、可塑但会累积僵化），重放最灵活（数据驱动、效果强但要存储/生成）。理解这个统一视角，你选方案时就不是背 3 个 trick，而是问一句："我的场景里，旧解的保护子空间该用什么代价来刻画？"——这和你在分布式系统里选一致性协议是同一种思维。</div></details>
+
+    <details><summary>2. 有观点认为"大模型 + 混合数据全量重训"让持续学习成了伪问题——反正每次都从头训。这个论断成立吗？</summary><div>部分成立，但有硬边界。<b>成立的一面</b>：当你能拿到全部历史数据、且算力预算允许，"周期性全量重训"（含新旧混合）确实是工业界最稳的做法，直接绕开了遗忘——这也是为什么很多产品级模型不搞花哨的持续学习算法，而是攒够数据就重训一版。经验重放的成功本质上印证了"混合数据"这条路。<b>不成立的边界</b>：(1) <b>数据不可留</b>——隐私/合规/授权到期，旧数据物理消失，只能靠 EWC 或生成重放这类"无旧数据"方法；(2) <b>算力不允许</b>——边缘设备、机器人要在部署中<b>在线</b>学习，没有"回炉重训"的机会；(3) <b>实时性</b>——需要分钟级适应新分布（推荐、风控），等不起重训周期；(4) <b>成本</b>——前沿大模型全量重训成本极高，为一点增量知识重训整个模型不经济。所以持续学习不是伪问题，而是<b>被推向了"约束更苛刻"的场景</b>：数据留不住、算力受限、要在线适应。对超级个体，本地小模型的持续微调恰恰落在这些边界内。</div></details>
+
+    <details><summary>3. 灾难性遗忘在人脑里几乎不发生。生物大脑的哪些机制正好对应了本期的三派对策？这对 AI 有何启发？</summary><div>惊人地一一对应。(1) <b>互补学习系统（海马体+新皮层）↔ 重放</b>：海马体快速编码新经历，睡眠中反复"回放"给新皮层缓慢巩固——正是生成重放的直接灵感（Shin 等明说受海马体启发）。(2) <b>突触固化（consolidation）↔ EWC</b>：重要突触通过分子机制变得"更难改写"——EWC 的 Fisher 惩罚就是它的数学化身，论文标题里"consolidation"正是这个词。(3) <b>功能分区/神经发生 ↔ 参数隔离</b>：不同脑区处理不同功能——类似给新任务分配新容量。启发在于：大脑不靠<b>单一</b>机制，而是<b>三者协同</b>；当前 AI 多数方法只用一招，而最强的持续学习系统往往也是<b>混合</b>的（重放+正则）。更深一点：大脑的记忆是<b>有损重构</b>（回忆即改写），它<b>主动</b>遗忘不重要的——"聪明的遗忘"或许是特性而非缺陷，这是多数 CL 方法尚未认真对待的维度。</div></details>
+
+    <details><summary>4. 若把"BigCat 与 AI 长期共事"看成一个持续学习系统，你（人）该扮演三派中的哪一派？</summary><div>有趣的错位：<b>今天的 AI 工具几乎没有真正的持续学习</b>——每次对话无状态、权重不更新。"记忆"被外包到了<b>系统外层</b>（Day 8 的 context/memory 架构），而非模型内部。这意味着：<b>你</b>在扮演"重放"派——通过共享 memory / 操作手册把"旧上下文"重新喂给无状态模型，就是人肉经验重放；厂商的"周期性重训新版本"则是全量重训。启发:(1) 别指望现在的模型"记住"你，关键记忆要<b>结构化沉淀在外层</b>（隔离派思维：每项目一份独立记忆分区）；(2) 定期"复习"——重要偏好/结论周期性重新注入，否则新会话等于遗忘；(3) 警惕<b>你自己</b>的遗忘：过度外包，脑中的"承重权重"（核心判断力）若不加"EWC 式保护"（刻意练习、不外包核心思考），也会被日常便利悄悄侵蚀。</div></details>
+
+    <details><summary>5. "稳定性-可塑性困境"能否被彻底解决，还是像 CAP 一样是本质权衡？</summary><div>倾向于：<b>本质权衡，但可被"抬高帕累托前沿"</b>——类似 CAP 不可能同时满足，工程却能在给定分区容忍度下把 C、A 都做好。在<b>固定容量、固定信息</b>下，学新必然改写某些表示，改写就有损旧任务，这是信息论层面的张力，不可能凭空消除。但抬高前沿的手段很多：(1) <b>加容量</b>（隔离派）——用参数换两者兼得，代价是规模;(2) <b>加信息</b>（重放派）——保留旧数据把"顺序学习"变回"联合学习"，代价是存储;(3) <b>更好的表示</b>——若不同任务表示天然<b>正交/稀疏</b>（不共享权重），冲突就小，这是模块化/稀疏架构的希望;(4) <b>正向迁移</b>——理想下学新甚至能<b>改善</b>旧任务（GEM 追求的），此时不再零和。务实答案：原理不可消除，但通过容量、信息、表示、迁移四条路，可压到"可接受"甚至"接近双赢"——与你对待 CAP 的成熟心态一致：不是消灭权衡，而是调到具体场景的最优点。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 52 · 2026-07-09</footer>
+
+</div>
+
+</body>
+</html>
