@@ -75,3 +75,4 @@
 - Day 53: 音频与语音模型 — STT(Whisper/wav2vec/CTC), TTS 架构(自回归/diffusion/神经声码器), 音频 codec 与离散化, 实时与流式机制（语音工程见 super-individual Day 46）
 - Day 54: LLM-as-Judge 的偏差与校准 — 位置/冗长/措辞伪影偏差, 自我偏好与错误趋同(correlated errors), 生成-验证鸿沟(GV-Gap), 多裁判聚合与校准实务(钩子·源自 deep-research #2)
 - Day 55: CoT 监控与可监控性 — 思维链监控原理与生产数字(GPT-5 标记 2.1-4.8%), obfuscated reward hacking(对 CoT 优化会教模型藏意图), 忠实度实测(提示复述率 25-39%), monitorability tax 与三家实验室联署立场(钩子·源自 deep-research #3)
+- Day 56: 错误趋同与冗余的失效 — N-version programming 独立性假设(Knight-Leveson 1986)在 LLM coding agent 上的复现(巧合失效 3.7× 独立预测, z=29.20), 多数投票增益衰减而非归零(387→131), 错误趋同(correlated errors)如何瓦解"多 LLM 互查/N-version"的可靠性前提, 与 Day 54 LLM-as-Judge 的接口(钩子·源自 deep-research #5)
