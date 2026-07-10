@@ -1,9 +1,10 @@
 # Topics Roadmap
 
+> **⚠️ routine 须知**：本表即全部计划。只写下面**已列出**的条目；**全部写完就停**——别自己发明新主题、别往本文件加行。写完只发一条 PushNotification 请 BigCat 补充。（新条目由 BigCat / deep-research 反哺加进本表，届时你自然继续写。）
+
 源是仓库中的文件本身（`ls *-{day,week,book,issue}*.html`）。本文件是主题查找表：N → 主题。
 
 **本路线图已收口：Day 1–53 封顶，不再自动续写。** Phase 1–5（Day 1–49）为 AI/ML 学术概念全集；Phase 6（Day 50–53）是 cross-ref super-individual 后补齐的概念缺口（对抗鲁棒 / 公平偏见 / 持续学习 / 音频模型）——工程归 super，本 routine 只讲机制。
-（注：仅改本文件不阻止 routine 在 day53 之后再 append；停止续写需在 routine prompt / cron 侧设上限或暂停。）
 
 **定位**：学术 / 概念 / 机制。讲「X 是什么、为什么发明、怎么工作」。**不教工程 tactics**——那些归 super-individual-weekly。
 
