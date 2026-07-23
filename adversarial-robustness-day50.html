@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：对抗样本与鲁棒性 — Day 50</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,44 +60,35 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：对抗样本与鲁棒性</h1>
-  <div class="meta">Day 50 · 2026-07-07</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：进阶</div>
+<h1 data-tts="c27979cbac022ac2">AI/ML 详解：对抗样本与鲁棒性</h1>
+<div class="meta">Day 50 · 2026-07-07</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：进阶</div>
 </header>
-
-
 <!-- 1. 对抗样本 -->
-<div class="card">
-  <h2>对抗样本与脆弱性<span class="en">Adversarial Examples</span></h2>
-  <div class="tags"><span class="tag">高维几何</span><span class="tag purple">攻击面</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>对抗样本就像一次<b>精心构造的哈希碰撞</b>——两张在人眼看来一模一样的图片，模型却输出天差地别（"熊猫"→"长臂猿"）。攻击者不是随机试，而是像<b>逆向一个哈希函数</b>，精确算出"往哪个方向推几个像素"能翻转分类。关键认知：这<strong>不是模型没训好，而是高维空间的结构性弱点</strong>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>2013 年 Szegedy 等人发现一个反常现象：给一张分类正确的图加上<b>人眼不可见</b>的微小扰动，SOTA 网络就以高置信度分错。更诡异的是——这些扰动不是随机噪声，而是<b>精心定向</b>的。为什么会这样？</p>
-    <p style="margin-top:8px">Goodfellow 2014 的<strong>线性假说（linear hypothesis）</strong>给了最简洁的解释：神经网络在局部近似线性。盯住一个 logit 的计算 <b>w·(x+η) = w·x + w·η</b>。攻击者取最坏扰动 <b>η = ε·sign(w)</b>（沿权重符号方向，每维都朝抬高 logit 的方向推），代入得到扰动带来的变化 <b>w·η = ε·‖w‖₁</b>。这里 <b>ε</b> 是每个像素的改动上限（小到人眼不可见），<b>‖w‖₁</b> 是权重绝对值之和。<strong>核心在于 ‖w‖₁ 随维度 n 线性增长</strong>：</p>
-
+<div class="card" data-tts="1e04717003111eac">
+<h2>对抗样本与脆弱性<span class="en">Adversarial Examples</span></h2>
+<div class="tags"><span class="tag">高维几何</span><span class="tag purple">攻击面</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>对抗样本就像一次<b>精心构造的哈希碰撞</b>——两张在人眼看来一模一样的图片，模型却输出天差地别（"熊猫"→"长臂猿"）。攻击者不是随机试，而是像<b>逆向一个哈希函数</b>，精确算出"往哪个方向推几个像素"能翻转分类。关键认知：这<strong>不是模型没训好，而是高维空间的结构性弱点</strong>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>2013 年 Szegedy 等人发现一个反常现象：给一张分类正确的图加上<b>人眼不可见</b>的微小扰动，SOTA 网络就以高置信度分错。更诡异的是——这些扰动不是随机噪声，而是<b>精心定向</b>的。为什么会这样？</p>
+<p style="margin-top:8px">Goodfellow 2014 的<strong>线性假说（linear hypothesis）</strong>给了最简洁的解释：神经网络在局部近似线性。盯住一个 logit 的计算 <b>w·(x+η) = w·x + w·η</b>。攻击者取最坏扰动 <b>η = ε·sign(w)</b>（沿权重符号方向，每维都朝抬高 logit 的方向推），代入得到扰动带来的变化 <b>w·η = ε·‖w‖₁</b>。这里 <b>ε</b> 是每个像素的改动上限（小到人眼不可见），<b>‖w‖₁</b> 是权重绝对值之和。<strong>核心在于 ‖w‖₁ 随维度 n 线性增长</strong>：</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">每维扰动 ε=0.007（人眼不可见）· 沿 sign(w) 累积 → logit 变化</span><br>
-维度 n=100 &nbsp;&nbsp;<span class="bar" style="width:20px;height:16px"></span> 小<br>
-维度 n=1000 &nbsp;<span class="bar" style="width:55px;height:16px"></span> 中<br>
-维度 n=150000（224×224×3 图）<span class="bar" style="width:180px;height:16px"></span> <span style="color:#ff8e8e">巨大</span><br>
+<span style="color:#8b92a8">每维扰动 ε=0.007（人眼不可见）· 沿 sign(w) 累积 → logit 变化</span><br/>
+维度 n=100   <span class="bar" style="width:20px;height:16px"></span> 小<br/>
+维度 n=1000  <span class="bar" style="width:55px;height:16px"></span> 中<br/>
+维度 n=150000（224×224×3 图）<span class="bar" style="width:180px;height:16px"></span> <span style="color:#ff8e8e">巨大</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ 每维一点点 × 十几万维之和 = 足以翻转输出。脆弱是高维线性的必然</span>
 </div>
-
-    <p style="margin-top:14px">一张 224×224×3 的图有约 15 万维。每维只动 ε=0.007，累积的 logit 变化却是"十几万个小量之和"——<strong>足以把决策推过分类边界</strong>。脆弱性不是缺陷，是高维线性的代价。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">一张 224×224×3 的图有约 15 万维。每维只动 ε=0.007，累积的 logit 变化却是"十几万个小量之和"——<strong>足以把决策推过分类边界</strong>。脆弱性不是缺陷，是高维线性的代价。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
 <span class="cmt"># 演示"线性放大"：为什么每维只动 ε 却能翻转输出</span>
 n = 150000                     <span class="cmt"># 输入维度（≈ 一张彩色图的像素数）</span>
@@ -109,47 +101,39 @@ delta_logit = w @ eta          <span class="cmt"># logit 的变化量 = ε·‖w
 <span class="fn">print</span>(<span class="str">f"单维扰动: {eps}"</span>)             <span class="cmt"># 0.007</span>
 <span class="fn">print</span>(<span class="str">f"logit 变化: {delta_logit:.0f}"</span>)  <span class="cmt"># 上百——随维度线性增长</span>
 <span class="cmt"># 结论：高维下"不可见的扰动"累积成"输出的巨变"</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区："对抗样本是实验室玩具，真实世界不会遇到。"——错。路牌上贴几张贴纸就能让视觉模型把"停"看成"限速"；Ilyas 2019 更进一步论证：对抗方向对应模型<b>真实依赖的"非鲁棒特征"</b>，不是人造噪声，而是数据里真实存在但脆弱的统计规律。</div>
-    <div class="exercise" style="margin-top:8px">📌 决策辅助场景：当你用多模态模型读图表、审合同扫描件时，要意识到输入端的微小扰动/对抗性内容可能<b>系统性地</b>误导模型——这不是"偶尔犯错"，而是一个可被定向利用的攻击面。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 神经网络的脆弱不是训练不足，是高维几何的结构性代价。<br>🤔 你的后端系统里，哪些"看起来等价的输入"其实会触发完全不同的代码路径？</div>
-  </div>
 </div>
-
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区："对抗样本是实验室玩具，真实世界不会遇到。"——错。路牌上贴几张贴纸就能让视觉模型把"停"看成"限速"；Ilyas 2019 更进一步论证：对抗方向对应模型<b>真实依赖的"非鲁棒特征"</b>，不是人造噪声，而是数据里真实存在但脆弱的统计规律。</div>
+<div class="exercise" style="margin-top:8px">📌 决策辅助场景：当你用多模态模型读图表、审合同扫描件时，要意识到输入端的微小扰动/对抗性内容可能<b>系统性地</b>误导模型——这不是"偶尔犯错"，而是一个可被定向利用的攻击面。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 神经网络的脆弱不是训练不足，是高维几何的结构性代价。<br/>🤔 你的后端系统里，哪些"看起来等价的输入"其实会触发完全不同的代码路径？</div>
+</div>
+</div>
 <!-- 2. FGSM & PGD -->
-<div class="card">
-  <h2>梯度攻击：FGSM 与 PGD<span class="en">Gradient-based Attacks</span></h2>
-  <div class="tags"><span class="tag">白盒攻击</span><span class="tag purple">梯度上升</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>训练时你对<b>权重</b>做梯度下降来<b>降低</b> loss；攻击时你冻结权重，反过来对<b>输入</b>做梯度上升来<b>抬高</b> loss。同一套自动微分机器，只是把矛头从"改模型"转向"改输入"。FGSM 是贪心一步，PGD 是带约束的迭代——像"一次性启发式" vs "带 clamp 的迭代优化器"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p><strong>FGSM（Fast Gradient Sign Method，快速梯度符号法）</strong>：一步到位。<b>x_adv = x + ε·sign(∇ₓL)</b>。为什么取 sign 而不用梯度本身？因为攻击约束通常是 <b>L∞</b>（每个像素改动 ≤ ε）；在这个约束下，沿每一维的梯度<b>符号</b>方向走满 ε，就是最大化 loss 上升的一步。快，但粗。</p>
-    <p style="margin-top:8px"><strong>PGD（Projected Gradient Descent，投影梯度下降）</strong>：把 FGSM 拆成很多小步（步长 α），每步之后<b>投影</b>回 ε-球——超出预算就 clip 回边界。这个"投影"就是你熟悉的<b>边界钳制 / 限流</b>：把值 clamp 到 [x−ε, x+ε]。PGD 是当前最强的一阶白盒攻击，也是评估鲁棒性的<strong>事实标准</strong>：一个防御若扛不住 PGD，基本就是"假鲁棒"。</p>
-
+<div class="card" data-tts="8cce34763a9c71ba">
+<h2>梯度攻击：FGSM 与 PGD<span class="en">Gradient-based Attacks</span></h2>
+<div class="tags"><span class="tag">白盒攻击</span><span class="tag purple">梯度上升</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>训练时你对<b>权重</b>做梯度下降来<b>降低</b> loss；攻击时你冻结权重，反过来对<b>输入</b>做梯度上升来<b>抬高</b> loss。同一套自动微分机器，只是把矛头从"改模型"转向"改输入"。FGSM 是贪心一步，PGD 是带约束的迭代——像"一次性启发式" vs "带 clamp 的迭代优化器"。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p><strong>FGSM（Fast Gradient Sign Method，快速梯度符号法）</strong>：一步到位。<b>x_adv = x + ε·sign(∇ₓL)</b>。为什么取 sign 而不用梯度本身？因为攻击约束通常是 <b>L∞</b>（每个像素改动 ≤ ε）；在这个约束下，沿每一维的梯度<b>符号</b>方向走满 ε，就是最大化 loss 上升的一步。快，但粗。</p>
+<p style="margin-top:8px"><strong>PGD（Projected Gradient Descent，投影梯度下降）</strong>：把 FGSM 拆成很多小步（步长 α），每步之后<b>投影</b>回 ε-球——超出预算就 clip 回边界。这个"投影"就是你熟悉的<b>边界钳制 / 限流</b>：把值 clamp 到 [x−ε, x+ε]。PGD 是当前最强的一阶白盒攻击，也是评估鲁棒性的<strong>事实标准</strong>：一个防御若扛不住 PGD，基本就是"假鲁棒"。</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">在 loss 曲面上，把输入推向 loss 更高处（= 更容易被分错）</span><br><br>
-ε-球（扰动预算） &nbsp; <span class="box p">起点 x</span><br><br>
-FGSM： <span class="box">x</span><span class="arrow">──一大步──▶</span><span class="box r">x_adv（撞边界，可能越过最优）</span><br><br>
-PGD： &nbsp;<span class="box">x</span><span class="arrow">·▶</span><span class="box o">·</span><span class="arrow">·▶</span><span class="box o">·</span><span class="arrow">·▶</span><span class="box r">x_adv</span> <span style="color:#5a6378">（多小步 + 每步投影回球内）</span><br>
+<span style="color:#8b92a8">在 loss 曲面上，把输入推向 loss 更高处（= 更容易被分错）</span><br/><br/>
+ε-球（扰动预算）   <span class="box p">起点 x</span><br/><br/>
+FGSM： <span class="box">x</span><span class="arrow">──一大步──▶</span><span class="box r">x_adv（撞边界，可能越过最优）</span><br/><br/>
+PGD：  <span class="box">x</span><span class="arrow">·▶</span><span class="box o">·</span><span class="arrow">·▶</span><span class="box o">·</span><span class="arrow">·▶</span><span class="box r">x_adv</span> <span style="color:#5a6378">（多小步 + 每步投影回球内）</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ PGD 在 ε-球内精细搜索最坏点，比 FGSM 强得多</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
 
 <span class="kw">def</span> <span class="fn">fgsm</span>(model, x, y, eps):
@@ -168,42 +152,35 @@ PGD： &nbsp;<span class="box">x</span><span class="arrow">·▶</span><span cla
         x_adv = torch.<span class="fn">min</span>(torch.<span class="fn">max</span>(x_adv, x - eps), x + eps)  <span class="cmt"># 投影回 ε-球</span>
         x_adv = x_adv.<span class="fn">clamp</span>(<span class="str">0</span>, <span class="str">1</span>)          <span class="cmt"># 保持合法像素范围</span>
     <span class="kw">return</span> x_adv</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区："ε 越大攻击越强，所以设很小的 ε 就安全了。"——ε 只是<b>扰动预算的定义</b>，不是安全阀。固定 ε 下，PGD 的迭代次数、随机重启才决定攻击强度；用弱攻击测出的"鲁棒"，会被强攻击轻易推翻——这正是很多防御论文事后翻车的原因。</div>
-    <div class="exercise" style="margin-top:8px">📌 跨学科迁移：评估任何"抗干扰"能力时，先问<b>用了多强的攻击测</b>。就像压测别只发顺序请求，得有对抗性负载，否则拿到的是虚假的 SLA。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 攻击与训练是同一枚硬币：梯度既能改模型，也能改输入。评估鲁棒必须用最强攻击。<br>🤔 若攻击者能对你的系统做"梯度式探测"（不断微调输入、观察输出），哪些接口会泄露可利用的方向？</div>
-  </div>
 </div>
-
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区："ε 越大攻击越强，所以设很小的 ε 就安全了。"——ε 只是<b>扰动预算的定义</b>，不是安全阀。固定 ε 下，PGD 的迭代次数、随机重启才决定攻击强度；用弱攻击测出的"鲁棒"，会被强攻击轻易推翻——这正是很多防御论文事后翻车的原因。</div>
+<div class="exercise" style="margin-top:8px">📌 跨学科迁移：评估任何"抗干扰"能力时，先问<b>用了多强的攻击测</b>。就像压测别只发顺序请求，得有对抗性负载，否则拿到的是虚假的 SLA。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 攻击与训练是同一枚硬币：梯度既能改模型，也能改输入。评估鲁棒必须用最强攻击。<br/>🤔 若攻击者能对你的系统做"梯度式探测"（不断微调输入、观察输出），哪些接口会泄露可利用的方向？</div>
+</div>
+</div>
 <!-- 3. 对抗训练 & 迁移性 -->
-<div class="card">
-  <h2>对抗训练与迁移性<span class="en">Adversarial Training &amp; Transferability</span></h2>
-  <div class="tags"><span class="tag">鲁棒优化</span><span class="tag orange">权衡</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>普通训练喂"正常样本"；对抗训练在每个 batch 里先用 PGD <b>现造最坏样本</b>再学。本质是<strong>把混沌工程搬进训练循环</strong>：不等线上被攻击，训练时就持续注入最坏扰动，逼模型学会"在最坏情况下也答对"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Madry 2017 把防御形式化成一个 <strong>min-max 鲁棒优化</strong>问题：</p>
-    <p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">min<sub>θ</sub> &nbsp; 𝔼<sub>(x,y)</sub> [ &nbsp; max<sub>‖δ‖≤ε</sub> &nbsp; L(θ, x+δ, y) &nbsp; ]</p>
-    <p style="margin-top:8px">读法：<b>内层 max<sub>δ</sub></b> = 在预算 ε 内找最坏扰动（用 PGD 近似求解）；<b>外层 min<sub>θ</sub></b> = 在这些最坏样本上做 SGD、更新权重。这个 saddle-point（鞍点）视角优雅地把攻击与防御统一在一个目标里。</p>
-    <p style="margin-top:8px">代价是<strong>鲁棒性–准确率权衡</strong>：对抗训练后，模型在<b>干净样本</b>上的准确率往往下降。直觉是它被迫放弃那些"高预测力但脆弱"的<b>非鲁棒特征</b>，只保留稳的特征——更安全，但也更"迟钝"。</p>
-    <p style="margin-top:8px"><strong>迁移性（transferability）</strong>是另一个关键现象：在模型 A 上造的对抗样本，常常也能骗过结构完全不同的模型 B。为什么？因为不同模型从<b>同一份数据</b>学到了<b>相同的非鲁棒特征</b>（Ilyas 2019）。后果很实际：攻击者不需要访问你的模型，在自己的<b>替身模型</b>上造样本就能打你——<strong>黑盒攻击</strong>由此成立，像一个跨实现通用的零日漏洞。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="2fa52e0fd3fa1ecf">
+<h2>对抗训练与迁移性<span class="en">Adversarial Training &amp; Transferability</span></h2>
+<div class="tags"><span class="tag">鲁棒优化</span><span class="tag orange">权衡</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>普通训练喂"正常样本"；对抗训练在每个 batch 里先用 PGD <b>现造最坏样本</b>再学。本质是<strong>把混沌工程搬进训练循环</strong>：不等线上被攻击，训练时就持续注入最坏扰动，逼模型学会"在最坏情况下也答对"。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Madry 2017 把防御形式化成一个 <strong>min-max 鲁棒优化</strong>问题：</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">min<sub>θ</sub>   𝔼<sub>(x,y)</sub> [   max<sub>‖δ‖≤ε</sub>   L(θ, x+δ, y)   ]</p>
+<p style="margin-top:8px">读法：<b>内层 max<sub>δ</sub></b> = 在预算 ε 内找最坏扰动（用 PGD 近似求解）；<b>外层 min<sub>θ</sub></b> = 在这些最坏样本上做 SGD、更新权重。这个 saddle-point（鞍点）视角优雅地把攻击与防御统一在一个目标里。</p>
+<p style="margin-top:8px">代价是<strong>鲁棒性–准确率权衡</strong>：对抗训练后，模型在<b>干净样本</b>上的准确率往往下降。直觉是它被迫放弃那些"高预测力但脆弱"的<b>非鲁棒特征</b>，只保留稳的特征——更安全，但也更"迟钝"。</p>
+<p style="margin-top:8px"><strong>迁移性（transferability）</strong>是另一个关键现象：在模型 A 上造的对抗样本，常常也能骗过结构完全不同的模型 B。为什么？因为不同模型从<b>同一份数据</b>学到了<b>相同的非鲁棒特征</b>（Ilyas 2019）。后果很实际：攻击者不需要访问你的模型，在自己的<b>替身模型</b>上造样本就能打你——<strong>黑盒攻击</strong>由此成立，像一个跨实现通用的零日漏洞。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># 对抗训练循环：内层 max 由 PGD 近似，外层 min 由 SGD 完成</span>
 <span class="kw">for</span> x, y <span class="kw">in</span> loader:
     <span class="cmt"># ① 内层：先用 PGD 现造这个 batch 的"最坏输入"</span>
@@ -216,49 +193,41 @@ PGD： &nbsp;<span class="box">x</span><span class="arrow">·▶</span><span cla
     opt.<span class="fn">step</span>()
     <span class="cmt"># 对应 min_θ  E[ max_δ  L(θ, x+δ, y) ]</span>
     <span class="cmt"># 注意：训练成本 ≈ 普通训练 × (PGD steps+1)，因为每步都要跑一遍 PGD</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区："做了对抗训练就绝对安全了。"——对抗训练只对<b>训练时那个 ε 和那种范数</b>（如 L∞）鲁棒；换个范数（L2）、或更大的 ε，照样能破。它是<b>经验防御</b>，没有数学证明。</div>
-    <div class="exercise" style="margin-top:8px">📌 跨学科思考：迁移性说明"针对一个系统的攻击能通用到同类系统"，这和你熟悉的<b>供应链漏洞</b>同构——共享的底层组件 = 共享的攻击面。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 对抗训练 = 训练时的混沌工程；换来鲁棒的同时牺牲干净准确率，且只防你练过的那种攻击。<br>🤔 迁移性意味着"独立开发"不等于"独立失败"——你的系统和竞品共享着哪些看不见的脆弱性？</div>
-  </div>
 </div>
-
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区："做了对抗训练就绝对安全了。"——对抗训练只对<b>训练时那个 ε 和那种范数</b>（如 L∞）鲁棒；换个范数（L2）、或更大的 ε，照样能破。它是<b>经验防御</b>，没有数学证明。</div>
+<div class="exercise" style="margin-top:8px">📌 跨学科思考：迁移性说明"针对一个系统的攻击能通用到同类系统"，这和你熟悉的<b>供应链漏洞</b>同构——共享的底层组件 = 共享的攻击面。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 对抗训练 = 训练时的混沌工程；换来鲁棒的同时牺牲干净准确率，且只防你练过的那种攻击。<br/>🤔 迁移性意味着"独立开发"不等于"独立失败"——你的系统和竞品共享着哪些看不见的脆弱性？</div>
+</div>
+</div>
 <!-- 4. 认证鲁棒性 -->
-<div class="card">
-  <h2>认证鲁棒性与随机平滑<span class="en">Certified Robustness &amp; Randomized Smoothing</span></h2>
-  <div class="tags"><span class="tag">可证明保证</span><span class="tag purple">共识投票</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>经验防御是"我们试过的攻击都没破"——像"没被黑过"不等于"安全"；认证鲁棒性要的是<strong>可证明的保证</strong>。随机平滑的做法特别像<b>quorum 读</b>：不信单次预测，而是给输入加大量高斯噪声、采样上千次、取<b>多数票</b>；单个对抗性翻转撼动不了一个强共识。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Pain point：攻防军备竞赛无止境——每个经验防御几个月后就被更强的攻击打破。<strong>认证鲁棒性（certified robustness）</strong>跳出这个循环：给出一个半径 R，<b>数学保证</b>任何 L2 范数 ≤ R 的扰动都无法改变输出。</p>
-    <p style="margin-top:8px"><strong>随机平滑（randomized smoothing，Cohen 2019）</strong>是最实用的方法：把原分类器 f 包成一个新分类器 <b>g(x) = 在 x 上加噪 N(0, σ²I) 后 f 的多数票类别</b>。定理给出认证半径：</p>
-    <p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">R = σ · Φ⁻¹(p<sub>A</sub>)</p>
-    <p style="margin-top:8px">符号含义：<b>σ</b> 是加的噪声强度；<b>p<sub>A</sub></b> 是最高票类别在噪声下的<b>得票率</b>；<b>Φ⁻¹</b> 是标准正态分布的<b>逆累积分布函数</b>（把"得票率"翻译成"标准差距离"）。直觉：<strong>若加了很多噪声、模型还是压倒性地投 A，说明 A 的"票仓"很深，小扰动动不了它</strong>。得票率 p<sub>A</sub> 越接近 1，认证半径越大。</p>
-
+<div class="card" data-tts="404774b7df46d212">
+<h2>认证鲁棒性与随机平滑<span class="en">Certified Robustness &amp; Randomized Smoothing</span></h2>
+<div class="tags"><span class="tag">可证明保证</span><span class="tag purple">共识投票</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>经验防御是"我们试过的攻击都没破"——像"没被黑过"不等于"安全"；认证鲁棒性要的是<strong>可证明的保证</strong>。随机平滑的做法特别像<b>quorum 读</b>：不信单次预测，而是给输入加大量高斯噪声、采样上千次、取<b>多数票</b>；单个对抗性翻转撼动不了一个强共识。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Pain point：攻防军备竞赛无止境——每个经验防御几个月后就被更强的攻击打破。<strong>认证鲁棒性（certified robustness）</strong>跳出这个循环：给出一个半径 R，<b>数学保证</b>任何 L2 范数 ≤ R 的扰动都无法改变输出。</p>
+<p style="margin-top:8px"><strong>随机平滑（randomized smoothing，Cohen 2019）</strong>是最实用的方法：把原分类器 f 包成一个新分类器 <b>g(x) = 在 x 上加噪 N(0, σ²I) 后 f 的多数票类别</b>。定理给出认证半径：</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff">R = σ · Φ⁻¹(p<sub>A</sub>)</p>
+<p style="margin-top:8px">符号含义：<b>σ</b> 是加的噪声强度；<b>p<sub>A</sub></b> 是最高票类别在噪声下的<b>得票率</b>；<b>Φ⁻¹</b> 是标准正态分布的<b>逆累积分布函数</b>（把"得票率"翻译成"标准差距离"）。直觉：<strong>若加了很多噪声、模型还是压倒性地投 A，说明 A 的"票仓"很深，小扰动动不了它</strong>。得票率 p<sub>A</sub> 越接近 1，认证半径越大。</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">给输入撒高斯噪声云 → 每个采样点投一票 → 多数票 + 认证半径</span><br><br>
-&nbsp;&nbsp;<span class="box g">·</span> <span class="box g">·</span> <span class="box">x</span> <span class="box g">·</span> <span class="box g">·</span> &nbsp;&nbsp;噪声云内 950/1000 票投 A<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ p<sub>A</sub> = 0.95 → R = σ·Φ⁻¹(0.95)<br><br>
-<span class="box r">◀── R ──▶</span> <span style="color:#5a6378">在这个 L2 半径内，任何扰动都无法翻转多数票（可证明）</span><br>
+<span style="color:#8b92a8">给输入撒高斯噪声云 → 每个采样点投一票 → 多数票 + 认证半径</span><br/><br/>
+  <span class="box g">·</span> <span class="box g">·</span> <span class="box">x</span> <span class="box g">·</span> <span class="box g">·</span>   噪声云内 950/1000 票投 A<br/>
+            └─ p<sub>A</sub> = 0.95 → R = σ·Φ⁻¹(0.95)<br/><br/>
+<span class="box r">◀── R ──▶</span> <span style="color:#5a6378">在这个 L2 半径内，任何扰动都无法翻转多数票（可证明）</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ σ 越大越鲁棒，但模型也越模糊（干净精度下降）——清晰的权衡</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> torch
 <span class="kw">from</span> scipy.stats <span class="kw">import</span> norm   <span class="cmt"># norm.ppf 就是 Φ⁻¹</span>
 
@@ -272,59 +241,46 @@ PGD： &nbsp;<span class="box">x</span><span class="arrow">·▶</span><span cla
     radius = sigma * norm.<span class="fn">ppf</span>(p_A)        <span class="cmt"># 认证半径 R = σ·Φ⁻¹(p_A)</span>
     <span class="kw">return</span> top.<span class="fn">item</span>(), radius           <span class="cmt"># 在 L2 半径 R 内，保证不被翻转</span>
     <span class="cmt"># 单个对抗性像素翻转撼动不了一个 950:50 的强共识</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区："认证鲁棒 = 绝对安全。"——认证只覆盖<b>特定范数球</b>（通常 L2）内的扰动；球外、或语义级攻击（换个角度拍照、改写句子）完全不保证，而且实际能证的半径通常很小，离"实用级安全"还远。</div>
-    <div class="exercise" style="margin-top:8px">📌 决策辅助场景：区分"没见过反例"（经验）和"可证明无反例"（认证），是关键的<b>认识论素养</b>——这和你分布式系统里"测试没挂"与"形式化验证过"之间的信心差距，是同一量级。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 经验防御给"信心"，认证防御给"保证"；代价是更小的适用范围和更模糊的模型。<br>🤔 你愿意为"可证明的安全"牺牲多少性能？这个 σ 的选择，和 CAP 里的取舍是不是同一种智慧？</div>
-  </div>
 </div>
-
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区："认证鲁棒 = 绝对安全。"——认证只覆盖<b>特定范数球</b>（通常 L2）内的扰动；球外、或语义级攻击（换个角度拍照、改写句子）完全不保证，而且实际能证的半径通常很小，离"实用级安全"还远。</div>
+<div class="exercise" style="margin-top:8px">📌 决策辅助场景：区分"没见过反例"（经验）和"可证明无反例"（认证），是关键的<b>认识论素养</b>——这和你分布式系统里"测试没挂"与"形式化验证过"之间的信心差距，是同一量级。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 经验防御给"信心"，认证防御给"保证"；代价是更小的适用范围和更模糊的模型。<br/>🤔 你愿意为"可证明的安全"牺牲多少性能？这个 σ 的选择，和 CAP 里的取舍是不是同一种智慧？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/1312.6199" target="_blank">Szegedy et al. 2013 — Intriguing Properties of Neural Networks</a> — 首次发现对抗样本，领域起点</li>
-      <li><a href="https://arxiv.org/abs/1412.6572" target="_blank">Goodfellow et al. 2014 — Explaining and Harnessing Adversarial Examples</a> — 线性假说 + FGSM，最经典的机制解释</li>
-      <li><a href="https://arxiv.org/abs/1706.06083" target="_blank">Madry et al. 2017 — Towards Deep Learning Models Resistant to Adversarial Attacks</a> — PGD 与 min-max 鲁棒优化的奠基工作</li>
-      <li><a href="https://arxiv.org/abs/1902.02918" target="_blank">Cohen et al. 2019 — Certified Robustness via Randomized Smoothing</a> — 随机平滑的紧致分析，可扩展到 ImageNet</li>
-      <li><a href="https://arxiv.org/abs/1905.02175" target="_blank">Ilyas et al. 2019 — Adversarial Examples Are Not Bugs, They Are Features</a> — 非鲁棒特征视角，解释迁移性的根源</li>
-    </ul>
-  </div>
+<div class="card" data-tts="15695c569088ba40" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/1312.6199" target="_blank">Szegedy et al. 2013 — Intriguing Properties of Neural Networks</a> — 首次发现对抗样本，领域起点</li>
+<li><a href="https://arxiv.org/abs/1412.6572" target="_blank">Goodfellow et al. 2014 — Explaining and Harnessing Adversarial Examples</a> — 线性假说 + FGSM，最经典的机制解释</li>
+<li><a href="https://arxiv.org/abs/1706.06083" target="_blank">Madry et al. 2017 — Towards Deep Learning Models Resistant to Adversarial Attacks</a> — PGD 与 min-max 鲁棒优化的奠基工作</li>
+<li><a href="https://arxiv.org/abs/1902.02918" target="_blank">Cohen et al. 2019 — Certified Robustness via Randomized Smoothing</a> — 随机平滑的紧致分析，可扩展到 ImageNet</li>
+<li><a href="https://arxiv.org/abs/1905.02175" target="_blank">Ilyas et al. 2019 — Adversarial Examples Are Not Bugs, They Are Features</a> — 非鲁棒特征视角，解释迁移性的根源</li>
+</ul>
 </div>
-
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 对抗样本 vs SQL 注入 / 哈希碰撞——都是"精心构造的合法输入触发异常行为"，它们共通的防御哲学是什么？</summary><div>三者本质同构：<b>攻击者利用系统"对输入的隐式假设"</b>——SQL 注入假设输入是数据而非代码，哈希碰撞假设"找不到碰撞在计算上不可行"，对抗样本假设"人眼等价 ⇒ 模型等价"。共通防御哲学有二：(a) <b>不信任输入边界</b>——SQL 用参数化查询把"数据"和"代码"物理隔离；对抗防御则要把"模型决策"和"输入表层"解耦（这正是随机平滑做的：不看单点，看邻域的共识）。(b) <b>从"经验补丁"升级到"可证明保证"</b>——SQL 注入靠 WAF 规则（经验，可绕过）→ 参数化查询（结构性根治）；对抗防御靠对抗训练（经验）→ 认证鲁棒（可证明）。深层教训：只要系统的"输入语义假设"和"攻击者的操作空间"存在缝隙，就有攻击面。BigCat 你在分布式系统里对"永远校验边界、永远假设输入是恶意的"这条铁律的直觉，直接迁移到 AI 安全。</div></details>
-
-    <details><summary>2. 为什么"经验防御"总被更强的攻击打破（军备竞赛），而认证鲁棒性跳出了这个循环？这和密码学里"没被破解" vs "可证明安全"是同一回事吗？</summary><div>是同一类认识论差异。经验防御的命题是"<b>我们试过的所有攻击都失败了</b>"——这是一个<b>存在性未被证伪</b>的陈述，永远可能被下一个更聪明的攻击推翻；对抗领域反复上演"新防御发布 → 三个月后被自适应攻击攻破"，因为防御者常无意中<b>混淆了梯度</b>（gradient masking）让弱攻击失效，却挡不住强攻击。认证鲁棒的命题是"<b>在半径 R 内，不存在任何能翻转输出的扰动</b>"——这是一个<b>对整个扰动空间的全称保证</b>，不依赖"试了哪些攻击"。这和密码学完全同构：一个算法"至今没被破解"（如某些启发式）和"可归约到离散对数难题"（可证明安全）是两个量级的信心。但要诚实：认证鲁棒的代价是保证范围小（通常只覆盖 L2 小球）、模型更钝——就像"信息论安全"的一次性密码本理论完美却工程上笨重。安全从来是"保证强度"和"实用性"的权衡，AI 和密码学在这一点上共享同一种智慧。</div></details>
-
-    <details><summary>3. Ilyas 说"对抗样本不是 bug，而是模型学到的真实（但脆弱）特征"。这对"模型到底在学什么"意味着什么？人类视觉为什么没有这个问题？</summary><div>这是全场最颠覆的观点。传统直觉认为对抗样本是"模型的缺陷"；Ilyas 2019 用实验论证：那些人眼无意义的<b>非鲁棒特征</b>，其实是数据分布里<b>真实存在、高度预测性</b>的统计规律——模型学它们不是犯错，而是在"最大化准确率"这个目标下的理性选择。含义深刻：(a) 模型和人类<b>在优化不同的东西</b>——人类视觉经亿万年进化，编码了"对光照、视角、微扰稳健"的先验；模型只被要求"在训练集上分对"，于是抄了任何管用的捷径，包括脆弱捷径。(b) "对齐"问题的一个缩影：模型的内部表征和人类的语义并不天然一致，<b>准确率高 ≠ 用了人类会用的理由</b>。(c) 鲁棒性–准确率权衡由此有了解释：强制模型只用鲁棒特征，就是让它放弃一部分真实但脆弱的预测力。人类"没有这个问题"或许只是因为我们的"攻击者"（进化压力）已经把非鲁棒特征筛掉了——换句话说，我们是被亿万年对抗训练过的模型。</div></details>
-
-    <details><summary>4. 鲁棒性–准确率权衡：对抗训练让干净准确率下降。为什么"更安全"要以"更笨"为代价？这是本质矛盾还是当前方法的局限？</summary><div>两种解读并存，学界尚无定论。<b>"本质矛盾"派</b>（Tsipras 等的观察）：在存在非鲁棒特征的数据分布上，鲁棒分类器和最优准确率分类器<b>可能就是两个不同的函数</b>——前者放弃了脆弱但有用的信号，准确率上限天然更低。这不是没调好，是目标冲突。<b>"当前局限"派</b>：权衡的严重程度依赖数据量、模型容量、方法——更大的模型、更多数据、更好的训练方法能显著缓解，理论上"鲁棒且准确"未必不可得，只是更贵。工程含义：这个权衡不是要不要付，而是<b>付多少、在哪个点上停</b>——和你熟悉的一致性 vs 可用性、延迟 vs 吞吐一样，是要显式定价的设计维度，不是免费午餐。对追求"AI 超级个体"的你，真正的启示是：任何声称"既最安全又最强"的方案都值得怀疑，先问它在哪个轴上偷偷付了代价。</div></details>
-
-    <details><summary>5. 认证半径依赖噪声强度 σ：σ 越大越鲁棒但模型越模糊。这和分布式一致性里的 CAP、quorum 大小取舍是不是同一类问题？</summary><div>结构上高度相似，都是"<b>调一个旋钮，两端此消彼长</b>"的连续权衡。随机平滑里，σ↑ → 认证半径 R↑（更鲁棒）、但决策边界被抹平 → 干净精度↓（更钝）；这和 quorum 里 <b>读写副本数 R+W 相对 N 的取舍</b>惊人一致：R+W&gt;N 保证强一致（撑得住更多节点故障），但每次操作要等更多副本 → 延迟↑、可用性↓。两者的共同数学骨架是：<b>用"冗余采样 + 多数决"换取对"局部扰动/故障"的容忍度</b>——认证半径 R 就是"能容忍多大的对抗扰动"，正如 quorum 能容忍多少节点失联。差异在代价的性质：分布式里付的是延迟和可用性，随机平滑里付的是模型精度和推理成本（要跑上千次采样）。共通的工程智慧：<b>没有"全都要"的点</b>，你只能根据"最坏情况有多可怕"来选旋钮位置——安全关键场景把 σ / quorum 调大，性能敏感场景调小。这正是把分布式的容错直觉迁移到 AI 鲁棒性的漂亮一课。</div></details>
-  </div>
+<div class="card think" data-tts="985d8993f36d2682" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 对抗样本 vs SQL 注入 / 哈希碰撞——都是"精心构造的合法输入触发异常行为"，它们共通的防御哲学是什么？</summary><div>三者本质同构：<b>攻击者利用系统"对输入的隐式假设"</b>——SQL 注入假设输入是数据而非代码，哈希碰撞假设"找不到碰撞在计算上不可行"，对抗样本假设"人眼等价 ⇒ 模型等价"。共通防御哲学有二：(a) <b>不信任输入边界</b>——SQL 用参数化查询把"数据"和"代码"物理隔离；对抗防御则要把"模型决策"和"输入表层"解耦（这正是随机平滑做的：不看单点，看邻域的共识）。(b) <b>从"经验补丁"升级到"可证明保证"</b>——SQL 注入靠 WAF 规则（经验，可绕过）→ 参数化查询（结构性根治）；对抗防御靠对抗训练（经验）→ 认证鲁棒（可证明）。深层教训：只要系统的"输入语义假设"和"攻击者的操作空间"存在缝隙，就有攻击面。BigCat 你在分布式系统里对"永远校验边界、永远假设输入是恶意的"这条铁律的直觉，直接迁移到 AI 安全。</div></details>
+<details><summary>2. 为什么"经验防御"总被更强的攻击打破（军备竞赛），而认证鲁棒性跳出了这个循环？这和密码学里"没被破解" vs "可证明安全"是同一回事吗？</summary><div>是同一类认识论差异。经验防御的命题是"<b>我们试过的所有攻击都失败了</b>"——这是一个<b>存在性未被证伪</b>的陈述，永远可能被下一个更聪明的攻击推翻；对抗领域反复上演"新防御发布 → 三个月后被自适应攻击攻破"，因为防御者常无意中<b>混淆了梯度</b>（gradient masking）让弱攻击失效，却挡不住强攻击。认证鲁棒的命题是"<b>在半径 R 内，不存在任何能翻转输出的扰动</b>"——这是一个<b>对整个扰动空间的全称保证</b>，不依赖"试了哪些攻击"。这和密码学完全同构：一个算法"至今没被破解"（如某些启发式）和"可归约到离散对数难题"（可证明安全）是两个量级的信心。但要诚实：认证鲁棒的代价是保证范围小（通常只覆盖 L2 小球）、模型更钝——就像"信息论安全"的一次性密码本理论完美却工程上笨重。安全从来是"保证强度"和"实用性"的权衡，AI 和密码学在这一点上共享同一种智慧。</div></details>
+<details><summary>3. Ilyas 说"对抗样本不是 bug，而是模型学到的真实（但脆弱）特征"。这对"模型到底在学什么"意味着什么？人类视觉为什么没有这个问题？</summary><div>这是全场最颠覆的观点。传统直觉认为对抗样本是"模型的缺陷"；Ilyas 2019 用实验论证：那些人眼无意义的<b>非鲁棒特征</b>，其实是数据分布里<b>真实存在、高度预测性</b>的统计规律——模型学它们不是犯错，而是在"最大化准确率"这个目标下的理性选择。含义深刻：(a) 模型和人类<b>在优化不同的东西</b>——人类视觉经亿万年进化，编码了"对光照、视角、微扰稳健"的先验；模型只被要求"在训练集上分对"，于是抄了任何管用的捷径，包括脆弱捷径。(b) "对齐"问题的一个缩影：模型的内部表征和人类的语义并不天然一致，<b>准确率高 ≠ 用了人类会用的理由</b>。(c) 鲁棒性–准确率权衡由此有了解释：强制模型只用鲁棒特征，就是让它放弃一部分真实但脆弱的预测力。人类"没有这个问题"或许只是因为我们的"攻击者"（进化压力）已经把非鲁棒特征筛掉了——换句话说，我们是被亿万年对抗训练过的模型。</div></details>
+<details><summary>4. 鲁棒性–准确率权衡：对抗训练让干净准确率下降。为什么"更安全"要以"更笨"为代价？这是本质矛盾还是当前方法的局限？</summary><div>两种解读并存，学界尚无定论。<b>"本质矛盾"派</b>（Tsipras 等的观察）：在存在非鲁棒特征的数据分布上，鲁棒分类器和最优准确率分类器<b>可能就是两个不同的函数</b>——前者放弃了脆弱但有用的信号，准确率上限天然更低。这不是没调好，是目标冲突。<b>"当前局限"派</b>：权衡的严重程度依赖数据量、模型容量、方法——更大的模型、更多数据、更好的训练方法能显著缓解，理论上"鲁棒且准确"未必不可得，只是更贵。工程含义：这个权衡不是要不要付，而是<b>付多少、在哪个点上停</b>——和你熟悉的一致性 vs 可用性、延迟 vs 吞吐一样，是要显式定价的设计维度，不是免费午餐。对追求"AI 超级个体"的你，真正的启示是：任何声称"既最安全又最强"的方案都值得怀疑，先问它在哪个轴上偷偷付了代价。</div></details>
+<details><summary>5. 认证半径依赖噪声强度 σ：σ 越大越鲁棒但模型越模糊。这和分布式一致性里的 CAP、quorum 大小取舍是不是同一类问题？</summary><div>结构上高度相似，都是"<b>调一个旋钮，两端此消彼长</b>"的连续权衡。随机平滑里，σ↑ → 认证半径 R↑（更鲁棒）、但决策边界被抹平 → 干净精度↓（更钝）；这和 quorum 里 <b>读写副本数 R+W 相对 N 的取舍</b>惊人一致：R+W&gt;N 保证强一致（撑得住更多节点故障），但每次操作要等更多副本 → 延迟↑、可用性↓。两者的共同数学骨架是：<b>用"冗余采样 + 多数决"换取对"局部扰动/故障"的容忍度</b>——认证半径 R 就是"能容忍多大的对抗扰动"，正如 quorum 能容忍多少节点失联。差异在代价的性质：分布式里付的是延迟和可用性，随机平滑里付的是模型精度和推理成本（要跑上千次采样）。共通的工程智慧：<b>没有"全都要"的点</b>，你只能根据"最坏情况有多可怕"来选旋钮位置——安全关键场景把 σ / quorum 调大，性能敏感场景调小。这正是把分布式的容错直觉迁移到 AI 鲁棒性的漂亮一课。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 50 · 2026-07-07</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

@@ -27,24 +27,64 @@ import argparse
 import hashlib
 import os
 import re
+import re as _re_mod
 import sys
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment, NavigableString
 
 # Azure endpoint template — region is filled in at request time
 ENDPOINT_TEMPLATE = "https://{region}.tts.speech.microsoft.com/cognitiveservices/v1"
 DEFAULT_VOICE_ZH = "zh-CN-XiaoxiaoNeural"
 DEFAULT_VOICE_EN = "en-US-JennyNeural"
 # Elements whose data-zh/data-en text becomes part of a model's narration.
-NARRATION_TAGS = ("h1", "h2", "h3", "h4", "p", "div", "li")
+NARRATION_TAGS = ("h1", "h2", "h3", "h4", "p", "div", "li", "summary", "span",
+                  "strong", "b", "dt", "dd")
 REPO_DIR = Path(__file__).parent.resolve()
 AUDIO_DIR = REPO_DIR / "audio"
 # Azure tolerates much larger bodies than Volcano. 3000 chars gives plenty of
 # headroom under their ~10-min audio-per-request limit; most model sections fit
 # in one call so ffmpeg concat isn't usually needed.
 MAX_CHARS_PER_CALL = 3000
+
+
+# Inline <code> reads badly when it is symbol soup ("GREATEST(0, x)") but fine
+# when it is just an identifier ("model_version"). Block-level code, formulas
+# and diagrams are for the eye — the narration should carry the prose around
+# them. Used instead of .get_text() when collecting narration.
+_SKIP_TEXT_PARENTS = ("pre", "code", "svg", "style", "script", "figure")
+# Read short code that is a name or a relation (model_version, w + r > n);
+# skip anything with call/index syntax — "now()" and "hash(key) % N" only
+# add noise when spoken.
+_READABLE_CODE = _re_mod.compile(r"^[\w .,+\-*/^<>=%≥≤]{1,24}$")
+
+
+def _in_diagram(s) -> bool:
+    """Diagram source (mermaid graph definitions, chart labels) is markup for
+    the renderer, not prose — narrating it yields "graph TD U 用户请求 GW"."""
+    return s.find_parent(
+        class_=lambda cl: cl and any(
+            k in " ".join(cl if isinstance(cl, list) else [cl])
+            for k in ("mermaid", "diagram", "viz", "chart", "graphviz", "plot")
+        )
+    ) is not None
+
+
+def visible_text(node) -> str:
+    parts = []
+    for s in node.strings:
+        if _in_diagram(s):
+            continue
+        holder = s.find_parent(_SKIP_TEXT_PARENTS)
+        if holder is not None:
+            if holder.name == "code" and holder.find_parent("pre") is None:
+                inner = holder.get_text(strip=True)
+                if _READABLE_CODE.match(inner):
+                    parts.append(inner)
+            continue
+        parts.append(str(s))
+    return "".join(parts)
 
 
 def hash_text(text: str) -> str:
@@ -58,9 +98,61 @@ def plain_text(attr_value: str) -> str:
 
 
 def normalize_for_tts(text: str) -> str:
-    """Light normalization. Azure handles smart quotes / em-dash fine, but
-    fixing nbsp etc. avoids weird pauses."""
-    return text.replace(" ", " ")  # nbsp → regular space
+    """Light normalization. Fix nbsp + spell out ✓/✗/⚠ marks
+    (Azure otherwise drops them, losing good/bad semantic). NOTE: × is
+    NOT replaced — commonly used as multiplication ("Care × Challenge")."""
+    text = text.replace(" ", " ")
+    text = text.replace("✓ ", "正例，").replace("✓ ", "正例，").replace("✓", "正例，")
+    text = text.replace("✔ ", "正例，").replace("✔ ", "正例，").replace("✔", "正例，")
+    text = text.replace("✗ ", "反例，").replace("✗ ", "反例，").replace("✗", "反例，")
+    text = text.replace("✘ ", "反例，").replace("✘ ", "反例，").replace("✘", "反例，")
+    text = text.replace("❌ ", "反例，").replace("❌ ", "反例，").replace("❌", "反例，")
+    text = text.replace("✅ ", "正例，").replace("✅", "正例，")
+    text = text.replace("⚠️ ", "注意，").replace("⚠ ", "注意，").replace("⚠", "注意，")
+    # Math / comparison symbols that Azure otherwise renders as awkward
+    # single-character reads or silence. Pad with commas so surrounding
+    # phrasing doesn't collide.
+    import re as _re
+    text = _re.sub(r"\s*≥\s*", " 大于等于 ", text)
+    text = _re.sub(r"\s*≤\s*", " 小于等于 ", text)
+    text = _re.sub(r"\s*>\s*", " 大于 ", text)
+    text = _re.sub(r"\s*<\s*", " 小于 ", text)
+    text = _re.sub(r"\s*×\s*", " 乘以 ", text)
+    text = _re.sub(r"\s*÷\s*", " 除以 ", text)
+    text = _re.sub(r"\s*±\s*", " 正负 ", text)
+    text = _re.sub(r"§\s*(\d+)", r"第\1节", text)    # §1 → 第1节
+    text = text.replace("§", "")                    # §combo 等非编号引用
+    text = _re.sub(r"(?<=[\w\)])\s*\+\s*(?=[\w\(])", " 加 ", text)
+    # `=` gets spoken as "等于" only when surrounded by spaces or between
+    # obviously numeric/short-word contexts; leave "A=B" style alone since
+    # it's often used as inline labelling in Chinese copy.
+    text = _re.sub(r"\s+=\s+", " 等于 ", text)
+    text = _re.sub(r"\s*≈\s*", " 约等于 ", text)
+    text = _re.sub(r"\s*≠\s*", " 不等于 ", text)
+    text = _re.sub(r"\s*＝\s*", " 等于 ", text)      # fullwidth
+    text = _re.sub(r"\s*＋\s*", " 加 ", text)        # fullwidth
+    text = _re.sub(r"(?<=\d)\s*°\s*C", " 摄氏度", text)
+    text = _re.sub(r"(?<=\d)\s*°", " 度", text)
+    # Year/number ranges: 1965–1971 → 1965 到 1971
+    text = _re.sub(r"(?<=\d)\s*[–—]\s*(?=\d)", " 到 ", text)
+    text = _re.sub(r"[─━―]{2,}", " ", text)          # decorative rules
+    text = _re.sub(r"\s*[•·]\s*(?=[A-Za-z\u4e00-\u9fff])", "，", text)
+    text = _re.sub(r"(?<=\d)\s*→\s*(?=\d)", " 到 ", text)
+    text = _re.sub(r"\s*[→←⇒⇐↔⇔]\s*", "，", text)   # flow arrows → pause
+    text = _re.sub(r"\s*[↗↘↖↙↑↓]\s*", " ", text)     # decorative (外链标记)
+    # Strip decorative icons. Azure narrates them by name (🌀 → "龙卷风"),
+    # which derails a heading like "🌀 越界 · 跨学科的联想". Runs AFTER the
+    # ✓/✗/⚠ replacements above, which need those glyphs intact.
+    text = _re.sub(
+        r"[\U0001F300-\U0001FAFF\u2300-\u23FF\u2600-\u27BF"
+        r"\u2B00-\u2BFF\uFE0F\u200D]",
+        "", text,
+    )
+    # Circled numerals are step markers; spell them out as numbering.
+    for _i, _ch in enumerate("①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳", 1):
+        text = text.replace(_ch, f"{_i}、")
+
+    return text
 
 
 def ssml_escape(text: str) -> str:
@@ -197,7 +289,27 @@ def collect_groups(soup) -> list[tuple]:
     """
     mode = detect_page_mode(soup)
     body = soup.body or soup
-    h2s = [h for h in body.find_all("h2") if not h.find_parent(class_="mmd-controls")]
+    # Section boundaries: h2 elements + <div class="card"> (philosophy pages
+    # use per-thinker cards, sometimes alongside a trailing h2 like 深入思考).
+    # Collect both, then sort by DOM order.
+    candidates = list(body.find_all(["h2", "h3", "h4"]))
+    candidates += list(body.find_all("div", class_=lambda c: c and "card" in c))
+    candidates = [el for el in candidates if not el.find_parent(class_="mmd-controls")]
+    # DOM order: use sourceline+sourcepos if available, else find_all() order
+    candidate_ids = set(id(c) for c in candidates)
+    seen = set()
+    h2s = []
+    for el in body.find_all(True):
+        if id(el) in candidate_ids and id(el) not in seen:
+            # De-duplicate nested boundaries: if ANY ancestor is a
+            # candidate, keep only the outer. Prevents inner h3 titles
+            # inside cards (buddhism .sutra-card > .section > h3, or
+            # philosophy card > h2) from over-splitting the audio.
+            outer = el.find_parent(lambda p: id(p) in candidate_ids)
+            if outer is not None:
+                continue
+            seen.add(id(el))
+            h2s.append(el)
     if not h2s:
         return []  # no model boundaries — page isn't a content page
 
@@ -215,34 +327,94 @@ def collect_groups(soup) -> list[tuple]:
         bins_split: list[list[str]] = [[] for _ in range(n_groups)]
         h2_set = set(id(h) for h in h2s)
         h2_seen = 0
+        # If we capture an outer container div (because it carries bare text
+        # mixed with block children), skip everything inside it so the same
+        # text isn't narrated twice.
+        skip_descendants_of: set[int] = set()
         # Readable text-bearing tags. Skip nav/controls and obviously decorative bits.
         for node in body.descendants:
             if id(node) in h2_set:
                 h2_seen += 1
             if not hasattr(node, "name") or node.name not in NARRATION_TAGS:
                 continue
+            if skip_descendants_of and any(
+                id(anc) in skip_descendants_of for anc in node.parents
+            ):
+                continue
             if node.find_parent("nav") or node.find_parent(class_="mmd-controls"):
                 continue
             # Skip elements inside a diagram/SVG, footers, anything purely decorative
             if node.find_parent("svg") or node.find_parent("style") or node.find_parent("script"):
                 continue
-            # Only direct visible text — skip elements that wrap richer structures
-            # whose text we already collected from children
+            # Only direct visible text — skip divs that WRAP block-level children
+            # (their text is captured via those inner elements). Include divs whose
+            # direct children are inline only (bare text, <strong>, <em>, <span>) —
+            # these are "leaf" divs holding real content.
             classes = node.get("class") or []
-            if node.name == "div" and not any(
-                c in classes
-                for c in ("prompt-item", "prompt-block", "prompt-box", "subtitle", "label",
-                          "section-label", "example-label", "lang", "english-summary")
-            ):
-                continue
+            _BLOCK_TAGS = ("div", "p", "h1", "h2", "h3", "h4", "h5", "h6",
+                           "ul", "ol", "li", "section", "article", "table",
+                           "tr", "td", "th", "pre", "blockquote")
+            if node.name == "div":
+                has_block_children = any(
+                    getattr(child, "name", None) in _BLOCK_TAGS
+                    for child in node.children
+                )
+                # If the div has block children but ALSO carries direct text
+                # nodes with content (e.g. <div class="tryit"><div class="label">
+                # THIS WEEK</div>bare instruction text<br/>思考：...</div>), keep
+                # it — that bare text is not covered by any child element.
+                has_direct_text = any(
+                    isinstance(child, NavigableString)
+                    and not isinstance(child, Comment)
+                    and str(child).strip()
+                    for child in node.children
+                )
+                if has_block_children and not has_direct_text:
+                    continue
+                if has_block_children and has_direct_text:
+                    # Captured this outer container; suppress its children so
+                    # inner leaf divs (e.g. <div class="label">THIS WEEK</div>)
+                    # aren't re-narrated.
+                    skip_descendants_of.add(id(node))
+            # Inline <span> is normally covered by its parent (a <p>, heading,
+            # or leaf div already narrates it). The one case it is NOT: a span
+            # sitting directly inside a div that has block children — that div
+            # gets skipped as a wrapper, and no block child contains the span.
+            # e.g. <div class="sec"><span class="label">机制解读</span><p>…</p></div>
+            # A lead-in label sitting directly inside a wrapper div is the one
+            # inline element nothing else covers, e.g.
+            #   <div class="tradeoff"><strong>三种 agent 执行模型：</strong><ul>…
+            # The <ul> items get read, the heading above them would be lost.
+            if node.name in ("span", "strong", "b"):
+                par = node.parent
+                if par is None or par.name != "div":
+                    continue
+                if not any(
+                    getattr(ch, "name", None) in _BLOCK_TAGS for ch in par.children
+                ):
+                    continue
+
             # Skip elements explicitly tagged as the opposite language
             if lang == "zh" and "en" in classes:
                 continue
             if lang == "en" and "zh" in classes:
                 continue
-            text = node.get_text().strip()
+            text = visible_text(node).strip()
             if not text:
                 continue
+            # <ol><li> numbering is painted by the browser, absent from the DOM
+            # text — so a "7 步清单" is read as one run-on with no step markers.
+            if node.name == "li":
+                ol = node.find_parent("ol")
+                if ol is not None:
+                    idx = ol.find_all("li", recursive=False).index(node) + 1 \
+                          if node in ol.find_all("li", recursive=False) else None
+                    if idx:
+                        text = f"第{idx}，{text}"
+            # In a <dl> glossary, <dt> is the term and <dd> its definition;
+            # a trailing colon after the term stops "Workflow 预定义…" running on.
+            if node.name == "dt":
+                text = text + "："
             # Skip prompt-box etc. whose text is clearly the wrong language
             # (e.g. "English Prompt" boxes inside a zh page with no `en` class)
             if "prompt-box" in classes or "prompt-block" in classes or "prompt-item" in classes:
@@ -398,6 +570,10 @@ def process_page(
                 skipped_lang += 1
                 continue
 
+            # Hash the RAW text on purpose: normalisation rules keep evolving
+            # (icons, ✓/✗, math symbols) and hashing their output would silently
+            # invalidate — and re-bake — every existing segment on the next push.
+            # Old audio therefore stays as baked; new pages get current rules.
             digest = hash_text(text)
             # SPLIT mode: each file is single-language, JS reads `data-tts`.
             # FULL mode: file holds both, JS reads `data-tts-{lang}`.
@@ -465,8 +641,15 @@ def main():
     if args.files:
         files = [Path(f) if Path(f).is_absolute() else REPO_DIR / f for f in args.files]
     else:
+        # Every content page, whatever the naming scheme. Sites vary:
+        # foo-day12.html, foo-paper3.html, entropy.html, ref-thalamus.html.
+        # Excludes the English mirrors and index/landing pages.
         files = sorted(
-            p for p in REPO_DIR.iterdir() if re.match(r".+-day\d+\.html$", p.name)
+            p for p in REPO_DIR.iterdir()
+            if p.suffix == ".html"
+            and not p.name.endswith(".en.html")
+            and not p.name.startswith("index.")
+            and not p.name.endswith("-index.html")
         )
 
     for path in files:
