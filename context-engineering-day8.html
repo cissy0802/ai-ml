@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：Context 工程 — Day 8</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,51 +60,42 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：Context 工程</h1>
-  <div class="meta">Day 8 · 2026-05-25</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="3658faeb7ffa2767">AI/ML 详解：Context 工程</h1>
+<div class="meta">Day 8 · 2026-05-25</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
-  <a href="https://cissy0802.github.io/super-individual-weekly/context-eng-day2.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+<a href="https://cissy0802.github.io/super-individual-weekly/context-eng-day2.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
     工程对应 → super-individual D2: Context Engineering（lost-in-the-middle、信息排布）
   </a>
 </div>
-
-
 <!-- 1. Context Window -->
-<div class="card">
-  <h2>上下文窗口<span class="en">Context Window</span></h2>
-  <div class="tags"><span class="tag">硬件约束</span><span class="tag purple">注意力</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>Context window 就是模型的"<b>工作集（working set）</b>"——类似进程的虚拟内存：你以为它能装无限东西，实际上有硬上限，并且<b>越靠近上限性能越糟</b>。后端世界对应：缓冲池（buffer pool）、SQL 的 work_mem、CPU 的 L1/L2 cache——尺寸都是 trade-off，不是"越大越好"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Transformer 的 attention 是 O(n²) 计算复杂度——每个 token 都要和窗口里所有 token 算相关性。窗口 1M token 意味着 1M × 1M = 一万亿次相似度计算，显存按 KV cache 线性增长（每个 token 的 Key/Value 矩阵都要存）。所以窗口尺寸是<b>硬件成本</b>问题，不是"想多大就多大"。</p>
-    <p style="margin-top:8px">2026 年主流模型窗口：Claude 4.7 / GPT-5 ~200K-1M、Gemini 2.5 ~2M、开源模型多在 32K-128K。但<b>核心反直觉</b>是 Liu et al. 2023 的发现——"<b>Lost in the Middle</b>"：把关键信息放在 100K 上下文的开头或结尾，准确率 ~80%；放在中间，掉到 ~50%。注意力分布是 U 形的：</p>
-
+<div class="card" data-tts="83baf79d266b1cf9">
+<h2>上下文窗口<span class="en">Context Window</span></h2>
+<div class="tags"><span class="tag">硬件约束</span><span class="tag purple">注意力</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>Context window 就是模型的"<b>工作集（working set）</b>"——类似进程的虚拟内存：你以为它能装无限东西，实际上有硬上限，并且<b>越靠近上限性能越糟</b>。后端世界对应：缓冲池（buffer pool）、SQL 的 work_mem、CPU 的 L1/L2 cache——尺寸都是 trade-off，不是"越大越好"。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Transformer 的 attention 是 O(n²) 计算复杂度——每个 token 都要和窗口里所有 token 算相关性。窗口 1M token 意味着 1M × 1M = 一万亿次相似度计算，显存按 KV cache 线性增长（每个 token 的 Key/Value 矩阵都要存）。所以窗口尺寸是<b>硬件成本</b>问题，不是"想多大就多大"。</p>
+<p style="margin-top:8px">2026 年主流模型窗口：Claude 4.7 / GPT-5 ~200K-1M、Gemini 2.5 ~2M、开源模型多在 32K-128K。但<b>核心反直觉</b>是 Liu et al. 2023 的发现——"<b>Lost in the Middle</b>"：把关键信息放在 100K 上下文的开头或结尾，准确率 ~80%；放在中间，掉到 ~50%。注意力分布是 U 形的：</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">关键信息位置 → 模型召回率</span><br>
-开头 <span class="bar" style="width:80px;height:24px"></span> 80%<br>
-1/4 处 <span class="bar" style="width:60px;height:24px;opacity:0.7"></span> 60%<br>
-中间 <span class="bar" style="width:48px;height:24px;opacity:0.55"></span> 48%（最低谷）<br>
-3/4 处 <span class="bar" style="width:65px;height:24px;opacity:0.75"></span> 65%<br>
-结尾 <span class="bar" style="width:82px;height:24px"></span> 82%<br>
+<span style="color:#8b92a8">关键信息位置 → 模型召回率</span><br/>
+开头 <span class="bar" style="width:80px;height:24px"></span> 80%<br/>
+1/4 处 <span class="bar" style="width:60px;height:24px;opacity:0.7"></span> 60%<br/>
+中间 <span class="bar" style="width:48px;height:24px;opacity:0.55"></span> 48%（最低谷）<br/>
+3/4 处 <span class="bar" style="width:65px;height:24px;opacity:0.75"></span> 65%<br/>
+结尾 <span class="bar" style="width:82px;height:24px"></span> 82%<br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ U 型曲线：长上下文不等于全部被看到</span>
 </div>
-
-    <p style="margin-top:14px">即使是 2025 年宣传"100% needle-in-haystack 召回"的新模型，在<b>多 needle + 推理</b>任务上依然有显著的位置偏差。把 context window 当成"无限注意力"是常见的认知误区。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">即使是 2025 年宣传"100% needle-in-haystack 召回"的新模型，在<b>多 needle + 推理</b>任务上依然有显著的位置偏差。把 context window 当成"无限注意力"是常见的认知误区。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()  <span class="cmt"># 需要 ANTHROPIC_API_KEY</span>
 
@@ -119,50 +111,43 @@ resp = client.messages.<span class="fn">create</span>(
     }]
 )
 <span class="fn">print</span>(resp.usage.input_tokens, <span class="str">"input tokens"</span>)  <span class="cmt"># 监控用量</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"我用 1M 窗口塞所有公司文档，就不用 RAG 了"——错。塞 200K token 一次调用既贵（成本随 token 线性涨）又慢（首字延迟随输入翻倍），中间内容召回率还差。Anthropic、Google 自己都明确推荐：<b>RAG + 短上下文 &gt; 直接长上下文</b>，尤其是文档库稳定、查询多样的场景。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：读论文时<b>不要</b>把整本书丢给模型，而是把<b>当前章节 + 摘要 + 关键问题</b>组成 8K-32K 的精炼上下文。质量比塞 200K 高得多，单次成本降 10 倍。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 Context window 是工作集，不是数据库。优化目标是"放对的东西"，不是"放更多东西"。<br>🤔 你过去把"上下文越长 = 模型越懂"当默认假设时，错过了哪些更便宜的工程方案？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"我用 1M 窗口塞所有公司文档，就不用 RAG 了"——错。塞 200K token 一次调用既贵（成本随 token 线性涨）又慢（首字延迟随输入翻倍），中间内容召回率还差。Anthropic、Google 自己都明确推荐：<b>RAG + 短上下文 &gt; 直接长上下文</b>，尤其是文档库稳定、查询多样的场景。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：读论文时<b>不要</b>把整本书丢给模型，而是把<b>当前章节 + 摘要 + 关键问题</b>组成 8K-32K 的精炼上下文。质量比塞 200K 高得多，单次成本降 10 倍。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 Context window 是工作集，不是数据库。优化目标是"放对的东西"，不是"放更多东西"。<br/>🤔 你过去把"上下文越长 = 模型越懂"当默认假设时，错过了哪些更便宜的工程方案？</div>
+</div>
+</div>
 <!-- 2. Context Caching -->
-<div class="card">
-  <h2>上下文缓存<span class="en">Context Caching / Prompt Caching</span></h2>
-  <div class="tags"><span class="tag">优化</span><span class="tag orange">成本</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>把 prompt 当成 HTTP 请求来看：不变的 <b>system prompt + 工具 schema + few-shot 例子</b> 就是"静态资源"，每次请求都重新跑 attention 等价于<b>不开 CDN</b>。Context caching = 把这段 prefix 的 KV cache 持久化到 GPU 显存或快速 SSD，下次命中时直接复用——和 Redis 缓存、HTTP 304、Postgres prepared statement 是同一类东西。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>典型 Agent 应用的 prompt 80% 是不变的（角色定义 + 工具描述 + 历史对话），只有最后用户问题在变。但 LLM 默认每次都从头跑 prefill——对一个 50K token 的固定 prefix 来说，这就是 50K 次 attention 白算。Caching 的核心机制：</p>
-    <ul>
-      <li><b>命中条件</b>：前缀必须<b>逐 token 完全一致</b>。改一个标点都会失效——和 Redis 的 key 哈希一样脆弱；</li>
-      <li><b>顺序至关重要</b>：不变内容必须放<b>最前面</b>，变动内容放最后。把 user query 插在 system prompt 中间 = cache 永远 miss；</li>
-      <li><b>定价结构</b>：Anthropic prompt caching 写入比正常贵 25%，命中读取便宜 90%。一次写多次读才合算——访问 ≥2 次就回本；</li>
-      <li><b>TTL</b>：Anthropic 默认 5 分钟，可买 1 小时长 TTL；OpenAI 自动缓存约 5-10 分钟，不可控但免费。</li>
-    </ul>
-
+<div class="card" data-tts="ff0dad838d8e12bc">
+<h2>上下文缓存<span class="en">Context Caching / Prompt Caching</span></h2>
+<div class="tags"><span class="tag">优化</span><span class="tag orange">成本</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>把 prompt 当成 HTTP 请求来看：不变的 <b>system prompt + 工具 schema + few-shot 例子</b> 就是"静态资源"，每次请求都重新跑 attention 等价于<b>不开 CDN</b>。Context caching = 把这段 prefix 的 KV cache 持久化到 GPU 显存或快速 SSD，下次命中时直接复用——和 Redis 缓存、HTTP 304、Postgres prepared statement 是同一类东西。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>典型 Agent 应用的 prompt 80% 是不变的（角色定义 + 工具描述 + 历史对话），只有最后用户问题在变。但 LLM 默认每次都从头跑 prefill——对一个 50K token 的固定 prefix 来说，这就是 50K 次 attention 白算。Caching 的核心机制：</p>
+<ul>
+<li><b>命中条件</b>：前缀必须<b>逐 token 完全一致</b>。改一个标点都会失效——和 Redis 的 key 哈希一样脆弱；</li>
+<li><b>顺序至关重要</b>：不变内容必须放<b>最前面</b>，变动内容放最后。把 user query 插在 system prompt 中间 = cache 永远 miss；</li>
+<li><b>定价结构</b>：Anthropic prompt caching 写入比正常贵 25%，命中读取便宜 90%。一次写多次读才合算——访问 ≥2 次就回本；</li>
+<li><b>TTL</b>：Anthropic 默认 5 分钟，可买 1 小时长 TTL；OpenAI 自动缓存约 5-10 分钟，不可控但免费。</li>
+</ul>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">Prompt 结构（顺序极重要）</b><br>
-<span class="box g">① system prompt</span><span class="arrow">+</span><span class="box g">② tools schema</span><span class="arrow">+</span><span class="box g">③ few-shot</span><span class="arrow">+</span><span class="box o">④ 对话历史</span><span class="arrow">+</span><span class="box p">⑤ user query</span><br>
-<span style="color:#5a6378">└─────── 缓存命中（KV 复用，跳过 prefill）───────┘└── 每次必须重算 ──┘</span><br><br>
+<b style="color:#7b61ff">Prompt 结构（顺序极重要）</b><br/>
+<span class="box g">① system prompt</span><span class="arrow">+</span><span class="box g">② tools schema</span><span class="arrow">+</span><span class="box g">③ few-shot</span><span class="arrow">+</span><span class="box o">④ 对话历史</span><span class="arrow">+</span><span class="box p">⑤ user query</span><br/>
+<span style="color:#5a6378">└─────── 缓存命中（KV 复用，跳过 prefill）───────┘└── 每次必须重算 ──┘</span><br/><br/>
 <b style="color:#ff8e8e">反模式：</b><span class="box p">user query</span><span class="arrow">→</span><span class="box g">system prompt</span> = cache 永远 miss
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()
 
@@ -180,44 +165,38 @@ resp = client.messages.<span class="fn">create</span>(
 )
 <span class="fn">print</span>(resp.usage.cache_creation_input_tokens)  <span class="cmt"># 第一次：写入</span>
 <span class="fn">print</span>(resp.usage.cache_read_input_tokens)      <span class="cmt"># 后续：命中（便宜 90%）</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"我把对话历史也加上 cache_control 就更省钱"——错。对话历史每轮都在变，缓存命中率几乎为零，反而每次都按 +25% 写入价付费。规则：<b>只缓存真正不变的前缀</b>。判断方法：你能预测下次请求时这段内容一字不差吗？不能就别缓存。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：把孩子的<b>学习风格画像 + 历次错题 + 常用知识框架</b>（合计 ~20K token）做成 system prompt 缓存，每次问"今天数学这道题怎么讲"时只付 user query 的钱。一个月省下的 token 费用是肉眼可见的。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 Caching 是 prompt 工程里最简单、最被低估的杠杆——零智力投入，立刻降本 50-90%。<br>🤔 你的 AI 工具链里有哪些 prompt 是"几乎不变 + 反复用"的？它们现在被缓存了吗？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"我把对话历史也加上 cache_control 就更省钱"——错。对话历史每轮都在变，缓存命中率几乎为零，反而每次都按 +25% 写入价付费。规则：<b>只缓存真正不变的前缀</b>。判断方法：你能预测下次请求时这段内容一字不差吗？不能就别缓存。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：把孩子的<b>学习风格画像 + 历次错题 + 常用知识框架</b>（合计 ~20K token）做成 system prompt 缓存，每次问"今天数学这道题怎么讲"时只付 user query 的钱。一个月省下的 token 费用是肉眼可见的。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 Caching 是 prompt 工程里最简单、最被低估的杠杆——零智力投入，立刻降本 50-90%。<br/>🤔 你的 AI 工具链里有哪些 prompt 是"几乎不变 + 反复用"的？它们现在被缓存了吗？</div>
+</div>
+</div>
 <!-- 3. Compression -->
-<div class="card">
-  <h2>上下文压缩<span class="en">Context Compression</span></h2>
-  <div class="tags"><span class="tag">数据流</span><span class="tag purple">总结</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>长会话的上下文管理 = 数据库的<b>日志滚动（log rotation）</b> + <b>compaction</b>。MySQL binlog 不会无限增长——超过阈值就 rotate + 压缩 + 归档。LLM 上下文同理：对话越长 token 越多，压缩是工程必需，不是可选项。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>当对话超过 50K-100K token，三个问题一起爆：<b>窗口溢出</b>（hard limit）、<b>注意力稀释</b>（lost in the middle）、<b>每轮成本线性涨</b>（所有历史每次都重算）。四类主流压缩策略，按"信息保真度 vs 成本"递增：</p>
-    <ul>
-      <li><b>① Sliding Window</b>——只保留最近 N 轮。最便宜但最丢信息；适合"无需长期记忆"的短任务；</li>
-      <li><b>② Summarization</b>——用 LLM 把旧消息总结成 200-500 token 摘要，替换原文。<b>主流选择</b>；要注意"<b>总结的总结</b>"会逐渐失真；</li>
-      <li><b>③ Hierarchical</b>——多层摘要：最近 5 轮全文 + 5-20 轮分组摘要 + 20+ 轮一句话摘要。类似 LSM tree 的分层结构；</li>
-      <li><b>④ Selective / RAG-style</b>——把对话历史<b>存外部 vector DB</b>，每轮根据当前问题语义检索相关片段。最贵但最准。</li>
-    </ul>
-    <p style="margin-top:8px">Anthropic 2025 推出的 <b>Memory 工具</b>和<b>自动 compaction</b>把这套机制内置——上下文接近上限时自动总结老消息，不需要应用层手写。但<b>什么该被压缩</b>、<b>压缩到什么粒度</b>仍然是产品决策，不是默认值能解决的。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="99b1f4f061b39cee">
+<h2>上下文压缩<span class="en">Context Compression</span></h2>
+<div class="tags"><span class="tag">数据流</span><span class="tag purple">总结</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>长会话的上下文管理 = 数据库的<b>日志滚动（log rotation）</b> + <b>compaction</b>。MySQL binlog 不会无限增长——超过阈值就 rotate + 压缩 + 归档。LLM 上下文同理：对话越长 token 越多，压缩是工程必需，不是可选项。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>当对话超过 50K-100K token，三个问题一起爆：<b>窗口溢出</b>（hard limit）、<b>注意力稀释</b>（lost in the middle）、<b>每轮成本线性涨</b>（所有历史每次都重算）。四类主流压缩策略，按"信息保真度 vs 成本"递增：</p>
+<ul>
+<li><b>① Sliding Window</b>——只保留最近 N 轮。最便宜但最丢信息；适合"无需长期记忆"的短任务；</li>
+<li><b>② Summarization</b>——用 LLM 把旧消息总结成 200-500 token 摘要，替换原文。<b>主流选择</b>；要注意"<b>总结的总结</b>"会逐渐失真；</li>
+<li><b>③ Hierarchical</b>——多层摘要：最近 5 轮全文 + 5-20 轮分组摘要 + 20+ 轮一句话摘要。类似 LSM tree 的分层结构；</li>
+<li><b>④ Selective / RAG-style</b>——把对话历史<b>存外部 vector DB</b>，每轮根据当前问题语义检索相关片段。最贵但最准。</li>
+</ul>
+<p style="margin-top:8px">Anthropic 2025 推出的 <b>Memory 工具</b>和<b>自动 compaction</b>把这套机制内置——上下文接近上限时自动总结老消息，不需要应用层手写。但<b>什么该被压缩</b>、<b>压缩到什么粒度</b>仍然是产品决策，不是默认值能解决的。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">def</span> <span class="fn">compress_history</span>(messages, max_tokens=8000):
     <span class="cmt"># 简单分层：最近 6 轮保全文，更早的总结成一段</span>
     recent = messages[-6:]
@@ -236,50 +215,41 @@ resp = client.messages.<span class="fn">create</span>(
     <span class="cmt"># 拼回：摘要 + 最近原文（这样最近上下文细节不丢）</span>
     <span class="kw">return</span> [{<span class="str">"role"</span>: <span class="str">"system"</span>,
              <span class="str">"content"</span>: <span class="fn">f</span><span class="str">"&lt;earlier_conversation_summary&gt;\n{summary}\n&lt;/earlier_conversation_summary&gt;"</span>}] + recent</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"压缩一切，省 token 就是赢"——错。把<b>用户的明确指令</b>（"千万别用 X 库"）、<b>关键数字</b>、<b>已经确认过的决策</b>压进 5-bullet 摘要 = 几乎一定丢。经验法则：(1) 用户的<b>原话偏好</b>逐字保留；(2) 数字/代码/ID 不压；(3) "讨论过的但没采纳的方案"可以压。压缩是有损算法，要知道你愿意丢什么。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：和 Claude 协作的"<b>长期项目笔记本</b>"——每周让模型总结上周对话成 200 字"决策清单 + 未解问题 + 关键原话"，旧消息归档到 markdown 文件。一年下来主对话窗口始终轻盈，但历史完整可回溯。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 压缩不是"省钱小技巧"，是有损编码的工程决策——必须显式声明保留什么、丢弃什么。<br>🤔 你和 AI 的长对话里，哪些信息<b>必须逐字保留</b>，哪些可以变成一句话摘要？这个清单本身就是你的"个人 AI 协议"。</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"压缩一切，省 token 就是赢"——错。把<b>用户的明确指令</b>（"千万别用 X 库"）、<b>关键数字</b>、<b>已经确认过的决策</b>压进 5-bullet 摘要 = 几乎一定丢。经验法则：(1) 用户的<b>原话偏好</b>逐字保留；(2) 数字/代码/ID 不压；(3) "讨论过的但没采纳的方案"可以压。压缩是有损算法，要知道你愿意丢什么。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：和 Claude 协作的"<b>长期项目笔记本</b>"——每周让模型总结上周对话成 200 字"决策清单 + 未解问题 + 关键原话"，旧消息归档到 markdown 文件。一年下来主对话窗口始终轻盈，但历史完整可回溯。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 压缩不是"省钱小技巧"，是有损编码的工程决策——必须显式声明保留什么、丢弃什么。<br/>🤔 你和 AI 的长对话里，哪些信息<b>必须逐字保留</b>，哪些可以变成一句话摘要？这个清单本身就是你的"个人 AI 协议"。</div>
+</div>
+</div>
 <!-- 4. Memory Management -->
-<div class="card">
-  <h2>Memory 管理<span class="en">Memory Management</span></h2>
-  <div class="tags"><span class="tag">架构</span><span class="tag purple">状态</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>LLM 本身是<b>无状态的</b>——每次 API 调用都是一次冷启动。要让它"记得你"，必须像 OS 设计内存层级一样，给它配一套<b>分层存储</b>：CPU register（当前 context）→ L1/L2 cache（缓存的 prefix）→ RAM（最近会话）→ disk（向量库 + 笔记）。"Memory 管理"就是设计这套层级。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>把"过去三个月每次对话都塞 context"既不可能（窗口爆）也无意义（lost in middle）。认知科学借来的四类记忆，对应不同存储策略：</p>
-
+<div class="card" data-tts="641fec4150f03de0">
+<h2>Memory 管理<span class="en">Memory Management</span></h2>
+<div class="tags"><span class="tag">架构</span><span class="tag purple">状态</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>LLM 本身是<b>无状态的</b>——每次 API 调用都是一次冷启动。要让它"记得你"，必须像 OS 设计内存层级一样，给它配一套<b>分层存储</b>：CPU register（当前 context）→ L1/L2 cache（缓存的 prefix）→ RAM（最近会话）→ disk（向量库 + 笔记）。"Memory 管理"就是设计这套层级。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>把"过去三个月每次对话都塞 context"既不可能（窗口爆）也无意义（lost in middle）。认知科学借来的四类记忆，对应不同存储策略：</p>
 <div class="diagram" style="margin-top:8px">
-<b style="color:#7b61ff">LLM Memory 层级（对应 OS 类比）</b><br><br>
-<span class="box">① Working Memory</span> <span style="color:#5a6378">≈ CPU register</span> — 当前 context window 内的内容<br>
-<span class="box g">② Procedural</span> <span style="color:#5a6378">≈ ROM / firmware</span> — 长期不变的 system prompt、工作流（缓存友好）<br>
-<span class="box o">③ Episodic</span> <span style="color:#5a6378">≈ RAM / SSD</span> — 过去对话历史，按时间索引，必要时检索<br>
-<span class="box p">④ Semantic</span> <span style="color:#5a6378">≈ knowledge base</span> — 从对话提炼出的<b>事实</b>，存 vector DB（"用户讨厌 emoji"、"项目截止 6/30"）<br><br>
+<b style="color:#7b61ff">LLM Memory 层级（对应 OS 类比）</b><br/><br/>
+<span class="box">① Working Memory</span> <span style="color:#5a6378">≈ CPU register</span> — 当前 context window 内的内容<br/>
+<span class="box g">② Procedural</span> <span style="color:#5a6378">≈ ROM / firmware</span> — 长期不变的 system prompt、工作流（缓存友好）<br/>
+<span class="box o">③ Episodic</span> <span style="color:#5a6378">≈ RAM / SSD</span> — 过去对话历史，按时间索引，必要时检索<br/>
+<span class="box p">④ Semantic</span> <span style="color:#5a6378">≈ knowledge base</span> — 从对话提炼出的<b>事实</b>，存 vector DB（"用户讨厌 emoji"、"项目截止 6/30"）<br/><br/>
 <span style="color:#8b92a8">读写路径：每轮 query → 检索 ③④ 相关片段 → 注入 ① → 模型推理 → 抽取新事实回写 ④</span>
 </div>
-
-    <p style="margin-top:14px">主流实现：<b>MemGPT / Letta</b> 用类操作系统的"分页"机制让 LLM 自己决定什么换入换出；<b>mem0 / LangMem</b> 把 episodic + semantic 抽象成 SDK；OpenAI ChatGPT 的"记忆"、Claude 的 Memory 工具是产品化版本。共同模式：<b>提取（extract）→ 存储（store）→ 检索（retrieve）→ 注入（inject）</b>四步。</p>
-
-    <p style="margin-top:10px">关键工程决策：<b>什么值得记？</b>——不是"对话里说过的都记"，而是用一个抽取 LLM 判断这条信息<b>是否会影响未来回答</b>。Mem0 论文 (2024) 显示，主动抽取 + 去重的 memory 比"全文存档 + 检索"准确率高 26%、延迟低 91%。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">主流实现：<b>MemGPT / Letta</b> 用类操作系统的"分页"机制让 LLM 自己决定什么换入换出；<b>mem0 / LangMem</b> 把 episodic + semantic 抽象成 SDK；OpenAI ChatGPT 的"记忆"、Claude 的 Memory 工具是产品化版本。共同模式：<b>提取（extract）→ 存储（store）→ 检索（retrieve）→ 注入（inject）</b>四步。</p>
+<p style="margin-top:10px">关键工程决策：<b>什么值得记？</b>——不是"对话里说过的都记"，而是用一个抽取 LLM 判断这条信息<b>是否会影响未来回答</b>。Mem0 论文 (2024) 显示，主动抽取 + 去重的 memory 比"全文存档 + 检索"准确率高 26%、延迟低 91%。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> mem0 <span class="kw">import</span> Memory  <span class="cmt"># pip install mem0ai</span>
 m = Memory()
 
@@ -297,60 +267,49 @@ resp = client.messages.<span class="fn">create</span>(
     system=<span class="fn">f</span><span class="str">"&lt;known_about_user&gt;\n{ctx}\n&lt;/known_about_user&gt;"</span>,
     messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"周六给孩子做生日蛋糕，推荐配方"</span>}])
 <span class="cmt"># → 模型会自动避开花生，知道孩子可能喜欢蓝色装饰</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"Memory 越多越聪明"——错。Memory 系统最大的失败模式是<b>污染</b>：错误事实（"用户讨厌 Python"——其实是某次气话）被持久化后，永久影响后续回答。生产经验：(1) 给 memory 打<b>置信度</b>分（明确陈述 &gt; 推断），(2) 让用户能<b>查看 + 删除</b>，(3) 定期跑 "memory 审计"——LLM 评估每条 memory 是否仍然有效。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：建一个<b>"BigCat 操作手册" memory</b>——你的工作偏好（深色主题、精炼输出、不要表情）、家庭关键事实（孩子年龄段、过敏、兴趣）、思考框架（佛学/复杂性科学/分布式系统类比偏好）。让所有 AI 工具读这份共享 memory，跨工具一致体验，比每次重复说一遍高效得多。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 Context 是工作集，Memory 才是持久存储——把两者混为一谈是 AI 应用最常见的架构错误。<br>🤔 如果把"和 AI 共事一年"看作设计一个有状态系统，你的"数据 schema"长什么样？哪些字段需要持久化，哪些只是 session state？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"Memory 越多越聪明"——错。Memory 系统最大的失败模式是<b>污染</b>：错误事实（"用户讨厌 Python"——其实是某次气话）被持久化后，永久影响后续回答。生产经验：(1) 给 memory 打<b>置信度</b>分（明确陈述 &gt; 推断），(2) 让用户能<b>查看 + 删除</b>，(3) 定期跑 "memory 审计"——LLM 评估每条 memory 是否仍然有效。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：建一个<b>"BigCat 操作手册" memory</b>——你的工作偏好（深色主题、精炼输出、不要表情）、家庭关键事实（孩子年龄段、过敏、兴趣）、思考框架（佛学/复杂性科学/分布式系统类比偏好）。让所有 AI 工具读这份共享 memory，跨工具一致体验，比每次重复说一遍高效得多。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 Context 是工作集，Memory 才是持久存储——把两者混为一谈是 AI 应用最常见的架构错误。<br/>🤔 如果把"和 AI 共事一年"看作设计一个有状态系统，你的"数据 schema"长什么样？哪些字段需要持久化，哪些只是 session state？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/2307.03172" target="_blank">Liu et al. 2023 — Lost in the Middle</a> — 长上下文位置偏差的奠基性研究，必读</li>
-      <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching" target="_blank">Anthropic Prompt Caching 文档</a> — cache_control 用法、定价、最佳实践</li>
-      <li><a href="https://platform.openai.com/docs/guides/prompt-caching" target="_blank">OpenAI Prompt Caching</a> — 自动缓存机制说明</li>
-      <li><a href="https://arxiv.org/abs/2310.08560" target="_blank">MemGPT 论文 (2023)</a> — 把 OS 内存管理思想用于 LLM，开创性工作</li>
-      <li><a href="https://arxiv.org/abs/2504.19413" target="_blank">Mem0 论文 (2024)</a> — 实证 memory 抽取 vs 全文存档的效果差异</li>
-      <li><a href="https://www.anthropic.com/news/context-management" target="_blank">Anthropic Context Management</a> — 官方 compaction 与 Memory 工具说明</li>
-      <li><a href="https://lilianweng.github.io/posts/2023-06-23-agent/#memory" target="_blank">Lilian Weng — Agent Memory 章节</a> — 认知科学 → LLM memory 的优雅映射</li>
-      <li><a href="https://www.philschmid.de/context-engineering" target="_blank">Philipp Schmid — Context Engineering</a> — 2025 年这一概念走红的代表性博文</li>
-    </ul>
-  </div>
+<div class="card" data-tts="1f83564d0cd2a7e3" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/2307.03172" target="_blank">Liu et al. 2023 — Lost in the Middle</a> — 长上下文位置偏差的奠基性研究，必读</li>
+<li><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching" target="_blank">Anthropic Prompt Caching 文档</a> — cache_control 用法、定价、最佳实践</li>
+<li><a href="https://platform.openai.com/docs/guides/prompt-caching" target="_blank">OpenAI Prompt Caching</a> — 自动缓存机制说明</li>
+<li><a href="https://arxiv.org/abs/2310.08560" target="_blank">MemGPT 论文 (2023)</a> — 把 OS 内存管理思想用于 LLM，开创性工作</li>
+<li><a href="https://arxiv.org/abs/2504.19413" target="_blank">Mem0 论文 (2024)</a> — 实证 memory 抽取 vs 全文存档的效果差异</li>
+<li><a href="https://www.anthropic.com/news/context-management" target="_blank">Anthropic Context Management</a> — 官方 compaction 与 Memory 工具说明</li>
+<li><a href="https://lilianweng.github.io/posts/2023-06-23-agent/#memory" target="_blank">Lilian Weng — Agent Memory 章节</a> — 认知科学 → LLM memory 的优雅映射</li>
+<li><a href="https://www.philschmid.de/context-engineering" target="_blank">Philipp Schmid — Context Engineering</a> — 2025 年这一概念走红的代表性博文</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. "Prompt engineering"（Day 3）和"Context engineering"（今天）的关系是什么？后者是前者的升级，还是不同的层次？</summary><div>它们是<b>不同抽象层</b>，不是版本迭代。Prompt engineering 关注"<b>这一次 LLM 调用，prompt 怎么写最有效</b>"——CoT、few-shot、role play，本质是<b>单次推理的技巧</b>。Context engineering 关注"<b>跨多次调用、跨长时间，模型该看见什么</b>"——caching 策略、压缩策略、memory 架构，本质是<b>系统级数据流设计</b>。一个工程师可以是顶级 prompt engineer 但完全没思考过 context 架构（结果就是写出"单次 Demo 完美、跑一周就崩"的系统）；反之亦然。两者关系类似"<b>SQL 查询优化</b>" vs "<b>数据库 schema 设计</b>"——一个看 query，一个看 schema。BigCat 你的分布式背景在 context engineering 上是巨大优势：缓存一致性、数据生命周期、热/冷数据分层——这些经验直接可迁移。2024-2025 业界共识：模型能力到 Claude 4.7 / GPT-5 这个水平后，<b>应用质量的瓶颈从模型转移到 context engineering</b>，这是为什么"context engineering" 在 2025 年成为热词。</div></details>
-
-    <details><summary>2. Context caching 的 KV cache 在 GPU 显存有限的情况下也会被淘汰（eviction）。这和你熟悉的 Redis LRU / OS page replacement 算法有什么异同？设计你自己的 caching 策略时该考虑什么？</summary><div>相似点：都是<b>受限存储 + 热数据保留 + 冷数据淘汰</b>的经典缓存问题。Anthropic / OpenAI 的实现细节没完全公开，但行业普遍用 LRU 或 LFU 变种 + 显式 TTL。差异点：(a) <b>淘汰粒度不同</b>——Redis 按 key 整体淘汰，KV cache 按 prompt prefix 的<b>哈希链</b>淘汰，prefix 不一致就部分失效；(b) <b>写入成本不对称</b>——Redis 写入和读取成本接近，KV cache 写入贵 25%、读取便宜 90%，<b>读写比</b>对 ROI 影响巨大；(c) <b>外部不可控</b>——你不知道 provider 端 GPU 当前负载，连续两次同样 prompt 可能一次命中一次不命中。设计策略：(1) <b>用 1-hour cache 而不是默认 5-min</b>——如果 prefix 调用频率 &gt; 每小时一次；(2) <b>预热</b>——业务低峰主动用一次"空"请求注入缓存；(3) <b>监控 cache_read / cache_creation 比率</b>，低于 5:1 就考虑下调缓存策略（写入贵了不划算）；(4) <b>稳定 prefix 边界</b>——别在 system prompt 里塞当前时间戳、随机 session_id 这种破坏哈希的内容。</div></details>
-
-    <details><summary>3. 长上下文（1M-2M token）vs RAG，2026 年应该怎么选？什么时候长上下文已经"够好"以致于不需要 RAG？</summary><div>2024 长上下文出现时业界喊"RAG is dead"，2025 年实践打脸——大部分场景两者并存。决策框架按三轴：(a) <b>知识库稳定性</b>——固定文档（一本书、一份合同）适合长上下文+caching；动态库（新闻、产品文档、用户笔记）必须 RAG；(b) <b>查询多样性</b>——查询和文档高度相关（"这份合同第 N 条说什么"）长上下文够；查询发散（"我们去年所有客户中类似 A 的有哪些"）RAG 必胜，因为长上下文里这种"全局聚合"召回率极低；(c) <b>成本预算</b>——长上下文每次调用 token 都是全量入参费，月活 10 万的应用不可承受；RAG 每次只查 5-10K，可线性扩展。<b>真正不需要 RAG 的场景</b>：单文档分析（论文阅读助手、合同审查）+ 文档 ≤ 500K token + 查询频率不高 + caching 能命中。其他场景都是 RAG + 长上下文混合：用 RAG 把候选缩到 50K-100K，再用长上下文一次性推理。BigCat 你的"读论文/读财报"场景属于第一类，"个人知识库长期查询"属于第二类——架构不同。</div></details>
-
-    <details><summary>4. Memory 系统会引入"<b>AI 记忆污染</b>"——错误事实被持久化后影响后续所有回答。这和数据库的"<b>脏数据治理</b>"有什么共通的工程模式？</summary><div>本质相同：<b>低质量写入 → 持久存储 → 污染下游推理</b>，是所有有状态系统的核心难题。可迁移的工程模式：(1) <b>写入前校验（schema validation）</b>——Memory 写入用一个独立 LLM 评估"这条事实<b>明确</b>还是<b>推断</b>？""是用户陈述还是 AI 推论？"，只持久化高置信度信息，对应数据库的 constraint check；(2) <b>软删除 + 审计日志</b>——never DROP，标记为 invalidated，保留追溯，方便事后调试为什么模型突然出错；(3) <b>定期 GC / 一致性检查</b>——周期性用 LLM 扫一遍 memory 库，发现矛盾事实（"用户喜欢深色"和"用户最近偏好亮色"）就提示用户/降权；(4) <b>用户可见 + 可编辑</b>——所有 memory 必须有 UI 让用户看到、删除、修改——这是<b>知情同意</b>也是脏数据治理；(5) <b>多源交叉验证</b>——重要事实（如医疗、法律相关）至少两次独立确认才持久化。Mem0 / Letta 已经在做前 3 条，但用户可见性和分级置信度普遍做得不好——这是 BigCat 你做"个人 AI 操作手册"时该自己 enforce 的。</div></details>
-
-    <details><summary>5. 如果把"和 AI 共事"看成认知外包，那么<b>哪些记忆应该外包给 AI，哪些必须留在你自己脑子里</b>？这个问题对个人成长有什么意涵？</summary><div>这是 context engineering 在个人层面最深刻的延伸。可外包的：(a) <b>事实记忆</b>（人名、日期、配置参数）——AI 比你强 100 倍，外包零损失；(b) <b>流程记忆</b>（如何配 Kubernetes、如何写 PR 模板）——AI + 文档完全够，但偶尔回顾保持手感；(c) <b>低频专业知识</b>（一年用一次的法律条款、报税流程）——纯外包合理。<b>必须留在自己脑子里</b>的：(i) <b>核心判断力</b>——"什么是好代码""什么是好决策"，外包了就丧失主体性；(ii) <b>情感联结</b>——和孩子的对话内容、家人的喜好细节，外包给 AI 等于把关系外包；(iii) <b>跨学科直觉</b>——你的佛学 × 分布式 × 复杂性科学的连接能力，本身是<b>组合记忆</b>，外包则 connection 消失；(iv) <b>身体性技能</b>——任何需要"做中学"的事，外包了就永远学不会。深层意涵：context engineering 不只是技术问题，它逼你回答"<b>我是谁</b>"——什么记忆构成"我"的不可外包部分。BigCat 你追求"AI 超级个体"的本质，是要清晰地知道：哪些扩展你（augment），哪些会替代你（atrophy）。这条界线是个体的"context schema 设计"——只有你能定。</div></details>
-  </div>
+<div class="card think" data-tts="1e33047aca6b3459" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. "Prompt engineering"（Day 3）和"Context engineering"（今天）的关系是什么？后者是前者的升级，还是不同的层次？</summary><div>它们是<b>不同抽象层</b>，不是版本迭代。Prompt engineering 关注"<b>这一次 LLM 调用，prompt 怎么写最有效</b>"——CoT、few-shot、role play，本质是<b>单次推理的技巧</b>。Context engineering 关注"<b>跨多次调用、跨长时间，模型该看见什么</b>"——caching 策略、压缩策略、memory 架构，本质是<b>系统级数据流设计</b>。一个工程师可以是顶级 prompt engineer 但完全没思考过 context 架构（结果就是写出"单次 Demo 完美、跑一周就崩"的系统）；反之亦然。两者关系类似"<b>SQL 查询优化</b>" vs "<b>数据库 schema 设计</b>"——一个看 query，一个看 schema。BigCat 你的分布式背景在 context engineering 上是巨大优势：缓存一致性、数据生命周期、热/冷数据分层——这些经验直接可迁移。2024-2025 业界共识：模型能力到 Claude 4.7 / GPT-5 这个水平后，<b>应用质量的瓶颈从模型转移到 context engineering</b>，这是为什么"context engineering" 在 2025 年成为热词。</div></details>
+<details><summary>2. Context caching 的 KV cache 在 GPU 显存有限的情况下也会被淘汰（eviction）。这和你熟悉的 Redis LRU / OS page replacement 算法有什么异同？设计你自己的 caching 策略时该考虑什么？</summary><div>相似点：都是<b>受限存储 + 热数据保留 + 冷数据淘汰</b>的经典缓存问题。Anthropic / OpenAI 的实现细节没完全公开，但行业普遍用 LRU 或 LFU 变种 + 显式 TTL。差异点：(a) <b>淘汰粒度不同</b>——Redis 按 key 整体淘汰，KV cache 按 prompt prefix 的<b>哈希链</b>淘汰，prefix 不一致就部分失效；(b) <b>写入成本不对称</b>——Redis 写入和读取成本接近，KV cache 写入贵 25%、读取便宜 90%，<b>读写比</b>对 ROI 影响巨大；(c) <b>外部不可控</b>——你不知道 provider 端 GPU 当前负载，连续两次同样 prompt 可能一次命中一次不命中。设计策略：(1) <b>用 1-hour cache 而不是默认 5-min</b>——如果 prefix 调用频率 &gt; 每小时一次；(2) <b>预热</b>——业务低峰主动用一次"空"请求注入缓存；(3) <b>监控 cache_read / cache_creation 比率</b>，低于 5:1 就考虑下调缓存策略（写入贵了不划算）；(4) <b>稳定 prefix 边界</b>——别在 system prompt 里塞当前时间戳、随机 session_id 这种破坏哈希的内容。</div></details>
+<details><summary>3. 长上下文（1M-2M token）vs RAG，2026 年应该怎么选？什么时候长上下文已经"够好"以致于不需要 RAG？</summary><div>2024 长上下文出现时业界喊"RAG is dead"，2025 年实践打脸——大部分场景两者并存。决策框架按三轴：(a) <b>知识库稳定性</b>——固定文档（一本书、一份合同）适合长上下文+caching；动态库（新闻、产品文档、用户笔记）必须 RAG；(b) <b>查询多样性</b>——查询和文档高度相关（"这份合同第 N 条说什么"）长上下文够；查询发散（"我们去年所有客户中类似 A 的有哪些"）RAG 必胜，因为长上下文里这种"全局聚合"召回率极低；(c) <b>成本预算</b>——长上下文每次调用 token 都是全量入参费，月活 10 万的应用不可承受；RAG 每次只查 5-10K，可线性扩展。<b>真正不需要 RAG 的场景</b>：单文档分析（论文阅读助手、合同审查）+ 文档 ≤ 500K token + 查询频率不高 + caching 能命中。其他场景都是 RAG + 长上下文混合：用 RAG 把候选缩到 50K-100K，再用长上下文一次性推理。BigCat 你的"读论文/读财报"场景属于第一类，"个人知识库长期查询"属于第二类——架构不同。</div></details>
+<details><summary>4. Memory 系统会引入"<b>AI 记忆污染</b>"——错误事实被持久化后影响后续所有回答。这和数据库的"<b>脏数据治理</b>"有什么共通的工程模式？</summary><div>本质相同：<b>低质量写入 → 持久存储 → 污染下游推理</b>，是所有有状态系统的核心难题。可迁移的工程模式：(1) <b>写入前校验（schema validation）</b>——Memory 写入用一个独立 LLM 评估"这条事实<b>明确</b>还是<b>推断</b>？""是用户陈述还是 AI 推论？"，只持久化高置信度信息，对应数据库的 constraint check；(2) <b>软删除 + 审计日志</b>——never DROP，标记为 invalidated，保留追溯，方便事后调试为什么模型突然出错；(3) <b>定期 GC / 一致性检查</b>——周期性用 LLM 扫一遍 memory 库，发现矛盾事实（"用户喜欢深色"和"用户最近偏好亮色"）就提示用户/降权；(4) <b>用户可见 + 可编辑</b>——所有 memory 必须有 UI 让用户看到、删除、修改——这是<b>知情同意</b>也是脏数据治理；(5) <b>多源交叉验证</b>——重要事实（如医疗、法律相关）至少两次独立确认才持久化。Mem0 / Letta 已经在做前 3 条，但用户可见性和分级置信度普遍做得不好——这是 BigCat 你做"个人 AI 操作手册"时该自己 enforce 的。</div></details>
+<details><summary>5. 如果把"和 AI 共事"看成认知外包，那么<b>哪些记忆应该外包给 AI，哪些必须留在你自己脑子里</b>？这个问题对个人成长有什么意涵？</summary><div>这是 context engineering 在个人层面最深刻的延伸。可外包的：(a) <b>事实记忆</b>（人名、日期、配置参数）——AI 比你强 100 倍，外包零损失；(b) <b>流程记忆</b>（如何配 Kubernetes、如何写 PR 模板）——AI + 文档完全够，但偶尔回顾保持手感；(c) <b>低频专业知识</b>（一年用一次的法律条款、报税流程）——纯外包合理。<b>必须留在自己脑子里</b>的：(i) <b>核心判断力</b>——"什么是好代码""什么是好决策"，外包了就丧失主体性；(ii) <b>情感联结</b>——和孩子的对话内容、家人的喜好细节，外包给 AI 等于把关系外包；(iii) <b>跨学科直觉</b>——你的佛学 × 分布式 × 复杂性科学的连接能力，本身是<b>组合记忆</b>，外包则 connection 消失；(iv) <b>身体性技能</b>——任何需要"做中学"的事，外包了就永远学不会。深层意涵：context engineering 不只是技术问题，它逼你回答"<b>我是谁</b>"——什么记忆构成"我"的不可外包部分。BigCat 你追求"AI 超级个体"的本质，是要清晰地知道：哪些扩展你（augment），哪些会替代你（atrophy）。这条界线是个体的"context schema 设计"——只有你能定。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 8 · 2026-05-25</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

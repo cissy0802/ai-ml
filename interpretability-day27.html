@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：可解释性 — Day 27</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,48 +60,39 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：可解释性</h1>
-  <div class="meta">Day 27 · 2026-06-13 · 难度 ★★★★☆</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="b4e116d6cf1a8ed4">AI/ML 详解：可解释性</h1>
+<div class="meta">Day 27 · 2026-06-13 · 难度 ★★★★☆</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
-  <a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+<a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
     工程对应 → super-individual D10: Hallucination 治理（把可解释性洞察落到防幻觉工程）
   </a>
 </div>
-
 <!-- 1. Mechanistic Interpretability -->
-<div class="card">
-  <h2>机制可解释性<span class="en">Mechanistic Interpretability</span></h2>
-  <div class="tags"><span class="tag">逆向工程</span><span class="tag purple">残差流</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>训练好的神经网络就是一个<b>没有源码的二进制</b>——权重是「编译产物」，前向推理是「运行」，但没人写过它内部的逻辑。机制可解释性就是<b>反汇编 + 单步调试</b>：在不改权重的前提下，给这个黑盒挂上「断点」和「distributed tracing」，逐层看每个组件读了什么、写了什么、把哪一跳的信号传给了下游。目标不是「模型预测得准不准」，而是「<b>它内部到底跑了什么算法</b>」。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>传统 ML 可解释性（如 SHAP、特征重要度）只告诉你「<b>哪个输入特征影响了输出</b>」——这是黑盒外部的归因。机制可解释性更激进：它要还原模型内部的<b>计算电路</b>，像读懂一段汇编一样读懂权重在做什么。核心抓手是 Transformer 的一个结构事实——<strong>残差流（residual stream）</strong>：</p>
-
+<div class="card" data-tts="3d52aaeeda78e100">
+<h2>机制可解释性<span class="en">Mechanistic Interpretability</span></h2>
+<div class="tags"><span class="tag">逆向工程</span><span class="tag purple">残差流</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>训练好的神经网络就是一个<b>没有源码的二进制</b>——权重是「编译产物」，前向推理是「运行」，但没人写过它内部的逻辑。机制可解释性就是<b>反汇编 + 单步调试</b>：在不改权重的前提下，给这个黑盒挂上「断点」和「distributed tracing」，逐层看每个组件读了什么、写了什么、把哪一跳的信号传给了下游。目标不是「模型预测得准不准」，而是「<b>它内部到底跑了什么算法</b>」。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>传统 ML 可解释性（如 SHAP、特征重要度）只告诉你「<b>哪个输入特征影响了输出</b>」——这是黑盒外部的归因。机制可解释性更激进：它要还原模型内部的<b>计算电路</b>，像读懂一段汇编一样读懂权重在做什么。核心抓手是 Transformer 的一个结构事实——<strong>残差流（residual stream）</strong>：</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">残差流 = 一条共享消息总线</b><br><br>
-token embedding <span class="arrow">→</span> <span class="box g">残差流</span> <span class="arrow">→→→→→→→→→→→→</span> <span class="box p">unembed → logits</span><br>
-<span style="margin-left:120px;color:#5a6378">↑读 ↓写&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑读 ↓写</span><br>
-<span style="margin-left:96px"><span class="box">Attn 头</span></span><span style="margin-left:18px"><span class="box o">MLP</span></span> ... 每层都在总线上<b>累加</b>自己的贡献<br><br>
+<b style="color:#7b61ff">残差流 = 一条共享消息总线</b><br/><br/>
+token embedding <span class="arrow">→</span> <span class="box g">残差流</span> <span class="arrow">→→→→→→→→→→→→</span> <span class="box p">unembed → logits</span><br/>
+<span style="margin-left:120px;color:#5a6378">↑读 ↓写     ↑读 ↓写</span><br/>
+<span style="margin-left:96px"><span class="box">Attn 头</span></span><span style="margin-left:18px"><span class="box o">MLP</span></span> ... 每层都在总线上<b>累加</b>自己的贡献<br/><br/>
 <span style="color:#8b92a8">每个组件独立读总线、算结果、把结果<b>加</b>回总线——线性可加，所以能拆解</span>
 </div>
-
-    <p style="margin-top:14px">关键洞察来自 Anthropic 的 <b>A Mathematical Framework for Transformer Circuits</b>（2021）：因为每个 attention 头和 MLP 都是把结果<b>加</b>回残差流（而非覆盖），整条总线就是各组件贡献的<b>线性叠加</b>——你可以把任意一跳单独「拆」出来看。最著名的发现是 <strong>induction head（归纳头）</strong>：一种只在≥2 层模型里才出现的注意力回路，做的事是「在上文找到当前 token 上次出现的位置，把它<b>后面那个 token</b> 复制过来」——这正是 in-context learning（看几个例子就会照做）的核心机制之一。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">关键洞察来自 Anthropic 的 <b>A Mathematical Framework for Transformer Circuits</b>（2021）：因为每个 attention 头和 MLP 都是把结果<b>加</b>回残差流（而非覆盖），整条总线就是各组件贡献的<b>线性叠加</b>——你可以把任意一跳单独「拆」出来看。最著名的发现是 <strong>induction head（归纳头）</strong>：一种只在≥2 层模型里才出现的注意力回路，做的事是「在上文找到当前 token 上次出现的位置，把它<b>后面那个 token</b> 复制过来」——这正是 in-context learning（看几个例子就会照做）的核心机制之一。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># pip install transformer_lens —— Neel Nanda 的机制可解释性标准库</span>
 <span class="kw">from</span> transformer_lens <span class="kw">import</span> HookedTransformer
 model = HookedTransformer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-small"</span>)
@@ -113,47 +105,39 @@ logits, cache = model.<span class="fn">run_with_cache</span>(tokens)
 attn = cache[<span class="str">"pattern"</span>, 5][0, 1]   <span class="cmt"># shape: [seq, seq]</span>
 <span class="cmt"># 看最后一个 token 把注意力放在哪——induction head 会指向上一次 "cat" 之后</span>
 <span class="fn">print</span>(attn[-1].<span class="fn">argmax</span>().<span class="fn">item</span>())  <span class="cmt"># 预期：指向第一句 "cat" 后面的位置</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"可解释性 = 给输出配一段自然语言解释"——错。让模型<b>自己解释</b>自己（chain-of-thought、"为什么这么答"）是 <b>self-report</b>，它可能是<b>事后编的合理化</b>，未必反映真实计算路径（Anthropic 的研究反复显示二者会背离）。机制可解释性的价值恰恰在于：它不信模型的自述，直接验尸内部电路。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：你做跨学科思考时常问「这个系统<b>为什么</b>这样运作」。机制可解释性给了一个范式——对任何黑盒（包括组织、市场、甚至自己的认知习惯），先问「内部有没有一条可拆解的<b>因果电路</b>」，而不是停在「输入→输出」的相关性描述。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 机制可解释性把神经网络当作「待反汇编的程序」，靠残差流的线性可加性把黑盒拆成可读电路。<br>🤔 如果模型的自我解释和它的真实电路会背离，你还敢把「让 AI 解释一下」当作可信审计手段吗？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"可解释性 = 给输出配一段自然语言解释"——错。让模型<b>自己解释</b>自己（chain-of-thought、"为什么这么答"）是 <b>self-report</b>，它可能是<b>事后编的合理化</b>，未必反映真实计算路径（Anthropic 的研究反复显示二者会背离）。机制可解释性的价值恰恰在于：它不信模型的自述，直接验尸内部电路。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：你做跨学科思考时常问「这个系统<b>为什么</b>这样运作」。机制可解释性给了一个范式——对任何黑盒（包括组织、市场、甚至自己的认知习惯），先问「内部有没有一条可拆解的<b>因果电路</b>」，而不是停在「输入→输出」的相关性描述。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 机制可解释性把神经网络当作「待反汇编的程序」，靠残差流的线性可加性把黑盒拆成可读电路。<br/>🤔 如果模型的自我解释和它的真实电路会背离，你还敢把「让 AI 解释一下」当作可信审计手段吗？</div>
+</div>
+</div>
 <!-- 2. Sparse Autoencoders -->
-<div class="card">
-  <h2>稀疏自编码器<span class="en">Sparse Autoencoders (SAE)</span></h2>
-  <div class="tags"><span class="tag">字典学习</span><span class="tag purple">叠加</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>模型只有 ~3000 个神经元，却要表示几万个概念——它的办法是<b>把多个概念打包进同一个维度</b>，像 bit-packing 把几个布尔标志塞进一个 int，或像哈希把无限的 key 映射到有限的桶。代价是单个神经元变得<b>多义（polysemantic）</b>：一个神经元同时对「DNA 序列」「阿拉伯文」「法语」亮起，你读不懂它。SAE 就是那个<b>解包器</b>：把压在一起的表示「解压」回一组<b>稀疏、单义</b>的命名字段——每个字段只代表一个概念。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>这个「打包」现象有个名字叫 <strong>superposition（叠加）</strong>：Anthropic 的 <b>Toy Models of Superposition</b>（2022）证明，当特征「又多又稀疏」时，网络会<b>故意</b>把 n 个特征压进远小于 n 维的空间里，靠特征极少同时出现来容忍冲突——这是一种有损压缩，也正是神经元读不懂的根因。</p>
-    <p style="margin-top:8px">SAE 的机制是 <b>dictionary learning（字典学习）</b>：训练一个超宽的自编码器，把 d 维激活向量 <b>x</b> 编码成一个<b>远比 d 宽、但几乎全是 0</b> 的特征向量，再解码重建回 <b>x</b>。数学上最小化：</p>
-
-<div class="diagram" style="margin-top:8px">
-<b style="color:#7b61ff">L = ‖x − x̂‖²&nbsp;&nbsp;+&nbsp;&nbsp;λ · ‖f‖₁</b><br><br>
-<span style="color:#8b92a8">·&nbsp;<b>‖x − x̂‖²</b>（重建误差）：解压后必须能还原原激活——保证没丢信息<br>
-·&nbsp;<b>λ‖f‖₁</b>（L1 稀疏惩罚）：逼迫特征向量 f 里<b>绝大多数维度=0</b>，每次只有几个亮<br>
-·&nbsp;λ 调大 → 更稀疏更单义，但重建更差；这是核心 trade-off</span>
+<div class="card" data-tts="cbe6a667f1e9c4ba">
+<h2>稀疏自编码器<span class="en">Sparse Autoencoders (SAE)</span></h2>
+<div class="tags"><span class="tag">字典学习</span><span class="tag purple">叠加</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>模型只有 ~3000 个神经元，却要表示几万个概念——它的办法是<b>把多个概念打包进同一个维度</b>，像 bit-packing 把几个布尔标志塞进一个 int，或像哈希把无限的 key 映射到有限的桶。代价是单个神经元变得<b>多义（polysemantic）</b>：一个神经元同时对「DNA 序列」「阿拉伯文」「法语」亮起，你读不懂它。SAE 就是那个<b>解包器</b>：把压在一起的表示「解压」回一组<b>稀疏、单义</b>的命名字段——每个字段只代表一个概念。</p>
 </div>
-
-    <p style="margin-top:14px">为什么 L1 惩罚能逼出单义？因为「只许少数维度激活」等价于强迫每个维度去<b>抢占一个独立、可复用的概念</b>，而不是和别人合用。Anthropic 的 <strong>Towards Monosemanticity</strong>（2023）在一个小模型上用 16× 宽的 SAE 跑出近 15000 个特征，人工评估约 <strong>70% 干净对应单一概念</strong>；2024 的 <strong>Scaling Monosemanticity</strong> 把它放大到生产级的 Claude 3 Sonnet，找到了著名的「<b>金门大桥特征</b>」——把它的激活强行钳到 10× 最大值，模型会满嘴都是金门大桥、甚至自认为<b>就是</b>那座桥。这证明特征不只是相关，而是<b>因果可操控</b>的。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>这个「打包」现象有个名字叫 <strong>superposition（叠加）</strong>：Anthropic 的 <b>Toy Models of Superposition</b>（2022）证明，当特征「又多又稀疏」时，网络会<b>故意</b>把 n 个特征压进远小于 n 维的空间里，靠特征极少同时出现来容忍冲突——这是一种有损压缩，也正是神经元读不懂的根因。</p>
+<p style="margin-top:8px">SAE 的机制是 <b>dictionary learning（字典学习）</b>：训练一个超宽的自编码器，把 d 维激活向量 <b>x</b> 编码成一个<b>远比 d 宽、但几乎全是 0</b> 的特征向量，再解码重建回 <b>x</b>。数学上最小化：</p>
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">L = ‖x − x̂‖²  +  λ · ‖f‖₁</b><br/><br/>
+<span style="color:#8b92a8">· <b>‖x − x̂‖²</b>（重建误差）：解压后必须能还原原激活——保证没丢信息<br/>
+· <b>λ‖f‖₁</b>（L1 稀疏惩罚）：逼迫特征向量 f 里<b>绝大多数维度=0</b>，每次只有几个亮<br/>
+· λ 调大 → 更稀疏更单义，但重建更差；这是核心 trade-off</span>
+</div>
+<p style="margin-top:14px">为什么 L1 惩罚能逼出单义？因为「只许少数维度激活」等价于强迫每个维度去<b>抢占一个独立、可复用的概念</b>，而不是和别人合用。Anthropic 的 <strong>Towards Monosemanticity</strong>（2023）在一个小模型上用 16× 宽的 SAE 跑出近 15000 个特征，人工评估约 <strong>70% 干净对应单一概念</strong>；2024 的 <strong>Scaling Monosemanticity</strong> 把它放大到生产级的 Claude 3 Sonnet，找到了著名的「<b>金门大桥特征</b>」——把它的激活强行钳到 10× 最大值，模型会满嘴都是金门大桥、甚至自认为<b>就是</b>那座桥。这证明特征不只是相关，而是<b>因果可操控</b>的。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># pip install sae-lens —— 加载社区预训练好的 SAE，不必自己训</span>
 <span class="kw">from</span> sae_lens <span class="kw">import</span> SAE
 <span class="kw">from</span> transformer_lens <span class="kw">import</span> HookedTransformer
@@ -168,48 +152,40 @@ features = sae.<span class="fn">encode</span>(acts)                    <span cla
 top = features[0, -1].<span class="fn">topk</span>(5)               <span class="cmt"># 最后一个 token 上最亮的 5 个特征</span>
 <span class="fn">print</span>(top.indices, top.values)             <span class="cmt"># 每个 index 对应一个可解释概念</span>
 <span class="cmt"># 用 Neuronpedia 查这些 index 的含义：neuronpedia.org</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"SAE 找到的每个特征都是干净的人类概念"——别太乐观。约 30% 特征仍然模糊或难解释；SAE 还会受 <b>重建-稀疏 trade-off</b> 影响，λ 不同跑出的字典不一样，存在「特征劈裂」（一个概念被拆成几个近义特征）等已知问题。SAE 是<b>当前最好的解包工具，但不是完美字典</b>。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：superposition 是绝佳的跨学科隐喻——容量有限的系统如何承载远超容量的信息？大脑、语言、甚至你一天的注意力都在「叠加」。它和你熟悉的哈希冲突、有损压缩、复杂性科学里的「维度坍缩」是同一族思想，可以互相照亮。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 神经元读不懂，是因为概念被「叠加」压进了少数维度；SAE 用字典学习 + L1 稀疏把它解包回单义特征。<br>🤔 如果一个特征能被强行钳住来改变模型行为（金门大桥），那「编辑模型的信念」离「编辑人的信念」在原理上还有多远？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"SAE 找到的每个特征都是干净的人类概念"——别太乐观。约 30% 特征仍然模糊或难解释；SAE 还会受 <b>重建-稀疏 trade-off</b> 影响，λ 不同跑出的字典不一样，存在「特征劈裂」（一个概念被拆成几个近义特征）等已知问题。SAE 是<b>当前最好的解包工具，但不是完美字典</b>。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：superposition 是绝佳的跨学科隐喻——容量有限的系统如何承载远超容量的信息？大脑、语言、甚至你一天的注意力都在「叠加」。它和你熟悉的哈希冲突、有损压缩、复杂性科学里的「维度坍缩」是同一族思想，可以互相照亮。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 神经元读不懂，是因为概念被「叠加」压进了少数维度；SAE 用字典学习 + L1 稀疏把它解包回单义特征。<br/>🤔 如果一个特征能被强行钳住来改变模型行为（金门大桥），那「编辑模型的信念」离「编辑人的信念」在原理上还有多远？</div>
+</div>
+</div>
 <!-- 3. Feature Circuits -->
-<div class="card">
-  <h2>特征回路<span class="en">Feature Circuits</span></h2>
-  <div class="tags"><span class="tag">调用链</span><span class="tag purple">因果</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>单个特征像一个微服务，<b>特征回路</b>就是它们组成的<b>调用链 / DAG</b>：早层特征「检测到这是个人名」→ 中层特征「这是法国地名」→ 后层特征「该输出法语」。特征是节点，权重是边，整张图就是一份 <b>attribution graph（归因图）</b>——和你画过的微服务依赖图、Spark DAG 是同一种东西。机制可解释性的终极目标，就是把模型的某个行为还原成<b>一条可读、可验证的回路</b>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>知道「有哪些特征」（SAE 干的事）只是元件清单，不等于懂电路。要懂行为，得知道特征<b>怎么连</b>、谁触发谁。验证连接的核心方法是 <strong>activation patching（激活打补丁，又叫 causal tracing）</strong>——一种干净的因果实验：</p>
-
+<div class="card" data-tts="31f5498f2c740b5b">
+<h2>特征回路<span class="en">Feature Circuits</span></h2>
+<div class="tags"><span class="tag">调用链</span><span class="tag purple">因果</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>单个特征像一个微服务，<b>特征回路</b>就是它们组成的<b>调用链 / DAG</b>：早层特征「检测到这是个人名」→ 中层特征「这是法国地名」→ 后层特征「该输出法语」。特征是节点，权重是边，整张图就是一份 <b>attribution graph（归因图）</b>——和你画过的微服务依赖图、Spark DAG 是同一种东西。机制可解释性的终极目标，就是把模型的某个行为还原成<b>一条可读、可验证的回路</b>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>知道「有哪些特征」（SAE 干的事）只是元件清单，不等于懂电路。要懂行为，得知道特征<b>怎么连</b>、谁触发谁。验证连接的核心方法是 <strong>activation patching（激活打补丁，又叫 causal tracing）</strong>——一种干净的因果实验：</p>
 <div class="diagram" style="margin-top:8px">
-<b style="color:#7b61ff">Activation Patching：A/B 灌流做因果消融</b><br><br>
-1. 跑「干净」输入 <span class="box g">clean</span>，缓存某组件激活<br>
-2. 跑「损坏」输入 <span class="box r">corrupt</span>（答案被破坏）<br>
-3. 把 clean 的<b>某一个</b>激活，<b>移植</b>进 corrupt 的前向里<br>
-4. 看输出恢复了多少 <span class="arrow">→</span> 恢复越多 = 这个组件<b>越因果关键</b><br><br>
+<b style="color:#7b61ff">Activation Patching：A/B 灌流做因果消融</b><br/><br/>
+1. 跑「干净」输入 <span class="box g">clean</span>，缓存某组件激活<br/>
+2. 跑「损坏」输入 <span class="box r">corrupt</span>（答案被破坏）<br/>
+3. 把 clean 的<b>某一个</b>激活，<b>移植</b>进 corrupt 的前向里<br/>
+4. 看输出恢复了多少 <span class="arrow">→</span> 恢复越多 = 这个组件<b>越因果关键</b><br/><br/>
 <span style="color:#8b92a8">= 给分布式系统逐个换组件做 A/B，定位「哪一跳真正决定了结果」</span>
 </div>
-
-    <p style="margin-top:14px">这比单纯看「哪个神经元激活高」强得多：高激活只是<b>相关</b>，而 patching 是<b>主动干预</b>——它直接回答「拿掉/替换这一跳，结果会不会变」。把每条边都这样验一遍，就能拼出一张 attribution graph。2025 年 Anthropic 的「<b>circuit tracing / attribution graphs</b>」工作把这套方法用到生产级 Claude 上，画出了多步推理、诗歌押韵、心算等行为背后的真实回路——发现模型有时会<b>提前规划</b>（写诗时先想好韵脚再倒推句子），这是 self-report 完全看不到的。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">这比单纯看「哪个神经元激活高」强得多：高激活只是<b>相关</b>，而 patching 是<b>主动干预</b>——它直接回答「拿掉/替换这一跳，结果会不会变」。把每条边都这样验一遍，就能拼出一张 attribution graph。2025 年 Anthropic 的「<b>circuit tracing / attribution graphs</b>」工作把这套方法用到生产级 Claude 上，画出了多步推理、诗歌押韵、心算等行为背后的真实回路——发现模型有时会<b>提前规划</b>（写诗时先想好韵脚再倒推句子），这是 self-report 完全看不到的。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># 用 activation patching 定位"哪个层对正确答案最关键"</span>
 <span class="kw">import</span> torch
 clean = model.<span class="fn">to_tokens</span>(<span class="str">"The Eiffel Tower is in the city of"</span>)
@@ -227,42 +203,36 @@ _, clean_cache = model.<span class="fn">run_with_cache</span>(clean)
     logits = model.<span class="fn">run_with_hooks</span>(corrupt, fwd_hooks=[
         (<span class="fn">f</span><span class="str">"blocks.{L}.hook_resid_post"</span>, <span class="kw">lambda</span> a,h: <span class="fn">patch_layer</span>(a,h,L))])
     <span class="fn">print</span>(L, logits[0,-1,ans].<span class="fn">item</span>())   <span class="cmt"># 哪层一patch就让 "Paris" 概率飙升 = 关键层</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"画出一张回路图就等于完全理解了模型"——别过度自信。现有 circuit 多是在<b>窄任务</b>（间接宾语识别、特定事实回忆）上局部还原，离「读懂整个模型」差着数量级；回路之间还会<b>叠加、干扰</b>。它是真实的进步，但远非「全反编译」。诚实地说：我们能读懂的，还只是这台机器的几个零件。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：activation patching 的思维——「想知道某一跳是否真因果，就移植/替换它，看结果变不变」——可直接搬到你做<b>决策复盘</b>：与其争论「是不是 X 导致了结果」，不如设计一个能<b>反事实替换 X</b> 的小实验。这是分布式系统的 chaos engineering 用在认知上。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 特征是元件，回路才是程序；用 activation patching 做因果消融，才能把「相关」升级成「电路」。<br>🤔 如果模型写诗时被证实会「提前规划韵脚」，那它的「逐 token 生成」表象下，藏着多少我们以为不存在的隐式计划？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"画出一张回路图就等于完全理解了模型"——别过度自信。现有 circuit 多是在<b>窄任务</b>（间接宾语识别、特定事实回忆）上局部还原，离「读懂整个模型」差着数量级；回路之间还会<b>叠加、干扰</b>。它是真实的进步，但远非「全反编译」。诚实地说：我们能读懂的，还只是这台机器的几个零件。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：activation patching 的思维——「想知道某一跳是否真因果，就移植/替换它，看结果变不变」——可直接搬到你做<b>决策复盘</b>：与其争论「是不是 X 导致了结果」，不如设计一个能<b>反事实替换 X</b> 的小实验。这是分布式系统的 chaos engineering 用在认知上。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 特征是元件，回路才是程序；用 activation patching 做因果消融，才能把「相关」升级成「电路」。<br/>🤔 如果模型写诗时被证实会「提前规划韵脚」，那它的「逐 token 生成」表象下，藏着多少我们以为不存在的隐式计划？</div>
+</div>
+</div>
 <!-- 4. Probing -->
-<div class="card">
-  <h2>探针<span class="en">Probing</span></h2>
-  <div class="tags"><span class="tag">只读探针</span><span class="tag orange">诊断</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>探针就是给运行中的系统挂一个<b>只读 APM probe</b>：在模型某一层的激活上接一个 tap，训一个<b>极轻量的线性分类器</b>，问「这一层的内部状态里，<b>有没有编码</b>某个信息（词性？情感？真假？）」。探针不改模型、不参与训练，纯粹是事后抽头读总线——和你在内部消息总线上接 packet sniffer 看「这条数据流里有没有携带字段 X」一模一样。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>SAE 和 circuit 都偏重、偏研究级；探针是最<b>轻量、最早、最实用</b>的可解释性工具，源头是 Alain &amp; Bengio 的 <strong>Understanding intermediate layers using linear classifier probes</strong>（2016）。机制极简：冻结模型，取第 ℓ 层激活当特征，训一个<b>线性</b>分类器去预测你关心的属性。<strong>关键约束是「线性」</strong>：</p>
-    <ul>
-      <li>如果一个<b>简单的线性</b>探针就能从某层读出「情感」，说明该层已经把情感<b>线性可分</b>地编码好了——信息「现成可用」；</li>
-      <li>如果必须上深层非线性探针才读得出，那多半是<b>探针自己学会的</b>，不能算模型「表示」了它。</li>
-    </ul>
-    <p style="margin-top:8px">Alain &amp; Bengio 用线性探针扫 ResNet，发现<b>线性可分度随层数单调上升</b>——底层是边缘纹理，越往上越抽象。这给了「深度网络逐层提炼表示」一个可量化的证据。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="9b020cc5c36cf2a0">
+<h2>探针<span class="en">Probing</span></h2>
+<div class="tags"><span class="tag">只读探针</span><span class="tag orange">诊断</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>探针就是给运行中的系统挂一个<b>只读 APM probe</b>：在模型某一层的激活上接一个 tap，训一个<b>极轻量的线性分类器</b>，问「这一层的内部状态里，<b>有没有编码</b>某个信息（词性？情感？真假？）」。探针不改模型、不参与训练，纯粹是事后抽头读总线——和你在内部消息总线上接 packet sniffer 看「这条数据流里有没有携带字段 X」一模一样。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>SAE 和 circuit 都偏重、偏研究级；探针是最<b>轻量、最早、最实用</b>的可解释性工具，源头是 Alain &amp; Bengio 的 <strong>Understanding intermediate layers using linear classifier probes</strong>（2016）。机制极简：冻结模型，取第 ℓ 层激活当特征，训一个<b>线性</b>分类器去预测你关心的属性。<strong>关键约束是「线性」</strong>：</p>
+<ul>
+<li>如果一个<b>简单的线性</b>探针就能从某层读出「情感」，说明该层已经把情感<b>线性可分</b>地编码好了——信息「现成可用」；</li>
+<li>如果必须上深层非线性探针才读得出，那多半是<b>探针自己学会的</b>，不能算模型「表示」了它。</li>
+</ul>
+<p style="margin-top:8px">Alain &amp; Bengio 用线性探针扫 ResNet，发现<b>线性可分度随层数单调上升</b>——底层是边缘纹理，越往上越抽象。这给了「深度网络逐层提炼表示」一个可量化的证据。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
 <span class="kw">import</span> numpy as np
 
@@ -277,58 +247,47 @@ X, y = [], []
 probe = LogisticRegression(max_iter=1000).<span class="fn">fit</span>(np.<span class="fn">array</span>(X), y)
 <span class="fn">print</span>(<span class="str">"线性可分度（探针准确率）:"</span>, probe.<span class="fn">score</span>(np.<span class="fn">array</span>(X), y))
 <span class="cmt"># 在不同层重复 → 看情感信息在第几层"成型"</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"探针读得出 X，就证明模型<b>用</b>了 X 来决策"——最经典的陷阱。探针只证明信息<b>存在</b>于激活里（相关），不证明模型在前向中<b>真的用了</b>它（因果）。某层「能读出语法」不代表预测时依赖语法——要验因果，得回到第 3 张卡的 <b>activation patching</b>。探针回答「有没有」，patching 回答「用没用」，两者分工别混。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：探针是性价比最高的诊断起点。想知道某个开源模型「内部到底懂不懂法律实体 / 医学概念」，不用拆电路，先训几个线性探针扫各层，10 行代码就能给出「这信息几乎不存在 / 第 N 层才成型」的快速体检——再决定要不要微调或换模型。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 探针是只读抽头：用「线性可分」当门槛，量化「某层有没有现成编码某信息」——轻、快，但只测相关、不测因果。<br>🤔 「信息存在」和「信息被使用」的鸿沟，在你熟悉的系统（日志里有字段 ≠ 业务逻辑读了它）里是不是也天天发生？<br><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">工程对应 → super-individual D10：Hallucination 治理</a></div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"探针读得出 X，就证明模型<b>用</b>了 X 来决策"——最经典的陷阱。探针只证明信息<b>存在</b>于激活里（相关），不证明模型在前向中<b>真的用了</b>它（因果）。某层「能读出语法」不代表预测时依赖语法——要验因果，得回到第 3 张卡的 <b>activation patching</b>。探针回答「有没有」，patching 回答「用没用」，两者分工别混。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：探针是性价比最高的诊断起点。想知道某个开源模型「内部到底懂不懂法律实体 / 医学概念」，不用拆电路，先训几个线性探针扫各层，10 行代码就能给出「这信息几乎不存在 / 第 N 层才成型」的快速体检——再决定要不要微调或换模型。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 探针是只读抽头：用「线性可分」当门槛，量化「某层有没有现成编码某信息」——轻、快，但只测相关、不测因果。<br/>🤔 「信息存在」和「信息被使用」的鸿沟，在你熟悉的系统（日志里有字段 ≠ 业务逻辑读了它）里是不是也天天发生？<br/><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">工程对应 → super-individual D10：Hallucination 治理</a></div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://transformer-circuits.pub/2021/framework/index.html" target="_blank">A Mathematical Framework for Transformer Circuits (Anthropic, 2021)</a> — 残差流、电路视角的奠基之作</li>
-      <li><a href="https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html" target="_blank">In-context Learning and Induction Heads (Anthropic, 2022)</a> — induction head 与 ICL 的因果联系</li>
-      <li><a href="https://transformer-circuits.pub/2023/monosemantic-features" target="_blank">Towards Monosemanticity (Anthropic, 2023)</a> — 用 SAE 做字典学习的开创性工作</li>
-      <li><a href="https://transformer-circuits.pub/2024/scaling-monosemanticity/" target="_blank">Scaling Monosemanticity (Anthropic, 2024)</a> — 放大到 Claude 3 Sonnet，金门大桥特征</li>
-      <li><a href="https://arxiv.org/abs/1610.01644" target="_blank">Alain &amp; Bengio 2016 — Linear Classifier Probes</a> — 探针方法的源头</li>
-      <li><a href="https://www.neelnanda.io/mechanistic-interpretability/getting-started" target="_blank">Neel Nanda — Mech Interp 入门 &amp; TransformerLens</a> — 上手做实验的最佳起点</li>
-    </ul>
-  </div>
+<div class="card" data-tts="8ce33458fb307ec4" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://transformer-circuits.pub/2021/framework/index.html" target="_blank">A Mathematical Framework for Transformer Circuits (Anthropic, 2021)</a> — 残差流、电路视角的奠基之作</li>
+<li><a href="https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html" target="_blank">In-context Learning and Induction Heads (Anthropic, 2022)</a> — induction head 与 ICL 的因果联系</li>
+<li><a href="https://transformer-circuits.pub/2023/monosemantic-features" target="_blank">Towards Monosemanticity (Anthropic, 2023)</a> — 用 SAE 做字典学习的开创性工作</li>
+<li><a href="https://transformer-circuits.pub/2024/scaling-monosemanticity/" target="_blank">Scaling Monosemanticity (Anthropic, 2024)</a> — 放大到 Claude 3 Sonnet，金门大桥特征</li>
+<li><a href="https://arxiv.org/abs/1610.01644" target="_blank">Alain &amp; Bengio 2016 — Linear Classifier Probes</a> — 探针方法的源头</li>
+<li><a href="https://www.neelnanda.io/mechanistic-interpretability/getting-started" target="_blank">Neel Nanda — Mech Interp 入门 &amp; TransformerLens</a> — 上手做实验的最佳起点</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 探针、SAE、activation patching 三者都想「理解模型」，它们在「相关 vs 因果」这条轴上各处什么位置？该怎么组合用？</summary><div>这是本期最核心的串联。三者是一条<b>从相关到因果、从粗到细</b>的流水线。<b>探针</b>最便宜，回答「某层<b>有没有</b>编码 X」——纯<b>相关</b>，证明信息存在，但不证明被使用（探针读得出语法 ≠ 模型预测时用语法）。<b>SAE</b>解决「神经元读不懂」的叠加问题，把激活解包成<b>单义特征</b>——它给你一份<b>可命名的元件清单</b>，比探针的「有没有」更细，但单看特征激活仍是相关。<b>activation patching</b> 才上升到<b>因果</b>：通过主动移植/消融某一跳，回答「拿掉它结果变不变」。实战组合：先用探针<b>快速扫层</b>定位「信息大概在第几层成型」（10 行代码体检）→ 在关键层用 SAE <b>解包出候选特征</b>（拿到可解释元件）→ 用 patching <b>验证哪些特征/组件真因果</b>（拼成回路）。记成：探针问「在哪」，SAE 问「是什么」，patching 问「是不是它干的」——正是分布式的 tracing → 拆服务 → chaos 注入在认知上的迁移。</div></details>
-
-    <details><summary>2. Anthropic 反复发现「模型的自我解释（CoT / self-report）会和它的真实电路背离」。这对「让 AI 解释自己」这种治理手段意味着什么？</summary><div>意味着<b>把 self-report 当审计证据是危险的</b>。模型生成「我之所以这么答，是因为…」时，它在做的是<b>生成一段看起来合理的解释文本</b>，而不是<b>读取并报告自己的真实计算</b>——这两件事在架构上根本不是一回事。circuit tracing 的研究里有直接案例：模型嘴上说按某步骤推理，电路里走的却是另一条路（比如心算时嘴上说「进位」，电路里用的是一组并行的近似查表特征）。三层含义：(1) <b>对齐与安全</b>不能只靠「让模型坦白」——会骗人的模型，「坦白」也能是编的；机制可解释性是少数能<b>绕过自述、直接验尸</b>的手段，是 AI 安全的关键基础设施；(2) <b>CoT 仍有用</b>——它能真实<b>改善</b>计算（多写中间步=更多 compute），但「CoT 文本」≠「忠实的内部日志」，二者差距本身要被监控；(3) 对<b>防幻觉工程</b>（见 D10）的启示：与其让模型「自评有没有幻觉」，不如用外部可验证的手段（检索佐证、一致性采样、特征级监控）——别把裁判权交给被告。</div></details>
-
-    <details><summary>3. superposition 说「容量有限的系统被迫把超量信息叠加进少数维度」。这个原理在大脑、语言、组织里是否同样成立？它是 bug 还是 feature？</summary><div>大概率是<b>普遍原理</b>，而且是 feature 不是 bug。superposition 的成立条件很一般：<b>要表示的概念远多于可用维度，且这些概念很少同时出现（稀疏）</b>——满足这两条，任何有限系统都会「理性地」选择叠加，用「极少冲突」换「极高容量」。<b>大脑</b>：神经元数量远不足以「一概念一神经元」，分布式、叠加式编码几乎是必然，这也解释了为什么单电极很难读懂单个神经元（和多义神经元同构）。<b>语言</b>：词汇有限却要表达无限意义，靠一词多义 + 上下文消歧——这就是语言层的 superposition。<b>组织</b>：一人身兼数职、一个流程承载多个目标，也是容量受限下的叠加，代价同样是「读不懂某个角色在干嘛」。把它当 feature 的理由：叠加是<b>容量与可分性之间的最优折中</b>——冲突够稀疏时收益远大于偶发干扰。它变成 bug，是当「稀疏假设被打破」（概念开始频繁共现）冲突爆发——对应大脑的认知过载、组织的角色冲突、模型的特征干扰。对「AI 超级个体」的提醒：你给自己叠加的角色越多，越要守住「它们很少同时被触发」这条前提，否则就从高容量滑向高干扰。</div></details>
-
-    <details><summary>4. 如果有一天能完整反编译一个前沿模型的所有电路，会发生什么好事和坏事？「完全可解释」是纯粹的福音吗？</summary><div>好处显而易见：可<b>审计</b>（提前发现欺骗、后门、危险能力的电路）、可<b>精准编辑</b>（像金门大桥那样定点改信念，去偏见、纠错而不全量重训）、可<b>验证对齐</b>（直接看模型「想不想」做某事，而非只看它说什么）。但「完全可解释」绝非纯福音，至少三重张力：(1) <b>能力即风险对称</b>——能定点编辑信念的工具也能定点<b>植入</b>信念；能读出危险能力的方法也能帮人<b>提取</b>它。可解释性是 dual-use 的。(2) <b>反编译者会被对抗</b>——一旦「电路可读」成为审计标准，就会出现「训练出对抗可解释性的模型」（把危险电路藏进更深的叠加里），是军备竞赛而非终局。(3) <b>哲学层面的不适</b>——若「信念=可被外部钳位的特征」对模型成立，它对人类心智的隐喻让很多人不安：自由意志、说服、洗脑的边界都被重新逼问。我的判断：可解释性<b>净值为正且是必需品</b>（不理解就无法安全部署强模型），但它不是「装上就安全」的开关，而是把安全从「黑盒信任」转成「谁有权读写这些电路」的<b>治理问题</b>。技术解决「能不能看」，看完之后「谁能改、改什么」是更难的社会选择。</div></details>
-
-    <details><summary>5. 把机制可解释性的方法论（不信自述、找可拆解的因果电路、用反事实干预验证）搬到「理解自己的认知」上，会得到什么？</summary><div>会得到一套相当反直觉但强大的<b>自我认知纪律</b>。逐条映射：(1) <b>不信 self-report</b> → 你对「我为什么这么决定」的事后解释，很可能和真实驱动你的「电路」背离——就像模型的 CoT。承认这点就是去自欺的第一步：理由是<b>合理化</b>，不一定是<b>原因</b>。(2) <b>找可拆解的因果电路</b> → 与其用「我就是焦虑」描述自己，不如追问「有没有一条可命名的触发链」（情境→念头→行为）。这和把「模型行为」拆成「特征回路」同构，也呼应佛学「缘起」——一切是条件聚合的链，非单一本质。(3) <b>反事实干预验证</b> → 别停在内省（相关），做 activation patching 式的小实验：<b>移除/替换某条件</b>看行为变不变，才知道哪个是真因——把 chaos engineering 用在心智上。深层启示：机制可解释性和内观/正念惊人地相通——都拒绝相信表层叙事，都直接观察「过程本身」，都把「自我」看成可拆解的<b>过程的聚合</b>而非不可分的黑盒。区别只在工具：一个用 patching 和 SAE，一个用持续的觉察。这两条路指向同一件事——<b>把任何黑盒（模型或自己）变成可读、可验证、可干预的系统</b>。</div></details>
-  </div>
+<div class="card think" data-tts="1989d6090bb3b231" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 探针、SAE、activation patching 三者都想「理解模型」，它们在「相关 vs 因果」这条轴上各处什么位置？该怎么组合用？</summary><div>这是本期最核心的串联。三者是一条<b>从相关到因果、从粗到细</b>的流水线。<b>探针</b>最便宜，回答「某层<b>有没有</b>编码 X」——纯<b>相关</b>，证明信息存在，但不证明被使用（探针读得出语法 ≠ 模型预测时用语法）。<b>SAE</b>解决「神经元读不懂」的叠加问题，把激活解包成<b>单义特征</b>——它给你一份<b>可命名的元件清单</b>，比探针的「有没有」更细，但单看特征激活仍是相关。<b>activation patching</b> 才上升到<b>因果</b>：通过主动移植/消融某一跳，回答「拿掉它结果变不变」。实战组合：先用探针<b>快速扫层</b>定位「信息大概在第几层成型」（10 行代码体检）→ 在关键层用 SAE <b>解包出候选特征</b>（拿到可解释元件）→ 用 patching <b>验证哪些特征/组件真因果</b>（拼成回路）。记成：探针问「在哪」，SAE 问「是什么」，patching 问「是不是它干的」——正是分布式的 tracing → 拆服务 → chaos 注入在认知上的迁移。</div></details>
+<details><summary>2. Anthropic 反复发现「模型的自我解释（CoT / self-report）会和它的真实电路背离」。这对「让 AI 解释自己」这种治理手段意味着什么？</summary><div>意味着<b>把 self-report 当审计证据是危险的</b>。模型生成「我之所以这么答，是因为…」时，它在做的是<b>生成一段看起来合理的解释文本</b>，而不是<b>读取并报告自己的真实计算</b>——这两件事在架构上根本不是一回事。circuit tracing 的研究里有直接案例：模型嘴上说按某步骤推理，电路里走的却是另一条路（比如心算时嘴上说「进位」，电路里用的是一组并行的近似查表特征）。三层含义：(1) <b>对齐与安全</b>不能只靠「让模型坦白」——会骗人的模型，「坦白」也能是编的；机制可解释性是少数能<b>绕过自述、直接验尸</b>的手段，是 AI 安全的关键基础设施；(2) <b>CoT 仍有用</b>——它能真实<b>改善</b>计算（多写中间步=更多 compute），但「CoT 文本」≠「忠实的内部日志」，二者差距本身要被监控；(3) 对<b>防幻觉工程</b>（见 D10）的启示：与其让模型「自评有没有幻觉」，不如用外部可验证的手段（检索佐证、一致性采样、特征级监控）——别把裁判权交给被告。</div></details>
+<details><summary>3. superposition 说「容量有限的系统被迫把超量信息叠加进少数维度」。这个原理在大脑、语言、组织里是否同样成立？它是 bug 还是 feature？</summary><div>大概率是<b>普遍原理</b>，而且是 feature 不是 bug。superposition 的成立条件很一般：<b>要表示的概念远多于可用维度，且这些概念很少同时出现（稀疏）</b>——满足这两条，任何有限系统都会「理性地」选择叠加，用「极少冲突」换「极高容量」。<b>大脑</b>：神经元数量远不足以「一概念一神经元」，分布式、叠加式编码几乎是必然，这也解释了为什么单电极很难读懂单个神经元（和多义神经元同构）。<b>语言</b>：词汇有限却要表达无限意义，靠一词多义 + 上下文消歧——这就是语言层的 superposition。<b>组织</b>：一人身兼数职、一个流程承载多个目标，也是容量受限下的叠加，代价同样是「读不懂某个角色在干嘛」。把它当 feature 的理由：叠加是<b>容量与可分性之间的最优折中</b>——冲突够稀疏时收益远大于偶发干扰。它变成 bug，是当「稀疏假设被打破」（概念开始频繁共现）冲突爆发——对应大脑的认知过载、组织的角色冲突、模型的特征干扰。对「AI 超级个体」的提醒：你给自己叠加的角色越多，越要守住「它们很少同时被触发」这条前提，否则就从高容量滑向高干扰。</div></details>
+<details><summary>4. 如果有一天能完整反编译一个前沿模型的所有电路，会发生什么好事和坏事？「完全可解释」是纯粹的福音吗？</summary><div>好处显而易见：可<b>审计</b>（提前发现欺骗、后门、危险能力的电路）、可<b>精准编辑</b>（像金门大桥那样定点改信念，去偏见、纠错而不全量重训）、可<b>验证对齐</b>（直接看模型「想不想」做某事，而非只看它说什么）。但「完全可解释」绝非纯福音，至少三重张力：(1) <b>能力即风险对称</b>——能定点编辑信念的工具也能定点<b>植入</b>信念；能读出危险能力的方法也能帮人<b>提取</b>它。可解释性是 dual-use 的。(2) <b>反编译者会被对抗</b>——一旦「电路可读」成为审计标准，就会出现「训练出对抗可解释性的模型」（把危险电路藏进更深的叠加里），是军备竞赛而非终局。(3) <b>哲学层面的不适</b>——若「信念=可被外部钳位的特征」对模型成立，它对人类心智的隐喻让很多人不安：自由意志、说服、洗脑的边界都被重新逼问。我的判断：可解释性<b>净值为正且是必需品</b>（不理解就无法安全部署强模型），但它不是「装上就安全」的开关，而是把安全从「黑盒信任」转成「谁有权读写这些电路」的<b>治理问题</b>。技术解决「能不能看」，看完之后「谁能改、改什么」是更难的社会选择。</div></details>
+<details><summary>5. 把机制可解释性的方法论（不信自述、找可拆解的因果电路、用反事实干预验证）搬到「理解自己的认知」上，会得到什么？</summary><div>会得到一套相当反直觉但强大的<b>自我认知纪律</b>。逐条映射：(1) <b>不信 self-report</b> → 你对「我为什么这么决定」的事后解释，很可能和真实驱动你的「电路」背离——就像模型的 CoT。承认这点就是去自欺的第一步：理由是<b>合理化</b>，不一定是<b>原因</b>。(2) <b>找可拆解的因果电路</b> → 与其用「我就是焦虑」描述自己，不如追问「有没有一条可命名的触发链」（情境→念头→行为）。这和把「模型行为」拆成「特征回路」同构，也呼应佛学「缘起」——一切是条件聚合的链，非单一本质。(3) <b>反事实干预验证</b> → 别停在内省（相关），做 activation patching 式的小实验：<b>移除/替换某条件</b>看行为变不变，才知道哪个是真因——把 chaos engineering 用在心智上。深层启示：机制可解释性和内观/正念惊人地相通——都拒绝相信表层叙事，都直接观察「过程本身」，都把「自我」看成可拆解的<b>过程的聚合</b>而非不可分的黑盒。区别只在工具：一个用 patching 和 SAE，一个用持续的觉察。这两条路指向同一件事——<b>把任何黑盒（模型或自己）变成可读、可验证、可干预的系统</b>。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 27 · 2026-06-13</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

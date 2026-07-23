@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：因果推断 — Day 36</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -63,41 +64,34 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：因果推断</h1>
-  <div class="meta">Day 36 · 2026-06-22</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="506622f881e90f0e">AI/ML 详解：因果推断</h1>
+<div class="meta">Day 36 · 2026-06-22</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
 <!-- 1. 因果 vs 相关 -->
-<div class="card">
-  <h2>因果 vs 相关<span class="en">Causation vs Correlation</span></h2>
-  <div class="tags"><span class="tag">核心区分</span><span class="tag purple">混杂</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>监控面板上 CPU 和延迟两条曲线总是一起涨——但你<b>无法从曲线本身</b>判断是 CPU 导致延迟、延迟导致 CPU，还是某个<b>隐藏的共同上游</b>（一波流量激增）同时推高了两者。这个隐藏上游就是<b>混杂变量（confounder）</b>，相当于系统里一个没被画进依赖图的<b>共享依赖</b>。看到相关就下因果结论，等于看到两个服务一起抖动就断定 A 调用了 B。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>统计相关回答的是<b>观察</b>问题："已经看到 X 高，Y 大概率也高"——数学上是条件概率 <strong>P(Y | X)</strong>。因果回答的是<b>干预</b>问题："我<b>主动</b>把 X 调高，Y 会变吗"——Judea Pearl 用 <strong>do 算子</strong>把它写成 <strong>P(Y | do(X))</strong>。两者的差距全在混杂：当 Z 同时影响 X 和 Y，X 与 Y 即使毫无因果关系也会高度相关。</p>
-    <p style="margin-top:8px">机制上，混杂打开了一条<b>后门路径（backdoor path）</b>：X ← Z → Y。相关性把"X→Y 的真实效应"和"经由 Z 的伪关联"<b>混在一起</b>。识别因果的核心动作，就是<b>堵住后门</b>——通过分层、回归、匹配等手段"控制住 Z"，只留下 X→Y 这条直接通路。这也是著名的 <strong>Simpson 悖论</strong>的根源：不控制 Z 时整体趋势，可能和每个分组内的趋势完全相反。</p>
-
-<div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">混杂的因果图（DAG）：Z 是后门</span><br><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="box p">Z 混杂变量</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↘<br>
-<span class="box">X 处理</span> <span class="arrow">— ? →</span> <span class="box g">Y 结果</span><br><br>
-<span style="color:#5a6378;font-size:0.78rem">X 与 Y 的相关 = 真实效应(X→Y) + 后门伪关联(X←Z→Y)<br>控制住 Z = 堵住后门，剩下的才是因果</span>
+<div class="card" data-tts="44323d9702ebbe03">
+<h2>因果 vs 相关<span class="en">Causation vs Correlation</span></h2>
+<div class="tags"><span class="tag">核心区分</span><span class="tag purple">混杂</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>监控面板上 CPU 和延迟两条曲线总是一起涨——但你<b>无法从曲线本身</b>判断是 CPU 导致延迟、延迟导致 CPU，还是某个<b>隐藏的共同上游</b>（一波流量激增）同时推高了两者。这个隐藏上游就是<b>混杂变量（confounder）</b>，相当于系统里一个没被画进依赖图的<b>共享依赖</b>。看到相关就下因果结论，等于看到两个服务一起抖动就断定 A 调用了 B。</p>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>统计相关回答的是<b>观察</b>问题："已经看到 X 高，Y 大概率也高"——数学上是条件概率 <strong>P(Y | X)</strong>。因果回答的是<b>干预</b>问题："我<b>主动</b>把 X 调高，Y 会变吗"——Judea Pearl 用 <strong>do 算子</strong>把它写成 <strong>P(Y | do(X))</strong>。两者的差距全在混杂：当 Z 同时影响 X 和 Y，X 与 Y 即使毫无因果关系也会高度相关。</p>
+<p style="margin-top:8px">机制上，混杂打开了一条<b>后门路径（backdoor path）</b>：X ← Z → Y。相关性把"X→Y 的真实效应"和"经由 Z 的伪关联"<b>混在一起</b>。识别因果的核心动作，就是<b>堵住后门</b>——通过分层、回归、匹配等手段"控制住 Z"，只留下 X→Y 这条直接通路。这也是著名的 <strong>Simpson 悖论</strong>的根源：不控制 Z 时整体趋势，可能和每个分组内的趋势完全相反。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">混杂的因果图（DAG）：Z 是后门</span><br/><br/>
+      <span class="box p">Z 混杂变量</span><br/>
+        ↙     ↘<br/>
+<span class="box">X 处理</span> <span class="arrow">— ? →</span> <span class="box g">Y 结果</span><br/><br/>
+<span style="color:#5a6378;font-size:0.78rem">X 与 Y 的相关 = 真实效应(X→Y) + 后门伪关联(X←Z→Y)<br/>控制住 Z = 堵住后门，剩下的才是因果</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd, numpy <span class="kw">as</span> np
 <span class="kw">import</span> statsmodels.formula.api <span class="kw">as</span> smf
 
@@ -113,35 +107,29 @@ df = pd.DataFrame({<span class="str">"X"</span>: X, <span class="str">"Y"</span>
 <span class="cmt"># 控制 Z（堵后门）：X 的系数塌回真实值 0</span>
 <span class="fn">print</span>(smf.<span class="fn">ols</span>(<span class="str">"Y ~ X + Z"</span>, df).fit().params[<span class="str">"X"</span>])  <span class="cmt"># ≈ 0</span>
 </pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"数据量够大，相关就能当因果用"——错得越大越离谱。样本越大，<b>伪关联的置信区间越窄</b>，你会更"确信"一个虚假结论。大数据修不了混杂偏差，它只是<b>把偏差估计得更精确</b>。能修的只有设计：随机化、或显式建模混杂。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：你发现"用了 AI 助手的那几周产出更高"，先别归因于工具。问一句——是不是<b>那几周本来就状态好</b>（混杂 Z = 精力/项目难度），导致你既愿意用 AI、又产出高？想验证因果，得让"用不用 AI"<b>独立于</b>你的状态，比如随机指定某些任务用、某些不用。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 相关是 P(Y|X)，因果是 P(Y|do(X))——两者的全部差距，藏在你没画进依赖图的那些共同上游里。<br>🤔 回想一个你最近基于"数据相关性"做出的判断：有没有一个隐藏的共同原因，能同时解释你看到的两端？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"数据量够大，相关就能当因果用"——错得越大越离谱。样本越大，<b>伪关联的置信区间越窄</b>，你会更"确信"一个虚假结论。大数据修不了混杂偏差，它只是<b>把偏差估计得更精确</b>。能修的只有设计：随机化、或显式建模混杂。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：你发现"用了 AI 助手的那几周产出更高"，先别归因于工具。问一句——是不是<b>那几周本来就状态好</b>（混杂 Z = 精力/项目难度），导致你既愿意用 AI、又产出高？想验证因果，得让"用不用 AI"<b>独立于</b>你的状态，比如随机指定某些任务用、某些不用。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 相关是 P(Y|X)，因果是 P(Y|do(X))——两者的全部差距，藏在你没画进依赖图的那些共同上游里。<br/>🤔 回想一个你最近基于"数据相关性"做出的判断：有没有一个隐藏的共同原因，能同时解释你看到的两端？</div>
+</div>
+</div>
 <!-- 2. 潜在结果框架 -->
-<div class="card">
-  <h2>潜在结果框架<span class="en">Potential Outcomes / Rubin Model</span></h2>
-  <div class="tags"><span class="tag">理论框架</span><span class="tag purple">反事实</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>反事实（counterfactual）就是"<b>如果我当时没上线这个 deploy，会怎样</b>"。问题在于：你<b>无法</b>对同一台服务器、在同一时刻，既部署又不部署。这正是 A/B test 的心智模型，但它有个无法回避的硬伤——<b>每个个体你只能看到一条平行宇宙</b>，另一条永远是<b>缺失数据</b>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Rubin 的潜在结果框架给每个个体 i 定义两个值：<strong>Y_i(1)</strong>（接受处理时的结果）和 <strong>Y_i(0)</strong>（不接受时的结果）。个体因果效应 = <strong>Y_i(1) − Y_i(0)</strong>。麻烦在于：i 要么被处理、要么没被处理，你<b>永远只能观测到其中一个</b>，另一个是反事实。这就是 <strong>因果推断的根本难题（Fundamental Problem of Causal Inference）</strong>——它本质是个<b>缺失数据问题</b>。</p>
-    <p style="margin-top:8px">既然个体效应不可观测，我们退而求其次估<b>平均</b>：<strong>ATE = E[Y(1) − Y(0)]</strong>。但天真地拿"被处理组均值 − 未处理组均值"会有<b>选择偏差</b>：选择接受处理的人本就和别人不同。<b>随机化</b>是破局钥匙——随机分配让"是否处理"<b>独立于</b>潜在结果，两组在处理前统计上无差异，于是组间差就是无偏的 ATE。这也是为什么 RCT（随机对照试验）是因果推断的黄金标准。</p>
-
+<div class="card" data-tts="92f9c2f42c67f9ee">
+<h2>潜在结果框架<span class="en">Potential Outcomes / Rubin Model</span></h2>
+<div class="tags"><span class="tag">理论框架</span><span class="tag purple">反事实</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>反事实（counterfactual）就是"<b>如果我当时没上线这个 deploy，会怎样</b>"。问题在于：你<b>无法</b>对同一台服务器、在同一时刻，既部署又不部署。这正是 A/B test 的心智模型，但它有个无法回避的硬伤——<b>每个个体你只能看到一条平行宇宙</b>，另一条永远是<b>缺失数据</b>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Rubin 的潜在结果框架给每个个体 i 定义两个值：<strong>Y_i(1)</strong>（接受处理时的结果）和 <strong>Y_i(0)</strong>（不接受时的结果）。个体因果效应 = <strong>Y_i(1) − Y_i(0)</strong>。麻烦在于：i 要么被处理、要么没被处理，你<b>永远只能观测到其中一个</b>，另一个是反事实。这就是 <strong>因果推断的根本难题（Fundamental Problem of Causal Inference）</strong>——它本质是个<b>缺失数据问题</b>。</p>
+<p style="margin-top:8px">既然个体效应不可观测，我们退而求其次估<b>平均</b>：<strong>ATE = E[Y(1) − Y(0)]</strong>。但天真地拿"被处理组均值 − 未处理组均值"会有<b>选择偏差</b>：选择接受处理的人本就和别人不同。<b>随机化</b>是破局钥匙——随机分配让"是否处理"<b>独立于</b>潜在结果，两组在处理前统计上无差异，于是组间差就是无偏的 ATE。这也是为什么 RCT（随机对照试验）是因果推断的黄金标准。</p>
 <table class="po">
 <tr><th>个体</th><th>Y(0) 不处理</th><th>Y(1) 处理</th><th>个体效应</th></tr>
 <tr><td>A（被处理）</td><td class="miss">? 反事实</td><td>8</td><td class="miss">不可知</td></tr>
@@ -149,10 +137,9 @@ df = pd.DataFrame({<span class="str">"X"</span>: X, <span class="str">"Y"</span>
 <tr><td>…</td><td>…</td><td>…</td><td>…</td></tr>
 </table>
 <div style="color:#5a6378;font-size:0.78rem;margin-top:6px">每行总有一半是缺失的红格 → 个体效应永远看不全，只能靠随机化估群体平均</div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
 np.random.seed(1)
 n = 5000
@@ -166,38 +153,32 @@ Y = np.<span class="fn">where</span>(T == 1, Y1, Y0)        <span class="cmt"># 
 ate = Y[T == 1].<span class="fn">mean</span>() - Y[T == 0].<span class="fn">mean</span>()
 <span class="fn">print</span>(<span class="fn">round</span>(ate, 2))   <span class="cmt"># ≈ 4.0，逼近真实 tau</span>
 </pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"我有处理组和对照组，直接比均值就是效应"——只有<b>随机分配</b>时才成立。观察数据里两组天然不可比（selection bias），直接比均值得到的是"相关"，不是 ATE。框架的价值不在公式，而在逼你<b>说清反事实是什么</b>、它为什么缺失。</div>
-    <div class="exercise" style="margin-top:8px">📌 决策辅助场景：给自己的个人项目设计"微型 RCT"。想知道"番茄钟到底有没有用"，别只在状态差的日子用它——用抛硬币<b>随机</b>决定每天用不用，两周后比两组的产出。随机化把混杂（当天状态）自动均摊到两组，省去你建一堆控制变量。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 因果推断的根本难题是缺失数据：你永远只能看到每个个体的一条平行宇宙，随机化是把另一条"借"回来的唯一干净办法。<br>🤔 你工作中哪个"显然有效"的习惯，其实从没在"不做它"的反事实下检验过？怎么给它设计一个最小随机实验？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"我有处理组和对照组，直接比均值就是效应"——只有<b>随机分配</b>时才成立。观察数据里两组天然不可比（selection bias），直接比均值得到的是"相关"，不是 ATE。框架的价值不在公式，而在逼你<b>说清反事实是什么</b>、它为什么缺失。</div>
+<div class="exercise" style="margin-top:8px">📌 决策辅助场景：给自己的个人项目设计"微型 RCT"。想知道"番茄钟到底有没有用"，别只在状态差的日子用它——用抛硬币<b>随机</b>决定每天用不用，两周后比两组的产出。随机化把混杂（当天状态）自动均摊到两组，省去你建一堆控制变量。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 因果推断的根本难题是缺失数据：你永远只能看到每个个体的一条平行宇宙，随机化是把另一条"借"回来的唯一干净办法。<br/>🤔 你工作中哪个"显然有效"的习惯，其实从没在"不做它"的反事实下检验过？怎么给它设计一个最小随机实验？</div>
+</div>
+</div>
 <!-- 3. 工具变量 -->
-<div class="card">
-  <h2>工具变量<span class="en">Instrumental Variables (IV)</span></h2>
-  <div class="tags"><span class="tag">准实验</span><span class="tag purple">识别策略</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>当你无法做随机实验、又有甩不掉的混杂时，去找一个<b>天然的随机器</b>——一个外部推力，它<b>只</b>改变"是否处理"，本身和结果、和混杂都无关。类比：你的灰度系统用<b>随机 seed</b> 分配 feature flag，谁拿到新功能是随机的、与用户画像无关。于是你可以把"被随机分到 flag"当成<b>杠杆</b>，撬出功能本身的因果效应——即使用户用不用功能是自选的。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>有<b>未观测混杂</b>时，"控制 Z"这招失效——你根本测不到 Z。工具变量（instrument）<strong>Z</strong> 绕开它，靠三个条件：<strong>(1) 相关性</strong>——Z 确实影响处理 X（Z→X 够强）；<strong>(2) 排他性（exclusion）</strong>——Z 只能<b>经由 X</b> 影响 Y，没有别的通路；<strong>(3) 独立性</strong>——Z 与未观测混杂无关，相当于"随机分配"。</p>
-    <p style="margin-top:8px">机制是<b>两阶段最小二乘（2SLS）</b>：第一阶段用 Z 预测 X，得到 X 中<b>仅由 Z 驱动</b>的那部分变动（这部分"干净"、不含混杂）；第二阶段用这个干净的预测值去解释 Y。直觉上，你<b>只用工具带来的那一点外生扰动</b>来估效应，把被混杂污染的其余变动统统丢掉。代价：估计量方差更大，且条件 (2)(3) <b>无法从数据检验</b>，只能靠领域论证——这是 IV 最脆弱处。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="5a4fcffd1b67aacd">
+<h2>工具变量<span class="en">Instrumental Variables (IV)</span></h2>
+<div class="tags"><span class="tag">准实验</span><span class="tag purple">识别策略</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>当你无法做随机实验、又有甩不掉的混杂时，去找一个<b>天然的随机器</b>——一个外部推力，它<b>只</b>改变"是否处理"，本身和结果、和混杂都无关。类比：你的灰度系统用<b>随机 seed</b> 分配 feature flag，谁拿到新功能是随机的、与用户画像无关。于是你可以把"被随机分到 flag"当成<b>杠杆</b>，撬出功能本身的因果效应——即使用户用不用功能是自选的。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>有<b>未观测混杂</b>时，"控制 Z"这招失效——你根本测不到 Z。工具变量（instrument）<strong>Z</strong> 绕开它，靠三个条件：<strong>(1) 相关性</strong>——Z 确实影响处理 X（Z→X 够强）；<strong>(2) 排他性（exclusion）</strong>——Z 只能<b>经由 X</b> 影响 Y，没有别的通路；<strong>(3) 独立性</strong>——Z 与未观测混杂无关，相当于"随机分配"。</p>
+<p style="margin-top:8px">机制是<b>两阶段最小二乘（2SLS）</b>：第一阶段用 Z 预测 X，得到 X 中<b>仅由 Z 驱动</b>的那部分变动（这部分"干净"、不含混杂）；第二阶段用这个干净的预测值去解释 Y。直觉上，你<b>只用工具带来的那一点外生扰动</b>来估效应，把被混杂污染的其余变动统统丢掉。代价：估计量方差更大，且条件 (2)(3) <b>无法从数据检验</b>，只能靠领域论证——这是 IV 最脆弱处。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> numpy <span class="kw">as</span> np, pandas <span class="kw">as</span> pd
 <span class="kw">from</span> linearmodels.iv <span class="kw">import</span> IV2SLS  <span class="cmt"># pip install linearmodels</span>
 
@@ -213,49 +194,42 @@ df = pd.DataFrame({<span class="str">"Y"</span>: Y, <span class="str">"X"</span>
 iv = IV2SLS.<span class="fn">from_formula</span>(<span class="str">"Y ~ 1 + [X ~ Z]"</span>, df).<span class="fn">fit</span>()
 <span class="fn">print</span>(<span class="fn">round</span>(iv.params[<span class="str">"X"</span>], 2))   <span class="cmt"># ≈ 2.0，逼近真实因果效应</span>
 </pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"弱工具也能凑合"——非常危险。当 Z→X 很弱（弱工具，weak instrument），第一阶段几乎没信息，2SLS 估计会<b>剧烈放大偏差和方差</b>，结果可能比直接 OLS 还离谱。用前务必看第一阶段的 F 统计量（经验阈值常取 &gt; 10）。</div>
-    <div class="exercise" style="margin-top:8px">📌 跨学科思考场景：经济学里"上学年限对收入的影响"用<b>出生季度</b>当工具（Angrist &amp; Krueger）——入学年龄政策让不同季度出生的孩子被动多读/少读一点书，这个"季度"与个人能力无关，是天然随机器。学会识别生活中的"准随机事件"（政策切换、地理边界、抽签），是把观察数据当实验用的核心功夫。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 工具变量是"借来的随机性"——找一个只撬动处理、不碰结果的外生杠杆，用它那一点干净扰动估因果。<br>🤔 你关心的某个"X 是否导致 Y"问题里，世界上有没有一个<b>近似随机</b>地改变了 X、却与 Y 无直接关系的事件？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"弱工具也能凑合"——非常危险。当 Z→X 很弱（弱工具，weak instrument），第一阶段几乎没信息，2SLS 估计会<b>剧烈放大偏差和方差</b>，结果可能比直接 OLS 还离谱。用前务必看第一阶段的 F 统计量（经验阈值常取 &gt; 10）。</div>
+<div class="exercise" style="margin-top:8px">📌 跨学科思考场景：经济学里"上学年限对收入的影响"用<b>出生季度</b>当工具（Angrist &amp; Krueger）——入学年龄政策让不同季度出生的孩子被动多读/少读一点书，这个"季度"与个人能力无关，是天然随机器。学会识别生活中的"准随机事件"（政策切换、地理边界、抽签），是把观察数据当实验用的核心功夫。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 工具变量是"借来的随机性"——找一个只撬动处理、不碰结果的外生杠杆，用它那一点干净扰动估因果。<br/>🤔 你关心的某个"X 是否导致 Y"问题里，世界上有没有一个<b>近似随机</b>地改变了 X、却与 Y 无直接关系的事件？</div>
+</div>
+</div>
 <!-- 4. 双重差分 -->
-<div class="card">
-  <h2>双重差分<span class="en">Difference-in-Differences (DiD)</span></h2>
-  <div class="tags"><span class="tag">准实验</span><span class="tag purple">面板数据</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>你给某个 shard 改了配置（处理组），另一个 shard 没动（对照组）。直接看处理组改前/改后的差不行——因为<b>整个集群</b>这期间可能因为流量季节性一起在涨。DiD 的做法：<b>(处理组前后差) 减去 (对照组前后差)</b>，把"两组共同经历的时间趋势"<b>减掉</b>，剩下的才是配置改动的净效应。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>当处理不是随机分配、但你有<b>处理前后两个时间点</b>和一个<b>没被处理的对照组</b>时，DiD 能识别效应。它同时消掉两类偏差：<b>第一次差分（前后）</b>消掉了每个组<b>不随时间变的固定差异</b>（比如处理组本来基线就高）；<b>第二次差分（处理组 vs 对照组）</b>消掉了<b>两组共享的时间趋势</b>（大盘的季节性波动）。两次相减后，留下的就是处理的因果效应。</p>
-    <p style="margin-top:8px">核心假设是<strong>平行趋势（parallel trends）</strong>：<b>若没有处理</b>，处理组和对照组本会沿着平行的轨迹变化。这是 DiD 全部可信度的来源，<b>也无法直接证明</b>——只能用处理前多期数据看两条线是否一直平行来旁证。经典案例是 <strong>Card &amp; Krueger (1994)</strong> 最低工资研究：新泽西涨了最低工资、隔壁宾州没涨，用快餐店就业的双重差分，发现就业<b>并未</b>如传统理论预测的下降。</p>
-
-<div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">平行趋势：反事实 = 对照组趋势平移到处理组</span><br><br>
-就业&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#00d4ff">●</span> 处理组(实际)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#00d4ff">●</span><span style="color:#5a6378">- - - -</span><span style="color:#ff8e8e">○</span> 处理组(反事实)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">▲</span> 对照组<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7ed6a0">▲</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──────────────→ 时间<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;处理前&nbsp;&nbsp;|&nbsp;处理后<br>
-<span style="color:#5a6378;font-size:0.78rem">DiD 效应 = 实际● 与 反事实○ 的垂直差<br>反事实 = 对照组的变化量，平移到处理组起点</span>
+<div class="card" data-tts="cc1eb5960cb03b3e">
+<h2>双重差分<span class="en">Difference-in-Differences (DiD)</span></h2>
+<div class="tags"><span class="tag">准实验</span><span class="tag purple">面板数据</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>你给某个 shard 改了配置（处理组），另一个 shard 没动（对照组）。直接看处理组改前/改后的差不行——因为<b>整个集群</b>这期间可能因为流量季节性一起在涨。DiD 的做法：<b>(处理组前后差) 减去 (对照组前后差)</b>，把"两组共同经历的时间趋势"<b>减掉</b>，剩下的才是配置改动的净效应。</p>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>当处理不是随机分配、但你有<b>处理前后两个时间点</b>和一个<b>没被处理的对照组</b>时，DiD 能识别效应。它同时消掉两类偏差：<b>第一次差分（前后）</b>消掉了每个组<b>不随时间变的固定差异</b>（比如处理组本来基线就高）；<b>第二次差分（处理组 vs 对照组）</b>消掉了<b>两组共享的时间趋势</b>（大盘的季节性波动）。两次相减后，留下的就是处理的因果效应。</p>
+<p style="margin-top:8px">核心假设是<strong>平行趋势（parallel trends）</strong>：<b>若没有处理</b>，处理组和对照组本会沿着平行的轨迹变化。这是 DiD 全部可信度的来源，<b>也无法直接证明</b>——只能用处理前多期数据看两条线是否一直平行来旁证。经典案例是 <strong>Card &amp; Krueger (1994)</strong> 最低工资研究：新泽西涨了最低工资、隔壁宾州没涨，用快餐店就业的双重差分，发现就业<b>并未</b>如传统理论预测的下降。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">平行趋势：反事实 = 对照组趋势平移到处理组</span><br/><br/>
+就业 │              <span style="color:#00d4ff">●</span> 处理组(实际)<br/>
+     │    <span style="color:#00d4ff">●</span><span style="color:#5a6378">- - - -</span><span style="color:#ff8e8e">○</span> 处理组(反事实)<br/>
+     │             <span style="color:#7ed6a0">▲</span> 对照组<br/>
+     │    <span style="color:#7ed6a0">▲</span><br/>
+     └──────────────→ 时间<br/>
+        处理前  | 处理后<br/>
+<span style="color:#5a6378;font-size:0.78rem">DiD 效应 = 实际● 与 反事实○ 的垂直差<br/>反事实 = 对照组的变化量，平移到处理组起点</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
 <span class="kw">import</span> statsmodels.formula.api <span class="kw">as</span> smf
 
@@ -270,56 +244,46 @@ m = smf.<span class="fn">ols</span>(<span class="str">"y ~ treat + post + treat:
 <span class="fn">print</span>(m.params[<span class="str">"treat:post"</span>])
 <span class="cmt"># = (25-18) - (22-20) = 7 - 2 = 5  ← 减掉了大盘+2 的趋势</span>
 </pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"找个对照组套上 DiD 就行"——对照组选错，平行趋势不成立，结论全废。若处理组在处理前就已经在<b>加速上升</b>（趋势本就不平行），DiD 会把这部分自然差异误算成因果效应。务必用处理前的多期数据画图，确认两条线一直平行（"事前趋势检验"）。</div>
-    <div class="exercise" style="margin-top:8px">📌 个人项目场景：想评估"换了新笔记系统后，我的周复盘质量是否提升"。别只看自己换前换后——找一个<b>没换系统但情况相似</b>的维度当对照（比如另一类一直没动的笔记），用 DiD 减掉"这段时间你整体更投入"的大盘趋势，才不会把进步全归功于工具。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 DiD 用"减两次"剥掉固定组间差和共同时间趋势，但它的全部可信度押在"平行趋势"这条无法证明、只能旁证的假设上。<br>🤔 你想归因的某个改变里，有没有一个"没经历这个改变、但本会同步波动"的对照？没有它，你怎么知道改变后的变化不只是大盘趋势？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"找个对照组套上 DiD 就行"——对照组选错，平行趋势不成立，结论全废。若处理组在处理前就已经在<b>加速上升</b>（趋势本就不平行），DiD 会把这部分自然差异误算成因果效应。务必用处理前的多期数据画图，确认两条线一直平行（"事前趋势检验"）。</div>
+<div class="exercise" style="margin-top:8px">📌 个人项目场景：想评估"换了新笔记系统后，我的周复盘质量是否提升"。别只看自己换前换后——找一个<b>没换系统但情况相似</b>的维度当对照（比如另一类一直没动的笔记），用 DiD 减掉"这段时间你整体更投入"的大盘趋势，才不会把进步全归功于工具。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 DiD 用"减两次"剥掉固定组间差和共同时间趋势，但它的全部可信度押在"平行趋势"这条无法证明、只能旁证的假设上。<br/>🤔 你想归因的某个改变里，有没有一个"没经历这个改变、但本会同步波动"的对照？没有它，你怎么知道改变后的变化不只是大盘趋势？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://mixtape.scunning.com/" target="_blank">Causal Inference: The Mixtape (Scott Cunningham)</a> — 免费在线，工程师友好，DiD/IV/RDD 全覆盖，强烈推荐入门</li>
-      <li><a href="https://miguelhernan.org/whatifbook" target="_blank">Causal Inference: What If (Hernán &amp; Robins)</a> — 免费 PDF，潜在结果框架的权威教材，含 Python/R 代码</li>
-      <li><a href="https://ideas.repec.org/a/aea/aecrev/v84y1994i4p772-93.html" target="_blank">Card &amp; Krueger (1994) 最低工资研究</a> — 双重差分最经典的实证案例，AER 原文索引</li>
-      <li><a href="https://en.wikipedia.org/wiki/Causality_(book)" target="_blank">Judea Pearl, <em>Causality</em></a> — do 算子与 DAG 后门准则的奠基性著作；通俗版见《The Book of Why》</li>
-      <li><a href="https://www.pywhy.org/dowhy/" target="_blank">DoWhy（微软开源库）</a> — 把"建模假设→识别→估计→反驳"四步法工程化的 Python 库</li>
-    </ul>
-  </div>
+<div class="card" data-tts="0e64dae5c319fa98" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://mixtape.scunning.com/" target="_blank">Causal Inference: The Mixtape (Scott Cunningham)</a> — 免费在线，工程师友好，DiD/IV/RDD 全覆盖，强烈推荐入门</li>
+<li><a href="https://miguelhernan.org/whatifbook" target="_blank">Causal Inference: What If (Hernán &amp; Robins)</a> — 免费 PDF，潜在结果框架的权威教材，含 Python/R 代码</li>
+<li><a href="https://ideas.repec.org/a/aea/aecrev/v84y1994i4p772-93.html" target="_blank">Card &amp; Krueger (1994) 最低工资研究</a> — 双重差分最经典的实证案例，AER 原文索引</li>
+<li><a href="https://en.wikipedia.org/wiki/Causality_(book)" target="_blank">Judea Pearl, <em>Causality</em></a> — do 算子与 DAG 后门准则的奠基性著作；通俗版见《The Book of Why》</li>
+<li><a href="https://www.pywhy.org/dowhy/" target="_blank">DoWhy（微软开源库）</a> — 把"建模假设→识别→估计→反驳"四步法工程化的 Python 库</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 既然随机对照试验（RCT）是因果黄金标准，为什么还要发明 IV、DiD 这些"准实验"方法？它们在因果可信度的阶梯上处于什么位置？</summary><div>因为 RCT 常常<b>做不了</b>：不道德（不能随机让人吸烟）、不可行（不能随机给某些州涨最低工资）、太贵或太慢。准实验是"<b>退而求其次找老天爷帮你随机</b>"——IV 借一个外生事件当随机器，DiD 借一个对照组减掉趋势。可信度阶梯大致：RCT &gt; 自然实验/IV/DiD/断点回归 &gt; 控制混杂的回归/匹配 &gt; 纯相关。越往下，越依赖<b>无法用数据检验的假设</b>（排他性、平行趋势），可信度越脆。关键认知：因果强度不取决于模型多复杂，而取决于<b>识别假设有多可信</b>。一个简单 DiD 配一个无懈可击的对照组，胜过一个塞满控制变量、却堵不住未观测混杂的花哨回归。这与分布式系统里"正确性来自不变量，而非代码量"同构。</div></details>
-
-    <details><summary>2. 机器学习模型预测准得不得了，为什么 ML 工程师仍然容易在因果问题上栽跟头？预测和因果到底是不是一回事？</summary><div>完全不是一回事，这是 ML 实践最深的陷阱之一。预测优化的是"<b>给定我观测到的 X，Y 是多少</b>"——它<b>乐于</b>利用一切相关性，包括混杂带来的伪关联，因为那也能降 loss。因果问的是"<b>我去改 X，Y 会怎样</b>"——此时伪关联全是毒药。经典翻车：模型发现"住院病人里哮喘患者死亡率<b>更低</b>"，预测层面没错（哮喘病人被更密集监护了），但若据此得出"哮喘保护肺炎病人"的因果结论并据以分流，会害死人——这里"监护强度"是混杂。一个 AUC 0.99 的模型，照样可能在"干预后会发生什么"上给出灾难性建议。所以可解释性、特征重要性<b>都不等于</b>因果归因：SHAP 值高只说明这个特征对<b>预测</b>有用，不说明改它能改结果。要做决策（而非预测），必须切换到因果框架。</div></details>
-
-    <details><summary>3. 「平行趋势」和「排他性约束」都是无法被数据证明、只能靠论证支撑的假设。这种"依赖不可检验假设"的状况，和你熟悉的工程领域有什么可类比之处？怎么对待它？</summary><div>这和分布式系统里依赖<b>无法穷尽测试的不变量</b>高度同构——你永远没法测出"在所有网络分区下都线性一致"，只能靠协议设计论证 + 大量旁证（Jepsen 测试、形式化验证）。对待方式也可迁移：(1) <b>把假设显式写出来</b>，别埋在代码/模型里——因果分析里就是明确声明"我假设平行趋势/排他性"；(2) <b>找间接证据加固</b>——DiD 用事前多期趋势图，IV 用相关的安慰剂检验（placebo test：对一个理应无效应的伪结果跑同样分析，若也出"效应"说明假设有问题）；(3) <b>敏感性分析</b>——问"假设违背到什么程度，结论才翻转"，DoWhy 的"反驳"步骤就是干这个；(4) <b>诚实标注不确定性</b>。核心心态：因果结论永远是"<b>在某假设下成立</b>"的条件命题，工程师的成熟体现在清楚自己押了哪些注、押得多重，而非假装没押注。</div></details>
-
-    <details><summary>4. 把因果阶梯（关联→干预→反事实）和当下的大语言模型对照，LLM 处在哪一层？这对"AI 能不能真正理解世界"意味着什么？</summary><div>Pearl 的因果阶梯三层：<b>关联</b>（看到 X 会怎样）、<b>干预</b>（做 X 会怎样）、<b>反事实</b>（如果当初不做 X 会怎样）。LLM 在海量文本上学的是<b>关联</b>层——它建模 token 的联合分布，本质是极强的相关性引擎。它能<b>复述</b>人类写下的因果知识（因为训练语料里有因果陈述），但这不等于它自己在做干预/反事实推理；面对训练分布外的新干预，它常给出听起来合理却因果错误的答案。这正是当前的活跃争论：有人认为纯关联学习触不到上面两层，必须引入显式因果结构；也有人认为足够规模 + 工具（能真正做实验、调 API 改变世界状态的 agent）能逼近干预层。对"AI 超级个体"的启示：用 LLM 做<b>预测/生成/检索</b>是它的主场，但做<b>因果决策</b>（这个改动会带来什么后果）时，要把它当成提假设的助手，真正的因果判断仍需你用本文的框架去验证——人机协同的分工线，恰好划在因果阶梯上。</div></details>
-
-    <details><summary>5. 本文四个工具（控制混杂的回归、潜在结果、IV、DiD）该怎么选？给你一个真实问题，决策路径是什么？</summary><div>决策树大致：<b>能随机化吗？</b>→ 能就做 RCT（用潜在结果框架算 ATE），别想别的。<b>不能随机，但混杂都能观测到吗？</b>→ 能就用回归/匹配控制它们（堵后门），但要诚实问"真的全观测到了？"——通常没有。<b>有未观测混杂，但能找到一个外生工具吗？</b>→ 能且工具够强（第一阶段 F&gt;10）、排他性可论证，就用 IV。<b>有处理前后的面板数据和一个可信对照组吗？</b>→ 有且事前趋势平行，就用 DiD。三者常组合：先 DiD 拿主估计，再用 IV 或敏感性分析做稳健性检查。落到 BigCat 的真实场景——"新工作流是否提升了我的产出"：首选给任务<b>随机</b>指派用不用（微型 RCT）；做不到就找一个一直没变的对照维度跑 DiD。永远先问"<b>我的反事实是什么、它为什么可信</b>"，工具只是回答这个问题的手段。</div></details>
-  </div>
+<div class="card think" data-tts="ad7b0f275a05e3be" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 既然随机对照试验（RCT）是因果黄金标准，为什么还要发明 IV、DiD 这些"准实验"方法？它们在因果可信度的阶梯上处于什么位置？</summary><div>因为 RCT 常常<b>做不了</b>：不道德（不能随机让人吸烟）、不可行（不能随机给某些州涨最低工资）、太贵或太慢。准实验是"<b>退而求其次找老天爷帮你随机</b>"——IV 借一个外生事件当随机器，DiD 借一个对照组减掉趋势。可信度阶梯大致：RCT &gt; 自然实验/IV/DiD/断点回归 &gt; 控制混杂的回归/匹配 &gt; 纯相关。越往下，越依赖<b>无法用数据检验的假设</b>（排他性、平行趋势），可信度越脆。关键认知：因果强度不取决于模型多复杂，而取决于<b>识别假设有多可信</b>。一个简单 DiD 配一个无懈可击的对照组，胜过一个塞满控制变量、却堵不住未观测混杂的花哨回归。这与分布式系统里"正确性来自不变量，而非代码量"同构。</div></details>
+<details><summary>2. 机器学习模型预测准得不得了，为什么 ML 工程师仍然容易在因果问题上栽跟头？预测和因果到底是不是一回事？</summary><div>完全不是一回事，这是 ML 实践最深的陷阱之一。预测优化的是"<b>给定我观测到的 X，Y 是多少</b>"——它<b>乐于</b>利用一切相关性，包括混杂带来的伪关联，因为那也能降 loss。因果问的是"<b>我去改 X，Y 会怎样</b>"——此时伪关联全是毒药。经典翻车：模型发现"住院病人里哮喘患者死亡率<b>更低</b>"，预测层面没错（哮喘病人被更密集监护了），但若据此得出"哮喘保护肺炎病人"的因果结论并据以分流，会害死人——这里"监护强度"是混杂。一个 AUC 0.99 的模型，照样可能在"干预后会发生什么"上给出灾难性建议。所以可解释性、特征重要性<b>都不等于</b>因果归因：SHAP 值高只说明这个特征对<b>预测</b>有用，不说明改它能改结果。要做决策（而非预测），必须切换到因果框架。</div></details>
+<details><summary>3. 「平行趋势」和「排他性约束」都是无法被数据证明、只能靠论证支撑的假设。这种"依赖不可检验假设"的状况，和你熟悉的工程领域有什么可类比之处？怎么对待它？</summary><div>这和分布式系统里依赖<b>无法穷尽测试的不变量</b>高度同构——你永远没法测出"在所有网络分区下都线性一致"，只能靠协议设计论证 + 大量旁证（Jepsen 测试、形式化验证）。对待方式也可迁移：(1) <b>把假设显式写出来</b>，别埋在代码/模型里——因果分析里就是明确声明"我假设平行趋势/排他性"；(2) <b>找间接证据加固</b>——DiD 用事前多期趋势图，IV 用相关的安慰剂检验（placebo test：对一个理应无效应的伪结果跑同样分析，若也出"效应"说明假设有问题）；(3) <b>敏感性分析</b>——问"假设违背到什么程度，结论才翻转"，DoWhy 的"反驳"步骤就是干这个；(4) <b>诚实标注不确定性</b>。核心心态：因果结论永远是"<b>在某假设下成立</b>"的条件命题，工程师的成熟体现在清楚自己押了哪些注、押得多重，而非假装没押注。</div></details>
+<details><summary>4. 把因果阶梯（关联→干预→反事实）和当下的大语言模型对照，LLM 处在哪一层？这对"AI 能不能真正理解世界"意味着什么？</summary><div>Pearl 的因果阶梯三层：<b>关联</b>（看到 X 会怎样）、<b>干预</b>（做 X 会怎样）、<b>反事实</b>（如果当初不做 X 会怎样）。LLM 在海量文本上学的是<b>关联</b>层——它建模 token 的联合分布，本质是极强的相关性引擎。它能<b>复述</b>人类写下的因果知识（因为训练语料里有因果陈述），但这不等于它自己在做干预/反事实推理；面对训练分布外的新干预，它常给出听起来合理却因果错误的答案。这正是当前的活跃争论：有人认为纯关联学习触不到上面两层，必须引入显式因果结构；也有人认为足够规模 + 工具（能真正做实验、调 API 改变世界状态的 agent）能逼近干预层。对"AI 超级个体"的启示：用 LLM 做<b>预测/生成/检索</b>是它的主场，但做<b>因果决策</b>（这个改动会带来什么后果）时，要把它当成提假设的助手，真正的因果判断仍需你用本文的框架去验证——人机协同的分工线，恰好划在因果阶梯上。</div></details>
+<details><summary>5. 本文四个工具（控制混杂的回归、潜在结果、IV、DiD）该怎么选？给你一个真实问题，决策路径是什么？</summary><div>决策树大致：<b>能随机化吗？</b>→ 能就做 RCT（用潜在结果框架算 ATE），别想别的。<b>不能随机，但混杂都能观测到吗？</b>→ 能就用回归/匹配控制它们（堵后门），但要诚实问"真的全观测到了？"——通常没有。<b>有未观测混杂，但能找到一个外生工具吗？</b>→ 能且工具够强（第一阶段 F&gt;10）、排他性可论证，就用 IV。<b>有处理前后的面板数据和一个可信对照组吗？</b>→ 有且事前趋势平行，就用 DiD。三者常组合：先 DiD 拿主估计，再用 IV 或敏感性分析做稳健性检查。落到 BigCat 的真实场景——"新工作流是否提升了我的产出"：首选给任务<b>随机</b>指派用不用（微型 RCT）；做不到就找一个一直没变的对照维度跑 DiD。永远先问"<b>我的反事实是什么、它为什么可信</b>"，工具只是回答这个问题的手段。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 36 · 2026-06-22</footer>
-
 </div>
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

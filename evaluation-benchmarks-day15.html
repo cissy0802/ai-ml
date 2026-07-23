@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：评估与基准 — Day 15</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,47 +60,39 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：评估与基准</h1>
-  <div class="meta">Day 15 · 2026-06-01</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="09f387319801adcc">AI/ML 详解：评估与基准</h1>
+<div class="meta">Day 15 · 2026-06-01</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
-  <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+<a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
     工程对应 → super-individual D6: Eval 工程（怎么搭自己的离线评估流水线）
   </a>
 </div>
-
-<div class="card" style="border-left-color:#5a6378;background:#101424">
-  <div class="section">
-    <p style="color:#cfd3df">一个绕不开的问题：<strong>「这个模型比那个好」凭什么说？</strong>软件工程里你有测试套件——红绿一目了然。但 LLM 的输出是开放文本，没有唯一正确答案。今天拆解四个核心评估机制，它们恰好对应你熟悉的测试金字塔：MMLU 是<strong>单元断言</strong>，HumanEval 是<strong>跑得过测试才算对</strong>，MT-Bench 是<strong>多轮集成测试</strong>，LLM-as-Judge 是<strong>自动化裁判</strong>——以及裁判自己的 bug。</p>
-  </div>
+<div class="card" data-tts="774cacf4bd0a6695" style="border-left-color:#5a6378;background:#101424">
+<div class="section">
+<p style="color:#cfd3df">一个绕不开的问题：<strong>「这个模型比那个好」凭什么说？</strong>软件工程里你有测试套件——红绿一目了然。但 LLM 的输出是开放文本，没有唯一正确答案。今天拆解四个核心评估机制，它们恰好对应你熟悉的测试金字塔：MMLU 是<strong>单元断言</strong>，HumanEval 是<strong>跑得过测试才算对</strong>，MT-Bench 是<strong>多轮集成测试</strong>，LLM-as-Judge 是<strong>自动化裁判</strong>——以及裁判自己的 bug。</p>
 </div>
-
+</div>
 <!-- 1. MMLU -->
-<div class="card">
-  <h2>大规模多任务语言理解<span class="en">MMLU</span></h2>
-  <div class="tags"><span class="tag">知识基准</span><span class="tag purple">多选题</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>MMLU 就是给模型出的「<strong>标准化高考</strong>」——57 个学科（数学、法律、医学、历史…）的多选题题库。在你的世界里它对应<strong>回归测试套件（regression suite）</strong>：一组固定不变的断言，每发一个新模型版本就跑一遍，看分数有没有退化。每道题相当于一条 <code>assert</code>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Pain point：早期 NLP 每个任务一个 benchmark，碎片化得像一百个互不兼容的测试框架，没人能回答「<strong>这模型到底懂多少世界知识</strong>」。Hendrycks 等人 2021 年把 57 个领域的多选题汇成<strong>一个分数</strong>，覆盖从初等数学到专业法律。</p>
-    <p style="margin-top:8px">机制的关键不是让模型「自由作答」（那没法自动判分），而是把<strong>开放生成问题降维成分类问题</strong>：给题干 + 4 个选项 A/B/C/D，看模型对哪个选项赋予的<strong>对数似然（log-likelihood，即模型认为这串字出现的可能性）</strong>最高。哪个选项概率最高就算选哪个，对了 +1。这一步「降维」是 benchmark 能规模化、零人工的根本原因。</p>
-    <p style="margin-top:8px">诚实地说它有个致命软肋：<strong>污染（contamination）</strong>——题目原文泄漏进了训练数据，模型不是「会做」而是「背过」，分数虚高。这就像测试用例被偷偷写进了被测代码。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
-    <pre><span class="cmt"># MMLU 的判分本质：比较每个选项的对数似然，不是让模型自由生成</span>
+<div class="card" data-tts="f66decd1ec5ba6da">
+<h2>大规模多任务语言理解<span class="en">MMLU</span></h2>
+<div class="tags"><span class="tag">知识基准</span><span class="tag purple">多选题</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>MMLU 就是给模型出的「<strong>标准化高考</strong>」——57 个学科（数学、法律、医学、历史…）的多选题题库。在你的世界里它对应<strong>回归测试套件（regression suite）</strong>：一组固定不变的断言，每发一个新模型版本就跑一遍，看分数有没有退化。每道题相当于一条 <code>assert</code>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Pain point：早期 NLP 每个任务一个 benchmark，碎片化得像一百个互不兼容的测试框架，没人能回答「<strong>这模型到底懂多少世界知识</strong>」。Hendrycks 等人 2021 年把 57 个领域的多选题汇成<strong>一个分数</strong>，覆盖从初等数学到专业法律。</p>
+<p style="margin-top:8px">机制的关键不是让模型「自由作答」（那没法自动判分），而是把<strong>开放生成问题降维成分类问题</strong>：给题干 + 4 个选项 A/B/C/D，看模型对哪个选项赋予的<strong>对数似然（log-likelihood，即模型认为这串字出现的可能性）</strong>最高。哪个选项概率最高就算选哪个，对了 +1。这一步「降维」是 benchmark 能规模化、零人工的根本原因。</p>
+<p style="margin-top:8px">诚实地说它有个致命软肋：<strong>污染（contamination）</strong>——题目原文泄漏进了训练数据，模型不是「会做」而是「背过」，分数虚高。这就像测试用例被偷偷写进了被测代码。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="cmt"># MMLU 的判分本质：比较每个选项的对数似然，不是让模型自由生成</span>
 <span class="kw">from</span> datasets <span class="kw">import</span> load_dataset
 
 ds = load_dataset(<span class="str">"cais/mmlu"</span>, <span class="str">"high_school_physics"</span>, split=<span class="str">"test"</span>)
@@ -115,50 +108,44 @@ prompt = <span class="fn">f</span><span class="str">"{q['question']}\nA. {q['cho
 
 pred = <span class="fn">max</span>(<span class="str">"ABCD"</span>, key=<span class="kw">lambda</span> L: <span class="fn">score_choice</span>(prompt, L))
 correct = (<span class="str">"ABCD"</span>[q[<span class="str">"answer"</span>]] == pred)  <span class="cmt"># 自动判分，零人工</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区：「MMLU 高 = 模型真聪明」。错。MMLU 测的是<strong>知识检索 + 多选题应试技巧</strong>，不测推理深度、不测开放生成质量、更不测多轮对话。一个会背书的模型 MMLU 可以很高，写代码、做 agent 却很差。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：选模型时把 MMLU 当<strong>「冒烟测试」</strong>——快速淘汰明显不行的，但绝不当最终判据。真正要选「帮我读论文/做决策」的模型，得看贴近你任务的评测（推理、长文本理解），而非一个综合分。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 MMLU 的天才在于「把开放问题降维成可自动判分的多选题」；它的局限也正源于此——能自动判分的，往往不是你最想测的能力。<br>🤔 你的 CI 里哪些是「多选题式」的确定性断言，哪些是「需要人来判断好坏」的？后者你现在怎么测？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「MMLU 高 = 模型真聪明」。错。MMLU 测的是<strong>知识检索 + 多选题应试技巧</strong>，不测推理深度、不测开放生成质量、更不测多轮对话。一个会背书的模型 MMLU 可以很高，写代码、做 agent 却很差。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：选模型时把 MMLU 当<strong>「冒烟测试」</strong>——快速淘汰明显不行的，但绝不当最终判据。真正要选「帮我读论文/做决策」的模型，得看贴近你任务的评测（推理、长文本理解），而非一个综合分。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 MMLU 的天才在于「把开放问题降维成可自动判分的多选题」；它的局限也正源于此——能自动判分的，往往不是你最想测的能力。<br/>🤔 你的 CI 里哪些是「多选题式」的确定性断言，哪些是「需要人来判断好坏」的？后者你现在怎么测？</div>
+</div>
+</div>
 <!-- 2. HumanEval / pass@k -->
-<div class="card">
-  <h2>HumanEval 与 pass@k<span class="en">Functional Correctness</span></h2>
-  <div class="tags"><span class="tag">代码评测</span><span class="tag purple">概率估计</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>HumanEval 是给模型的「<strong>TDD 验收测试</strong>」——164 道 Python 题，每道带一组隐藏单元测试，生成的代码<strong>跑过测试才算对</strong>，长得漂不漂亮无所谓。而 pass@k 就是你最熟的那个东西：<strong>给不稳定的下游服务设重试，重试 k 次至少成功一次的概率</strong>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Pain point：代码<strong>不能用字符串匹配判分</strong>。两段代码可以一字不差地不同却都对，也可以长得几乎一样一个对一个错。所以传统的 BLEU、编辑距离全失效。Chen 等人 2021 年（Codex 论文）的答案简单粗暴：<strong>functional correctness——跑单元测试，过了就对</strong>。</p>
-    <p style="margin-top:8px">真正有数学含量的是 <strong>pass@k</strong>。它要回答：「采样 k 个解，至少一个正确的概率多少？」最朴素的写法是 <code>1−(1−p)^k</code>，但单题样本少时<strong>方差极大、估计不准</strong>。Codex 论文用了一个无偏估计器：每题先采样 <strong>n 个</strong>解（n 远大于 k），数出其中 <strong>c 个</strong>正确，然后：</p>
-    <div class="formula">pass@k = 1 − C(n−c, k) / C(n, k)</div>
-    <p style="margin-top:8px">逐符号拆开看就很直觉：<br>
-    · <strong>C(n, k)</strong>：从 n 个解里随机抽 k 个，一共多少种抽法（组合数）。<br>
-    · <strong>C(n−c, k)</strong>：只从那 c 个错解……不对，是从 <strong>n−c 个错解</strong>里抽 k 个的抽法数——即「<strong>k 个全抽到错解</strong>」的情况数。<br>
-    · 两者相除 = 抽 k 个<strong>全错</strong>的概率；<strong>1 减去它 = 至少抽到一个对的概率</strong>。<br>
+<div class="card" data-tts="c58bfe46949ebc7e">
+<h2>HumanEval 与 pass@k<span class="en">Functional Correctness</span></h2>
+<div class="tags"><span class="tag">代码评测</span><span class="tag purple">概率估计</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>HumanEval 是给模型的「<strong>TDD 验收测试</strong>」——164 道 Python 题，每道带一组隐藏单元测试，生成的代码<strong>跑过测试才算对</strong>，长得漂不漂亮无所谓。而 pass@k 就是你最熟的那个东西：<strong>给不稳定的下游服务设重试，重试 k 次至少成功一次的概率</strong>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Pain point：代码<strong>不能用字符串匹配判分</strong>。两段代码可以一字不差地不同却都对，也可以长得几乎一样一个对一个错。所以传统的 BLEU、编辑距离全失效。Chen 等人 2021 年（Codex 论文）的答案简单粗暴：<strong>functional correctness——跑单元测试，过了就对</strong>。</p>
+<p style="margin-top:8px">真正有数学含量的是 <strong>pass@k</strong>。它要回答：「采样 k 个解，至少一个正确的概率多少？」最朴素的写法是 <code>1−(1−p)^k</code>，但单题样本少时<strong>方差极大、估计不准</strong>。Codex 论文用了一个无偏估计器：每题先采样 <strong>n 个</strong>解（n 远大于 k），数出其中 <strong>c 个</strong>正确，然后：</p>
+<div class="formula">pass@k = 1 − C(n−c, k) / C(n, k)</div>
+<p style="margin-top:8px">逐符号拆开看就很直觉：<br/>
+    · <strong>C(n, k)</strong>：从 n 个解里随机抽 k 个，一共多少种抽法（组合数）。<br/>
+    · <strong>C(n−c, k)</strong>：只从那 c 个错解……不对，是从 <strong>n−c 个错解</strong>里抽 k 个的抽法数——即「<strong>k 个全抽到错解</strong>」的情况数。<br/>
+    · 两者相除 = 抽 k 个<strong>全错</strong>的概率；<strong>1 减去它 = 至少抽到一个对的概率</strong>。<br/>
     用大 n 估出真实正确率，再算这个组合式，就比直接重试 k 次稳得多——本质是<strong>用更多采样换更低的估计方差</strong>。</p>
-    <div class="diagram" style="margin-top:10px">
-      一题采样 n=8 个解，c=2 个正确：<br>
-      <span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><span class="box r">✗</span><span class="box r">✗</span><br>
-      <span style="color:#8b92a8">pass@1 ≈ 25%　pass@4 = 1 − C(6,4)/C(8,4) = 1 − 15/70 ≈ <span style="color:#7ed6a0">79%</span></span>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
-    <pre><span class="cmt"># pass@k 无偏估计器（Codex 论文给出的标准实现）</span>
+<div class="diagram" style="margin-top:10px">
+      一题采样 n=8 个解，c=2 个正确：<br/>
+<span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><span class="box r">✗</span><span class="box r">✗</span><br/>
+<span style="color:#8b92a8">pass@1 ≈ 25%　pass@4 = 1 − C(6,4)/C(8,4) = 1 − 15/70 ≈ <span style="color:#7ed6a0">79%</span></span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="cmt"># pass@k 无偏估计器（Codex 论文给出的标准实现）</span>
 <span class="kw">import</span> numpy <span class="kw">as</span> np
 
 <span class="kw">def</span> <span class="fn">pass_at_k</span>(n, c, k):
@@ -174,39 +161,33 @@ c = <span class="fn">sum</span>(<span class="fn">run_unit_tests</span>(s, proble
 
 <span class="fn">print</span>(<span class="fn">pass_at_k</span>(n=<span class="str">8</span>, c=c, k=<span class="str">1</span>))   <span class="cmt"># 一次就对的概率</span>
 <span class="fn">print</span>(<span class="fn">pass_at_k</span>(n=<span class="str">8</span>, c=c, k=<span class="str">4</span>))   <span class="cmt"># 4 次内至少一次对</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区：「pass@1 低这模型就没用」。不一定。在<strong>有验证器</strong>的场景（能自动跑测试），pass@10 高就足够可用——让模型反复试错，验证器挑出对的那个。这正是 coding agent 的工作方式：生成→跑测试→失败就再来。能自动验证时，「采样多次」是被低估的策略。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：评估 coding agent 时，别只看 pass@1。如果你的工作流允许 agent 自己跑测试再迭代，pass@k（k 较大）才是真实可用性指标——这直接决定你能不能放手让它自动改 bug。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 代码评测的范式转变是「<strong>从『长得像』到『跑得对』</strong>」；pass@k 则告诉你：有验证器时，模型的价值不在「一次答对」，而在「多试几次能不能撞对」。<br>🤔 你手上哪些任务<strong>有廉价的自动验证器</strong>（测试、编译、schema 校验）？那些任务最适合让 AI「采样多次 + 自动筛选」。</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「pass@1 低这模型就没用」。不一定。在<strong>有验证器</strong>的场景（能自动跑测试），pass@10 高就足够可用——让模型反复试错，验证器挑出对的那个。这正是 coding agent 的工作方式：生成→跑测试→失败就再来。能自动验证时，「采样多次」是被低估的策略。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：评估 coding agent 时，别只看 pass@1。如果你的工作流允许 agent 自己跑测试再迭代，pass@k（k 较大）才是真实可用性指标——这直接决定你能不能放手让它自动改 bug。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 代码评测的范式转变是「<strong>从『长得像』到『跑得对』</strong>」；pass@k 则告诉你：有验证器时，模型的价值不在「一次答对」，而在「多试几次能不能撞对」。<br/>🤔 你手上哪些任务<strong>有廉价的自动验证器</strong>（测试、编译、schema 校验）？那些任务最适合让 AI「采样多次 + 自动筛选」。</div>
+</div>
+</div>
 <!-- 3. MT-Bench -->
-<div class="card">
-  <h2>MT-Bench 多轮对话基准<span class="en">MT-Bench</span></h2>
-  <div class="tags"><span class="tag">开放生成</span><span class="tag purple">多轮</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>如果 MMLU/HumanEval 是<strong>单元测试</strong>，MT-Bench 就是<strong>集成测试</strong>——它测多轮（2 轮）对话里模型能不能<strong>保持上下文一致、follow-up 不掉链子</strong>。就像测一个有状态会话服务：第一个请求没问题不算赢，要看跨多个请求后会话状态还对不对。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Pain point：多选题和代码题测不了「<strong>开放对话质量</strong>」——写作、角色扮演、解释推理、改写。这些没有唯一正确答案，没法 <code>assert</code>。MT-Bench（出自 Zheng 等人 2023 的 MT-Bench / Chatbot Arena 论文）用 <strong>80 道高质量两轮问题</strong>，覆盖写作、推理、数学、编码等 8 类，专门压力测试「第二轮还跟得上吗」。</p>
-    <p style="margin-top:8px">核心难题随之而来：<strong>开放回答怎么自动判分？</strong>MT-Bench 的答案是把判分外包给一个强模型——<strong>LLM-as-Judge</strong>，给每个回答打 1–10 分（single-answer grading），或两个模型的回答两两对比（pairwise）。这就引出了今天最关键、也最危险的机制 → 下一张卡。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
-    <pre><span class="cmt"># MT-Bench 风格的单答打分：让强模型按 rubric 打 1-10 分</span>
+<div class="card" data-tts="286ce18371cfc08c">
+<h2>MT-Bench 多轮对话基准<span class="en">MT-Bench</span></h2>
+<div class="tags"><span class="tag">开放生成</span><span class="tag purple">多轮</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>如果 MMLU/HumanEval 是<strong>单元测试</strong>，MT-Bench 就是<strong>集成测试</strong>——它测多轮（2 轮）对话里模型能不能<strong>保持上下文一致、follow-up 不掉链子</strong>。就像测一个有状态会话服务：第一个请求没问题不算赢，要看跨多个请求后会话状态还对不对。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Pain point：多选题和代码题测不了「<strong>开放对话质量</strong>」——写作、角色扮演、解释推理、改写。这些没有唯一正确答案，没法 <code>assert</code>。MT-Bench（出自 Zheng 等人 2023 的 MT-Bench / Chatbot Arena 论文）用 <strong>80 道高质量两轮问题</strong>，覆盖写作、推理、数学、编码等 8 类，专门压力测试「第二轮还跟得上吗」。</p>
+<p style="margin-top:8px">核心难题随之而来：<strong>开放回答怎么自动判分？</strong>MT-Bench 的答案是把判分外包给一个强模型——<strong>LLM-as-Judge</strong>，给每个回答打 1–10 分（single-answer grading），或两个模型的回答两两对比（pairwise）。这就引出了今天最关键、也最危险的机制 → 下一张卡。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="cmt"># MT-Bench 风格的单答打分：让强模型按 rubric 打 1-10 分</span>
 <span class="kw">import</span> anthropic
 client = anthropic.<span class="fn">Anthropic</span>(api_key=<span class="str">"sk-ant-..."</span>)  <span class="cmt"># 占位</span>
 
@@ -223,52 +204,46 @@ msg = client.messages.<span class="fn">create</span>(
     messages=[{<span class="str">"role"</span>:<span class="str">"user"</span>,
         <span class="str">"content"</span>: JUDGE.<span class="fn">format</span>(q=q, a1=a1, q2=q2, a2=a2)}])
 <span class="cmt"># 用正则从 "Rating: [[8]]" 抽出分数——结构化输出便于自动解析</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区：「MT-Bench 分数可以跨论文绝对比较」。不行。分数<strong>强依赖用的是哪个 judge 模型、哪个版本、什么 prompt</strong>。换个 judge，分数整体平移。它适合<strong>同一套设置下的相对比较</strong>（A 比 B 好多少），不适合当跨研究的绝对刻度。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：评估你自己的 writing assistant 时，固定一个 judge + 一套 rubric，让它对「旧 prompt vs 新 prompt」的输出两两打分。你关心的是<strong>相对进步</strong>，不是绝对分。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 一旦评测对象变成「开放质量」，就没有断言可用，只能引入裁判——而裁判本身需要被评估。<br>🤔 你怎么知道「第二轮回答好」？把你脑中那套隐性 rubric 写成显式 5 条标准，会发现它比想象中难。</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「MT-Bench 分数可以跨论文绝对比较」。不行。分数<strong>强依赖用的是哪个 judge 模型、哪个版本、什么 prompt</strong>。换个 judge，分数整体平移。它适合<strong>同一套设置下的相对比较</strong>（A 比 B 好多少），不适合当跨研究的绝对刻度。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：评估你自己的 writing assistant 时，固定一个 judge + 一套 rubric，让它对「旧 prompt vs 新 prompt」的输出两两打分。你关心的是<strong>相对进步</strong>，不是绝对分。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 一旦评测对象变成「开放质量」，就没有断言可用，只能引入裁判——而裁判本身需要被评估。<br/>🤔 你怎么知道「第二轮回答好」？把你脑中那套隐性 rubric 写成显式 5 条标准，会发现它比想象中难。</div>
+</div>
+</div>
 <!-- 4. LLM-as-Judge -->
-<div class="card">
-  <h2>LLM 当裁判<span class="en">LLM-as-Judge</span></h2>
-  <div class="tags"><span class="tag">自动评估</span><span class="tag purple">偏差</span><span class="tag orange">Elo</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>用一个强模型给另一个模型的输出打分，就像「<strong>用一个服务监控另一个服务</strong>」，或者自动化的 code review bot。但关键反转：<strong>裁判自己有系统性偏差</strong>——就像你的监控系统本身也可能有 bug，会谎报或漏报。不校准裁判，就等于信任一个没测过的探针。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Pain point：人工标注<strong>又贵又慢</strong>，规模化不了。Zheng 等人 2023 的发现给了 LLM-as-Judge 合法性：<strong>GPT-4 当裁判与人类偏好的一致率超过 80%——和人类彼此之间的一致率是同一水平</strong>。换句话说，强裁判已逼近「人类天花板」。</p>
-    <p style="margin-top:8px">但同一篇论文也点名了三大系统性偏差，必须知道：</p>
-    <ul style="margin-top:6px">
-      <li><strong>位置偏差（position bias）</strong>：成对比较时，倾向于偏好<strong>先出现</strong>的那个答案，与内容无关。</li>
-      <li><strong>冗长偏差（verbosity bias）</strong>：倾向于给<strong>更长</strong>的回答更高分，哪怕没更好。</li>
-      <li><strong>自我增强偏差（self-enhancement bias）</strong>：倾向于偏好<strong>自己或同家族模型</strong>生成的回答。</li>
-    </ul>
-    <p style="margin-top:8px">最实用的缓解是治位置偏差：<strong>交换顺序（swap）跑两遍</strong>——A/B 各当一次先手，<strong>只有两次都赢</strong>才判赢，否则算平。这把「位置」这个干扰变量消掉了。</p>
-    <div class="diagram" style="margin-top:10px">
-      位置偏差与 swap 缓解：<br>
-      第 1 轮　<span class="box g">答案A</span><span class="arrow">vs</span><span class="box p">答案B</span><span class="arrow">→</span> 裁判选 <span style="color:#7ed6a0">先手</span><br>
-      第 2 轮　<span class="box p">答案B</span><span class="arrow">vs</span><span class="box g">答案A</span><span class="arrow">→</span> 裁判仍选 <span style="color:#7ed6a0">先手</span>？<br>
-      <span style="color:#8b92a8">→ 两轮结论矛盾 = 裁判在看位置不看内容，判为平局</span>
-    </div>
-    <p style="margin-top:10px">一致性怎么量化？用<strong>一致率（agreement rate）</strong>，更严谨的用 <strong>Cohen's kappa</strong>——它扣掉了「瞎猜也会蒙对」的随机一致部分，只留下真实一致。另一条路是 <strong>Chatbot Arena</strong>：让真人对两个匿名模型的回答投票，再用 <strong>Elo / Bradley-Terry 模型</strong>把海量两两胜负转换成一个排名分（和象棋天梯分同一套数学）。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
-    <pre><span class="cmt"># 成对评判 + 位置交换，消除 position bias</span>
+<div class="card" data-tts="f2a0767af64f5f80">
+<h2>LLM 当裁判<span class="en">LLM-as-Judge</span></h2>
+<div class="tags"><span class="tag">自动评估</span><span class="tag purple">偏差</span><span class="tag orange">Elo</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>用一个强模型给另一个模型的输出打分，就像「<strong>用一个服务监控另一个服务</strong>」，或者自动化的 code review bot。但关键反转：<strong>裁判自己有系统性偏差</strong>——就像你的监控系统本身也可能有 bug，会谎报或漏报。不校准裁判，就等于信任一个没测过的探针。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Pain point：人工标注<strong>又贵又慢</strong>，规模化不了。Zheng 等人 2023 的发现给了 LLM-as-Judge 合法性：<strong>GPT-4 当裁判与人类偏好的一致率超过 80%——和人类彼此之间的一致率是同一水平</strong>。换句话说，强裁判已逼近「人类天花板」。</p>
+<p style="margin-top:8px">但同一篇论文也点名了三大系统性偏差，必须知道：</p>
+<ul style="margin-top:6px">
+<li><strong>位置偏差（position bias）</strong>：成对比较时，倾向于偏好<strong>先出现</strong>的那个答案，与内容无关。</li>
+<li><strong>冗长偏差（verbosity bias）</strong>：倾向于给<strong>更长</strong>的回答更高分，哪怕没更好。</li>
+<li><strong>自我增强偏差（self-enhancement bias）</strong>：倾向于偏好<strong>自己或同家族模型</strong>生成的回答。</li>
+</ul>
+<p style="margin-top:8px">最实用的缓解是治位置偏差：<strong>交换顺序（swap）跑两遍</strong>——A/B 各当一次先手，<strong>只有两次都赢</strong>才判赢，否则算平。这把「位置」这个干扰变量消掉了。</p>
+<div class="diagram" style="margin-top:10px">
+      位置偏差与 swap 缓解：<br/>
+      第 1 轮　<span class="box g">答案A</span><span class="arrow">vs</span><span class="box p">答案B</span><span class="arrow">→</span> 裁判选 <span style="color:#7ed6a0">先手</span><br/>
+      第 2 轮　<span class="box p">答案B</span><span class="arrow">vs</span><span class="box g">答案A</span><span class="arrow">→</span> 裁判仍选 <span style="color:#7ed6a0">先手</span>？<br/>
+<span style="color:#8b92a8">→ 两轮结论矛盾 = 裁判在看位置不看内容，判为平局</span>
+</div>
+<p style="margin-top:10px">一致性怎么量化？用<strong>一致率（agreement rate）</strong>，更严谨的用 <strong>Cohen's kappa</strong>——它扣掉了「瞎猜也会蒙对」的随机一致部分，只留下真实一致。另一条路是 <strong>Chatbot Arena</strong>：让真人对两个匿名模型的回答投票，再用 <strong>Elo / Bradley-Terry 模型</strong>把海量两两胜负转换成一个排名分（和象棋天梯分同一套数学）。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="cmt"># 成对评判 + 位置交换，消除 position bias</span>
 <span class="kw">def</span> <span class="fn">judge_pair</span>(q, ans_a, ans_b):
     <span class="kw">def</span> <span class="fn">ask</span>(first, second):
         p = <span class="fn">f</span><span class="str">"问题：{q}\n回答1：{first}\n回答2：{second}\n"</span> \
@@ -283,55 +258,45 @@ msg = client.messages.<span class="fn">create</span>(
     <span class="kw">if</span> r1 == <span class="str">"1"</span> <span class="kw">and</span> r2 == <span class="str">"2"</span>: <span class="kw">return</span> <span class="str">"A"</span>
     <span class="kw">if</span> r1 == <span class="str">"2"</span> <span class="kw">and</span> r2 == <span class="str">"1"</span>: <span class="kw">return</span> <span class="str">"B"</span>
     <span class="kw">return</span> <span class="str">"tie"</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区：「LLM judge 的打分 = 客观真理」。不是。它放大的是<strong>训练分布里的偏好</strong>——更长、更礼貌、更像它自己的风格的回答得分更高，哪怕实质没更好。把 judge 分数当 KPI 直接优化，模型会学会「讨好裁判」而非「真的变好」（一种 reward hacking）。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：用 LLM judge 自动评估你的 prompt 迭代是高效的，但必须配两道保险：<strong>(1) 成对比较 + swap</strong> 消位置偏差；<strong>(2) 定期人工抽检</strong> 一小批，校准裁判有没有跑偏。裁判要被裁判。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 LLM-as-Judge 让评估规模化成为可能，但它不是真理探测器——它是一个有已知偏差、需要持续校准的<strong>探针</strong>。<br>🤔 你的监控系统会监控自己吗？同理：当你用 AI 评估 AI，谁来评估那个评估者？这条链在哪里触底？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「LLM judge 的打分 = 客观真理」。不是。它放大的是<strong>训练分布里的偏好</strong>——更长、更礼貌、更像它自己的风格的回答得分更高，哪怕实质没更好。把 judge 分数当 KPI 直接优化，模型会学会「讨好裁判」而非「真的变好」（一种 reward hacking）。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：用 LLM judge 自动评估你的 prompt 迭代是高效的，但必须配两道保险：<strong>(1) 成对比较 + swap</strong> 消位置偏差；<strong>(2) 定期人工抽检</strong> 一小批，校准裁判有没有跑偏。裁判要被裁判。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 LLM-as-Judge 让评估规模化成为可能，但它不是真理探测器——它是一个有已知偏差、需要持续校准的<strong>探针</strong>。<br/>🤔 你的监控系统会监控自己吗？同理：当你用 AI 评估 AI，谁来评估那个评估者？这条链在哪里触底？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/2009.03300" target="_blank">Hendrycks et al. 2021 — Measuring Massive Multitask Language Understanding (MMLU)</a> — 综合知识基准的奠基论文，ICLR 2021</li>
-      <li><a href="https://arxiv.org/abs/2107.03374" target="_blank">Chen et al. 2021 — Evaluating LLMs Trained on Code (Codex)</a> — HumanEval 与 pass@k 无偏估计器的出处</li>
-      <li><a href="https://arxiv.org/abs/2306.05685" target="_blank">Zheng et al. 2023 — Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</a> — LLM 裁判可行性 + 三大偏差，NeurIPS 2023</li>
-      <li><a href="https://github.com/hendrycks/test" target="_blank">MMLU 官方仓库</a> — 题库与评测脚本</li>
-      <li><a href="https://github.com/EleutherAI/lm-evaluation-harness" target="_blank">EleutherAI lm-evaluation-harness</a> — 工业标准的开源评测框架，MMLU 等基准的参考实现</li>
-    </ul>
-  </div>
+<div class="card" data-tts="aba1a37c1cd1ad99" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/2009.03300" target="_blank">Hendrycks et al. 2021 — Measuring Massive Multitask Language Understanding (MMLU)</a> — 综合知识基准的奠基论文，ICLR 2021</li>
+<li><a href="https://arxiv.org/abs/2107.03374" target="_blank">Chen et al. 2021 — Evaluating LLMs Trained on Code (Codex)</a> — HumanEval 与 pass@k 无偏估计器的出处</li>
+<li><a href="https://arxiv.org/abs/2306.05685" target="_blank">Zheng et al. 2023 — Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</a> — LLM 裁判可行性 + 三大偏差，NeurIPS 2023</li>
+<li><a href="https://github.com/hendrycks/test" target="_blank">MMLU 官方仓库</a> — 题库与评测脚本</li>
+<li><a href="https://github.com/EleutherAI/lm-evaluation-harness" target="_blank">EleutherAI lm-evaluation-harness</a> — 工业标准的开源评测框架，MMLU 等基准的参考实现</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 为什么几乎所有公开 benchmark 最终都会「失效」？这和软件测试里的「测试过拟合」是同一回事吗？</summary><div>本质相同，但更隐蔽。软件测试里你可能写出「只为通过某个测试」的实现；LLM 的失效有两层：(1) <strong>污染</strong>——benchmark 题目流入训练数据，模型从「会做」退化成「背过」，分数虚高却不代表能力；(2) <strong>过拟合到分布</strong>——整个行业盯着同一个排行榜优化，模型学会了「这类题的应试模式」而非底层能力，就像所有学校都教同一套高考技巧。结果是 benchmark 一旦广为人知，它的<strong>信息量随时间衰减</strong>——这也是为什么 MMLU（2021）之后不断有 MMLU-Pro、GPQA 等「更难、更新、更防污染」的基准出现。工程对策类比：定期<strong>轮换私有 holdout 测试集</strong>，就像安全团队不公开全部渗透用例。对 BigCat 的启示：看到某模型「刷爆某榜」时，第一反应该是「这榜还有多少信息量」，而不是「它真这么强」。</div></details>
-
-    <details><summary>2. pass@k 里「采样 n 个解再估计」和「直接重试 k 次」，统计学上差在哪？为什么论文要多此一举？</summary><div>差在<strong>估计方差</strong>。直接重试 k 次只给你一个 0/1 结果（这 k 次里成没成功），单题信息量极低，跨题平均后噪声很大——尤其当某题正确率是 5% 这种小概率时，你重试 5 次很可能全失败，于是把它误判成「pass@5 = 0」，但真实值并非 0。论文的做法是先用<strong>大 n（如 100 或 200）</strong>把该题的<strong>真实正确率 c/n 估准</strong>，再用组合公式 <code>1 − C(n−c,k)/C(n,k)</code> 解析地算出 pass@k 的期望。这等于「用更多采样买更稳的估计」。统计直觉：你不是在「模拟一次 k 重试」，而是在「估计这道题的难度参数，再算出任意 k 下的理论通过率」。类比你做压测：与其手动重放 5 次请求看成功率，不如先精确测出单请求成功率 p，再解析推导任意重试次数的可用性——后者样本利用率高得多，结论也稳得多。</div></details>
-
-    <details><summary>3. 既然 LLM-as-Judge 有 80% 与人类一致率，剩下 20% 的分歧是「裁判错了」还是「人类错了」？这个问题为什么没有干净答案？</summary><div>因为「正确答案」本身不存在——开放生成质量是<strong>偏好</strong>而非事实，人类标注者彼此都只有约 80% 一致率（即同样两份人工标注也会在 20% 的样本上互相打架）。所以那 20% 分歧里，三种情况混在一起且无法干净拆分：(a) 裁判受偏差影响（偏好长答案）判错；(b) 人类标注者注意力/偏好差异导致「人类标准答案」本身就不稳定；(c) 这道题<strong>本来就没有共识好坏</strong>（比如两种都合理的写作风格）。这意味着 80% 不是「裁判的准确率」，而是「裁判与一个同样有噪声的参照系的吻合度」——<strong>参照系本身就有 20% 内部噪声</strong>。深层含义：评估开放质量时，不该追求「逼近真理」，而该追求「与目标人群偏好对齐」。对 BigCat：当你用 judge 评估「哪个写作风格更好」，先想清楚<strong>对谁更好</strong>——裁判校准的方向应该是你的真实受众，而非某个抽象的「客观质量」。</div></details>
-
-    <details><summary>4. 把今天四个机制串起来：为什么评估的难度是「越接近真实价值的能力，越难自动评估」？这对你设计 AI 工作流意味着什么？</summary><div>四个机制恰好排成一条「<strong>可自动化程度 vs 贴近真实价值</strong>」的反向曲线。MMLU 完全可自动判分（多选），但离真实价值最远（只测知识检索）；HumanEval 可自动判分（跑测试），贴近度提升（真能写对代码）；MT-Bench 测开放质量、贴近真实使用，但<strong>已无法用断言判分</strong>，被迫引入裁判；LLM-as-Judge 试图自动化「质量判断」本身，却带来偏差和「谁评估评估者」的无穷回退。规律是：<strong>能写成 assert 的能力，往往不是你最在乎的；你最在乎的能力，往往写不成 assert。</strong>对工作流设计的意涵：(1) 在<strong>有廉价验证器的环节</strong>（代码、数据校验、格式）尽量自动化、放手让 AI 多采样自筛；(2) 在<strong>开放质量环节</strong>（写作、决策、跨学科洞察）保留人在环（human-in-the-loop），用 LLM judge 做初筛、人做终审；(3) 警惕「因为某能力好测就过度优化它」——这是评估驱动的局部最优陷阱，会让你在能量化的地方过度投入，在真正重要却难量化的地方失明。</div></details>
-  </div>
+<div class="card think" data-tts="b0f13fb95df40775" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 为什么几乎所有公开 benchmark 最终都会「失效」？这和软件测试里的「测试过拟合」是同一回事吗？</summary><div>本质相同，但更隐蔽。软件测试里你可能写出「只为通过某个测试」的实现；LLM 的失效有两层：(1) <strong>污染</strong>——benchmark 题目流入训练数据，模型从「会做」退化成「背过」，分数虚高却不代表能力；(2) <strong>过拟合到分布</strong>——整个行业盯着同一个排行榜优化，模型学会了「这类题的应试模式」而非底层能力，就像所有学校都教同一套高考技巧。结果是 benchmark 一旦广为人知，它的<strong>信息量随时间衰减</strong>——这也是为什么 MMLU（2021）之后不断有 MMLU-Pro、GPQA 等「更难、更新、更防污染」的基准出现。工程对策类比：定期<strong>轮换私有 holdout 测试集</strong>，就像安全团队不公开全部渗透用例。对 BigCat 的启示：看到某模型「刷爆某榜」时，第一反应该是「这榜还有多少信息量」，而不是「它真这么强」。</div></details>
+<details><summary>2. pass@k 里「采样 n 个解再估计」和「直接重试 k 次」，统计学上差在哪？为什么论文要多此一举？</summary><div>差在<strong>估计方差</strong>。直接重试 k 次只给你一个 0/1 结果（这 k 次里成没成功），单题信息量极低，跨题平均后噪声很大——尤其当某题正确率是 5% 这种小概率时，你重试 5 次很可能全失败，于是把它误判成「pass@5 = 0」，但真实值并非 0。论文的做法是先用<strong>大 n（如 100 或 200）</strong>把该题的<strong>真实正确率 c/n 估准</strong>，再用组合公式 <code>1 − C(n−c,k)/C(n,k)</code> 解析地算出 pass@k 的期望。这等于「用更多采样买更稳的估计」。统计直觉：你不是在「模拟一次 k 重试」，而是在「估计这道题的难度参数，再算出任意 k 下的理论通过率」。类比你做压测：与其手动重放 5 次请求看成功率，不如先精确测出单请求成功率 p，再解析推导任意重试次数的可用性——后者样本利用率高得多，结论也稳得多。</div></details>
+<details><summary>3. 既然 LLM-as-Judge 有 80% 与人类一致率，剩下 20% 的分歧是「裁判错了」还是「人类错了」？这个问题为什么没有干净答案？</summary><div>因为「正确答案」本身不存在——开放生成质量是<strong>偏好</strong>而非事实，人类标注者彼此都只有约 80% 一致率（即同样两份人工标注也会在 20% 的样本上互相打架）。所以那 20% 分歧里，三种情况混在一起且无法干净拆分：(a) 裁判受偏差影响（偏好长答案）判错；(b) 人类标注者注意力/偏好差异导致「人类标准答案」本身就不稳定；(c) 这道题<strong>本来就没有共识好坏</strong>（比如两种都合理的写作风格）。这意味着 80% 不是「裁判的准确率」，而是「裁判与一个同样有噪声的参照系的吻合度」——<strong>参照系本身就有 20% 内部噪声</strong>。深层含义：评估开放质量时，不该追求「逼近真理」，而该追求「与目标人群偏好对齐」。对 BigCat：当你用 judge 评估「哪个写作风格更好」，先想清楚<strong>对谁更好</strong>——裁判校准的方向应该是你的真实受众，而非某个抽象的「客观质量」。</div></details>
+<details><summary>4. 把今天四个机制串起来：为什么评估的难度是「越接近真实价值的能力，越难自动评估」？这对你设计 AI 工作流意味着什么？</summary><div>四个机制恰好排成一条「<strong>可自动化程度 vs 贴近真实价值</strong>」的反向曲线。MMLU 完全可自动判分（多选），但离真实价值最远（只测知识检索）；HumanEval 可自动判分（跑测试），贴近度提升（真能写对代码）；MT-Bench 测开放质量、贴近真实使用，但<strong>已无法用断言判分</strong>，被迫引入裁判；LLM-as-Judge 试图自动化「质量判断」本身，却带来偏差和「谁评估评估者」的无穷回退。规律是：<strong>能写成 assert 的能力，往往不是你最在乎的；你最在乎的能力，往往写不成 assert。</strong>对工作流设计的意涵：(1) 在<strong>有廉价验证器的环节</strong>（代码、数据校验、格式）尽量自动化、放手让 AI 多采样自筛；(2) 在<strong>开放质量环节</strong>（写作、决策、跨学科洞察）保留人在环（human-in-the-loop），用 LLM judge 做初筛、人做终审；(3) 警惕「因为某能力好测就过度优化它」——这是评估驱动的局部最优陷阱，会让你在能量化的地方过度投入，在真正重要却难量化的地方失明。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 15 · 2026-06-01</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

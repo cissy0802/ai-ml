@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：Prompt Engineering — Day 3</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -52,40 +53,33 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-<a href="https://cissy0802.github.io/" style="position:fixed;top:14px;left:14px;font-size:0.82rem;color:inherit;opacity:0.55;text-decoration:none;padding:6px 12px;border:1px solid currentColor;border-radius:20px;z-index:100;backdrop-filter:blur(6px);transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.55">← Hub</a>
-
+<a href="https://cissy0802.github.io/" onmouseout="this.style.opacity=0.55" onmouseover="this.style.opacity=1" style="position:fixed;top:14px;left:14px;font-size:0.82rem;color:inherit;opacity:0.55;text-decoration:none;padding:6px 12px;border:1px solid currentColor;border-radius:20px;z-index:100;backdrop-filter:blur(6px);transition:opacity 0.2s">← Hub</a>
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：Prompt Engineering</h1>
-  <div class="meta">Day 3 · 2026-05-20</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="2a2b1cbf2a1a9b3b">AI/ML 详解：Prompt Engineering</h1>
+<div class="meta">Day 3 · 2026-05-20</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
-  <a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-day1.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+<a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-day1.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
     工程对应 → super-individual D1: Prompt Engineering（系统 prompt 架构、四层结构）
   </a>
 </div>
-
-
 <!-- 1. Zero/Few-shot -->
-<div class="card">
-  <h2>零样本 / 少样本提示<span class="en">Zero-shot / Few-shot Prompting</span></h2>
-  <div class="tags"><span class="tag">Prompt</span><span class="tag purple">基础</span></div>
-
-  <div class="section">
-    <div class="label">一句话解释</div>
-    <p>就像写单元测试：你只在 prompt 里给出几个"输入→输出"的例子，模型就能照葫芦画瓢推广到新输入——不需要重新训练，只是临时"用例子教它一次"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题</div>
-    <p>传统 ML 想做一个新任务（比如"判断这条评论是不是阴阳怪气"），要标几千条数据再训模型。Few-shot 把这个流程压缩成：写 3-5 个例子塞进 prompt。Zero-shot 更极端——一个例子都不给，靠任务描述就让模型干活。本质是利用预训练时学到的"模式补全"能力，把"训练"挪到了"推理时"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">工作机制（直觉版）</div>
-    <p>模型只会做一件事：续写。Zero-shot 把任务写成自然语言指令，让模型续写出答案；Few-shot 在 prompt 里造一个"问答对话"的模式，模型看到这个模式就会延续下去。例子的<b>顺序、格式、措辞</b>都会显著影响输出——这就是"prompt 形式即模型行为"。</p>
+<div class="card" data-tts="aff31767fb889857">
+<h2>零样本 / 少样本提示<span class="en">Zero-shot / Few-shot Prompting</span></h2>
+<div class="tags"><span class="tag">Prompt</span><span class="tag purple">基础</span></div>
+<div class="section">
+<div class="label">一句话解释</div>
+<p>就像写单元测试：你只在 prompt 里给出几个"输入→输出"的例子，模型就能照葫芦画瓢推广到新输入——不需要重新训练，只是临时"用例子教它一次"。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题</div>
+<p>传统 ML 想做一个新任务（比如"判断这条评论是不是阴阳怪气"），要标几千条数据再训模型。Few-shot 把这个流程压缩成：写 3-5 个例子塞进 prompt。Zero-shot 更极端——一个例子都不给，靠任务描述就让模型干活。本质是利用预训练时学到的"模式补全"能力，把"训练"挪到了"推理时"。</p>
+</div>
+<div class="section">
+<div class="label">工作机制（直觉版）</div>
+<p>模型只会做一件事：续写。Zero-shot 把任务写成自然语言指令，让模型续写出答案；Few-shot 在 prompt 里造一个"问答对话"的模式，模型看到这个模式就会延续下去。例子的<b>顺序、格式、措辞</b>都会显著影响输出——这就是"prompt 形式即模型行为"。</p>
 <pre><span class="cmt"># Zero-shot：只描述任务</span>
 "判断情感（正面/负面）：'这服务太糟糕了' →"
 
@@ -94,10 +88,9 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 输入：电池一天就没电 → 负面
 输入：客服很耐心解决了问题 → 正面
 输入：这服务太糟糕了 →"</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()
 
@@ -119,59 +112,50 @@ resp = client.messages.create(
     messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}]
 )
 <span class="fn">print</span>(resp.content[0].text)  <span class="cmt"># 期望：NVIDIA, TSMC</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区</div>
-    <div class="tip">"例子越多越好"——错。3-5 个高质量、覆盖边界情况的例子，往往比 20 个雷同例子效果更好；且太多例子会挤占 context window 和增加成本。另一个误区：以为 few-shot 是"训练"，其实模型参数没有任何变化，下次调用就忘了。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">关键资源</div>
-    <ul>
-      <li><a href="https://www.promptingguide.ai/" target="_blank">Prompt Engineering Guide</a> — 系统、有例子、中英双语</li>
-      <li>Anthropic 官方 <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank">Prompt Engineering 文档</a></li>
-    </ul>
-  </div>
-
-  <div class="section">
-    <div class="label">实践场景</div>
-    <div class="exercise">📌 经典：用 few-shot 让模型按固定 JSON 格式输出（取代写正则解析）。<br>👩‍💼 你的场景：把孩子的作业题拍照转文字后，用 few-shot 让模型按"题目 / 知识点 / 难度"三栏整理成你能快速过的复习清单。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">English Summary</div>
-    <div class="eng">Zero-shot prompting describes the task in natural language; few-shot prompting includes a handful of input-output examples in the prompt to demonstrate the desired pattern. No weights are updated — the model simply continues the pattern it sees, leveraging in-context learning from pre-training.</div>
-  </div>
-
-  <div class="section think">
-    <div class="label">思考题</div>
-    <details><summary>1. 为什么 few-shot 里"例子的顺序"会影响输出？这跟 Day 1 学的 Attention 有什么关系？</summary><div>因为模型本质是"基于已看到的 token 续写下一个 token"。Attention 让靠后位置的 token 能看到所有前文，但越靠近末尾的例子在 attention 权重和"近期模式"上往往影响更大——这就是 recency bias。研究发现 few-shot 的最后一个例子会被模型当作最强信号。所以工程上常把"最像目标输入"的例子放最后，并把简单/常见 case 放前面、边界 case 放后面，让模型"印象更深"。</div></details>
-    <details><summary>2. 如果一个任务用 zero-shot 就能稳定做对，那 few-shot 还有意义吗？</summary><div>有，但意义不在"提升能力"而在"约束输出格式"。Zero-shot 能力够时，模型常常输出冗余解释（"好的，我来分析一下..."）。Few-shot 用例子定型输出格式，比写一长串"请只输出 X，不要解释"更可靠，因为模型擅长模仿示例而不是遵循禁令。代价是 token 成本和延迟略增；如果是高并发线上服务，可以权衡用 zero-shot + structured output API。</div></details>
-    <details><summary>3. Few-shot 跟传统 ML 的 "K-shot learning" 是同一回事吗？</summary><div>形似神不同。传统 K-shot learning 指模型"用 K 个标注样本去更新参数"（meta-learning 范式）。LLM 的 few-shot 不更新任何参数，只是把例子塞进 prompt 当作 context——所以更准确的名字是"in-context learning"。这个区别决定了：LLM 的 few-shot 几乎没有"训练成本"但每次推理都要付 token 钱；传统 K-shot 训练一次后推理便宜，但训练流程复杂。</div></details>
-    <details><summary>4. 什么情况下 few-shot 会让模型变笨？</summary><div>三种典型坑：(a) 例子里有错误/偏见，模型会忠实模仿错误——所谓"garbage in, garbage out"被放大；(b) 例子的领域跟目标输入差太远，模型可能强行套用错误模式；(c) 例子的格式过于复杂（如嵌套 JSON+多语言混合），反而让模型困惑，输出格式漂移。判断方法：先用 zero-shot 跑一遍 baseline，再加 few-shot 对比，确认是真的提升而非引入新噪音。</div></details>
-    <details><summary>5. 站在产品视角，few-shot 跟"做一个微调模型"该怎么选？</summary><div>决策维度有四个：调用量、稳定性、隐私、迭代速度。调用量小（每天 < 万次）、需求经常变 → few-shot 完胜（改 prompt 即上线）。调用量极大、prompt 太长导致延迟和成本爆炸 → 微调把例子"压进权重"更划算。需要严格稳定性（金融、医疗）→ 微调+评估集更可控。涉及敏感数据不能传外部 API → 微调小模型本地部署。实际工程常常是"先 few-shot 跑通 PMF，量起来再考虑微调"。</div></details>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区</div>
+<div class="tip">"例子越多越好"——错。3-5 个高质量、覆盖边界情况的例子，往往比 20 个雷同例子效果更好；且太多例子会挤占 context window 和增加成本。另一个误区：以为 few-shot 是"训练"，其实模型参数没有任何变化，下次调用就忘了。</div>
+</div>
+<div class="section">
+<div class="label">关键资源</div>
+<ul>
+<li><a href="https://www.promptingguide.ai/" target="_blank">Prompt Engineering Guide</a> — 系统、有例子、中英双语</li>
+<li>Anthropic 官方 <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank">Prompt Engineering 文档</a></li>
+</ul>
+</div>
+<div class="section">
+<div class="label">实践场景</div>
+<div class="exercise">📌 经典：用 few-shot 让模型按固定 JSON 格式输出（取代写正则解析）。<br/>👩‍💼 你的场景：把孩子的作业题拍照转文字后，用 few-shot 让模型按"题目 / 知识点 / 难度"三栏整理成你能快速过的复习清单。</div>
+</div>
+<div class="section">
+<div class="label">English Summary</div>
+<div class="eng">Zero-shot prompting describes the task in natural language; few-shot prompting includes a handful of input-output examples in the prompt to demonstrate the desired pattern. No weights are updated — the model simply continues the pattern it sees, leveraging in-context learning from pre-training.</div>
+</div>
+<div class="section think">
+<div class="label">思考题</div>
+<details><summary>1. 为什么 few-shot 里"例子的顺序"会影响输出？这跟 Day 1 学的 Attention 有什么关系？</summary><div>因为模型本质是"基于已看到的 token 续写下一个 token"。Attention 让靠后位置的 token 能看到所有前文，但越靠近末尾的例子在 attention 权重和"近期模式"上往往影响更大——这就是 recency bias。研究发现 few-shot 的最后一个例子会被模型当作最强信号。所以工程上常把"最像目标输入"的例子放最后，并把简单/常见 case 放前面、边界 case 放后面，让模型"印象更深"。</div></details>
+<details><summary>2. 如果一个任务用 zero-shot 就能稳定做对，那 few-shot 还有意义吗？</summary><div>有，但意义不在"提升能力"而在"约束输出格式"。Zero-shot 能力够时，模型常常输出冗余解释（"好的，我来分析一下..."）。Few-shot 用例子定型输出格式，比写一长串"请只输出 X，不要解释"更可靠，因为模型擅长模仿示例而不是遵循禁令。代价是 token 成本和延迟略增；如果是高并发线上服务，可以权衡用 zero-shot + structured output API。</div></details>
+<details><summary>3. Few-shot 跟传统 ML 的 "K-shot learning" 是同一回事吗？</summary><div>形似神不同。传统 K-shot learning 指模型"用 K 个标注样本去更新参数"（meta-learning 范式）。LLM 的 few-shot 不更新任何参数，只是把例子塞进 prompt 当作 context——所以更准确的名字是"in-context learning"。这个区别决定了：LLM 的 few-shot 几乎没有"训练成本"但每次推理都要付 token 钱；传统 K-shot 训练一次后推理便宜，但训练流程复杂。</div></details>
+<details><summary>4. 什么情况下 few-shot 会让模型变笨？</summary><div>三种典型坑：(a) 例子里有错误/偏见，模型会忠实模仿错误——所谓"garbage in, garbage out"被放大；(b) 例子的领域跟目标输入差太远，模型可能强行套用错误模式；(c) 例子的格式过于复杂（如嵌套 JSON+多语言混合），反而让模型困惑，输出格式漂移。判断方法：先用 zero-shot 跑一遍 baseline，再加 few-shot 对比，确认是真的提升而非引入新噪音。</div></details>
+<details><summary>5. 站在产品视角，few-shot 跟"做一个微调模型"该怎么选？</summary><div>决策维度有四个：调用量、稳定性、隐私、迭代速度。调用量小（每天 &lt; 万次）、需求经常变 → few-shot 完胜（改 prompt 即上线）。调用量极大、prompt 太长导致延迟和成本爆炸 → 微调把例子"压进权重"更划算。需要严格稳定性（金融、医疗）→ 微调+评估集更可控。涉及敏感数据不能传外部 API → 微调小模型本地部署。实际工程常常是"先 few-shot 跑通 PMF，量起来再考虑微调"。</div></details>
+</div>
+</div>
 <!-- 2. Chain-of-Thought -->
-<div class="card">
-  <h2>思维链<span class="en">Chain-of-Thought (CoT)</span></h2>
-  <div class="tags"><span class="tag">Prompt</span><span class="tag purple">推理</span></div>
-
-  <div class="section">
-    <div class="label">一句话解释</div>
-    <p>就像 code review 时强制要求"先写注释说明思路再写代码"——让模型先把推理过程"想出声"，再给最终答案，准确率立刻上一个台阶。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题</div>
-    <p>对"应用题"、"多步推理"、"逻辑判断"这类任务，模型直接输出答案常常翻车。原因是：每个 token 的预测算力是恒定的，要"一步算出最终答案"对复杂题来说算力不够。CoT 的洞察是：<b>让模型多写一些中间 token，等于多给它一些"思考时间"</b>。模型把推理拆成小步，每一步都基于上一步的中间结果，错误率显著下降。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">工作机制（直觉版）</div>
-    <p>触发方式简单到离谱：在 prompt 末尾加一句 "Let's think step by step." 或者 few-shot 例子里展示推理过程。模型就会先输出一段推理，再给答案。</p>
+<div class="card" data-tts="95b44989b524015f">
+<h2>思维链<span class="en">Chain-of-Thought (CoT)</span></h2>
+<div class="tags"><span class="tag">Prompt</span><span class="tag purple">推理</span></div>
+<div class="section">
+<div class="label">一句话解释</div>
+<p>就像 code review 时强制要求"先写注释说明思路再写代码"——让模型先把推理过程"想出声"，再给最终答案，准确率立刻上一个台阶。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题</div>
+<p>对"应用题"、"多步推理"、"逻辑判断"这类任务，模型直接输出答案常常翻车。原因是：每个 token 的预测算力是恒定的，要"一步算出最终答案"对复杂题来说算力不够。CoT 的洞察是：<b>让模型多写一些中间 token，等于多给它一些"思考时间"</b>。模型把推理拆成小步，每一步都基于上一步的中间结果，错误率显著下降。</p>
+</div>
+<div class="section">
+<div class="label">工作机制（直觉版）</div>
+<p>触发方式简单到离谱：在 prompt 末尾加一句 "Let's think step by step." 或者 few-shot 例子里展示推理过程。模型就会先输出一段推理，再给答案。</p>
 <pre><span class="cmt"># 不用 CoT</span>
 "小明有 5 个苹果，吃了 2 个，又买了 3 倍数量。还剩几个？"
 → "9 个"  <span class="cmt">（错！）</span>
@@ -182,11 +166,10 @@ resp = client.messages.create(
    又买了 3 × 3 = 9 个；
    总共 3 + 9 = 12 个。
    答案：12 个。"  <span class="cmt">（对）</span></pre>
-    <p>类比：你的大脑做心算 23×47 也会先在脑子里拆成 20×47+3×47——CoT 就是逼模型显式做这件事。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p>类比：你的大脑做心算 23×47 也会先在脑子里拆成 20×47+3×47——CoT 就是逼模型显式做这件事。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()
 
@@ -201,59 +184,50 @@ resp = client.messages.create(
 )
 <span class="fn">print</span>(resp.content[0].text)
 <span class="cmt"># 模型会先列出"总路程 = 60×2.5 + 80×1.5 = 270"等推理，再给平均速度</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区</div>
-    <div class="tip">CoT 写出的"推理过程"不等于模型"真实的内部计算"。它只是模型生成的更多 token，确实提升了准确率，但中间步骤可能编造（看起来合理但和最终答案逻辑脱节）。所以不要把 CoT 输出当作模型"诚实的思考过程"——可解释性研究证实这两者并不等价。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">关键资源</div>
-    <ul>
-      <li>原始论文（Wei et al., 2022）<a href="https://arxiv.org/abs/2201.11903" target="_blank">Chain-of-Thought Prompting</a> — 4 页就讲清楚了，很友好</li>
-      <li><a href="https://www.promptingguide.ai/techniques/cot" target="_blank">Prompting Guide: CoT 章节</a> 附大量例子</li>
-    </ul>
-  </div>
-
-  <div class="section">
-    <div class="label">实践场景</div>
-    <div class="exercise">📌 经典：让模型解数学题、逻辑题、SQL 推导。<br>💰 你的场景：投资分析时让模型"先拆解一家公司的护城河、再列收入结构、再估值、最后给买/卖建议"——把研究框架显式写进 prompt，避免拍脑袋结论。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">English Summary</div>
-    <div class="eng">Chain-of-Thought prompting elicits intermediate reasoning steps before the final answer, dramatically improving performance on multi-step problems. It works because extra tokens give the model more "compute budget" per query. Note that the verbalized reasoning is not guaranteed to reflect the model's internal mechanics — it is a behavioral trick, not introspection.</div>
-  </div>
-
-  <div class="section think">
-    <div class="label">思考题</div>
-    <details><summary>1. 为什么 CoT 在小模型上几乎没用，到了大模型才"涌现"出来？</summary><div>研究观察到：参数 < ~10B 的模型用 CoT 反而可能变差，因为它"想得到但算不准"——推理链里某一步算错会沿着链路放大，到最后比直接猜还离谱。大模型每一步出错率低，推理链才能稳定走完。这也解释了为什么 GPT-3 论文里 CoT 不显著，到 GPT-3.5/4 一下就明显——能力达到阈值后才"解锁"。工程启发：在小模型上要用 CoT，最好搭配 Self-Consistency 或工具调用来纠错。</div></details>
-    <details><summary>2. CoT 让 token 数量和延迟翻几倍，什么时候这个代价不值得？</summary><div>三种场景不该用 CoT：(a) 任务是分类/抽取/翻译这类"模式匹配题"，CoT 不仅没帮助还可能让模型过度发挥；(b) 高 QPS 的实时服务（搜索建议、聊天补全），200ms 预算不够 CoT 跑完；(c) 模型已经原生是"推理模型"（如 o1、Claude with extended thinking），它内部已经在做隐式 CoT，再外加显式 CoT 是浪费 token。原则：CoT 是给"需要推理"的题用的，不是默认开关。</div></details>
-    <details><summary>3. CoT 的"思维过程"可能造假，那它跟人类的"事后合理化"有什么共通之处？</summary><div>非常像。心理学实验表明人类常常先做决定再编理由（自我辩护）。CoT 模型也类似：在某些任务上，研究者改了模型的最终答案但保留推理链，发现推理链居然能"自圆其说"地导向新答案。这给可解释性敲了警钟——不能用"模型解释了"等同于"模型理解了"。在高风险场景（医疗建议、信贷决策）要用工具调用或外部 verifier 交叉验证，不能依赖 CoT 自述。</div></details>
-    <details><summary>4. 如果让你设计一个 CoT prompt 模板，你会怎么对比 "Let's think step by step" 和 "请按以下步骤分析：1. ... 2. ... 3. ..."？</summary><div>前者是 zero-shot CoT，泛化好但思路无约束，质量起伏大；后者是 structured CoT，把领域知识（比如 SWOT、估值五步法）编码进 prompt，输出更稳定、可审计、便于自动化下游解析。工程实践：探索期用前者快速验证 LLM 能不能做这事；产品化期切换成后者并配评估集打分。两者还可以组合：先 "Let's plan the steps for this problem"，让模型自己列步骤，再让模型按自己列的步骤执行。</div></details>
-    <details><summary>5. 跟 Day 2 学过的 RLHF 联系起来——CoT 能力是预训练就有的，还是 RLHF 调出来的？</summary><div>预训练时模型已经见过大量"先讲推理再得结论"的人类文本（论文、教程、Stack Overflow 回答），所以底层能力来自预训练。但 RLHF/SFT 阶段会强化"什么时候该展开推理"的倾向：当人类标注者偏爱有解释的回答时，奖励模型就鼓励模型默认输出 CoT 风格。这也是为什么基础模型（如 GPT-3 base）需要显式触发 CoT，而对话模型（ChatGPT、Claude）很多时候不用触发也会自动 step-by-step——前者是"会但不主动"，后者是"被调教成偏好"。</div></details>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区</div>
+<div class="tip">CoT 写出的"推理过程"不等于模型"真实的内部计算"。它只是模型生成的更多 token，确实提升了准确率，但中间步骤可能编造（看起来合理但和最终答案逻辑脱节）。所以不要把 CoT 输出当作模型"诚实的思考过程"——可解释性研究证实这两者并不等价。</div>
+</div>
+<div class="section">
+<div class="label">关键资源</div>
+<ul>
+<li>原始论文（Wei et al., 2022）<a href="https://arxiv.org/abs/2201.11903" target="_blank">Chain-of-Thought Prompting</a> — 4 页就讲清楚了，很友好</li>
+<li><a href="https://www.promptingguide.ai/techniques/cot" target="_blank">Prompting Guide: CoT 章节</a> 附大量例子</li>
+</ul>
+</div>
+<div class="section">
+<div class="label">实践场景</div>
+<div class="exercise">📌 经典：让模型解数学题、逻辑题、SQL 推导。<br/>💰 你的场景：投资分析时让模型"先拆解一家公司的护城河、再列收入结构、再估值、最后给买/卖建议"——把研究框架显式写进 prompt，避免拍脑袋结论。</div>
+</div>
+<div class="section">
+<div class="label">English Summary</div>
+<div class="eng">Chain-of-Thought prompting elicits intermediate reasoning steps before the final answer, dramatically improving performance on multi-step problems. It works because extra tokens give the model more "compute budget" per query. Note that the verbalized reasoning is not guaranteed to reflect the model's internal mechanics — it is a behavioral trick, not introspection.</div>
+</div>
+<div class="section think">
+<div class="label">思考题</div>
+<details><summary>1. 为什么 CoT 在小模型上几乎没用，到了大模型才"涌现"出来？</summary><div>研究观察到：参数 &lt; ~10B 的模型用 CoT 反而可能变差，因为它"想得到但算不准"——推理链里某一步算错会沿着链路放大，到最后比直接猜还离谱。大模型每一步出错率低，推理链才能稳定走完。这也解释了为什么 GPT-3 论文里 CoT 不显著，到 GPT-3.5/4 一下就明显——能力达到阈值后才"解锁"。工程启发：在小模型上要用 CoT，最好搭配 Self-Consistency 或工具调用来纠错。</div></details>
+<details><summary>2. CoT 让 token 数量和延迟翻几倍，什么时候这个代价不值得？</summary><div>三种场景不该用 CoT：(a) 任务是分类/抽取/翻译这类"模式匹配题"，CoT 不仅没帮助还可能让模型过度发挥；(b) 高 QPS 的实时服务（搜索建议、聊天补全），200ms 预算不够 CoT 跑完；(c) 模型已经原生是"推理模型"（如 o1、Claude with extended thinking），它内部已经在做隐式 CoT，再外加显式 CoT 是浪费 token。原则：CoT 是给"需要推理"的题用的，不是默认开关。</div></details>
+<details><summary>3. CoT 的"思维过程"可能造假，那它跟人类的"事后合理化"有什么共通之处？</summary><div>非常像。心理学实验表明人类常常先做决定再编理由（自我辩护）。CoT 模型也类似：在某些任务上，研究者改了模型的最终答案但保留推理链，发现推理链居然能"自圆其说"地导向新答案。这给可解释性敲了警钟——不能用"模型解释了"等同于"模型理解了"。在高风险场景（医疗建议、信贷决策）要用工具调用或外部 verifier 交叉验证，不能依赖 CoT 自述。</div></details>
+<details><summary>4. 如果让你设计一个 CoT prompt 模板，你会怎么对比 "Let's think step by step" 和 "请按以下步骤分析：1. ... 2. ... 3. ..."？</summary><div>前者是 zero-shot CoT，泛化好但思路无约束，质量起伏大；后者是 structured CoT，把领域知识（比如 SWOT、估值五步法）编码进 prompt，输出更稳定、可审计、便于自动化下游解析。工程实践：探索期用前者快速验证 LLM 能不能做这事；产品化期切换成后者并配评估集打分。两者还可以组合：先 "Let's plan the steps for this problem"，让模型自己列步骤，再让模型按自己列的步骤执行。</div></details>
+<details><summary>5. 跟 Day 2 学过的 RLHF 联系起来——CoT 能力是预训练就有的，还是 RLHF 调出来的？</summary><div>预训练时模型已经见过大量"先讲推理再得结论"的人类文本（论文、教程、Stack Overflow 回答），所以底层能力来自预训练。但 RLHF/SFT 阶段会强化"什么时候该展开推理"的倾向：当人类标注者偏爱有解释的回答时，奖励模型就鼓励模型默认输出 CoT 风格。这也是为什么基础模型（如 GPT-3 base）需要显式触发 CoT，而对话模型（ChatGPT、Claude）很多时候不用触发也会自动 step-by-step——前者是"会但不主动"，后者是"被调教成偏好"。</div></details>
+</div>
+</div>
 <!-- 3. ReAct -->
-<div class="card">
-  <h2>ReAct 推理-行动循环<span class="en">ReAct (Reason + Act)</span></h2>
-  <div class="tags"><span class="tag">Prompt</span><span class="tag purple">Agent</span></div>
-
-  <div class="section">
-    <div class="label">一句话解释</div>
-    <p>就像 REPL 调试：模型不再一口气把答案吐出来，而是"想一步 → 调一个工具 → 看结果 → 再想一步"，循环到拿到答案为止。CoT 只是脑内推理，ReAct 是脑内推理 + 真的去外面查资料/执行命令。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题</div>
-    <p>纯 CoT 只能基于模型已有的知识推理，遇到"今天股价是多少"、"这个 GitHub 仓库的星数是多少"就要瞎编（hallucination）。ReAct 把推理和"动手"交织起来：模型先 think 自己缺什么信息，然后 act 调一个工具去拿，看到工具返回结果（observation）后再继续 think，循环逼近答案。这是绝大多数 Agent 框架的基础范式。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">工作机制（直觉版）</div>
-    <p>核心是一个 Thought → Action → Observation → Thought ... 的循环。每一轮模型只生成一小段，由"外层 runtime"解析 Action 部分去执行真实工具，再把结果作为 Observation 拼回 prompt 让模型继续。</p>
+<div class="card" data-tts="1b49db7432048f1b">
+<h2>ReAct 推理-行动循环<span class="en">ReAct (Reason + Act)</span></h2>
+<div class="tags"><span class="tag">Prompt</span><span class="tag purple">Agent</span></div>
+<div class="section">
+<div class="label">一句话解释</div>
+<p>就像 REPL 调试：模型不再一口气把答案吐出来，而是"想一步 → 调一个工具 → 看结果 → 再想一步"，循环到拿到答案为止。CoT 只是脑内推理，ReAct 是脑内推理 + 真的去外面查资料/执行命令。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题</div>
+<p>纯 CoT 只能基于模型已有的知识推理，遇到"今天股价是多少"、"这个 GitHub 仓库的星数是多少"就要瞎编（hallucination）。ReAct 把推理和"动手"交织起来：模型先 think 自己缺什么信息，然后 act 调一个工具去拿，看到工具返回结果（observation）后再继续 think，循环逼近答案。这是绝大多数 Agent 框架的基础范式。</p>
+</div>
+<div class="section">
+<div class="label">工作机制（直觉版）</div>
+<p>核心是一个 Thought → Action → Observation → Thought ... 的循环。每一轮模型只生成一小段，由"外层 runtime"解析 Action 部分去执行真实工具，再把结果作为 Observation 拼回 prompt 让模型继续。</p>
 <pre><span class="cmt"># ReAct 典型对话格式</span>
 用户：BigCat 的 GitHub 仓库 ai-ml-daily 有多少 stars？
 
@@ -262,11 +236,10 @@ Action:  http_get("https://api.github.com/repos/cissy0802/ai-ml-daily")
 Observation: {"stargazers_count": 42, ...}
 Thought: 我有数据了，可以回答。
 Answer:  42 个 stars。</pre>
-    <p>本质上 ReAct = CoT + 工具调用 + 循环。Day 6 我们会专门讲 Function Calling，那是 ReAct 的"工业化版本"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p>本质上 ReAct = CoT + 工具调用 + 循环。Day 6 我们会专门讲 Function Calling，那是 ReAct 的"工业化版本"。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> langchain.agents <span class="kw">import</span> create_react_agent, AgentExecutor
 <span class="kw">from</span> langchain_anthropic <span class="kw">import</span> ChatAnthropic
 <span class="kw">from</span> langchain.tools <span class="kw">import</span> Tool
@@ -288,59 +261,50 @@ executor = AgentExecutor(agent=agent, tools=tools, verbose=<span class="kw">True
 
 executor.invoke({<span class="str">"input"</span>: <span class="str">"今天上证指数涨跌幅 × 我的持仓 50 万 = ?"</span>})
 <span class="cmt"># 你会看到 Thought→Action→Observation 的完整轨迹</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区</div>
-    <div class="tip">ReAct 不是"模型有了思考能力"，而是"框架替模型搭了一个外循环"。模型每一轮还是一次性 forward——所谓"它在思考"其实是 runtime 在解析它的输出、执行工具、把结果拼回 prompt 再让它继续。理解这点很重要：调试 ReAct agent 时，bug 经常出在"解析 Action"或"工具 schema 描述不清"，而不是模型本身。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">关键资源</div>
-    <ul>
-      <li>原始论文 <a href="https://arxiv.org/abs/2210.03629" target="_blank">ReAct: Synergizing Reasoning and Acting (Yao et al., 2022)</a></li>
-      <li><a href="https://python.langchain.com/docs/how_to/agent_executor/" target="_blank">LangChain Agent 教程</a> — 跟着跑通最直观</li>
-    </ul>
-  </div>
-
-  <div class="section">
-    <div class="label">实践场景</div>
-    <div class="exercise">📌 经典：让 agent 上网查资料 + 计算 + 写代码完成一个"端到端任务"（如订机票、写市场报告）。<br>👩‍💼 你的场景：每天晨会助手——agent 先调 calendar 工具看今天有几个会，再调邮件搜索看待办事项，再调 Notion 看 OKR 进度，最后输出一份 5 分钟可读的简报。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">English Summary</div>
-    <div class="eng">ReAct interleaves reasoning traces (Thought) and tool actions (Act) in a loop, using tool observations to ground further reasoning. It transforms a static LLM into an interactive agent that can fetch real-world data. ReAct is the conceptual backbone of most modern agent frameworks (LangChain, OpenAI Assistants, Anthropic tool use).</div>
-  </div>
-
-  <div class="section think">
-    <div class="label">思考题</div>
-    <details><summary>1. ReAct 的循环可能"跑飞"——模型一直 think 不停，永远不给 answer。你会怎么设计护栏？</summary><div>常见护栏三件套：(a) 最大步数上限（如 max_iterations=10），到上限强行让模型输出"based on what I have"的回答或返错；(b) 重复检测：若连续两轮 Action 一模一样，说明陷入死循环，强制中止；(c) 预算控制：累计 token / 时间 / 调用成本超过阈值就熔断。生产环境还要加：可观测性日志（每一步的 thought/action 落库）、对 final answer 的 schema 校验、对"high-risk action"（删除、付款）做 human-in-the-loop 二次确认。</div></details>
-    <details><summary>2. 跟单纯的 Function Calling 比，ReAct 的"显式 Thought 步骤"是必要的吗？</summary><div>不一定。现代 API（OpenAI tool calling、Anthropic tool use）已经把 Thought 隐式化了——模型直接输出 tool_use 块，runtime 执行后把结果回给模型继续。这种"隐式 ReAct"延迟更低、解析更稳。但显式 ReAct 仍有两个价值：(a) 可观测性，你能在日志里看到模型在想什么、为什么选这个工具；(b) 给非推理模型（小模型）当训练轮子，强制它先 think 再 act 能提升准确率。原则：能用原生 tool use 就用；需要审计/调试时切回显式 ReAct。</div></details>
-    <details><summary>3. ReAct 跟你熟悉的"事件循环"（Node.js / Python asyncio）有哪些结构上的相似？</summary><div>很像：都有一个外层 runtime 在调度，"任务"产出一个意图（Promise / Action）就被 yield 出去，runtime 执行 I/O，结果回来后再唤醒任务继续。差别在两点：(a) ReAct 的"任务"是一个文本生成模型，状态完全编码在 prompt 里（无内存指针），所以每次唤醒都要把全部历史拼回去——这就是为什么 ReAct 越跑 context 越长、token 成本越高；(b) ReAct 的下一步走向是"非确定的"，模型可能改主意走另一条 action，调试方法跟传统状态机不同——更像调试 LLM 应用。</div></details>
-    <details><summary>4. ReAct 失败的典型模式有哪些？</summary><div>(a) 工具选错：description 写得不清晰，模型选了 calculator 去做日期解析；(b) 参数填错：模型把 "2026-05-20" 当字符串塞给一个要 Unix timestamp 的工具；(c) 沉迷工具：每个问题都先 search 一下，哪怕答案它早就知道（"工具滥用"）；(d) 不信工具：工具返回了正确数据，模型却"觉得不对"继续在脑内编（"工具偏见"）；(e) 上下文爆炸：每轮 observation 太长（比如返了一个完整网页），几轮后塞满 context。每一类对应一个工程对策：清晰的 description、严格的参数 schema、prompt 里加"只在需要时调工具"、限制 observation 长度并做摘要。</div></details>
-    <details><summary>5. 如果你只能教一个非 AI 的同事一个"提示技巧"，你会教 CoT 还是 ReAct？为什么？</summary><div>教 CoT。CoT 是零成本立竿见影的——加一句"请逐步思考"，今天就能用，不需要工具、不需要框架、不需要循环管理，对 95% 的日常场景（写邮件、做数据分析、写文档）已经够用。ReAct 价值大但门槛高：要定义工具、处理解析、容错。教学顺序应该是：先 CoT 让人尝到甜头，等他遇到"模型瞎编实时信息"的痛点时再引入 ReAct/Function Calling——带着痛点学才学得进去。这也是 Day 3 把 CoT 放在 ReAct 前面的原因。</div></details>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区</div>
+<div class="tip">ReAct 不是"模型有了思考能力"，而是"框架替模型搭了一个外循环"。模型每一轮还是一次性 forward——所谓"它在思考"其实是 runtime 在解析它的输出、执行工具、把结果拼回 prompt 再让它继续。理解这点很重要：调试 ReAct agent 时，bug 经常出在"解析 Action"或"工具 schema 描述不清"，而不是模型本身。</div>
+</div>
+<div class="section">
+<div class="label">关键资源</div>
+<ul>
+<li>原始论文 <a href="https://arxiv.org/abs/2210.03629" target="_blank">ReAct: Synergizing Reasoning and Acting (Yao et al., 2022)</a></li>
+<li><a href="https://python.langchain.com/docs/how_to/agent_executor/" target="_blank">LangChain Agent 教程</a> — 跟着跑通最直观</li>
+</ul>
+</div>
+<div class="section">
+<div class="label">实践场景</div>
+<div class="exercise">📌 经典：让 agent 上网查资料 + 计算 + 写代码完成一个"端到端任务"（如订机票、写市场报告）。<br/>👩‍💼 你的场景：每天晨会助手——agent 先调 calendar 工具看今天有几个会，再调邮件搜索看待办事项，再调 Notion 看 OKR 进度，最后输出一份 5 分钟可读的简报。</div>
+</div>
+<div class="section">
+<div class="label">English Summary</div>
+<div class="eng">ReAct interleaves reasoning traces (Thought) and tool actions (Act) in a loop, using tool observations to ground further reasoning. It transforms a static LLM into an interactive agent that can fetch real-world data. ReAct is the conceptual backbone of most modern agent frameworks (LangChain, OpenAI Assistants, Anthropic tool use).</div>
+</div>
+<div class="section think">
+<div class="label">思考题</div>
+<details><summary>1. ReAct 的循环可能"跑飞"——模型一直 think 不停，永远不给 answer。你会怎么设计护栏？</summary><div>常见护栏三件套：(a) 最大步数上限（如 max_iterations=10），到上限强行让模型输出"based on what I have"的回答或返错；(b) 重复检测：若连续两轮 Action 一模一样，说明陷入死循环，强制中止；(c) 预算控制：累计 token / 时间 / 调用成本超过阈值就熔断。生产环境还要加：可观测性日志（每一步的 thought/action 落库）、对 final answer 的 schema 校验、对"high-risk action"（删除、付款）做 human-in-the-loop 二次确认。</div></details>
+<details><summary>2. 跟单纯的 Function Calling 比，ReAct 的"显式 Thought 步骤"是必要的吗？</summary><div>不一定。现代 API（OpenAI tool calling、Anthropic tool use）已经把 Thought 隐式化了——模型直接输出 tool_use 块，runtime 执行后把结果回给模型继续。这种"隐式 ReAct"延迟更低、解析更稳。但显式 ReAct 仍有两个价值：(a) 可观测性，你能在日志里看到模型在想什么、为什么选这个工具；(b) 给非推理模型（小模型）当训练轮子，强制它先 think 再 act 能提升准确率。原则：能用原生 tool use 就用；需要审计/调试时切回显式 ReAct。</div></details>
+<details><summary>3. ReAct 跟你熟悉的"事件循环"（Node.js / Python asyncio）有哪些结构上的相似？</summary><div>很像：都有一个外层 runtime 在调度，"任务"产出一个意图（Promise / Action）就被 yield 出去，runtime 执行 I/O，结果回来后再唤醒任务继续。差别在两点：(a) ReAct 的"任务"是一个文本生成模型，状态完全编码在 prompt 里（无内存指针），所以每次唤醒都要把全部历史拼回去——这就是为什么 ReAct 越跑 context 越长、token 成本越高；(b) ReAct 的下一步走向是"非确定的"，模型可能改主意走另一条 action，调试方法跟传统状态机不同——更像调试 LLM 应用。</div></details>
+<details><summary>4. ReAct 失败的典型模式有哪些？</summary><div>(a) 工具选错：description 写得不清晰，模型选了 calculator 去做日期解析；(b) 参数填错：模型把 "2026-05-20" 当字符串塞给一个要 Unix timestamp 的工具；(c) 沉迷工具：每个问题都先 search 一下，哪怕答案它早就知道（"工具滥用"）；(d) 不信工具：工具返回了正确数据，模型却"觉得不对"继续在脑内编（"工具偏见"）；(e) 上下文爆炸：每轮 observation 太长（比如返了一个完整网页），几轮后塞满 context。每一类对应一个工程对策：清晰的 description、严格的参数 schema、prompt 里加"只在需要时调工具"、限制 observation 长度并做摘要。</div></details>
+<details><summary>5. 如果你只能教一个非 AI 的同事一个"提示技巧"，你会教 CoT 还是 ReAct？为什么？</summary><div>教 CoT。CoT 是零成本立竿见影的——加一句"请逐步思考"，今天就能用，不需要工具、不需要框架、不需要循环管理，对 95% 的日常场景（写邮件、做数据分析、写文档）已经够用。ReAct 价值大但门槛高：要定义工具、处理解析、容错。教学顺序应该是：先 CoT 让人尝到甜头，等他遇到"模型瞎编实时信息"的痛点时再引入 ReAct/Function Calling——带着痛点学才学得进去。这也是 Day 3 把 CoT 放在 ReAct 前面的原因。</div></details>
+</div>
+</div>
 <!-- 4. Self-Consistency -->
-<div class="card">
-  <h2>自一致性<span class="en">Self-Consistency</span></h2>
-  <div class="tags"><span class="tag">Prompt</span><span class="tag purple">推理</span></div>
-
-  <div class="section">
-    <div class="label">一句话解释</div>
-    <p>就像让多个工程师独立解同一道题再投票：让模型用不同温度采样多次，每次都跑 CoT，最后取"出现次数最多的答案"——多数派往往是对的。本质是用算力换准确率的统计版"群体智慧"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题</div>
-    <p>单次 CoT 推理仍可能在某一步算错，链路一错全错。Self-Consistency 的洞察是：<b>正确的推理路径往往收敛到同一个答案，错误的推理路径会四散开来</b>。于是采样 N 次（比如 N=10），把答案做多数投票（majority vote），鲁棒性远高于单次。这在数学题、推理题上常常能再涨 10-20 个百分点准确率。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">工作机制（直觉版）</div>
-    <p>三步：(1) 用 temperature > 0（如 0.7）让模型对同一个 prompt 采样 N 次，每次产生不同的 CoT 推理链；(2) 从每条链里抽出最终答案；(3) 对答案做投票，取众数。</p>
+<div class="card" data-tts="f6fdab8fee7ef36b">
+<h2>自一致性<span class="en">Self-Consistency</span></h2>
+<div class="tags"><span class="tag">Prompt</span><span class="tag purple">推理</span></div>
+<div class="section">
+<div class="label">一句话解释</div>
+<p>就像让多个工程师独立解同一道题再投票：让模型用不同温度采样多次，每次都跑 CoT，最后取"出现次数最多的答案"——多数派往往是对的。本质是用算力换准确率的统计版"群体智慧"。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题</div>
+<p>单次 CoT 推理仍可能在某一步算错，链路一错全错。Self-Consistency 的洞察是：<b>正确的推理路径往往收敛到同一个答案，错误的推理路径会四散开来</b>。于是采样 N 次（比如 N=10），把答案做多数投票（majority vote），鲁棒性远高于单次。这在数学题、推理题上常常能再涨 10-20 个百分点准确率。</p>
+</div>
+<div class="section">
+<div class="label">工作机制（直觉版）</div>
+<p>三步：(1) 用 temperature &gt; 0（如 0.7）让模型对同一个 prompt 采样 N 次，每次产生不同的 CoT 推理链；(2) 从每条链里抽出最终答案；(3) 对答案做投票，取众数。</p>
 <pre><span class="cmt"># 伪代码：Self-Consistency</span>
 question = "如果 3x + 7 = 22，x = ?"
 answers = []
@@ -348,11 +312,10 @@ answers = []
     cot = llm(question, temperature=0.7)   <span class="cmt"># 每次推理路径不同</span>
     answers.append(extract_final(cot))      <span class="cmt"># 抽出最终数值</span>
 final = mode(answers)                       <span class="cmt"># 投票：[5,5,5,5,4,5,5,6,5,5] → 5</span></pre>
-    <p>类比：单次 CoT 像让一个学生答题，Self-Consistency 像把题发给 10 个学生独立答，再看哪个答案最多人选。代价是 10 倍 token 成本。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p>类比：单次 CoT 像让一个学生答题，Self-Consistency 像把题发给 10 个学生独立答，再看哪个答案最多人选。代价是 10 倍 token 成本。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 <span class="kw">from</span> collections <span class="kw">import</span> Counter
 <span class="kw">import</span> re
@@ -374,48 +337,41 @@ answers = []
     <span class="kw">if</span> nums: answers.append(nums[-1])
 
 <span class="fn">print</span>(Counter(answers).most_common(1))      <span class="cmt"># 出现最多的答案就是最终答案</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区</div>
-    <div class="tip">Self-Consistency <b>只对"有明确单一答案"的题有效</b>（数学、单选、抽取）。对开放性任务（写文章、做策划）没法做投票——"哪种创意最常出现"不等于"哪种最好"。另一个误区：以为 temperature=0 也能用 self-consistency——错，必须开温度让采样有多样性，否则 10 次结果一模一样，投票毫无意义。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">关键资源</div>
-    <ul>
-      <li>原始论文 <a href="https://arxiv.org/abs/2203.11171" target="_blank">Self-Consistency Improves CoT (Wang et al., 2022)</a></li>
-      <li><a href="https://www.promptingguide.ai/techniques/consistency" target="_blank">Prompting Guide: Self-Consistency 小节</a></li>
-    </ul>
-  </div>
-
-  <div class="section">
-    <div class="label">实践场景</div>
-    <div class="exercise">📌 经典：高准确率要求的数学/逻辑题、医疗诊断、合同条款抽取。<br>💰 你的场景：估值一家公司的内在价值时，让模型用不同的"假设组合"独立估 N 次（贴现率、增长率、终值假设各变化），看估值分布是否收敛——分布窄说明结论稳健、分布宽说明对假设极敏感，提示你不要重仓。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">English Summary</div>
-    <div class="eng">Self-Consistency samples multiple CoT reasoning paths at non-zero temperature and takes the majority-vote answer. The intuition: correct reasoning paths tend to converge, while errors scatter. It trades compute for accuracy and works best on tasks with a unique, extractable final answer.</div>
-  </div>
-
-  <div class="section think">
-    <div class="label">思考题</div>
-    <details><summary>1. Self-Consistency 跟传统机器学习里的 ensemble (bagging) 在思想上有什么共通和差异？</summary><div>共通：都是"多个略有差异的预测器投票，降低单点错误的影响"。差异：bagging 的多样性来自训练数据 bootstrap，每个模型权重不同；Self-Consistency 的多样性来自同一个模型在 temperature > 0 下的随机采样，模型权重完全一样，差异只在生成路径。代价也不同：bagging 训练贵推理便宜，Self-Consistency 不训练但每次推理付 N 倍成本。这也启发：可以把 Self-Consistency 看成"推理时的 bagging"，是 LLM 时代独有的形态。</div></details>
-    <details><summary>2. 如果你只有 3 倍预算（采 3 次而不是 10 次），Self-Consistency 还值得用吗？</summary><div>仍可能值得，但收益递减明显。研究观察到 N 从 1→5 提升最大，5→20 边际递减，20→40 基本饱和。N=3 的实际增益取决于题目难度：(a) 简单题 N=3 已能纠正偶然错误；(b) 难题需要至少 N=10 才有稳定多数派。工程上还有更省的变体：用 small model 跑 N 条推理 + 用 large model 做"裁判"选最优，叫 LLM-as-Judge（Day 10 会讲），整体成本比纯大模型 N 次便宜。</div></details>
-    <details><summary>3. Self-Consistency 假设"正确答案是众数"。什么场景下这个假设会失败？</summary><div>三类典型失败：(a) 系统性偏见——如果模型在某个问题上有共同偏见（如训练数据里大量错误信息），10 次都会一致地错，多数派反而强化错误；(b) 长尾正确——某些题目正确答案需要罕见的洞察，模型 10 次里只有 1 次想到，被 9 次"看起来合理的错答"压制；(c) 答案空间太大——开放数值题（"这家公司估值多少？"）几乎不可能出现两次完全相同答案，投票退化为随机选。对策：a 类要换模型或加 verifier，b 类要换成 Best-of-N + Reward Model，c 类要先把答案分桶再投票。</div></details>
-    <details><summary>4. 把 Self-Consistency 跟 ReAct 组合起来会发生什么？</summary><div>等于"让 N 个 agent 各自跑一遍完整的工具调用循环"。好处：能纠正单个 agent 工具选错/参数错的偶然失误，对最终结论更鲁棒。代价巨大：每个 agent 都要花 5-10 步工具调用，N=10 就是 100 次工具调用 + 100 倍 LLM token，延迟和钱都受不了。实际工程上更常见的折中：只对"关键决策点"做 Self-Consistency（比如最终结论那一步），中间工具调用还是单路径。这也是 Day 7 多 Agent 系统的雏形——把"独立采样"演化成"角色分工的多 agent 协作"。</div></details>
-    <details><summary>5. 站在产品视角，怎么向用户解释"为什么这次回答更慢但更准"？</summary><div>这是个值得专门设计的 UX 问题。三种讲法：(a) 进度条："正在用 5 种不同思路独立验证..."，把多采样可视化成"严谨度"，用户觉得贵的有道理；(b) 对比展示：把 5 条推理链折叠展示，让用户看到收敛过程，建立信任；(c) 分级选项：默认快速模式（单次）、给高价值任务（投资决策、医疗）开"深度分析"按钮触发 self-consistency，让用户主动选权衡。本质是把"算力换准确率"翻译成用户能感知的价值——这也是 Day 29 AI 产品设计要展开讲的"延迟预算"和"用户信任"。</div></details>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区</div>
+<div class="tip">Self-Consistency <b>只对"有明确单一答案"的题有效</b>（数学、单选、抽取）。对开放性任务（写文章、做策划）没法做投票——"哪种创意最常出现"不等于"哪种最好"。另一个误区：以为 temperature=0 也能用 self-consistency——错，必须开温度让采样有多样性，否则 10 次结果一模一样，投票毫无意义。</div>
+</div>
+<div class="section">
+<div class="label">关键资源</div>
+<ul>
+<li>原始论文 <a href="https://arxiv.org/abs/2203.11171" target="_blank">Self-Consistency Improves CoT (Wang et al., 2022)</a></li>
+<li><a href="https://www.promptingguide.ai/techniques/consistency" target="_blank">Prompting Guide: Self-Consistency 小节</a></li>
+</ul>
+</div>
+<div class="section">
+<div class="label">实践场景</div>
+<div class="exercise">📌 经典：高准确率要求的数学/逻辑题、医疗诊断、合同条款抽取。<br/>💰 你的场景：估值一家公司的内在价值时，让模型用不同的"假设组合"独立估 N 次（贴现率、增长率、终值假设各变化），看估值分布是否收敛——分布窄说明结论稳健、分布宽说明对假设极敏感，提示你不要重仓。</div>
+</div>
+<div class="section">
+<div class="label">English Summary</div>
+<div class="eng">Self-Consistency samples multiple CoT reasoning paths at non-zero temperature and takes the majority-vote answer. The intuition: correct reasoning paths tend to converge, while errors scatter. It trades compute for accuracy and works best on tasks with a unique, extractable final answer.</div>
+</div>
+<div class="section think">
+<div class="label">思考题</div>
+<details><summary>1. Self-Consistency 跟传统机器学习里的 ensemble (bagging) 在思想上有什么共通和差异？</summary><div>共通：都是"多个略有差异的预测器投票，降低单点错误的影响"。差异：bagging 的多样性来自训练数据 bootstrap，每个模型权重不同；Self-Consistency 的多样性来自同一个模型在 temperature &gt; 0 下的随机采样，模型权重完全一样，差异只在生成路径。代价也不同：bagging 训练贵推理便宜，Self-Consistency 不训练但每次推理付 N 倍成本。这也启发：可以把 Self-Consistency 看成"推理时的 bagging"，是 LLM 时代独有的形态。</div></details>
+<details><summary>2. 如果你只有 3 倍预算（采 3 次而不是 10 次），Self-Consistency 还值得用吗？</summary><div>仍可能值得，但收益递减明显。研究观察到 N 从 1→5 提升最大，5→20 边际递减，20→40 基本饱和。N=3 的实际增益取决于题目难度：(a) 简单题 N=3 已能纠正偶然错误；(b) 难题需要至少 N=10 才有稳定多数派。工程上还有更省的变体：用 small model 跑 N 条推理 + 用 large model 做"裁判"选最优，叫 LLM-as-Judge（Day 10 会讲），整体成本比纯大模型 N 次便宜。</div></details>
+<details><summary>3. Self-Consistency 假设"正确答案是众数"。什么场景下这个假设会失败？</summary><div>三类典型失败：(a) 系统性偏见——如果模型在某个问题上有共同偏见（如训练数据里大量错误信息），10 次都会一致地错，多数派反而强化错误；(b) 长尾正确——某些题目正确答案需要罕见的洞察，模型 10 次里只有 1 次想到，被 9 次"看起来合理的错答"压制；(c) 答案空间太大——开放数值题（"这家公司估值多少？"）几乎不可能出现两次完全相同答案，投票退化为随机选。对策：a 类要换模型或加 verifier，b 类要换成 Best-of-N + Reward Model，c 类要先把答案分桶再投票。</div></details>
+<details><summary>4. 把 Self-Consistency 跟 ReAct 组合起来会发生什么？</summary><div>等于"让 N 个 agent 各自跑一遍完整的工具调用循环"。好处：能纠正单个 agent 工具选错/参数错的偶然失误，对最终结论更鲁棒。代价巨大：每个 agent 都要花 5-10 步工具调用，N=10 就是 100 次工具调用 + 100 倍 LLM token，延迟和钱都受不了。实际工程上更常见的折中：只对"关键决策点"做 Self-Consistency（比如最终结论那一步），中间工具调用还是单路径。这也是 Day 7 多 Agent 系统的雏形——把"独立采样"演化成"角色分工的多 agent 协作"。</div></details>
+<details><summary>5. 站在产品视角，怎么向用户解释"为什么这次回答更慢但更准"？</summary><div>这是个值得专门设计的 UX 问题。三种讲法：(a) 进度条："正在用 5 种不同思路独立验证..."，把多采样可视化成"严谨度"，用户觉得贵的有道理；(b) 对比展示：把 5 条推理链折叠展示，让用户看到收敛过程，建立信任；(c) 分级选项：默认快速模式（单次）、给高价值任务（投资决策、医疗）开"深度分析"按钮触发 self-consistency，让用户主动选权衡。本质是把"算力换准确率"翻译成用户能感知的价值——这也是 Day 29 AI 产品设计要展开讲的"延迟预算"和"用户信任"。</div></details>
+</div>
+</div>
 <a class="back" href="index.html">← 返回首页</a>
-
 <footer>BigCat · AI &amp; ML · Day 3 · 2026</footer>
 </div>
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

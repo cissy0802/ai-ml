@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：CNN 与视觉 — Day 18</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,42 +60,35 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：CNN 与视觉</h1>
-  <div class="meta">Day 18 · 2026-06-04</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="05b68bf9fc58c19a">AI/ML 详解：CNN 与视觉</h1>
+<div class="meta">Day 18 · 2026-06-04</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
 <!-- 1. 卷积原理 -->
-<div class="card">
-  <h2>卷积原理<span class="en">Convolution</span></h2>
-  <div class="tags"><span class="tag">视觉基石</span><span class="tag purple">参数共享</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>卷积核（kernel）就是一段<strong>滑动窗口上的 stored procedure</strong>——同一个小函数在整张图上逐个位置滑过去，每到一处就对覆盖的局部像素做一次点积。关键不在"滑动"，在<strong>参数共享（weight sharing）</strong>：一份逻辑部署到所有位置，就像一份 CDN 边缘代码处理所有区域的请求，而不是每个像素配一套独立权重。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>如果用 Day 17 的全连接层（fully-connected，每个输入连每个神经元）直接喂图像，参数会爆炸：一张 1000×1000 的图就有百万输入，接一个千神经元的隐层 = <strong>十亿参数</strong>，且模型不知道"猫平移了 10 像素还是同一只猫"。卷积用两招破局：<strong>局部连接</strong>（每个神经元只看一小块感受野）+ <strong>参数共享</strong>（同一个 kernel 扫全图）。于是参数从十亿降到几百，还天然获得<strong>平移不变性（translation invariance）</strong>——同一个特征出现在哪都能被同一个 kernel 抓到。</p>
-    <p style="margin-top:8px">机制上，每个 kernel 学一种"局部模式探测器"：第一层学边缘/颜色块，往上堆叠后<strong>感受野</strong>逐层扩大，第二层组合成纹理、角点，更高层组合成眼睛、轮子乃至整只猫。中间穿插 <strong>pooling</strong>（池化，取局部最大/平均）做降采样，缩小尺寸、增强对微小位移的鲁棒性。这套"局部 → 组合 → 抽象"的层级正是 1989 年 LeCun 的设计直觉，2012 年 AlexNet 在 ImageNet 上引爆。</p>
-
+<div class="card" data-tts="3833c26a229bed8e">
+<h2>卷积原理<span class="en">Convolution</span></h2>
+<div class="tags"><span class="tag">视觉基石</span><span class="tag purple">参数共享</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>卷积核（kernel）就是一段<strong>滑动窗口上的 stored procedure</strong>——同一个小函数在整张图上逐个位置滑过去，每到一处就对覆盖的局部像素做一次点积。关键不在"滑动"，在<strong>参数共享（weight sharing）</strong>：一份逻辑部署到所有位置，就像一份 CDN 边缘代码处理所有区域的请求，而不是每个像素配一套独立权重。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>如果用 Day 17 的全连接层（fully-connected，每个输入连每个神经元）直接喂图像，参数会爆炸：一张 1000×1000 的图就有百万输入，接一个千神经元的隐层 = <strong>十亿参数</strong>，且模型不知道"猫平移了 10 像素还是同一只猫"。卷积用两招破局：<strong>局部连接</strong>（每个神经元只看一小块感受野）+ <strong>参数共享</strong>（同一个 kernel 扫全图）。于是参数从十亿降到几百，还天然获得<strong>平移不变性（translation invariance）</strong>——同一个特征出现在哪都能被同一个 kernel 抓到。</p>
+<p style="margin-top:8px">机制上，每个 kernel 学一种"局部模式探测器"：第一层学边缘/颜色块，往上堆叠后<strong>感受野</strong>逐层扩大，第二层组合成纹理、角点，更高层组合成眼睛、轮子乃至整只猫。中间穿插 <strong>pooling</strong>（池化，取局部最大/平均）做降采样，缩小尺寸、增强对微小位移的鲁棒性。这套"局部 → 组合 → 抽象"的层级正是 1989 年 LeCun 的设计直觉，2012 年 AlexNet 在 ImageNet 上引爆。</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">同一个 3×3 kernel 在输入上滑动（参数共享）</span><br><br>
-输入特征图 &nbsp;&nbsp;&nbsp;&nbsp; kernel &nbsp;&nbsp;&nbsp;&nbsp; 输出特征图<br>
-<span class="box">▦ ▦ ▦ ▦ ▦</span> <span class="arrow">×</span> <span class="box p">▣ 3×3</span> <span class="arrow">=</span> <span class="box g">▨ ▨ ▨</span><br>
-<span class="box">▦ ▦ ▦ ▦ ▦</span> <span style="color:#5a6378">↓滑动</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="box g">▨ ▨ ▨</span><br>
-<span class="box">▦ ▦ ▦ ▦ ▦</span> <span style="color:#5a6378">每处点积</span> &nbsp;&nbsp; <span class="box g">▨ ▨ ▨</span><br>
+<span style="color:#8b92a8">同一个 3×3 kernel 在输入上滑动（参数共享）</span><br/><br/>
+输入特征图      kernel      输出特征图<br/>
+<span class="box">▦ ▦ ▦ ▦ ▦</span> <span class="arrow">×</span> <span class="box p">▣ 3×3</span> <span class="arrow">=</span> <span class="box g">▨ ▨ ▨</span><br/>
+<span class="box">▦ ▦ ▦ ▦ ▦</span> <span style="color:#5a6378">↓滑动</span>        <span class="box g">▨ ▨ ▨</span><br/>
+<span class="box">▦ ▦ ▦ ▦ ▦</span> <span style="color:#5a6378">每处点积</span>    <span class="box g">▨ ▨ ▨</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ 全图只用这 9 个权重 → 参数量与图像大小无关</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> torch
 <span class="kw">import</span> torch.nn <span class="kw">as</span> nn
 
@@ -109,49 +103,42 @@ y = <span class="fn">conv</span>(x)
 <span class="cmt"># 关键：参数量 = 16×3×3×3 + 16(bias) = 448，与图像大小无关</span>
 <span class="cmt"># 同样的输出若用全连接层 = 3·32·32 × 16·32·32 ≈ 8 亿参数</span>
 <span class="fn">print</span>(<span class="fn">sum</span>(p.numel() <span class="kw">for</span> p <span class="kw">in</span> conv.<span class="fn">parameters</span>()))  <span class="cmt"># 448</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <p><span class="tip">⚠️ <strong>误区</strong>：以为 kernel 是人手工设计的（像 Photoshop 的锐化/模糊滤镜）。其实 CNN 的 kernel 权重全部由反向传播<strong>自动学出来</strong>——你只定义 kernel 的尺寸和数量，长成什么探测器是数据决定的。</span></p>
-    <p style="margin-top:10px">🎯 <strong>BigCat 场景</strong>：你做个人项目要给上千张家庭照片自动打标签/去重，第一反应可能是调云端大模型 API。但一个几层的小 CNN（或现成预训练 backbone）在本地就能跑，零 API 成本、数据不出门——理解卷积让你知道"什么时候不需要大模型"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 卷积的全部威力来自一个约束：<strong>局部连接 + 参数共享</strong>。它把"图像有平移不变性"这个先验直接写进了架构。<br>🤔 你熟悉的后端系统里，有哪些"用同一份逻辑处理海量相似单元"的设计？它们和参数共享共享了什么本质？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<p><span class="tip">⚠️ <strong>误区</strong>：以为 kernel 是人手工设计的（像 Photoshop 的锐化/模糊滤镜）。其实 CNN 的 kernel 权重全部由反向传播<strong>自动学出来</strong>——你只定义 kernel 的尺寸和数量，长成什么探测器是数据决定的。</span></p>
+<p style="margin-top:10px">🎯 <strong>BigCat 场景</strong>：你做个人项目要给上千张家庭照片自动打标签/去重，第一反应可能是调云端大模型 API。但一个几层的小 CNN（或现成预训练 backbone）在本地就能跑，零 API 成本、数据不出门——理解卷积让你知道"什么时候不需要大模型"。</p>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 卷积的全部威力来自一个约束：<strong>局部连接 + 参数共享</strong>。它把"图像有平移不变性"这个先验直接写进了架构。<br/>🤔 你熟悉的后端系统里，有哪些"用同一份逻辑处理海量相似单元"的设计？它们和参数共享共享了什么本质？</div>
+</div>
+</div>
 <!-- 2. ResNet -->
-<div class="card">
-  <h2>残差网络<span class="en">ResNet</span></h2>
-  <div class="tags"><span class="tag">深度训练</span><span class="tag purple">skip connection</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>残差连接（residual / skip connection）就是给每一层加一条 <strong>bypass 直通线</strong>——代码写出来是 <code>return x + f(x)</code>。类比中间件链：每个 middleware 默认有一条"什么都不改、原样透传"的旁路，要改才改。这条旁路让"加深网络"从"必须学得更好"退化成"至少不能学得更差"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>2015 年前大家发现一个反常现象：网络加到几十层后，<strong>训练误差反而上升</strong>。注意——这不是过拟合（那是训练好、测试差），而是<strong>退化（degradation）</strong>：连训练集都拟合不好。直觉上多加几层至少能学个"恒等映射（identity，原样输出）"保底，但实际优化器很难让一堆非线性层凑出恒等函数，深层梯度回传也衰减严重。</p>
-    <p style="margin-top:8px">He et al. 2015 的解法极简：不让层直接学目标 <strong>H(x)</strong>，而是学<strong>残差 F(x) = H(x) − x</strong>，最终输出 <strong>H(x) = F(x) + x</strong>。如果最优就是恒等映射，优化器只需把 F(x) 压到 0——比从零拟合一个恒等函数容易得多。更妙的是那个 <strong>+x</strong> 给梯度开了一条<strong>高速公路</strong>：反向传播时梯度能沿 skip 直接回到浅层，绕开链式衰减。靠这招，ResNet 把网络从十几层推到 <strong>152 层</strong>，拿下 2015 年 ImageNet 冠军，从此"残差块"成了几乎所有深网络（包括 Transformer）的标配。</p>
-
+<div class="card" data-tts="320237eec8d4b670">
+<h2>残差网络<span class="en">ResNet</span></h2>
+<div class="tags"><span class="tag">深度训练</span><span class="tag purple">skip connection</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>残差连接（residual / skip connection）就是给每一层加一条 <strong>bypass 直通线</strong>——代码写出来是 <code>return x + f(x)</code>。类比中间件链：每个 middleware 默认有一条"什么都不改、原样透传"的旁路，要改才改。这条旁路让"加深网络"从"必须学得更好"退化成"至少不能学得更差"。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>2015 年前大家发现一个反常现象：网络加到几十层后，<strong>训练误差反而上升</strong>。注意——这不是过拟合（那是训练好、测试差），而是<strong>退化（degradation）</strong>：连训练集都拟合不好。直觉上多加几层至少能学个"恒等映射（identity，原样输出）"保底，但实际优化器很难让一堆非线性层凑出恒等函数，深层梯度回传也衰减严重。</p>
+<p style="margin-top:8px">He et al. 2015 的解法极简：不让层直接学目标 <strong>H(x)</strong>，而是学<strong>残差 F(x) = H(x) − x</strong>，最终输出 <strong>H(x) = F(x) + x</strong>。如果最优就是恒等映射，优化器只需把 F(x) 压到 0——比从零拟合一个恒等函数容易得多。更妙的是那个 <strong>+x</strong> 给梯度开了一条<strong>高速公路</strong>：反向传播时梯度能沿 skip 直接回到浅层，绕开链式衰减。靠这招，ResNet 把网络从十几层推到 <strong>152 层</strong>，拿下 2015 年 ImageNet 冠军，从此"残差块"成了几乎所有深网络（包括 Transformer）的标配。</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">残差块：H(x) = F(x) + x</span><br><br>
-&nbsp;&nbsp;<span class="box">输入 x</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;╲ <span style="color:#7ed6a0">skip（恒等直通）</span><br>
-&nbsp;&nbsp;<span class="box p">权重层 → ReLU</span> &nbsp;║<br>
-&nbsp;&nbsp;<span class="box p">权重层</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;║ <span style="color:#7ed6a0">梯度高速公路</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;│ F(x)&nbsp;&nbsp;&nbsp;╱<br>
-&nbsp;&nbsp;<span class="box g">⊕ 相加</span> <span class="arrow">→</span> <span class="box">输出 F(x)+x</span><br>
+<span style="color:#8b92a8">残差块：H(x) = F(x) + x</span><br/><br/>
+  <span class="box">输入 x</span><br/>
+    │      ╲ <span style="color:#7ed6a0">skip（恒等直通）</span><br/>
+  <span class="box p">权重层 → ReLU</span>  ║<br/>
+  <span class="box p">权重层</span>         ║ <span style="color:#7ed6a0">梯度高速公路</span><br/>
+    │ F(x)   ╱<br/>
+  <span class="box g">⊕ 相加</span> <span class="arrow">→</span> <span class="box">输出 F(x)+x</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ F(x)→0 即退回恒等映射，"加层至少不变差"</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> torch.nn <span class="kw">as</span> nn
 
 <span class="kw">class</span> <span class="fn">ResidualBlock</span>(nn.Module):
@@ -165,49 +152,42 @@ y = <span class="fn">conv</span>(x)
         out = self.<span class="fn">relu</span>(self.<span class="fn">conv1</span>(x))
         out = self.<span class="fn">conv2</span>(out)
         <span class="kw">return</span> self.<span class="fn">relu</span>(out + x)   <span class="cmt"># 核心：+x 这条 skip 就是全部魔法</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <p><span class="tip">⚠️ <strong>误区</strong>：以为残差连接是为了"解决梯度消失"。梯度通畅是<strong>副作用之一</strong>，原论文强调的核心是<strong>退化问题</strong>——让深层网络"易于学到恒等映射"。两者相关但不是一回事。</span></p>
-    <p style="margin-top:10px">🎯 <strong>BigCat 场景</strong>：残差思想的迁移价值远超视觉。你设计一个多步 AI 流水线（agent / 数据处理链）时，给关键环节保留一条"原始输入直通"的旁路，能让系统在某步失灵时优雅降级而非全盘崩——这就是 <code>output = step(x) + x</code> 的工程哲学。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 ResNet 的洞见是：<strong>把"难学的目标"改写成"易学的残差"</strong>。一行 <code>+x</code> 让千层网络成为可能，今天的 Transformer 每个 block 都在用它。<br>🤔 "让默认行为是不变、要改才改"——这个原则在你的系统设计、甚至个人习惯养成里，还能用在哪？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<p><span class="tip">⚠️ <strong>误区</strong>：以为残差连接是为了"解决梯度消失"。梯度通畅是<strong>副作用之一</strong>，原论文强调的核心是<strong>退化问题</strong>——让深层网络"易于学到恒等映射"。两者相关但不是一回事。</span></p>
+<p style="margin-top:10px">🎯 <strong>BigCat 场景</strong>：残差思想的迁移价值远超视觉。你设计一个多步 AI 流水线（agent / 数据处理链）时，给关键环节保留一条"原始输入直通"的旁路，能让系统在某步失灵时优雅降级而非全盘崩——这就是 <code>output = step(x) + x</code> 的工程哲学。</p>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 ResNet 的洞见是：<strong>把"难学的目标"改写成"易学的残差"</strong>。一行 <code>+x</code> 让千层网络成为可能，今天的 Transformer 每个 block 都在用它。<br/>🤔 "让默认行为是不变、要改才改"——这个原则在你的系统设计、甚至个人习惯养成里，还能用在哪？</div>
+</div>
+</div>
 <!-- 3. ViT -->
-<div class="card">
-  <h2>视觉 Transformer<span class="en">Vision Transformer / ViT</span></h2>
-  <div class="tags"><span class="tag">架构融合</span><span class="tag purple">patch token</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>ViT 干的事就一句话：<strong>把图像"分词（tokenize）"</strong>。它把图切成 16×16 的小块（patch），每块拍平当成一个 token，于是一张图变成"一句由图块组成的话"，然后直接套用 Day 1 那套处理文本的 Transformer。视觉问题被翻译成了 NLP 问题。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>CNN 自带强<strong>归纳偏置（inductive bias，架构里预置的先验假设）</strong>：局部性、平移不变。这让它在中小数据集上又快又准，但也限制了对<strong>全局长程关系</strong>的建模——卷积要堆很多层才能让左上角"看到"右下角。Transformer 的 self-attention 天生是全局的：任意两个 token 一步直连。Dosovitskiy et al. 2020 的赌注是——能不能<strong>扔掉卷积的先验，纯靠 attention + 海量数据</strong>让模型自己学出视觉规律？</p>
-    <p style="margin-top:8px">流程：图像切 patch → 每个 patch 线性投影成向量（patch embedding）→ 加<strong>位置编码</strong>（Day 13，否则模型不知道图块的空间顺序）→ 拼一个 <strong>[CLS] token</strong> 汇总全局信息 → 喂进标准 Transformer encoder → 用 [CLS] 的输出做分类。结论很关键也很诚实：<strong>数据量是分水岭</strong>。在 ImageNet 这种"中等"规模上，ViT 干不过同级 CNN（缺了归纳偏置这个先验，等于让它从数据里重新学"局部性"）；但预训练数据涨到上亿张时，ViT <strong>反超</strong>——先验少反而成了优势，因为它不被人为假设束缚。这正是 Day 14 scaling laws 的视觉版印证。</p>
-
+<div class="card" data-tts="d36b5fde8dda6558">
+<h2>视觉 Transformer<span class="en">Vision Transformer / ViT</span></h2>
+<div class="tags"><span class="tag">架构融合</span><span class="tag purple">patch token</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>ViT 干的事就一句话：<strong>把图像"分词（tokenize）"</strong>。它把图切成 16×16 的小块（patch），每块拍平当成一个 token，于是一张图变成"一句由图块组成的话"，然后直接套用 Day 1 那套处理文本的 Transformer。视觉问题被翻译成了 NLP 问题。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>CNN 自带强<strong>归纳偏置（inductive bias，架构里预置的先验假设）</strong>：局部性、平移不变。这让它在中小数据集上又快又准，但也限制了对<strong>全局长程关系</strong>的建模——卷积要堆很多层才能让左上角"看到"右下角。Transformer 的 self-attention 天生是全局的：任意两个 token 一步直连。Dosovitskiy et al. 2020 的赌注是——能不能<strong>扔掉卷积的先验，纯靠 attention + 海量数据</strong>让模型自己学出视觉规律？</p>
+<p style="margin-top:8px">流程：图像切 patch → 每个 patch 线性投影成向量（patch embedding）→ 加<strong>位置编码</strong>（Day 13，否则模型不知道图块的空间顺序）→ 拼一个 <strong>[CLS] token</strong> 汇总全局信息 → 喂进标准 Transformer encoder → 用 [CLS] 的输出做分类。结论很关键也很诚实：<strong>数据量是分水岭</strong>。在 ImageNet 这种"中等"规模上，ViT 干不过同级 CNN（缺了归纳偏置这个先验，等于让它从数据里重新学"局部性"）；但预训练数据涨到上亿张时，ViT <strong>反超</strong>——先验少反而成了优势，因为它不被人为假设束缚。这正是 Day 14 scaling laws 的视觉版印证。</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">把图像变成 token 序列</span><br><br>
-<span class="box">🖼 整图</span> <span class="arrow">→</span> 切 16×16 patch <span class="arrow">→</span><br>
-<span class="box p">▣</span><span class="box p">▣</span><span class="box p">▣</span><span class="box p">▣</span> ... <span style="color:#5a6378">(N 个 patch)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span> 线性投影 + 位置编码<br>
-<span class="box g">[CLS]</span><span class="box">t₁</span><span class="box">t₂</span><span class="box">t₃</span>...<span class="box">t_N</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span> Transformer Encoder（self-attention）<br>
-<span class="box g">[CLS] 输出</span> <span class="arrow">→</span> <span class="box o">分类头</span><br>
+<span style="color:#8b92a8">把图像变成 token 序列</span><br/><br/>
+<span class="box">🖼 整图</span> <span class="arrow">→</span> 切 16×16 patch <span class="arrow">→</span><br/>
+<span class="box p">▣</span><span class="box p">▣</span><span class="box p">▣</span><span class="box p">▣</span> ... <span style="color:#5a6378">(N 个 patch)</span><br/>
+    <span class="arrow">↓</span> 线性投影 + 位置编码<br/>
+<span class="box g">[CLS]</span><span class="box">t₁</span><span class="box">t₂</span><span class="box">t₃</span>...<span class="box">t_N</span><br/>
+    <span class="arrow">↓</span> Transformer Encoder（self-attention）<br/>
+<span class="box g">[CLS] 输出</span> <span class="arrow">→</span> <span class="box o">分类头</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ 和文本 Transformer 几乎同一套，只是 token 来自图块</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> transformers <span class="kw">import</span> ViTImageProcessor, ViTForImageClassification
 <span class="kw">from</span> PIL <span class="kw">import</span> Image
 
@@ -220,48 +200,41 @@ inputs = <span class="fn">proc</span>(images=img, return_tensors=<span class="st
 logits = <span class="fn">model</span>(**inputs).logits
 pred = logits.<span class="fn">argmax</span>(-1).<span class="fn">item</span>()
 <span class="fn">print</span>(model.config.id2label[pred])          <span class="cmt"># 预测类别，如 'Egyptian cat'</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <p><span class="tip">⚠️ <strong>误区</strong>：以为"ViT 全面取代了 CNN"。现实是<strong>各有地盘</strong>：数据/算力有限或要快时 CNN（及其现代变体）仍是默认；超大规模预训练、要和文本/多模态打通时 ViT 占优。把它当"必选升级"会在小数据上吃亏。</span></p>
-    <p style="margin-top:10px">🎯 <strong>BigCat 场景</strong>：ViT 的真正意义是<strong>架构统一</strong>——图像、文本、音频都能切成 token 进同一个 Transformer。理解它，你就理解了今天多模态大模型（GPT/Gemini 看图）底层为什么能"用一套引擎吃所有模态"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 ViT 证明了：<strong>给足数据，通用架构能打败专用先验</strong>。"图像即 token 序列"这一步，让视觉并入了 Transformer 的统一版图。<br>🤔 "先验少 + 数据多 &gt; 先验多 + 数据少"——这个 trade-off 只属于深度学习吗？它对你做跨学科判断、收集证据 vs 依赖直觉，有什么启发？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<p><span class="tip">⚠️ <strong>误区</strong>：以为"ViT 全面取代了 CNN"。现实是<strong>各有地盘</strong>：数据/算力有限或要快时 CNN（及其现代变体）仍是默认；超大规模预训练、要和文本/多模态打通时 ViT 占优。把它当"必选升级"会在小数据上吃亏。</span></p>
+<p style="margin-top:10px">🎯 <strong>BigCat 场景</strong>：ViT 的真正意义是<strong>架构统一</strong>——图像、文本、音频都能切成 token 进同一个 Transformer。理解它，你就理解了今天多模态大模型（GPT/Gemini 看图）底层为什么能"用一套引擎吃所有模态"。</p>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 ViT 证明了：<strong>给足数据，通用架构能打败专用先验</strong>。"图像即 token 序列"这一步，让视觉并入了 Transformer 的统一版图。<br/>🤔 "先验少 + 数据多 &gt; 先验多 + 数据少"——这个 trade-off 只属于深度学习吗？它对你做跨学科判断、收集证据 vs 依赖直觉，有什么启发？</div>
+</div>
+</div>
 <!-- 4. CLIP -->
-<div class="card">
-  <h2>对比语言-图像预训练<span class="en">CLIP</span></h2>
-  <div class="tags"><span class="tag">多模态</span><span class="tag purple">对比学习</span><span class="tag orange">zero-shot</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>CLIP 就是把图像和文本塞进<strong>同一个向量空间的双塔检索（two-tower retrieval）</strong>——你熟悉的 embedding 语义搜索（Day 4）的多模态版。一个图像编码器、一个文本编码器，训练目标是：配对的图文向量靠拢，不配对的推远。训练完，"一张猫的图"和"a photo of a cat"在空间里几乎重合。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>传统视觉模型有个硬伤：<strong>只认训练时定死的类别</strong>。在 1000 类 ImageNet 上训练的模型，永远只会输出这 1000 个标签——想加一类"咖啡拉花"，得重新标数据、重新训练。CLIP 要的是 <strong>zero-shot（零样本，没专门训练过也能识别任意新概念）</strong>。</p>
-    <p style="margin-top:8px">Radford et al. 2021 的做法：从互联网爬 <strong>4 亿对（图，文）</strong>，用<strong>对比学习（contrastive learning）</strong>训练。每个 batch 取 N 张图、N 段文，编码后算出 N×N 相似度矩阵——<strong>对角线是真实配对（正样本，要拉高），其余 N²−N 个是错配（负样本，要压低）</strong>。这就是对比学习的精髓：不预测绝对标签，只学"谁和谁该靠近"。推理时玩法很巧：把候选类别名套进模板变成文本（"a photo of a {label}"），编码后和图像向量比相似度，最高的就是预测——<strong>分类问题被转成了图文检索</strong>，类别想加就加，无需重训。CLIP 因此成了 Stable Diffusion、多模态 LLM 的视觉地基。</p>
-
+<div class="card" data-tts="78e129b8c272f661">
+<h2>对比语言-图像预训练<span class="en">CLIP</span></h2>
+<div class="tags"><span class="tag">多模态</span><span class="tag purple">对比学习</span><span class="tag orange">zero-shot</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>CLIP 就是把图像和文本塞进<strong>同一个向量空间的双塔检索（two-tower retrieval）</strong>——你熟悉的 embedding 语义搜索（Day 4）的多模态版。一个图像编码器、一个文本编码器，训练目标是：配对的图文向量靠拢，不配对的推远。训练完，"一张猫的图"和"a photo of a cat"在空间里几乎重合。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>传统视觉模型有个硬伤：<strong>只认训练时定死的类别</strong>。在 1000 类 ImageNet 上训练的模型，永远只会输出这 1000 个标签——想加一类"咖啡拉花"，得重新标数据、重新训练。CLIP 要的是 <strong>zero-shot（零样本，没专门训练过也能识别任意新概念）</strong>。</p>
+<p style="margin-top:8px">Radford et al. 2021 的做法：从互联网爬 <strong>4 亿对（图，文）</strong>，用<strong>对比学习（contrastive learning）</strong>训练。每个 batch 取 N 张图、N 段文，编码后算出 N×N 相似度矩阵——<strong>对角线是真实配对（正样本，要拉高），其余 N²−N 个是错配（负样本，要压低）</strong>。这就是对比学习的精髓：不预测绝对标签，只学"谁和谁该靠近"。推理时玩法很巧：把候选类别名套进模板变成文本（"a photo of a {label}"），编码后和图像向量比相似度，最高的就是预测——<strong>分类问题被转成了图文检索</strong>，类别想加就加，无需重训。CLIP 因此成了 Stable Diffusion、多模态 LLM 的视觉地基。</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">对比学习：N×N 相似度矩阵，对角线=正样本</span><br><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;T₁&nbsp;&nbsp;T₂&nbsp;&nbsp;T₃&nbsp;&nbsp;<span style="color:#5a6378">(文本)</span><br>
-I₁ &nbsp;<span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><br>
-I₂ &nbsp;<span class="box r">✗</span><span class="box g">✓</span><span class="box r">✗</span><br>
-I₃ &nbsp;<span class="box r">✗</span><span class="box r">✗</span><span class="box g">✓</span><br>
-<span style="color:#5a6378">(图像)</span> &nbsp; <span style="color:#7ed6a0">✓ 拉高</span> &nbsp; <span style="color:#ff8e8e">✗ 压低</span><br>
+<span style="color:#8b92a8">对比学习：N×N 相似度矩阵，对角线=正样本</span><br/><br/>
+      T₁  T₂  T₃  <span style="color:#5a6378">(文本)</span><br/>
+I₁  <span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><br/>
+I₂  <span class="box r">✗</span><span class="box g">✓</span><span class="box r">✗</span><br/>
+I₃  <span class="box r">✗</span><span class="box r">✗</span><span class="box g">✓</span><br/>
+<span style="color:#5a6378">(图像)</span>   <span style="color:#7ed6a0">✓ 拉高</span>   <span style="color:#ff8e8e">✗ 压低</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ 推理：类别名→文本，取相似度最高 = zero-shot 分类</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> transformers <span class="kw">import</span> CLIPProcessor, CLIPModel
 <span class="kw">from</span> PIL <span class="kw">import</span> Image
 
@@ -276,51 +249,45 @@ inputs = <span class="fn">proc</span>(text=labels, images=img, return_tensors=<s
 out = <span class="fn">model</span>(**inputs)
 probs = out.logits_per_image.<span class="fn">softmax</span>(dim=1)  <span class="cmt"># 图文相似度 → 概率</span>
 <span class="fn">print</span>(labels[probs.<span class="fn">argmax</span>().<span class="fn">item</span>()])      <span class="cmt"># zero-shot 预测</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <p><span class="tip">⚠️ <strong>误区</strong>：以为 CLIP "理解"图像内容。它学的是<strong>图文统计关联</strong>，不是真正的视觉推理——遇到训练分布外的概念、需要数数或空间推理的任务会翻车。它强在"匹配"，弱在"推理"。</span></p>
-    <p style="margin-top:10px">🎯 <strong>BigCat 场景</strong>：CLIP 让你能搭一个<strong>零训练的私人图片语义搜索</strong>——把家庭相册全部编码进向量库，然后用自然语言"孩子在海边的照片"直接检索。这是 Day 4 向量检索能力在图像上的直接延伸，本地可跑、隐私可控。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 CLIP 的杠杆是<strong>用自然语言当监督信号</strong>：不再人工标固定类别，而是让海量"图+配文"自己教会模型。zero-shot 的本质，是把分类悄悄换成了检索。<br>🤔 "用更弱但海量的监督（网络图文）替代精标小数据"——这个思路，对你积累个人知识、训练自己的判断力，是不是也成立？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<p><span class="tip">⚠️ <strong>误区</strong>：以为 CLIP "理解"图像内容。它学的是<strong>图文统计关联</strong>，不是真正的视觉推理——遇到训练分布外的概念、需要数数或空间推理的任务会翻车。它强在"匹配"，弱在"推理"。</span></p>
+<p style="margin-top:10px">🎯 <strong>BigCat 场景</strong>：CLIP 让你能搭一个<strong>零训练的私人图片语义搜索</strong>——把家庭相册全部编码进向量库，然后用自然语言"孩子在海边的照片"直接检索。这是 Day 4 向量检索能力在图像上的直接延伸，本地可跑、隐私可控。</p>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 CLIP 的杠杆是<strong>用自然语言当监督信号</strong>：不再人工标固定类别，而是让海量"图+配文"自己教会模型。zero-shot 的本质，是把分类悄悄换成了检索。<br/>🤔 "用更弱但海量的监督（网络图文）替代精标小数据"——这个思路，对你积累个人知识、训练自己的判断力，是不是也成立？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/1512.03385" target="_blank">He et al. 2015 — Deep Residual Learning (ResNet)</a> — 残差连接奠基作，2015 ImageNet 冠军，必读</li>
-      <li><a href="https://arxiv.org/abs/2010.11929" target="_blank">Dosovitskiy et al. 2020 — An Image is Worth 16x16 Words (ViT)</a> — 把 Transformer 引入视觉的开山之作</li>
-      <li><a href="https://arxiv.org/abs/2103.00020" target="_blank">Radford et al. 2021 — Learning Transferable Visual Models (CLIP)</a> — 多模态 zero-shot 的基石</li>
-      <li><a href="https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks" target="_blank">Krizhevsky et al. 2012 — AlexNet</a> — 引爆深度学习视觉革命的 NeurIPS 论文</li>
-      <li><a href="https://cs231n.github.io/" target="_blank">Stanford CS231n</a> — 卷积网络与视觉的经典课程讲义，从零讲透 CNN</li>
-    </ul>
-  </div>
+<div class="card" data-tts="93c4d479634adc67" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/1512.03385" target="_blank">He et al. 2015 — Deep Residual Learning (ResNet)</a> — 残差连接奠基作，2015 ImageNet 冠军，必读</li>
+<li><a href="https://arxiv.org/abs/2010.11929" target="_blank">Dosovitskiy et al. 2020 — An Image is Worth 16x16 Words (ViT)</a> — 把 Transformer 引入视觉的开山之作</li>
+<li><a href="https://arxiv.org/abs/2103.00020" target="_blank">Radford et al. 2021 — Learning Transferable Visual Models (CLIP)</a> — 多模态 zero-shot 的基石</li>
+<li><a href="https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks" target="_blank">Krizhevsky et al. 2012 — AlexNet</a> — 引爆深度学习视觉革命的 NeurIPS 论文</li>
+<li><a href="https://cs231n.github.io/" target="_blank">Stanford CS231n</a> — 卷积网络与视觉的经典课程讲义，从零讲透 CNN</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 卷积的归纳偏置（局部性、平移不变）让它在小数据上高效；ViT 扔掉这些先验、靠海量数据反超。这个 trade-off 揭示了关于"先验 vs 数据"的什么普遍规律？</summary><div>本质是<strong>归纳偏置是把双刃剑</strong>：先验等于"免费的假设"——数据少时它替你脑补缺失信息，省样本（CNN 不用从头学"邻近像素相关"这件事，因为架构已经假设了）；但先验也是<strong>天花板</strong>，当它和真实规律有偏差，数据再多也突破不了那个错误假设。CNN 假设"重要的是局部模式"，这在多数自然图像上对，但全局长程关系（一张脸的左右对称、远处物体的呼应）它要堆很多层才够得着。ViT 几乎没有空间先验，所以小数据上它得把样本"浪费"在重新发现局部性上，干不过 CNN；可一旦数据上亿，它不被错误先验绑住，能学到 CNN 架构表达不了的全局规律，于是反超。普遍规律：<strong>数据稀缺时，强先验赢；数据充裕时，弱先验+大模型赢</strong>。这和 Day 14 scaling laws、甚至贝叶斯推断里"先验 vs 似然"的权重转移是同一个故事——证据越多，先验越该让位。对 BigCat 做跨学科判断的启发：信息不足时依赖经验直觉（强先验）是理性的，但当你能收集到大量证据时，要敢于让数据推翻直觉。</div></details>
-    <details><summary>2. ResNet 的 skip connection 后来成了 Transformer 每个 block 的标配。为什么"残差"这个看似只为视觉深网络设计的技巧，能跨架构通用？</summary><div>因为它解决的不是视觉特有问题，而是<strong>所有深层堆叠结构的通病</strong>：层数一多，信号（前向）和梯度（反向）都会在长链上衰减/畸变，且优化器难以让深层逼近恒等映射。skip connection 提供两个架构无关的好处：(1) <strong>恒等保底</strong>——<code>x + f(x)</code> 让"多加一层"的最坏情况退化成"什么都没做"，于是加深永远不会更糟，这给了堆叠任意深度的信心；(2) <strong>梯度高速公路</strong>——反向传播时梯度能沿 +x 直达浅层，绕开逐层连乘的衰减。Transformer 动辄几十上百层，没有残差根本训不动，所以每个 attention 子层、每个 FFN 子层后面都接 <code>x + sublayer(x)</code>。更深一层看，这是个<strong>架构设计的元原则</strong>：让"什么都不做"成为默认、容易达到的状态，把学习压力集中在"相对当前该改什么"（残差）而非"从零构造全部"（绝对）。这个思想在工程上无处不在——增量更新、差分编码、git diff，都是"存残差不存全量"。</div></details>
-    <details><summary>3. CLIP 用"图文配对"这种廉价但海量的弱监督，替代了昂贵的人工精标。这种范式转变对"什么是高质量训练信号"的理解意味着什么？</summary><div>它颠覆了"<strong>监督信号越精确越好</strong>"的旧直觉。传统 ImageNet 靠人工把每张图标成 1000 类之一，精确但昂贵、且天花板就是那 1000 类。CLIP 用互联网现成的图文对——配文嘈杂、不规范、甚至常有噪声，但<strong>规模碾压（4 亿对）且语义空间是开放的自然语言</strong>。关键洞察：<strong>信号的"信息量"= 质量 × 规模 × 覆盖广度</strong>，当规模和广度足够大，单条信号的噪声会被平均掉，而开放语言带来的概念覆盖是任何固定标签体系给不了的。这也是为什么 CLIP 能 zero-shot——它的"类别"不是离散标签而是连续语言空间，天然可泛化到没见过的概念。代价是<strong>它继承了网络数据的偏见和肤浅</strong>：学的是统计共现而非深层理解，所以不会数数、空间推理弱。对 BigCat 的迁移意义：积累个人知识时，"大量略读 + 建立关联"（弱监督、广覆盖）和"少量精读 + 深度掌握"（强监督、窄深）是互补的两种学习信号，超级个体需要的可能不是非此即彼，而是像 CLIP+下游微调那样——先用海量弱信号建广阔地基，再用少量精信号在关键处打深井。</div></details>
-    <details><summary>4. 从 CNN（局部卷积）到 ViT（全局 attention），视觉架构走了一条"从专用到通用"的路。这条路和你熟悉的软件系统"从专用优化到通用平台"的演进，有可比性吗？</summary><div>高度可比，但有个关键差异值得想清楚。相似面：早期为性能/资源约束做专用设计（CNN 的局部连接=针对图像结构的"硬编码优化"，正如早期系统为单机性能写专用 C 模块），后期算力/数据充裕后转向通用抽象（ViT/Transformer=通用计算基质，正如转向通用平台、微服务、云原生），换取<strong>可组合性和跨域复用</strong>——Transformer 一套引擎吃图像/文本/音频，正如通用平台一套基建跑所有业务。差异面：软件演进里"通用化"常以<strong>牺牲性能换开发效率</strong>为代价（通用方案通常更慢更耗资源），而深度学习里通用架构在大数据下<strong>连性能（精度）都反超</strong>了专用方案——这在传统工程里罕见。原因在于：软件的专用优化是人写死的确定逻辑，通用化只是换了组织方式；而 CNN 的"专用"是把人的先验假设硬编码进架构，ViT 的"通用"则让模型从数据里学出比人的假设更好的规律——通用化在这里同时买到了灵活性和更高上限。这提示一个反直觉判断：在<strong>数据/算力是瓶颈被打破的领域</strong>，"通用 + 规模"可能不只是省事的妥协，而是真正更优的解。BigCat 你做架构决策时可以问：这个领域的瓶颈到底是"人的设计智慧"还是"数据与算力"？答案决定该押专用还是通用。</div></details>
-  </div>
+<div class="card think" data-tts="98bbf2a85e4ee70b" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 卷积的归纳偏置（局部性、平移不变）让它在小数据上高效；ViT 扔掉这些先验、靠海量数据反超。这个 trade-off 揭示了关于"先验 vs 数据"的什么普遍规律？</summary><div>本质是<strong>归纳偏置是把双刃剑</strong>：先验等于"免费的假设"——数据少时它替你脑补缺失信息，省样本（CNN 不用从头学"邻近像素相关"这件事，因为架构已经假设了）；但先验也是<strong>天花板</strong>，当它和真实规律有偏差，数据再多也突破不了那个错误假设。CNN 假设"重要的是局部模式"，这在多数自然图像上对，但全局长程关系（一张脸的左右对称、远处物体的呼应）它要堆很多层才够得着。ViT 几乎没有空间先验，所以小数据上它得把样本"浪费"在重新发现局部性上，干不过 CNN；可一旦数据上亿，它不被错误先验绑住，能学到 CNN 架构表达不了的全局规律，于是反超。普遍规律：<strong>数据稀缺时，强先验赢；数据充裕时，弱先验+大模型赢</strong>。这和 Day 14 scaling laws、甚至贝叶斯推断里"先验 vs 似然"的权重转移是同一个故事——证据越多，先验越该让位。对 BigCat 做跨学科判断的启发：信息不足时依赖经验直觉（强先验）是理性的，但当你能收集到大量证据时，要敢于让数据推翻直觉。</div></details>
+<details><summary>2. ResNet 的 skip connection 后来成了 Transformer 每个 block 的标配。为什么"残差"这个看似只为视觉深网络设计的技巧，能跨架构通用？</summary><div>因为它解决的不是视觉特有问题，而是<strong>所有深层堆叠结构的通病</strong>：层数一多，信号（前向）和梯度（反向）都会在长链上衰减/畸变，且优化器难以让深层逼近恒等映射。skip connection 提供两个架构无关的好处：(1) <strong>恒等保底</strong>——<code>x + f(x)</code> 让"多加一层"的最坏情况退化成"什么都没做"，于是加深永远不会更糟，这给了堆叠任意深度的信心；(2) <strong>梯度高速公路</strong>——反向传播时梯度能沿 +x 直达浅层，绕开逐层连乘的衰减。Transformer 动辄几十上百层，没有残差根本训不动，所以每个 attention 子层、每个 FFN 子层后面都接 <code>x + sublayer(x)</code>。更深一层看，这是个<strong>架构设计的元原则</strong>：让"什么都不做"成为默认、容易达到的状态，把学习压力集中在"相对当前该改什么"（残差）而非"从零构造全部"（绝对）。这个思想在工程上无处不在——增量更新、差分编码、git diff，都是"存残差不存全量"。</div></details>
+<details><summary>3. CLIP 用"图文配对"这种廉价但海量的弱监督，替代了昂贵的人工精标。这种范式转变对"什么是高质量训练信号"的理解意味着什么？</summary><div>它颠覆了"<strong>监督信号越精确越好</strong>"的旧直觉。传统 ImageNet 靠人工把每张图标成 1000 类之一，精确但昂贵、且天花板就是那 1000 类。CLIP 用互联网现成的图文对——配文嘈杂、不规范、甚至常有噪声，但<strong>规模碾压（4 亿对）且语义空间是开放的自然语言</strong>。关键洞察：<strong>信号的"信息量"= 质量 × 规模 × 覆盖广度</strong>，当规模和广度足够大，单条信号的噪声会被平均掉，而开放语言带来的概念覆盖是任何固定标签体系给不了的。这也是为什么 CLIP 能 zero-shot——它的"类别"不是离散标签而是连续语言空间，天然可泛化到没见过的概念。代价是<strong>它继承了网络数据的偏见和肤浅</strong>：学的是统计共现而非深层理解，所以不会数数、空间推理弱。对 BigCat 的迁移意义：积累个人知识时，"大量略读 + 建立关联"（弱监督、广覆盖）和"少量精读 + 深度掌握"（强监督、窄深）是互补的两种学习信号，超级个体需要的可能不是非此即彼，而是像 CLIP+下游微调那样——先用海量弱信号建广阔地基，再用少量精信号在关键处打深井。</div></details>
+<details><summary>4. 从 CNN（局部卷积）到 ViT（全局 attention），视觉架构走了一条"从专用到通用"的路。这条路和你熟悉的软件系统"从专用优化到通用平台"的演进，有可比性吗？</summary><div>高度可比，但有个关键差异值得想清楚。相似面：早期为性能/资源约束做专用设计（CNN 的局部连接=针对图像结构的"硬编码优化"，正如早期系统为单机性能写专用 C 模块），后期算力/数据充裕后转向通用抽象（ViT/Transformer=通用计算基质，正如转向通用平台、微服务、云原生），换取<strong>可组合性和跨域复用</strong>——Transformer 一套引擎吃图像/文本/音频，正如通用平台一套基建跑所有业务。差异面：软件演进里"通用化"常以<strong>牺牲性能换开发效率</strong>为代价（通用方案通常更慢更耗资源），而深度学习里通用架构在大数据下<strong>连性能（精度）都反超</strong>了专用方案——这在传统工程里罕见。原因在于：软件的专用优化是人写死的确定逻辑，通用化只是换了组织方式；而 CNN 的"专用"是把人的先验假设硬编码进架构，ViT 的"通用"则让模型从数据里学出比人的假设更好的规律——通用化在这里同时买到了灵活性和更高上限。这提示一个反直觉判断：在<strong>数据/算力是瓶颈被打破的领域</strong>，"通用 + 规模"可能不只是省事的妥协，而是真正更优的解。BigCat 你做架构决策时可以问：这个领域的瓶颈到底是"人的设计智慧"还是"数据与算力"？答案决定该押专用还是通用。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 18 · 2026-06-04</footer>
-
 </div>
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

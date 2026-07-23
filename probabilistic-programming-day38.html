@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：概率编程与贝叶斯深度学习 — Day 38</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,49 +60,40 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：概率编程与贝叶斯深度学习</h1>
-  <div class="meta">Day 38 · 2026-06-24 · 难度 ★★★★☆</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="ccda109b63acb9e6">AI/ML 详解：概率编程与贝叶斯深度学习</h1>
+<div class="meta">Day 38 · 2026-06-24 · 难度 ★★★★☆</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
-<div class="card" style="border-left-color:#7b61ff;background:#10152a">
-  <div class="section">
-    <p style="color:#cfd3df">前面的模型都给你一个<b>点估计</b>——「答案是 0.87」。但 0.87 是「我非常确定」还是「我瞎猜的」？普通神经网络分不清。<strong>贝叶斯方法的核心野心</strong>：不输出一个数，而是输出一个<b>分布</b>——「大概 0.87，但也可能在 0.6~0.95 之间」。今天讲清这套思想的两大计算引擎（<b>MCMC 采样</b>、<b>变分推断</b>）、它给深度学习带来的能力（<b>不确定性量化</b>），以及把这套数学封装成工具的<b>概率编程语言</b>。</p>
-  </div>
+<div class="card" data-tts="a489669139b3a379" style="border-left-color:#7b61ff;background:#10152a">
+<div class="section">
+<p style="color:#cfd3df">前面的模型都给你一个<b>点估计</b>——「答案是 0.87」。但 0.87 是「我非常确定」还是「我瞎猜的」？普通神经网络分不清。<strong>贝叶斯方法的核心野心</strong>：不输出一个数，而是输出一个<b>分布</b>——「大概 0.87，但也可能在 0.6~0.95 之间」。今天讲清这套思想的两大计算引擎（<b>MCMC 采样</b>、<b>变分推断</b>）、它给深度学习带来的能力（<b>不确定性量化</b>），以及把这套数学封装成工具的<b>概率编程语言</b>。</p>
 </div>
-
+</div>
 <!-- 1. MCMC -->
-<div class="card">
-  <h2>马尔可夫链蒙特卡洛<span class="en">MCMC</span></h2>
-  <div class="tags"><span class="tag">采样</span><span class="tag purple">贝叶斯推断</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>你想知道一个海量数据库里某个聚合分布的形状，但<b>没法全表扫描</b>（积分算不出来）。MCMC 派出一个<b>随机游走的爬虫</b>在状态空间里走动，规则是：<strong>概率密度高的地方多停留、低的地方少停留</strong>。走够久之后，统计爬虫的「访问频率直方图」，就近似了你要的那个分布。它和你熟悉的<b>蒙特卡洛抽样估 p99</b> 是同一个思路——用样本代替全量。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>贝叶斯推断的核心是贝叶斯公式：<b>后验 ∝ 似然 × 先验</b>。写成数学是 <span style="font-family:monospace">p(θ|D) = p(D|θ)·p(θ) / p(D)</span>。分子好算（你的模型直接给），<strong>要命的是分母 p(D)</strong>——它是对所有可能参数 θ 的积分 <span style="font-family:monospace">∫ p(D|θ)p(θ)dθ</span>，在高维下根本算不出来（这叫「归一化常数」难题）。</p>
-    <p style="margin-top:8px">MCMC 的妙处：<strong>它不需要算那个分母</strong>——每一步只看「<b>新旧位置的概率密度比值</b>」，分母在比值里被约掉了。最经典的 <b>Metropolis-Hastings</b> 算法只有四步：</p>
-
+<div class="card" data-tts="82706663878d2722">
+<h2>马尔可夫链蒙特卡洛<span class="en">MCMC</span></h2>
+<div class="tags"><span class="tag">采样</span><span class="tag purple">贝叶斯推断</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>你想知道一个海量数据库里某个聚合分布的形状，但<b>没法全表扫描</b>（积分算不出来）。MCMC 派出一个<b>随机游走的爬虫</b>在状态空间里走动，规则是：<strong>概率密度高的地方多停留、低的地方少停留</strong>。走够久之后，统计爬虫的「访问频率直方图」，就近似了你要的那个分布。它和你熟悉的<b>蒙特卡洛抽样估 p99</b> 是同一个思路——用样本代替全量。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>贝叶斯推断的核心是贝叶斯公式：<b>后验 ∝ 似然 × 先验</b>。写成数学是 <span style="font-family:monospace">p(θ|D) = p(D|θ)·p(θ) / p(D)</span>。分子好算（你的模型直接给），<strong>要命的是分母 p(D)</strong>——它是对所有可能参数 θ 的积分 <span style="font-family:monospace">∫ p(D|θ)p(θ)dθ</span>，在高维下根本算不出来（这叫「归一化常数」难题）。</p>
+<p style="margin-top:8px">MCMC 的妙处：<strong>它不需要算那个分母</strong>——每一步只看「<b>新旧位置的概率密度比值</b>」，分母在比值里被约掉了。最经典的 <b>Metropolis-Hastings</b> 算法只有四步：</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">Metropolis-Hastings 一步循环</b><br><br>
-<span class="box">① 当前点 θ</span> <span class="arrow">→</span> <span class="box o">② 随机提议新点 θ'</span> <span style="color:#5a6378">（在附近抖一下）</span><br><br>
-<span class="box p">③ 算接受率 a = min(1, p(θ')/p(θ))</span> <span style="color:#5a6378">← 分母约掉了！</span><br><br>
-<span class="box g">④ 掷骰子：以概率 a 移到 θ'，否则留在 θ</span><br><br>
+<b style="color:#7b61ff">Metropolis-Hastings 一步循环</b><br/><br/>
+<span class="box">① 当前点 θ</span> <span class="arrow">→</span> <span class="box o">② 随机提议新点 θ'</span> <span style="color:#5a6378">（在附近抖一下）</span><br/><br/>
+<span class="box p">③ 算接受率 a = min(1, p(θ')/p(θ))</span> <span style="color:#5a6378">← 分母约掉了！</span><br/><br/>
+<span class="box g">④ 掷骰子：以概率 a 移到 θ'，否则留在 θ</span><br/><br/>
 <span style="color:#8b92a8">重复百万次 → 停留点的分布 ≈ 真实后验</span>
 </div>
-
-    <p style="margin-top:14px">朴素随机抖动在高维里效率极低（像喝醉的人乱走）。现代采样器用<b>哈密顿蒙特卡洛（HMC）</b>——借物理里「小球在能量曲面上滚」的思想，让提议<b>顺着梯度</b>走，一步迈得远又少被拒绝。但 HMC 要手调「滚多少步」，调不好就废。<b>NUTS（No-U-Turn Sampler，Hoffman & Gelman 2011）</b>让算法<strong>自动决定何时该停</strong>（小球开始往回掉头时就停），这就是 PyMC / Stan 今天默认采样器的由来。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">朴素随机抖动在高维里效率极低（像喝醉的人乱走）。现代采样器用<b>哈密顿蒙特卡洛（HMC）</b>——借物理里「小球在能量曲面上滚」的思想，让提议<b>顺着梯度</b>走，一步迈得远又少被拒绝。但 HMC 要手调「滚多少步」，调不好就废。<b>NUTS（No-U-Turn Sampler，Hoffman &amp; Gelman 2011）</b>让算法<strong>自动决定何时该停</strong>（小球开始往回掉头时就停），这就是 PyMC / Stan 今天默认采样器的由来。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
 
 <span class="cmt"># 从一个未归一化的目标分布采样（双峰），演示 MCMC 不需要分母</span>
@@ -118,44 +110,38 @@ samples, x = [], 0.0
 
 <span class="cmt"># 丢掉前段"预热(burn-in)"未收敛的样本，剩下的就近似目标分布</span>
 <span class="fn">print</span>(np.mean(samples[5000:]), np.std(samples[5000:]))</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"采样器跑完就一定对了"——错。MCMC 最大的坑是<b>没收敛你却以为收敛了</b>：链可能卡在一个峰里出不来，或样本间高度自相关（等于有效样本数很少）。所以必须看诊断——<b>R-hat</b>（多条链是否走到一致，应 ≈ 1.0）和 <b>ESS</b>（有效样本数，太低说明样本冗余）。不看诊断的贝叶斯结果等于没做。</div>
-    <div class="exercise" style="margin-top:8px">📌 超个体场景：做<b>个人 A/B 决策</b>（比如两个文案哪个转化率高），样本量往往很小（各 30 次点击）。频率派只给「3.2% vs 4.1%」的点估计，看不出差异是否可信。用 MCMC 跑个贝叶斯比例模型，直接得到「B 比 A 好的概率是 73%」——<strong>小样本下贝叶斯把不确定性诚实交还给你</strong>，比虚假精确的点估计更适合拍板。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 MCMC 把「算不出的积分」换成「采得到的样本」——用随机游走的停留频率，绕过了贝叶斯公式里最难的归一化常数。<br>🤔 你日常哪些「凭经验估一个数」的判断，其实背后是个分布？如果把它当分布看，你的决策会变吗？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"采样器跑完就一定对了"——错。MCMC 最大的坑是<b>没收敛你却以为收敛了</b>：链可能卡在一个峰里出不来，或样本间高度自相关（等于有效样本数很少）。所以必须看诊断——<b>R-hat</b>（多条链是否走到一致，应 ≈ 1.0）和 <b>ESS</b>（有效样本数，太低说明样本冗余）。不看诊断的贝叶斯结果等于没做。</div>
+<div class="exercise" style="margin-top:8px">📌 超个体场景：做<b>个人 A/B 决策</b>（比如两个文案哪个转化率高），样本量往往很小（各 30 次点击）。频率派只给「3.2% vs 4.1%」的点估计，看不出差异是否可信。用 MCMC 跑个贝叶斯比例模型，直接得到「B 比 A 好的概率是 73%」——<strong>小样本下贝叶斯把不确定性诚实交还给你</strong>，比虚假精确的点估计更适合拍板。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 MCMC 把「算不出的积分」换成「采得到的样本」——用随机游走的停留频率，绕过了贝叶斯公式里最难的归一化常数。<br/>🤔 你日常哪些「凭经验估一个数」的判断，其实背后是个分布？如果把它当分布看，你的决策会变吗？</div>
+</div>
+</div>
 <!-- 2. Variational Inference -->
-<div class="card">
-  <h2>变分推断<span class="en">Variational Inference</span></h2>
-  <div class="tags"><span class="tag">近似推断</span><span class="tag purple">优化</span><span class="tag orange">ELBO</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>MCMC 慢且难扩展——百万样本对大数据集是灾难。变分推断（VI）换思路：<strong>与其精确采样那个复杂后验，不如找一个简单分布（比如高斯）去「拟合」它</strong>。这就像用一个<b>预计算的物化视图 / 缓存</b>去近似一个昂贵的实时聚合查询——牺牲一点精度，换巨大的速度。VI 把「推断问题」变成了你最熟的「<b>优化问题</b>」：调参数让近似分布尽量贴近真后验。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>设真后验是 <span style="font-family:monospace">p(θ|D)</span>（算不出），引入一个带参数 φ 的简单分布 <span style="font-family:monospace">q<sub>φ</sub>(θ)</span>（比如均值方差待定的高斯）。目标：<strong>调 φ，让 q 和 p 的「距离」最小</strong>。距离用 <b>KL 散度</b>衡量（Day 33 讲过：两个分布的信息差）。</p>
-    <p style="margin-top:8px">但 KL(q‖p) 里又藏着那个算不出的后验。数学上一变形，最小化 KL 等价于<strong>最大化一个叫 ELBO（证据下界）的量</strong>：</p>
-    <div class="diagram" style="margin-top:8px;text-align:center">
-<span style="color:#00d4ff;font-size:0.95rem">ELBO = E<sub>q</sub>[ log p(D|θ) ] − KL( q<sub>φ</sub>(θ) ‖ p(θ) )</span><br>
+<div class="card" data-tts="a6b7ac043d478dbb">
+<h2>变分推断<span class="en">Variational Inference</span></h2>
+<div class="tags"><span class="tag">近似推断</span><span class="tag purple">优化</span><span class="tag orange">ELBO</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>MCMC 慢且难扩展——百万样本对大数据集是灾难。变分推断（VI）换思路：<strong>与其精确采样那个复杂后验，不如找一个简单分布（比如高斯）去「拟合」它</strong>。这就像用一个<b>预计算的物化视图 / 缓存</b>去近似一个昂贵的实时聚合查询——牺牲一点精度，换巨大的速度。VI 把「推断问题」变成了你最熟的「<b>优化问题</b>」：调参数让近似分布尽量贴近真后验。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>设真后验是 <span style="font-family:monospace">p(θ|D)</span>（算不出），引入一个带参数 φ 的简单分布 <span style="font-family:monospace">q<sub>φ</sub>(θ)</span>（比如均值方差待定的高斯）。目标：<strong>调 φ，让 q 和 p 的「距离」最小</strong>。距离用 <b>KL 散度</b>衡量（Day 33 讲过：两个分布的信息差）。</p>
+<p style="margin-top:8px">但 KL(q‖p) 里又藏着那个算不出的后验。数学上一变形，最小化 KL 等价于<strong>最大化一个叫 ELBO（证据下界）的量</strong>：</p>
+<div class="diagram" style="margin-top:8px;text-align:center">
+<span style="color:#00d4ff;font-size:0.95rem">ELBO = E<sub>q</sub>[ log p(D|θ) ] − KL( q<sub>φ</sub>(θ) ‖ p(θ) )</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">　　　　第一项：拟合数据　　　　第二项：别离先验太远（正则）</span>
-    </div>
-    <p style="margin-top:12px">直觉拆解：<b>第一项</b>逼 q 解释好观测数据（似然要高）；<b>第二项</b>是个「拉回先验」的弹簧，防止过拟合。两项拔河——这正是<strong>「拟合 vs 正则」的贝叶斯版本</strong>，你在 Day 10 见过同样的张力。ELBO 之所以叫「下界」，是因为它永远 ≤ 真实证据 log p(D)，把它顶高，就等于把 q 推向 p。</p>
-    <p style="margin-top:10px">关键是 ELBO <b>可以求梯度</b>，于是能用 Adam 直接跑。把高斯的「采样」改写成「均值 + 标准差 × 标准噪声」，梯度就能穿过随机采样回流——这个<b>重参数化技巧（reparameterization trick）</b>是 Kingma & Welling 的 VAE 论文（2013）的核心，也是 VAE、扩散模型背后的同一块积木。PyMC / NumPyro 里这套自动化版本叫 <b>ADVI</b>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<p style="margin-top:12px">直觉拆解：<b>第一项</b>逼 q 解释好观测数据（似然要高）；<b>第二项</b>是个「拉回先验」的弹簧，防止过拟合。两项拔河——这正是<strong>「拟合 vs 正则」的贝叶斯版本</strong>，你在 Day 10 见过同样的张力。ELBO 之所以叫「下界」，是因为它永远 ≤ 真实证据 log p(D)，把它顶高，就等于把 q 推向 p。</p>
+<p style="margin-top:10px">关键是 ELBO <b>可以求梯度</b>，于是能用 Adam 直接跑。把高斯的「采样」改写成「均值 + 标准差 × 标准噪声」，梯度就能穿过随机采样回流——这个<b>重参数化技巧（reparameterization trick）</b>是 Kingma &amp; Welling 的 VAE 论文（2013）的核心，也是 VAE、扩散模型背后的同一块积木。PyMC / NumPyro 里这套自动化版本叫 <b>ADVI</b>。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> pymc <span class="kw">as</span> pm
 <span class="kw">import</span> numpy <span class="kw">as</span> np
 
@@ -171,50 +157,44 @@ y = np.random.normal(5, 2, size=200)   <span class="cmt"># 假数据：真均值
     idata = approx.<span class="fn">sample</span>(1000)            <span class="cmt"># 从拟合好的 q 里抽样</span>
 
 <span class="fn">print</span>(idata.posterior[<span class="str">"mu"</span>].mean().item())  <span class="cmt"># ≈ 5，且带后验区间</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"VI 和 MCMC 结果一样，只是更快"——不全对。VI 有个系统性偏差：用 KL(q‖p) 当目标会让 q <b>低估不确定性</b>（倾向"缩进"真后验的一个峰里，方差偏小）。所以速度优势有代价——<strong>它给的置信区间往往过窄、过于自信</strong>。规模小、要严谨结论用 MCMC；规模大、要可扩展（如深度模型）用 VI。知道这个权衡，才不会被过窄的区间骗了。</div>
-    <div class="exercise" style="margin-top:8px">📌 超个体场景：你训练任何带<b>随机层（dropout、隐变量）</b>的模型时，背后都在用 VI 的思想。理解 ELBO 让你看懂为什么 VAE / 扩散模型的损失函数长那样（重构项 + KL 正则项）——<strong>它们都是 ELBO 的变体</strong>，下次读这类论文不再是天书。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 变分推断把「采样」换成「优化」——找一个简单分布去贴近复杂后验，用梯度下降解贝叶斯，代价是会低估不确定性。<br>🤔 「用简单模型近似复杂真相，换取可计算性」——这个权衡在你的工程经验里还出现在哪些地方（缓存？降维？索引？）</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"VI 和 MCMC 结果一样，只是更快"——不全对。VI 有个系统性偏差：用 KL(q‖p) 当目标会让 q <b>低估不确定性</b>（倾向"缩进"真后验的一个峰里，方差偏小）。所以速度优势有代价——<strong>它给的置信区间往往过窄、过于自信</strong>。规模小、要严谨结论用 MCMC；规模大、要可扩展（如深度模型）用 VI。知道这个权衡，才不会被过窄的区间骗了。</div>
+<div class="exercise" style="margin-top:8px">📌 超个体场景：你训练任何带<b>随机层（dropout、隐变量）</b>的模型时，背后都在用 VI 的思想。理解 ELBO 让你看懂为什么 VAE / 扩散模型的损失函数长那样（重构项 + KL 正则项）——<strong>它们都是 ELBO 的变体</strong>，下次读这类论文不再是天书。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 变分推断把「采样」换成「优化」——找一个简单分布去贴近复杂后验，用梯度下降解贝叶斯，代价是会低估不确定性。<br/>🤔 「用简单模型近似复杂真相，换取可计算性」——这个权衡在你的工程经验里还出现在哪些地方（缓存？降维？索引？）</div>
+</div>
+</div>
 <!-- 3. Uncertainty Quantification -->
-<div class="card">
-  <h2>不确定性量化<span class="en">Uncertainty Quantification</span></h2>
-  <div class="tags"><span class="tag">贝叶斯深度学习</span><span class="tag purple">可靠性</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>普通神经网络永远「<b>自信满满</b>」——哪怕喂它一张从没见过的乱码图，它也会斩钉截铁说「这是猫，99%」。这就像一个<b>从不返回错误码、永远返回 200 OK 的服务</b>，哪怕后端早就崩了。不确定性量化（UQ）给模型装上一个诚实的「<strong>我不知道</strong>」信号——区分「我见过类似数据，有把握」和「这超出我的认知范围，别信我」。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>关键是区分<strong>两种本质不同的不确定性</strong>，这个区分是整个领域的地基：</p>
+<div class="card" data-tts="2002aa48fa559cdc">
+<h2>不确定性量化<span class="en">Uncertainty Quantification</span></h2>
+<div class="tags"><span class="tag">贝叶斯深度学习</span><span class="tag purple">可靠性</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>普通神经网络永远「<b>自信满满</b>」——哪怕喂它一张从没见过的乱码图，它也会斩钉截铁说「这是猫，99%」。这就像一个<b>从不返回错误码、永远返回 200 OK 的服务</b>，哪怕后端早就崩了。不确定性量化（UQ）给模型装上一个诚实的「<strong>我不知道</strong>」信号——区分「我见过类似数据，有把握」和「这超出我的认知范围，别信我」。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>关键是区分<strong>两种本质不同的不确定性</strong>，这个区分是整个领域的地基：</p>
 <div class="diagram" style="margin-top:8px">
-<span class="box o">偶然不确定性 Aleatoric</span> — <b>数据本身的噪声</b>，不可消除<br>
-<span style="color:#5a6378">　例：抛硬币、传感器抖动。给再多数据也是 50/50，加数据没用</span><br><br>
-<span class="box p">认知不确定性 Epistemic</span> — <b>模型的无知</b>，可消除<br>
-<span style="color:#5a6378">　例：训练集没覆盖的区域。<b>加数据 / 加训练就能降低</b></span><br><br>
-<span style="color:#8b92a8">类比分布式排障：aleatoric ≈ 网络固有抖动（认了）；</span><br>
+<span class="box o">偶然不确定性 Aleatoric</span> — <b>数据本身的噪声</b>，不可消除<br/>
+<span style="color:#5a6378">　例：抛硬币、传感器抖动。给再多数据也是 50/50，加数据没用</span><br/><br/>
+<span class="box p">认知不确定性 Epistemic</span> — <b>模型的无知</b>，可消除<br/>
+<span style="color:#5a6378">　例：训练集没覆盖的区域。<b>加数据 / 加训练就能降低</b></span><br/><br/>
+<span style="color:#8b92a8">类比分布式排障：aleatoric ≈ 网络固有抖动（认了）；</span><br/>
 <span style="color:#8b92a8">epistemic ≈ 这条链路我从没监控过（补监控就好了）</span>
 </div>
-    <p style="margin-top:14px">怎么让神经网络给出 epistemic 信号？核心思路：<strong>别只信一个模型，要看「一群模型」的分歧</strong>。数据密集处大家答案一致（低不确定）；没见过的区域各模型乱猜、互相打架（高不确定）。两种最实用的实现：</p>
-    <ul style="margin-top:8px">
-      <li><b>MC Dropout</b>（Gal & Ghahramani 2015）：推理时<b>不关掉 dropout</b>，同一输入跑 N 次、每次随机丢不同神经元 → N 个不同预测，它们的方差就是不确定性。理论上等价于一种廉价变分推断——几乎零成本给现成模型加上贝叶斯能力。</li>
-      <li><b>Deep Ensembles</b>（Lakshminarayanan 2016）：独立训练 5 个模型（不同随机种子），预测时看分歧。简单粗暴，但实测<strong>校准质量常常最好</strong>，是工业界强基线。</li>
-    </ul>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">怎么让神经网络给出 epistemic 信号？核心思路：<strong>别只信一个模型，要看「一群模型」的分歧</strong>。数据密集处大家答案一致（低不确定）；没见过的区域各模型乱猜、互相打架（高不确定）。两种最实用的实现：</p>
+<ul style="margin-top:8px">
+<li><b>MC Dropout</b>（Gal &amp; Ghahramani 2015）：推理时<b>不关掉 dropout</b>，同一输入跑 N 次、每次随机丢不同神经元 → N 个不同预测，它们的方差就是不确定性。理论上等价于一种廉价变分推断——几乎零成本给现成模型加上贝叶斯能力。</li>
+<li><b>Deep Ensembles</b>（Lakshminarayanan 2016）：独立训练 5 个模型（不同随机种子），预测时看分歧。简单粗暴，但实测<strong>校准质量常常最好</strong>，是工业界强基线。</li>
+</ul>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> torch
 
 <span class="cmt"># MC Dropout：推理时保持 dropout 打开，跑多次拿分歧</span>
@@ -229,47 +209,41 @@ mean, std = <span class="fn">predict_with_uncertainty</span>(my_net, x_test)
 <span class="cmt"># std 高的样本 → 模型在"瞎猜"，应转人工审核或拒答</span>
 mask = std.<span class="fn">squeeze</span>() &gt; 0.3
 <span class="fn">print</span>(<span class="str">f"需人工复核的样本数: {mask.sum().item()}"</span>)</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"Softmax 输出 0.99 就代表模型很确定"——大错。Softmax 概率是<b>类别间的相对排序</b>，不是<b>校准过的置信度</b>。现代神经网络出了名地<b>过度自信</b>，对完全没见过的输入也能给 99%。真正的 epistemic 不确定性必须靠模型分歧（MC Dropout / Ensemble）拿，不能直接读 softmax——把 softmax 当置信度，是部署 AI 时最常见也最危险的误判。</div>
-    <div class="exercise" style="margin-top:8px">📌 超个体场景：搭<b>AI 工作流</b>时给每个模型节点加一道「不确定性闸门」——高不确定的输出<strong>自动转人工或触发二次验证</strong>，低不确定的才放行自动化。这就是把「人机协同」做成可量化的开关：模型有把握时全自动，没把握时才占用你的注意力。UQ 让「该信任 AI 到什么程度」从玄学变成数字。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 普通模型永远返回 200 OK；不确定性量化给它装上诚实的「我不知道」——而且要分清「数据噪声（认了）」和「我没见过（可补）」两种来源。<br>🤔 如果你的 AI 助手能可靠地说「这个我没把握」，你的协作方式会怎么变？信任的前提是不是「它知道自己不知道」？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"Softmax 输出 0.99 就代表模型很确定"——大错。Softmax 概率是<b>类别间的相对排序</b>，不是<b>校准过的置信度</b>。现代神经网络出了名地<b>过度自信</b>，对完全没见过的输入也能给 99%。真正的 epistemic 不确定性必须靠模型分歧（MC Dropout / Ensemble）拿，不能直接读 softmax——把 softmax 当置信度，是部署 AI 时最常见也最危险的误判。</div>
+<div class="exercise" style="margin-top:8px">📌 超个体场景：搭<b>AI 工作流</b>时给每个模型节点加一道「不确定性闸门」——高不确定的输出<strong>自动转人工或触发二次验证</strong>，低不确定的才放行自动化。这就是把「人机协同」做成可量化的开关：模型有把握时全自动，没把握时才占用你的注意力。UQ 让「该信任 AI 到什么程度」从玄学变成数字。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 普通模型永远返回 200 OK；不确定性量化给它装上诚实的「我不知道」——而且要分清「数据噪声（认了）」和「我没见过（可补）」两种来源。<br/>🤔 如果你的 AI 助手能可靠地说「这个我没把握」，你的协作方式会怎么变？信任的前提是不是「它知道自己不知道」？</div>
+</div>
+</div>
 <!-- 4. Probabilistic Programming Languages -->
-<div class="card">
-  <h2>概率编程语言<span class="en">PyMC / Stan</span></h2>
-  <div class="tags"><span class="tag">工具</span><span class="tag purple">声明式</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>前面三个概念的数学都很硬。概率编程语言（PPL）是把它们<strong>封装成一门声明式语言</strong>：你只「<b>声明</b>」概率模型（先验是什么、数据怎么生成），<b>推断引擎自动</b>帮你跑 MCMC 或 VI。这正是 <b>SQL 之于数据库</b> 的关系——你写「想要什么（what）」，查询优化器决定「怎么算（how）」。PyMC / Stan 就是<strong>概率世界的 SQL</strong>，把你从手写采样器里解放出来。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>没有 PPL 之前，每换一个模型你都得重写 Metropolis 接受率、梯度、收敛诊断——极易出错。PPL 的核心机制是<strong>把模型定义和推断算法解耦</strong>：</p>
+<div class="card" data-tts="c81943a3bf25a3ce">
+<h2>概率编程语言<span class="en">PyMC / Stan</span></h2>
+<div class="tags"><span class="tag">工具</span><span class="tag purple">声明式</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>前面三个概念的数学都很硬。概率编程语言（PPL）是把它们<strong>封装成一门声明式语言</strong>：你只「<b>声明</b>」概率模型（先验是什么、数据怎么生成），<b>推断引擎自动</b>帮你跑 MCMC 或 VI。这正是 <b>SQL 之于数据库</b> 的关系——你写「想要什么（what）」，查询优化器决定「怎么算（how）」。PyMC / Stan 就是<strong>概率世界的 SQL</strong>，把你从手写采样器里解放出来。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>没有 PPL 之前，每换一个模型你都得重写 Metropolis 接受率、梯度、收敛诊断——极易出错。PPL 的核心机制是<strong>把模型定义和推断算法解耦</strong>：</p>
 <div class="diagram" style="margin-top:8px">
-<b style="color:#7b61ff">声明式 vs 命令式</b><br><br>
-<span class="box r">命令式（手写）</span>：自己写采样循环、接受率、梯度、诊断 → 几百行、易错<br><br>
-<span class="box g">声明式（PPL）</span>：<br>
-&nbsp;&nbsp;<span class="box">① 写先验 prior</span> <span class="arrow">+</span> <span class="box o">② 写似然 likelihood</span> <span class="arrow">+</span> <span class="box p">③ 绑观测数据</span><br>
-&nbsp;&nbsp;<span class="arrow">↓ 引擎自动微分 + NUTS/ADVI</span><br>
-&nbsp;&nbsp;<span class="box g">④ 拿后验分布 + R-hat/ESS 诊断</span><br><br>
+<b style="color:#7b61ff">声明式 vs 命令式</b><br/><br/>
+<span class="box r">命令式（手写）</span>：自己写采样循环、接受率、梯度、诊断 → 几百行、易错<br/><br/>
+<span class="box g">声明式（PPL）</span>：<br/>
+  <span class="box">① 写先验 prior</span> <span class="arrow">+</span> <span class="box o">② 写似然 likelihood</span> <span class="arrow">+</span> <span class="box p">③ 绑观测数据</span><br/>
+  <span class="arrow">↓ 引擎自动微分 + NUTS/ADVI</span><br/>
+  <span class="box g">④ 拿后验分布 + R-hat/ESS 诊断</span><br/><br/>
 <span style="color:#8b92a8">你只管描述"世界怎么生成数据"，推断交给引擎</span>
 </div>
-    <p style="margin-top:14px">主流选择：<b>Stan</b>——统计学界金标准、最严谨，独立 DSL；<b>PyMC</b>——纯 Python、上手最快；<b>NumPyro</b>——架在 JAX 上、GPU 加速、最快，适合大模型贝叶斯。它们共享同一套引擎核心：<strong>自动微分 + NUTS 采样 + 变分推断</strong>，区别只在语法与速度。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">主流选择：<b>Stan</b>——统计学界金标准、最严谨，独立 DSL；<b>PyMC</b>——纯 Python、上手最快；<b>NumPyro</b>——架在 JAX 上、GPU 加速、最快，适合大模型贝叶斯。它们共享同一套引擎核心：<strong>自动微分 + NUTS 采样 + 变分推断</strong>，区别只在语法与速度。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> pymc <span class="kw">as</span> pm
 <span class="kw">import</span> numpy <span class="kw">as</span> np
 
@@ -288,59 +262,48 @@ y = 2.5 * x + 1.0 + np.random.normal(0, 1, 50)   <span class="cmt"># 真斜率 2
 
 <span class="cmt"># 得到的不是一个斜率，而是斜率的整个后验分布</span>
 pm.<span class="fn">summary</span>(idata)  <span class="cmt"># 输出均值、94% 区间、r_hat、ess</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"PPL 是统计学家的玩具，深度学习用不上"——过时了。NumPyro / Pyro 正为<b>贝叶斯深度学习</b>而生：可把神经网络权重设成分布、用变分推断训练，得到自带不确定性的网络。而且<strong>会读概率模型 ≠ 会建对模型</strong>——先验选得离谱、结构错了，引擎照样跑出一堆漂亮但错误的后验。PPL 降低了计算门槛，没降低<b>建模思维</b>的门槛。</div>
-    <div class="exercise" style="margin-top:8px">📌 超个体场景：用 PyMC 做<b>个人决策建模</b>——把你对一件事的先验信念（"这项目大概 6 成能成"）写成分布，每来一条新证据就更新后验。这是<strong>把贝叶斯更新变成可执行代码</strong>的思维训练：它逼你显式写下「我原本信什么、新证据多强、更新后信什么」，比拍脑袋可靠得多。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 概率编程语言是「贝叶斯世界的 SQL」——你声明模型，引擎自动推断；它降低了计算门槛，但建模的判断力仍然在你。<br>🤔 SQL 让不懂 B+ 树的人也能查数据库。PPL 让不懂 MCMC 的人也能做贝叶斯——这种「声明式抽象」下一个会颠覆的领域是什么？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"PPL 是统计学家的玩具，深度学习用不上"——过时了。NumPyro / Pyro 正为<b>贝叶斯深度学习</b>而生：可把神经网络权重设成分布、用变分推断训练，得到自带不确定性的网络。而且<strong>会读概率模型 ≠ 会建对模型</strong>——先验选得离谱、结构错了，引擎照样跑出一堆漂亮但错误的后验。PPL 降低了计算门槛，没降低<b>建模思维</b>的门槛。</div>
+<div class="exercise" style="margin-top:8px">📌 超个体场景：用 PyMC 做<b>个人决策建模</b>——把你对一件事的先验信念（"这项目大概 6 成能成"）写成分布，每来一条新证据就更新后验。这是<strong>把贝叶斯更新变成可执行代码</strong>的思维训练：它逼你显式写下「我原本信什么、新证据多强、更新后信什么」，比拍脑袋可靠得多。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 概率编程语言是「贝叶斯世界的 SQL」——你声明模型，引擎自动推断；它降低了计算门槛，但建模的判断力仍然在你。<br/>🤔 SQL 让不懂 B+ 树的人也能查数据库。PPL 让不懂 MCMC 的人也能做贝叶斯——这种「声明式抽象」下一个会颠覆的领域是什么？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/1111.4246" target="_blank">Hoffman &amp; Gelman 2011 — The No-U-Turn Sampler</a> — NUTS 原论文，现代 MCMC 默认采样器的来源</li>
-      <li><a href="https://arxiv.org/abs/1601.00670" target="_blank">Blei et al. 2017 — Variational Inference: A Review for Statisticians</a> — VI 最清晰的综述入门，强烈推荐</li>
-      <li><a href="https://arxiv.org/abs/1312.6114" target="_blank">Kingma &amp; Welling 2013 — Auto-Encoding Variational Bayes</a> — VAE + 重参数化技巧的奠基作</li>
-      <li><a href="https://arxiv.org/abs/1506.02142" target="_blank">Gal &amp; Ghahramani 2015 — Dropout as a Bayesian Approximation</a> — MC Dropout，给现成网络加不确定性</li>
-      <li><a href="https://arxiv.org/abs/1612.01474" target="_blank">Lakshminarayanan et al. 2016 — Deep Ensembles</a> — 不确定性估计的工业级强基线</li>
-      <li><a href="https://www.pymc.io/" target="_blank">PyMC 官方文档</a> — Python 概率编程，含大量可跑教程</li>
-      <li><a href="https://mc-stan.org/" target="_blank">Stan 官方文档</a> — 统计建模金标准与 NUTS 实现</li>
-    </ul>
-  </div>
+<div class="card" data-tts="8929ff64f5e93864" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/1111.4246" target="_blank">Hoffman &amp; Gelman 2011 — The No-U-Turn Sampler</a> — NUTS 原论文，现代 MCMC 默认采样器的来源</li>
+<li><a href="https://arxiv.org/abs/1601.00670" target="_blank">Blei et al. 2017 — Variational Inference: A Review for Statisticians</a> — VI 最清晰的综述入门，强烈推荐</li>
+<li><a href="https://arxiv.org/abs/1312.6114" target="_blank">Kingma &amp; Welling 2013 — Auto-Encoding Variational Bayes</a> — VAE + 重参数化技巧的奠基作</li>
+<li><a href="https://arxiv.org/abs/1506.02142" target="_blank">Gal &amp; Ghahramani 2015 — Dropout as a Bayesian Approximation</a> — MC Dropout，给现成网络加不确定性</li>
+<li><a href="https://arxiv.org/abs/1612.01474" target="_blank">Lakshminarayanan et al. 2016 — Deep Ensembles</a> — 不确定性估计的工业级强基线</li>
+<li><a href="https://www.pymc.io/" target="_blank">PyMC 官方文档</a> — Python 概率编程，含大量可跑教程</li>
+<li><a href="https://mc-stan.org/" target="_blank">Stan 官方文档</a> — 统计建模金标准与 NUTS 实现</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 频率派给点估计 + 置信区间，贝叶斯给后验分布。对一个工程师做实际决策，这两套框架的本质差异是什么？什么时候该用哪个？</summary><div>本质差异在<b>「概率」指的是什么</b>。频率派：参数是固定真值，概率描述「反复实验时数据的波动」——「95% 置信区间」真实含义是「这套程序重复 100 次，约 95 次的区间会盖住真值」，<b>不是</b>「真值有 95% 概率落在此区间」（这是大众普遍的误读）。贝叶斯：参数本身是随机变量，「94% 区间」就是字面意思——「给定数据和先验，参数有 94% 概率在这」，可直接拿去决策。<b>工程取舍</b>：(a) <b>小样本 + 有先验</b>→贝叶斯，能把领域知识写进先验，小数据下更稳；(b) <b>大样本 + 要标准化报告</b>→频率派，更快、业界默认、不用辩论先验；(c) <b>要做下游决策</b>→贝叶斯，完整后验能直接算「选 A 比 B 好的概率」。对你做超个体的个人决策（样本天然小、你有强先验），贝叶斯思维往往更合身——它逼你显式写下信念并随证据更新。</div></details>
-
-    <details><summary>2. MCMC 精确但慢，VI 快但低估不确定性。这个「精度 vs 速度」的权衡，和你在分布式系统里见过的哪些取舍同构？有没有「两者兼得」的中间路线？</summary><div>这是<b>强一致 vs 最终一致</b>在推断世界的翻版。MCMC 像<b>强一致读</b>：渐近正确，但慢、难水平扩展。VI 像<b>读缓存</b>：快、可扩展，但可能读到「偏窄」的近似（类比略陈旧的副本）。而且 VI 的偏差是<b>系统性</b>的（总低估方差），就像缓存 staleness 有方向性，可预判和补偿。<b>中间路线</b>确实有：(a) <b>归一化流</b>——给 VI 用更灵活的 q 分布（不止高斯），逼近能力大增；(b) <b>SVGD / 粒子变分</b>——用一群粒子兼顾采样的灵活和优化的速度；(c) <b>VI 预热 + MCMC 精修</b>——先用 VI 快速定位后验大致位置，再用少量 MCMC 步精修，类似「缓存预取 + 关键路径强一致校验」。工程哲学一致：先快速近似定位，再按需局部精确化。</div></details>
-
-    <details><summary>3. 「认知不确定性（epistemic）可以靠加数据消除，偶然不确定性（aleatoric）不能」——这个区分对设计 AI 系统的「主动学习」和「拒答策略」有什么直接指导？</summary><div>这个区分是<b>主动学习（active learning）</b>的理论核心。主动学习要解决「<b>该花钱标注哪些样本</b>」——答案：<b>专挑 epistemic 高的</b>。因为 epistemic 高 = 模型没见过这类数据 = 标注它能真正消除无知；反之 aleatoric 高的样本（本就是 50/50 噪声），标了也没用。所以「按总不确定性排序标注」是错的，必须<b>先分解出 epistemic 那部分</b>。对<b>拒答 / 转人工策略</b>同样关键：(a) <b>epistemic 高</b>→「超出我的认知范围」→应<b>拒答或转人工</b>，且值得<b>反馈进训练集</b>形成闭环；(b) <b>aleatoric 高</b>→「这事本质就不确定」→拒答没意义（换模型也一样），应<b>如实给出概率</b>让人带不确定性决策。混淆两者会让系统要么过度拒答（把噪声当无知），要么盲目自信（把无知当噪声）——成熟的 AI 应对这两种「不知道」给出不同行为。</div></details>
-
-    <details><summary>4. 重参数化技巧（reparameterization trick）让梯度能「穿过」随机采样。为什么这一个小技巧能同时点燃 VAE、扩散模型、变分推断三个领域？它的深层意义是什么？</summary><div>深层意义：<b>它把「随机性」和「可微性」调和了</b>，这是整个深度生成模型的命门。背景：神经网络靠反向传播训练，但「从分布里采样」<b>本身不可微</b>——你没法对「掷骰子」求导。重参数化的巧妙：把「从 N(μ,σ²) 采样」改写成「z = μ + σ·ε，其中 ε~N(0,1)」。随机性被<b>外包给与参数无关的 ε</b>，μ、σ 变成确定性的可微变换，梯度便能绕过 ε、顺着 μ/σ 回流。<b>为什么点燃三个领域</b>：它们本质都是「学一个带随机隐变量的生成过程」——VAE 学编码-解码、扩散模型学逐步去噪、贝叶斯网络学权重分布，全卡在「怎么对采样求导」这一关。重参数化一举打通，让它们都能用 SGD + Adam 端到端训练。这也是为什么 Day 20 的扩散模型、今天的 VI、生成模型底层是<b>同一块积木</b>——一个看似不起眼的代数变形，决定了一整代生成式 AI 能否用梯度训练，是「可微编程」吞下「概率建模」的关键接口。</div></details>
-
-    <details><summary>5. 贝叶斯的核心是「先验 + 证据 → 后验」的更新循环。如果把人的认知、科学的进步、甚至佛学的「缘起」都看成贝叶斯更新，这个视角能照亮什么，又会遮蔽什么？</summary><div>能照亮的：(a) <b>认知层面</b>——「带先验看世界、用证据更新」精确刻画了学习：婴儿先验很弱，专家先验很强却更难被新证据撼动——这正是「专家偏见」的贝叶斯解释（强先验需更强证据才能翻转）。(b) <b>科学哲学</b>——科学进步是集体后验的更新，范式转移（Kuhn）就是反常证据终于压过旧先验的「相变」。(c) <b>东方思想</b>——佛学「缘起」讲一切依条件生灭、无固定自性，与贝叶斯「信念随证据流转、无绝对确定」有迷人呼应；「执」可类比为<b>先验过强、拒绝更新</b>的退化态。<b>会遮蔽的</b>：(i) 贝叶斯假设<b>假设空间稳定</b>，但真实认知的突破常是<b>创造出原本不在假设空间里的新概念</b>——这是框架装不下的「无中生有」（你没法给还没被想到的假设赋先验）；(ii) 它把认知简化为<b>信息处理</b>，可能遮蔽具身、情感、直觉这些非命题性的知；(iii) 佛学的「证悟」指向<b>超越概念分别</b>的体验，而贝叶斯是一套概念分别的精致机器——用它解释证悟，恰恰可能错过证悟要解构的东西。所以这是把好用的<b>透镜</b>，别误当成眼睛本身——这也很「贝叶斯」：对「贝叶斯是万能视角」这个先验，本身就该保持可被更新的谦逊。</div></details>
-  </div>
+<div class="card think" data-tts="19b120fb2225b017" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 频率派给点估计 + 置信区间，贝叶斯给后验分布。对一个工程师做实际决策，这两套框架的本质差异是什么？什么时候该用哪个？</summary><div>本质差异在<b>「概率」指的是什么</b>。频率派：参数是固定真值，概率描述「反复实验时数据的波动」——「95% 置信区间」真实含义是「这套程序重复 100 次，约 95 次的区间会盖住真值」，<b>不是</b>「真值有 95% 概率落在此区间」（这是大众普遍的误读）。贝叶斯：参数本身是随机变量，「94% 区间」就是字面意思——「给定数据和先验，参数有 94% 概率在这」，可直接拿去决策。<b>工程取舍</b>：(a) <b>小样本 + 有先验</b>→贝叶斯，能把领域知识写进先验，小数据下更稳；(b) <b>大样本 + 要标准化报告</b>→频率派，更快、业界默认、不用辩论先验；(c) <b>要做下游决策</b>→贝叶斯，完整后验能直接算「选 A 比 B 好的概率」。对你做超个体的个人决策（样本天然小、你有强先验），贝叶斯思维往往更合身——它逼你显式写下信念并随证据更新。</div></details>
+<details><summary>2. MCMC 精确但慢，VI 快但低估不确定性。这个「精度 vs 速度」的权衡，和你在分布式系统里见过的哪些取舍同构？有没有「两者兼得」的中间路线？</summary><div>这是<b>强一致 vs 最终一致</b>在推断世界的翻版。MCMC 像<b>强一致读</b>：渐近正确，但慢、难水平扩展。VI 像<b>读缓存</b>：快、可扩展，但可能读到「偏窄」的近似（类比略陈旧的副本）。而且 VI 的偏差是<b>系统性</b>的（总低估方差），就像缓存 staleness 有方向性，可预判和补偿。<b>中间路线</b>确实有：(a) <b>归一化流</b>——给 VI 用更灵活的 q 分布（不止高斯），逼近能力大增；(b) <b>SVGD / 粒子变分</b>——用一群粒子兼顾采样的灵活和优化的速度；(c) <b>VI 预热 + MCMC 精修</b>——先用 VI 快速定位后验大致位置，再用少量 MCMC 步精修，类似「缓存预取 + 关键路径强一致校验」。工程哲学一致：先快速近似定位，再按需局部精确化。</div></details>
+<details><summary>3. 「认知不确定性（epistemic）可以靠加数据消除，偶然不确定性（aleatoric）不能」——这个区分对设计 AI 系统的「主动学习」和「拒答策略」有什么直接指导？</summary><div>这个区分是<b>主动学习（active learning）</b>的理论核心。主动学习要解决「<b>该花钱标注哪些样本</b>」——答案：<b>专挑 epistemic 高的</b>。因为 epistemic 高 = 模型没见过这类数据 = 标注它能真正消除无知；反之 aleatoric 高的样本（本就是 50/50 噪声），标了也没用。所以「按总不确定性排序标注」是错的，必须<b>先分解出 epistemic 那部分</b>。对<b>拒答 / 转人工策略</b>同样关键：(a) <b>epistemic 高</b>→「超出我的认知范围」→应<b>拒答或转人工</b>，且值得<b>反馈进训练集</b>形成闭环；(b) <b>aleatoric 高</b>→「这事本质就不确定」→拒答没意义（换模型也一样），应<b>如实给出概率</b>让人带不确定性决策。混淆两者会让系统要么过度拒答（把噪声当无知），要么盲目自信（把无知当噪声）——成熟的 AI 应对这两种「不知道」给出不同行为。</div></details>
+<details><summary>4. 重参数化技巧（reparameterization trick）让梯度能「穿过」随机采样。为什么这一个小技巧能同时点燃 VAE、扩散模型、变分推断三个领域？它的深层意义是什么？</summary><div>深层意义：<b>它把「随机性」和「可微性」调和了</b>，这是整个深度生成模型的命门。背景：神经网络靠反向传播训练，但「从分布里采样」<b>本身不可微</b>——你没法对「掷骰子」求导。重参数化的巧妙：把「从 N(μ,σ²) 采样」改写成「z = μ + σ·ε，其中 ε~N(0,1)」。随机性被<b>外包给与参数无关的 ε</b>，μ、σ 变成确定性的可微变换，梯度便能绕过 ε、顺着 μ/σ 回流。<b>为什么点燃三个领域</b>：它们本质都是「学一个带随机隐变量的生成过程」——VAE 学编码-解码、扩散模型学逐步去噪、贝叶斯网络学权重分布，全卡在「怎么对采样求导」这一关。重参数化一举打通，让它们都能用 SGD + Adam 端到端训练。这也是为什么 Day 20 的扩散模型、今天的 VI、生成模型底层是<b>同一块积木</b>——一个看似不起眼的代数变形，决定了一整代生成式 AI 能否用梯度训练，是「可微编程」吞下「概率建模」的关键接口。</div></details>
+<details><summary>5. 贝叶斯的核心是「先验 + 证据 → 后验」的更新循环。如果把人的认知、科学的进步、甚至佛学的「缘起」都看成贝叶斯更新，这个视角能照亮什么，又会遮蔽什么？</summary><div>能照亮的：(a) <b>认知层面</b>——「带先验看世界、用证据更新」精确刻画了学习：婴儿先验很弱，专家先验很强却更难被新证据撼动——这正是「专家偏见」的贝叶斯解释（强先验需更强证据才能翻转）。(b) <b>科学哲学</b>——科学进步是集体后验的更新，范式转移（Kuhn）就是反常证据终于压过旧先验的「相变」。(c) <b>东方思想</b>——佛学「缘起」讲一切依条件生灭、无固定自性，与贝叶斯「信念随证据流转、无绝对确定」有迷人呼应；「执」可类比为<b>先验过强、拒绝更新</b>的退化态。<b>会遮蔽的</b>：(i) 贝叶斯假设<b>假设空间稳定</b>，但真实认知的突破常是<b>创造出原本不在假设空间里的新概念</b>——这是框架装不下的「无中生有」（你没法给还没被想到的假设赋先验）；(ii) 它把认知简化为<b>信息处理</b>，可能遮蔽具身、情感、直觉这些非命题性的知；(iii) 佛学的「证悟」指向<b>超越概念分别</b>的体验，而贝叶斯是一套概念分别的精致机器——用它解释证悟，恰恰可能错过证悟要解构的东西。所以这是把好用的<b>透镜</b>，别误当成眼睛本身——这也很「贝叶斯」：对「贝叶斯是万能视角」这个先验，本身就该保持可被更新的谦逊。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 38 · 2026-06-24</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

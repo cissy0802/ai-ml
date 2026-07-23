@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：推理优化 — Day 9</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,45 +60,37 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：推理优化</h1>
-  <div class="meta">Day 9 · 2026-05-26</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="1f3173534236833f">AI/ML 详解：推理优化</h1>
+<div class="meta">Day 9 · 2026-05-26</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
 <!-- 1. KV Cache -->
-<div class="card">
-  <h2>KV 缓存<span class="en">KV Cache</span></h2>
-  <div class="tags"><span class="tag">显存</span><span class="tag purple">基础优化</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>KV cache 就是<b>自回归生成的 memoization</b>——和动态规划里"算过的子问题别再算一遍"完全同构。后端世界对应：<b>流式聚合的中间状态</b>（Flink 的 keyed state）、<b>数据库的物化视图</b>、<b>HTTP 长连接的会话上下文</b>。没有它，每生成一个 token 都要把之前所有 token 的 attention 重新跑一遍——O(n²) 变 O(n³)。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>LLM 推理是<b>自回归</b>的：生成第 100 个 token 时，attention 要算它对前 99 个 token 的相关性。Attention 的公式是 <code>softmax(Q·K<sup>T</sup>/√d)·V</code>——其中 <b>Q</b>(Query) 是当前 token 的"提问向量"，<b>K</b>(Key) 是历史 token 的"标签向量"，<b>V</b>(Value) 是历史 token 的"内容向量"。<b>直觉</b>：Q 像查询，K 像索引，V 像被查的数据。</p>
-    <p style="margin-top:8px"><b>关键观察</b>：第 1-99 个 token 的 K 和 V 在生成第 100 个 token 时<b>完全不变</b>——它们只依赖各自位置之前的内容。所以 K/V 算一次就能永久复用，只有新 token 的 Q/K/V 需要新算。把所有历史 K/V 存起来，就是 KV cache。</p>
-
+<div class="card" data-tts="b366c0e3f0212511">
+<h2>KV 缓存<span class="en">KV Cache</span></h2>
+<div class="tags"><span class="tag">显存</span><span class="tag purple">基础优化</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>KV cache 就是<b>自回归生成的 memoization</b>——和动态规划里"算过的子问题别再算一遍"完全同构。后端世界对应：<b>流式聚合的中间状态</b>（Flink 的 keyed state）、<b>数据库的物化视图</b>、<b>HTTP 长连接的会话上下文</b>。没有它，每生成一个 token 都要把之前所有 token 的 attention 重新跑一遍——O(n²) 变 O(n³)。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>LLM 推理是<b>自回归</b>的：生成第 100 个 token 时，attention 要算它对前 99 个 token 的相关性。Attention 的公式是 <code>softmax(Q·K<sup>T</sup>/√d)·V</code>——其中 <b>Q</b>(Query) 是当前 token 的"提问向量"，<b>K</b>(Key) 是历史 token 的"标签向量"，<b>V</b>(Value) 是历史 token 的"内容向量"。<b>直觉</b>：Q 像查询，K 像索引，V 像被查的数据。</p>
+<p style="margin-top:8px"><b>关键观察</b>：第 1-99 个 token 的 K 和 V 在生成第 100 个 token 时<b>完全不变</b>——它们只依赖各自位置之前的内容。所以 K/V 算一次就能永久复用，只有新 token 的 Q/K/V 需要新算。把所有历史 K/V 存起来，就是 KV cache。</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">两阶段推理（Prefill vs Decode）</b><br><br>
-<span class="box g">Prefill 阶段</span> 一次性处理整个 prompt（比如 1000 token），并行算 K/V 写入 cache<br>
-<span style="color:#5a6378">→ 计算密集（compute-bound）：GPU 矩阵乘法跑满</span><br><br>
-<span class="box o">Decode 阶段</span> 每次只生成 1 个新 token，复用 cache 里 1000 条历史 K/V<br>
-<span style="color:#5a6378">→ 显存带宽密集（memory-bound）：搬运 KV 比计算慢得多</span><br><br>
-<b style="color:#ff8e8e">显存代价：</b>每个 token ≈ <code>2 × n_layers × n_heads × head_dim × 2 bytes</code><br>
+<b style="color:#7b61ff">两阶段推理（Prefill vs Decode）</b><br/><br/>
+<span class="box g">Prefill 阶段</span> 一次性处理整个 prompt（比如 1000 token），并行算 K/V 写入 cache<br/>
+<span style="color:#5a6378">→ 计算密集（compute-bound）：GPU 矩阵乘法跑满</span><br/><br/>
+<span class="box o">Decode 阶段</span> 每次只生成 1 个新 token，复用 cache 里 1000 条历史 K/V<br/>
+<span style="color:#5a6378">→ 显存带宽密集（memory-bound）：搬运 KV 比计算慢得多</span><br/><br/>
+<b style="color:#ff8e8e">显存代价：</b>每个 token ≈ <code>2 × n_layers × n_heads × head_dim × 2 bytes</code><br/>
 Llama-3 70B：每 token 约 320 KB，10K context = 3.2 GB，<b>batch=32 时占 100 GB+</b>
 </div>
-
-    <p style="margin-top:14px">这就是为什么 <b>LLM 推理的瓶颈不在算力，而在显存带宽</b>——一个反直觉但极其重要的事实。后续三个优化（speculative decoding、continuous batching、quantization）本质都在"想办法多榨点带宽出来"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">这就是为什么 <b>LLM 推理的瓶颈不在算力，而在显存带宽</b>——一个反直觉但极其重要的事实。后续三个优化（speculative decoding、continuous batching、quantization）本质都在"想办法多榨点带宽出来"。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> torch
 <span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForCausalLM
 
@@ -115,53 +108,45 @@ past_key_values = <span class="kw">None</span>  <span class="cmt"># ← KV cache
     input_ids = next_id  <span class="cmt"># ← 下一轮只喂"新 token"，前面的从 cache 取</span>
     <span class="kw">if</span> next_id.<span class="fn">item</span>() == tok.eos_token_id: <span class="kw">break</span>
 <span class="cmt"># 关掉 use_cache 让你直观感受差距——同样输出 20 token，慢 10-50 倍</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"开了 KV cache 就够快了"——错。真实生产里 cache 本身成了瓶颈：长 context 时显存装不下、batch 之间共享 prefix 又被重复存。所以 2023 年才有 <b>PagedAttention</b>（vLLM）借用 OS 虚拟内存的"分页"思想管理 KV cache、<b>Prefix Caching</b> 跨请求共享公共前缀的 KV——本质上把"内存分配器"的全套学问搬进了 LLM 推理引擎。</div>
-    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：自己跑本地 LLM（LM Studio / Ollama）时，<b>上下文越长生成越慢</b>不是错觉，是 KV cache 在显存带宽里被反复搬运。这就是为什么"先压缩历史再问下一句"比"无脑加长 context"快得多——你在直接减少 KV 搬运量。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 LLM 推理是<b>显存带宽</b>问题不是<b>算力</b>问题。理解这一点，所有后续优化都自然了。<br>🤔 你熟悉的哪些后端系统也是"看起来 CPU 紧张，实际上是 I/O / 内存带宽紧张"？两类问题的优化策略有什么共通点？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"开了 KV cache 就够快了"——错。真实生产里 cache 本身成了瓶颈：长 context 时显存装不下、batch 之间共享 prefix 又被重复存。所以 2023 年才有 <b>PagedAttention</b>（vLLM）借用 OS 虚拟内存的"分页"思想管理 KV cache、<b>Prefix Caching</b> 跨请求共享公共前缀的 KV——本质上把"内存分配器"的全套学问搬进了 LLM 推理引擎。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：自己跑本地 LLM（LM Studio / Ollama）时，<b>上下文越长生成越慢</b>不是错觉，是 KV cache 在显存带宽里被反复搬运。这就是为什么"先压缩历史再问下一句"比"无脑加长 context"快得多——你在直接减少 KV 搬运量。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 LLM 推理是<b>显存带宽</b>问题不是<b>算力</b>问题。理解这一点，所有后续优化都自然了。<br/>🤔 你熟悉的哪些后端系统也是"看起来 CPU 紧张，实际上是 I/O / 内存带宽紧张"？两类问题的优化策略有什么共通点？</div>
+</div>
+</div>
 <!-- 2. Speculative Decoding -->
-<div class="card">
-  <h2>推测解码<span class="en">Speculative Decoding</span></h2>
-  <div class="tags"><span class="tag">延迟</span><span class="tag purple">并行</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>和 CPU 的<b>分支预测 + 推测执行（speculative execution）</b>是同一个套路：用一个便宜的"小模型"先抢跑几步，再让"大模型"<b>一次性并行验证</b>。验证通过就赚到，验证失败就回滚。后端类比：<b>乐观锁</b>（先写后查，冲突再重试）、<b>predicate pushdown</b>（先用便宜的过滤器砍掉大部分数据）。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Decode 阶段每次只算 1 个新 token，但每次都得把<b>整个 70B 模型的参数</b>从显存搬到 GPU 算一遍——参数搬运 = 140 GB（FP16），即使 H100 也要花约 50ms。<b>瓶颈是带宽不是算力</b>，意味着 GPU 算力其实大量闲置。Speculative decoding 的洞察：既然 forward pass 一次的带宽成本是固定的，那一次<b>验证 5 个候选 token</b>几乎不增加成本——免费的并行。</p>
-    <p style="margin-top:8px">机制三步走：</p>
-    <ul>
-      <li><b>① Draft（草稿）</b>：用一个 1B 量级的小模型连续生成 K 个 token（K 通常 4-8）。小模型快 10-20 倍，串行跑 K 步成本很低；</li>
-      <li><b>② Verify（验证）</b>：把这 K 个 token 一次性喂给大模型，<b>一次 forward pass</b> 同时算出每个位置大模型自己会预测什么；</li>
-      <li><b>③ Accept / Reject</b>：从头比对，连续相同的部分接受；第一个不同的位置用大模型的预测替换、丢弃后面的草稿。</li>
-    </ul>
-
+<div class="card" data-tts="62d47369975af959">
+<h2>推测解码<span class="en">Speculative Decoding</span></h2>
+<div class="tags"><span class="tag">延迟</span><span class="tag purple">并行</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>和 CPU 的<b>分支预测 + 推测执行（speculative execution）</b>是同一个套路：用一个便宜的"小模型"先抢跑几步，再让"大模型"<b>一次性并行验证</b>。验证通过就赚到，验证失败就回滚。后端类比：<b>乐观锁</b>（先写后查，冲突再重试）、<b>predicate pushdown</b>（先用便宜的过滤器砍掉大部分数据）。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Decode 阶段每次只算 1 个新 token，但每次都得把<b>整个 70B 模型的参数</b>从显存搬到 GPU 算一遍——参数搬运 = 140 GB（FP16），即使 H100 也要花约 50ms。<b>瓶颈是带宽不是算力</b>，意味着 GPU 算力其实大量闲置。Speculative decoding 的洞察：既然 forward pass 一次的带宽成本是固定的，那一次<b>验证 5 个候选 token</b>几乎不增加成本——免费的并行。</p>
+<p style="margin-top:8px">机制三步走：</p>
+<ul>
+<li><b>① Draft（草稿）</b>：用一个 1B 量级的小模型连续生成 K 个 token（K 通常 4-8）。小模型快 10-20 倍，串行跑 K 步成本很低；</li>
+<li><b>② Verify（验证）</b>：把这 K 个 token 一次性喂给大模型，<b>一次 forward pass</b> 同时算出每个位置大模型自己会预测什么；</li>
+<li><b>③ Accept / Reject</b>：从头比对，连续相同的部分接受；第一个不同的位置用大模型的预测替换、丢弃后面的草稿。</li>
+</ul>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">一轮 speculative decoding</b><br><br>
-Draft 小模型生成 5 个候选：<span class="box g">The</span><span class="box g">cat</span><span class="box g">sat</span><span class="box g">on</span><span class="box g">mat</span><br>
-大模型一次 forward 并行验证：<span class="box">The</span>✓ <span class="box">cat</span>✓ <span class="box">sat</span>✓ <span class="box r">a</span>✗ <span class="box" style="opacity:0.4">mat</span>丢弃<br>
-结果：本轮 <b>1 次大模型调用产出 4 个 token</b>（vs 普通解码 4 次调用）<br><br>
+<b style="color:#7b61ff">一轮 speculative decoding</b><br/><br/>
+Draft 小模型生成 5 个候选：<span class="box g">The</span><span class="box g">cat</span><span class="box g">sat</span><span class="box g">on</span><span class="box g">mat</span><br/>
+大模型一次 forward 并行验证：<span class="box">The</span>✓ <span class="box">cat</span>✓ <span class="box">sat</span>✓ <span class="box r">a</span>✗ <span class="box" style="opacity:0.4">mat</span>丢弃<br/>
+结果：本轮 <b>1 次大模型调用产出 4 个 token</b>（vs 普通解码 4 次调用）<br/><br/>
 <span style="color:#5a6378">关键不变量：输出分布和原大模型完全一致（数学可证）——不是近似，是无损加速</span>
 </div>
-
-    <p style="margin-top:14px"><b>性能数学</b>：设接受率 α，每轮 K 个草稿，平均产出 <code>(1-α<sup>K+1</sup>)/(1-α)</code> 个 token。α=0.7、K=5 时约 2.9 token / 大模型调用——理论 2.9x 加速。实测 1.5-3x，剩余开销在小模型本身。<b>Medusa / EAGLE</b> 等变体把"小模型"换成在大模型上加几个轻量 head，省掉独立小模型的开销，加速比可达 3-4x。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px"><b>性能数学</b>：设接受率 α，每轮 K 个草稿，平均产出 <code>(1-α<sup>K+1</sup>)/(1-α)</code> 个 token。α=0.7、K=5 时约 2.9 token / 大模型调用——理论 2.9x 加速。实测 1.5-3x，剩余开销在小模型本身。<b>Medusa / EAGLE</b> 等变体把"小模型"换成在大模型上加几个轻量 head，省掉独立小模型的开销，加速比可达 3-4x。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># HuggingFace transformers 内置 assisted_generation 即 speculative decoding</span>
 <span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForCausalLM
 <span class="kw">import</span> torch
@@ -182,59 +167,51 @@ out = big.<span class="fn">generate</span>(
 <span class="fn">print</span>(tok.<span class="fn">decode</span>(out[<span class="str">0</span>]))
 <span class="cmt"># 输出和不开 assistant_model 时完全一致，速度 1.5-3x。</span>
 <span class="cmt"># vLLM / TensorRT-LLM / SGLang 在生产端有更优实现（PagedAttn + speculative 融合）</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"加大 K 一定更快"——错。K 太大时小模型偏离大模型越多，接受率 α 急剧下降，反而做了一堆白工。还有一个隐藏陷阱：<b>batch size &gt; 1 时 speculative 收益骤降</b>，因为大模型本来就在用 batch 把带宽用满，再叠并行验证收益边际。生产经验：<b>低 batch + 长输出</b>场景（如交互式 chat）受益最大；<b>高 batch + 短输出</b>（如批量分类）几乎没用，关掉更省。</div>
-    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：本地跑 Ollama 时同时下载一个同家族的 1B 模型当 draft，对 70B 主模型加速 2x——交互式对话的"首字延迟"和"打字速度"都会肉眼可见地改善。这是<b>个人 AI 超级个体工作流</b>里最容易吃到的免费午餐。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 Speculative decoding 是<b>无损</b>加速——输出和原模型 bit-for-bit 一致，只是把闲置的算力换成了延迟。<br>🤔 "用便宜的近似先抢跑，再用昂贵的精确算法校验"——你能在自己的工作里找到几个对应的工程或决策模式？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"加大 K 一定更快"——错。K 太大时小模型偏离大模型越多，接受率 α 急剧下降，反而做了一堆白工。还有一个隐藏陷阱：<b>batch size &gt; 1 时 speculative 收益骤降</b>，因为大模型本来就在用 batch 把带宽用满，再叠并行验证收益边际。生产经验：<b>低 batch + 长输出</b>场景（如交互式 chat）受益最大；<b>高 batch + 短输出</b>（如批量分类）几乎没用，关掉更省。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：本地跑 Ollama 时同时下载一个同家族的 1B 模型当 draft，对 70B 主模型加速 2x——交互式对话的"首字延迟"和"打字速度"都会肉眼可见地改善。这是<b>个人 AI 超级个体工作流</b>里最容易吃到的免费午餐。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 Speculative decoding 是<b>无损</b>加速——输出和原模型 bit-for-bit 一致，只是把闲置的算力换成了延迟。<br/>🤔 "用便宜的近似先抢跑，再用昂贵的精确算法校验"——你能在自己的工作里找到几个对应的工程或决策模式？</div>
+</div>
+</div>
 <!-- 3. Continuous Batching -->
-<div class="card">
-  <h2>连续批处理<span class="en">Continuous Batching</span></h2>
-  <div class="tags"><span class="tag">吞吐</span><span class="tag orange">调度</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>从<b>阻塞式线程池</b>升级到<b>异步事件循环</b>的范式跃迁——和 Node.js / Netty / asyncio 是同一个内核思想。传统 static batching 像"<b>木桶效应</b>"：整批等最慢那个请求生成完才能换下一批；continuous batching 像 OS 调度器，<b>谁先完成就立刻让出位置，新请求填进来</b>。vLLM 2023 论文把这件事推向主流，让吞吐量直接涨 5-23 倍。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>LLM 请求的输出长度方差极大：有人要 10 token，有人要 2000 token。传统做法是"<b>request-level batching</b>"——攒 8 个请求一起跑，但因为 batch 同步前进，<b>所有人都得等最慢那个 2000 token 跑完</b>。中间 GPU 大量空转，吞吐拉胯。</p>
-    <p style="margin-top:8px"><b>Continuous batching（也叫 iteration-level scheduling）</b>把调度粒度从"整个请求"降到"每一步 decode"：</p>
-    <ul>
-      <li><b>每生成一个 token 后</b>调度器都重新审视一次 batch；</li>
-      <li><b>完成的请求立刻退出</b>，释放它在 KV cache 里的内存；</li>
-      <li><b>等待队列里的新请求立刻填进空位</b>，开始 prefill；</li>
-      <li>同一个 batch 里 prefill 和 decode 阶段可以<b>混跑</b>（chunked prefill 进一步把长 prefill 拆成小块插到 decode 间隙）。</li>
-    </ul>
-
+<div class="card" data-tts="37241f90b89234b0">
+<h2>连续批处理<span class="en">Continuous Batching</span></h2>
+<div class="tags"><span class="tag">吞吐</span><span class="tag orange">调度</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>从<b>阻塞式线程池</b>升级到<b>异步事件循环</b>的范式跃迁——和 Node.js / Netty / asyncio 是同一个内核思想。传统 static batching 像"<b>木桶效应</b>"：整批等最慢那个请求生成完才能换下一批；continuous batching 像 OS 调度器，<b>谁先完成就立刻让出位置，新请求填进来</b>。vLLM 2023 论文把这件事推向主流，让吞吐量直接涨 5-23 倍。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>LLM 请求的输出长度方差极大：有人要 10 token，有人要 2000 token。传统做法是"<b>request-level batching</b>"——攒 8 个请求一起跑，但因为 batch 同步前进，<b>所有人都得等最慢那个 2000 token 跑完</b>。中间 GPU 大量空转，吞吐拉胯。</p>
+<p style="margin-top:8px"><b>Continuous batching（也叫 iteration-level scheduling）</b>把调度粒度从"整个请求"降到"每一步 decode"：</p>
+<ul>
+<li><b>每生成一个 token 后</b>调度器都重新审视一次 batch；</li>
+<li><b>完成的请求立刻退出</b>，释放它在 KV cache 里的内存；</li>
+<li><b>等待队列里的新请求立刻填进空位</b>，开始 prefill；</li>
+<li>同一个 batch 里 prefill 和 decode 阶段可以<b>混跑</b>（chunked prefill 进一步把长 prefill 拆成小块插到 decode 间隙）。</li>
+</ul>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#ff8e8e">Static batching（旧）</b><br>
-T1: <span class="box">R1</span><span class="box">R2</span><span class="box">R3</span><span class="box">R4</span>  并行 decode<br>
-T2: <span class="box">R1</span><span class="box">R2</span><span class="box">R3</span><span class="box">R4</span>  R2 完成但还在占位<br>
-T3: <span class="box">R1</span><span class="box" style="opacity:0.3">空</span><span class="box">R3</span><span class="box">R4</span>  GPU 空转 ↑<br>
-T4: <span class="box">R1</span><span class="box" style="opacity:0.3">空</span><span class="box" style="opacity:0.3">空</span><span class="box">R4</span>  继续浪费<br><br>
-<b style="color:#7ed6a0">Continuous batching（vLLM）</b><br>
-T1: <span class="box">R1</span><span class="box">R2</span><span class="box">R3</span><span class="box">R4</span>  正常并行<br>
-T2: <span class="box">R1</span><span class="box g">R5</span><span class="box">R3</span><span class="box">R4</span>  R2 完成→ R5 立刻补位<br>
-T3: <span class="box">R1</span><span class="box g">R5</span><span class="box g">R6</span><span class="box">R4</span>  R3 完成→ R6 补位<br>
+<b style="color:#ff8e8e">Static batching（旧）</b><br/>
+T1: <span class="box">R1</span><span class="box">R2</span><span class="box">R3</span><span class="box">R4</span>  并行 decode<br/>
+T2: <span class="box">R1</span><span class="box">R2</span><span class="box">R3</span><span class="box">R4</span>  R2 完成但还在占位<br/>
+T3: <span class="box">R1</span><span class="box" style="opacity:0.3">空</span><span class="box">R3</span><span class="box">R4</span>  GPU 空转 ↑<br/>
+T4: <span class="box">R1</span><span class="box" style="opacity:0.3">空</span><span class="box" style="opacity:0.3">空</span><span class="box">R4</span>  继续浪费<br/><br/>
+<b style="color:#7ed6a0">Continuous batching（vLLM）</b><br/>
+T1: <span class="box">R1</span><span class="box">R2</span><span class="box">R3</span><span class="box">R4</span>  正常并行<br/>
+T2: <span class="box">R1</span><span class="box g">R5</span><span class="box">R3</span><span class="box">R4</span>  R2 完成→ R5 立刻补位<br/>
+T3: <span class="box">R1</span><span class="box g">R5</span><span class="box g">R6</span><span class="box">R4</span>  R3 完成→ R6 补位<br/>
 <span style="color:#5a6378">每一步 GPU 都满载，吞吐 5-23x</span>
 </div>
-
-    <p style="margin-top:14px">实现挑战在 <b>KV cache 内存管理</b>：传统做法给每个请求预分配最大长度的 KV 显存，浪费 60-80%。vLLM 的 <b>PagedAttention</b> 把 KV 切成固定 4KB 的"页"按需分配（直接借用 OS 虚拟内存的分页思想），让 continuous batching 真正可用。这是 2023 年系统侧最重要的 LLM 服务突破，今天 vLLM / SGLang / TensorRT-LLM / TGI 全都用类似机制。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">实现挑战在 <b>KV cache 内存管理</b>：传统做法给每个请求预分配最大长度的 KV 显存，浪费 60-80%。vLLM 的 <b>PagedAttention</b> 把 KV 切成固定 4KB 的"页"按需分配（直接借用 OS 虚拟内存的分页思想），让 continuous batching 真正可用。这是 2023 年系统侧最重要的 LLM 服务突破，今天 vLLM / SGLang / TensorRT-LLM / TGI 全都用类似机制。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># vLLM 把 continuous batching 默认开启——你只管批量 submit 请求即可</span>
 <span class="kw">from</span> vllm <span class="kw">import</span> LLM, SamplingParams
 
@@ -254,54 +231,46 @@ outputs = llm.<span class="fn">generate</span>(prompts, params)
 <span class="cmt"># 短请求 1-2 秒就返回不必等长的，长请求继续跑——同一 batch 持续被新请求填满</span>
 <span class="cmt"># 同样硬件下，吞吐对比 HuggingFace transformers 通常 10x+，</span>
 <span class="cmt"># 这是为什么所有生产 LLM serving 都用 vLLM/SGLang/TensorRT-LLM 而不是裸 transformers</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"continuous batching 让<b>单个</b>请求变快"——错。它<b>不降低单请求延迟</b>，反而可能因为和其他请求共享 GPU 稍微变慢。它优化的是<b>吞吐量</b>（系统每秒服务多少 token）——你为多人服务时的总成本，<b>不是</b>你一个人发请求时的体感速度。OpenAI / Anthropic API 之所以能定到 $0.5-3 / 1M token 的价格，靠的就是这套底层调度把 GPU 利用率从 30% 推到 80%+。</div>
-    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：自己开发个人 AI 工具时，一个人用就别上 vLLM——HuggingFace transformers + KV cache 完全够。但如果你做一个<b>给家人朋友共用的 AI 助手</b>（哪怕只有 5-10 人），换 vLLM 立刻能在同一台机器上服务 10x 用户，单位成本断崖式下降。判断分水岭：<b>是否有并发请求</b>。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 Continuous batching 是<b>调度</b>问题不是<b>模型</b>问题——同样的模型权重，换个服务框架吞吐能差 10x。<br>🤔 你做过的系统里，"调度粒度从大变小"（线程→协程、批处理→流处理）带来过什么数量级的性能跃迁？背后的不变模式是什么？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"continuous batching 让<b>单个</b>请求变快"——错。它<b>不降低单请求延迟</b>，反而可能因为和其他请求共享 GPU 稍微变慢。它优化的是<b>吞吐量</b>（系统每秒服务多少 token）——你为多人服务时的总成本，<b>不是</b>你一个人发请求时的体感速度。OpenAI / Anthropic API 之所以能定到 $0.5-3 / 1M token 的价格，靠的就是这套底层调度把 GPU 利用率从 30% 推到 80%+。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：自己开发个人 AI 工具时，一个人用就别上 vLLM——HuggingFace transformers + KV cache 完全够。但如果你做一个<b>给家人朋友共用的 AI 助手</b>（哪怕只有 5-10 人），换 vLLM 立刻能在同一台机器上服务 10x 用户，单位成本断崖式下降。判断分水岭：<b>是否有并发请求</b>。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 Continuous batching 是<b>调度</b>问题不是<b>模型</b>问题——同样的模型权重，换个服务框架吞吐能差 10x。<br/>🤔 你做过的系统里，"调度粒度从大变小"（线程→协程、批处理→流处理）带来过什么数量级的性能跃迁？背后的不变模式是什么？</div>
+</div>
+</div>
 <!-- 4. Quantization -->
-<div class="card">
-  <h2>量化<span class="en">Quantization</span></h2>
-  <div class="tags"><span class="tag">压缩</span><span class="tag purple">精度</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>量化 = <b>神经网络的 JPEG 压缩</b>——主动接受<b>可控的有损精度损失</b>换取显存和速度的几何级数收益。后端类比：<b>定点数代替浮点数</b>（嵌入式系统传统手法）、<b>列存压缩</b>（Parquet 用 dictionary encoding 把 string 压成 int）、<b>protobuf 的 varint</b>（小数字用更少字节）。所有这些都在押注："数据的<b>分布特性</b>允许我们用更少 bit 还原原貌。"</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Llama-3 70B 原版 FP16 占 140 GB 显存——单张 H100（80 GB）装不下。但 H100 卖 ¥30 万。量化到 INT4 后只占 35 GB，<b>一张消费级 RTX 4090（24 GB）配上 CPU offload 就能跑</b>，成本差 100 倍。这就是量化为什么是<b>本地 / 边缘部署 LLM 的入场券</b>。</p>
-    <p style="margin-top:8px"><b>核心公式</b>：<code>x_int = round((x_float - zero) / scale)</code>，反量化 <code>x_float ≈ x_int * scale + zero</code>。<b>直觉</b>：把浮点数线性映射到一个小整数区间——<code>scale</code> 是"每步多大"，<code>zero</code> 是"哪里是零点"。FP16 的 [-65504, 65504] 压到 INT8 的 [-128, 127] 就丢精度，但模型权重的分布是钟形曲线，大部分集中在零附近，损失远比想象中小。</p>
-
+<div class="card" data-tts="bc3f364bc8c4d1b6">
+<h2>量化<span class="en">Quantization</span></h2>
+<div class="tags"><span class="tag">压缩</span><span class="tag purple">精度</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>量化 = <b>神经网络的 JPEG 压缩</b>——主动接受<b>可控的有损精度损失</b>换取显存和速度的几何级数收益。后端类比：<b>定点数代替浮点数</b>（嵌入式系统传统手法）、<b>列存压缩</b>（Parquet 用 dictionary encoding 把 string 压成 int）、<b>protobuf 的 varint</b>（小数字用更少字节）。所有这些都在押注："数据的<b>分布特性</b>允许我们用更少 bit 还原原貌。"</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Llama-3 70B 原版 FP16 占 140 GB 显存——单张 H100（80 GB）装不下。但 H100 卖 ¥30 万。量化到 INT4 后只占 35 GB，<b>一张消费级 RTX 4090（24 GB）配上 CPU offload 就能跑</b>，成本差 100 倍。这就是量化为什么是<b>本地 / 边缘部署 LLM 的入场券</b>。</p>
+<p style="margin-top:8px"><b>核心公式</b>：<code>x_int = round((x_float - zero) / scale)</code>，反量化 <code>x_float ≈ x_int * scale + zero</code>。<b>直觉</b>：把浮点数线性映射到一个小整数区间——<code>scale</code> 是"每步多大"，<code>zero</code> 是"哪里是零点"。FP16 的 [-65504, 65504] 压到 INT8 的 [-128, 127] 就丢精度，但模型权重的分布是钟形曲线，大部分集中在零附近，损失远比想象中小。</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">主流方案对比</b>（精度 vs 显存）<br><br>
-<span class="box">FP16 / BF16</span> 16 bit · 100% 显存 · 0 损失 · 基线<br>
-<span class="box g">FP8</span>          8 bit · 50% · ~0 损失 · H100/B200 硬件支持<br>
-<span class="box g">INT8 (W8A8)</span>  8 bit · 50% · &lt;1% 精度损失 · SmoothQuant/LLM.int8()<br>
-<span class="box o">INT4 (GPTQ/AWQ)</span> 4 bit · 25% · 1-3% 损失 · 主流本地部署<br>
-<span class="box r">INT2 / GGUF Q2</span> 2-3 bit · 12% · 显著损失 · 极限压缩<br><br>
-<b style="color:#7b61ff">三种主流算法的工程取舍：</b><br>
-<b>GPTQ</b>：post-training，按层逐个最小化量化误差，准但慢（小时级）<br>
-<b>AWQ</b>：保留 1% 的"重要权重"不量化（按激活幅度排序），速度精度平衡<br>
-<b>GGUF (llama.cpp)</b>：多种 Q2-Q8 等级，CPU/Mac 友好，本地玩家首选<br>
+<b style="color:#7b61ff">主流方案对比</b>（精度 vs 显存）<br/><br/>
+<span class="box">FP16 / BF16</span> 16 bit · 100% 显存 · 0 损失 · 基线<br/>
+<span class="box g">FP8</span>          8 bit · 50% · ~0 损失 · H100/B200 硬件支持<br/>
+<span class="box g">INT8 (W8A8)</span>  8 bit · 50% · &lt;1% 精度损失 · SmoothQuant/LLM.int8()<br/>
+<span class="box o">INT4 (GPTQ/AWQ)</span> 4 bit · 25% · 1-3% 损失 · 主流本地部署<br/>
+<span class="box r">INT2 / GGUF Q2</span> 2-3 bit · 12% · 显著损失 · 极限压缩<br/><br/>
+<b style="color:#7b61ff">三种主流算法的工程取舍：</b><br/>
+<b>GPTQ</b>：post-training，按层逐个最小化量化误差，准但慢（小时级）<br/>
+<b>AWQ</b>：保留 1% 的"重要权重"不量化（按激活幅度排序），速度精度平衡<br/>
+<b>GGUF (llama.cpp)</b>：多种 Q2-Q8 等级，CPU/Mac 友好，本地玩家首选<br/>
 <b>QAT</b>：训练时模拟量化误差，最准但要重新训练（成本高）
 </div>
-
-    <p style="margin-top:14px"><b>权重量化（weight-only）</b> vs <b>激活也量化（W·A）</b>是两条不同路线：仅权重量化省显存 + 加快内存搬运（因为 LLM 推理瓶颈正是带宽），实现简单；激活也量化能用上 GPU 的 INT8 tensor core 真正提速但精度更难控。社区共识：<b>本地推理用 weight-only INT4（AWQ/GPTQ）</b>，<b>云端高吞吐用 W8A8 / FP8</b>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px"><b>权重量化（weight-only）</b> vs <b>激活也量化（W·A）</b>是两条不同路线：仅权重量化省显存 + 加快内存搬运（因为 LLM 推理瓶颈正是带宽），实现简单；激活也量化能用上 GPU 的 INT8 tensor core 真正提速但精度更难控。社区共识：<b>本地推理用 weight-only INT4（AWQ/GPTQ）</b>，<b>云端高吞吐用 W8A8 / FP8</b>。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># 用 bitsandbytes 直接加载 4-bit 量化模型——一行配置搞定</span>
 <span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 <span class="kw">import</span> torch
@@ -322,62 +291,51 @@ tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"m
 ids = tok(<span class="str">"Define entropy in one sentence."</span>, return_tensors=<span class="str">"pt"</span>).<span class="fn">to</span>(<span class="str">"cuda"</span>)
 <span class="fn">print</span>(tok.<span class="fn">decode</span>(m.<span class="fn">generate</span>(**ids, max_new_tokens=<span class="str">100</span>)[<span class="str">0</span>]))
 <span class="cmt"># 8B 模型从 16GB 降到 5GB——M2 Mac/RTX 3060 都能跑，质量损失通常&lt;2%</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"INT4 损失只有 1-3%，几乎免费"——分情况。在多选题、摘要这类任务上确实几乎无感；但在<b>数学推理、代码生成、长链 CoT、罕见语言</b>上量化损失会被链式放大——8B 量化版有时输出会偏离原版很远，看起来"变笨了"。<b>评估纪律</b>：在<b>你自己的真实任务</b>上对比量化版 vs 原版的输出，别只信公开 benchmark。Karpathy 一再提醒：benchmark 上 1% 损失，到 agent 长链任务里可能是 30% 任务失败率。</div>
-    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：把 70B 模型 4-bit 量化跑在 MacBook M3 Max（48GB 统一内存）做<b>离线私密对话</b>——读论文、写日记、复盘家庭决策——隐私级别远高于云 API。这是"AI 超级个体"很重要的一块拼图：<b>云端用最强模型做开放任务，本地量化模型做隐私敏感任务</b>，按数据敏感度分流。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 量化是<b>有损压缩</b>——必须在你的真实任务上量化前后对比评估，benchmark 数字不够。<br>🤔 "用更少 bit 表达同样的意思"在你的工作中还有哪些场景？信息论的"<b>有效熵</b>"和工程上的"<b>表示精度</b>"是同一回事吗？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"INT4 损失只有 1-3%，几乎免费"——分情况。在多选题、摘要这类任务上确实几乎无感；但在<b>数学推理、代码生成、长链 CoT、罕见语言</b>上量化损失会被链式放大——8B 量化版有时输出会偏离原版很远，看起来"变笨了"。<b>评估纪律</b>：在<b>你自己的真实任务</b>上对比量化版 vs 原版的输出，别只信公开 benchmark。Karpathy 一再提醒：benchmark 上 1% 损失，到 agent 长链任务里可能是 30% 任务失败率。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：把 70B 模型 4-bit 量化跑在 MacBook M3 Max（48GB 统一内存）做<b>离线私密对话</b>——读论文、写日记、复盘家庭决策——隐私级别远高于云 API。这是"AI 超级个体"很重要的一块拼图：<b>云端用最强模型做开放任务，本地量化模型做隐私敏感任务</b>，按数据敏感度分流。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 量化是<b>有损压缩</b>——必须在你的真实任务上量化前后对比评估，benchmark 数字不够。<br/>🤔 "用更少 bit 表达同样的意思"在你的工作中还有哪些场景？信息论的"<b>有效熵</b>"和工程上的"<b>表示精度</b>"是同一回事吗？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/2309.06180" target="_blank">vLLM / PagedAttention 论文 (Kwon et al. 2023)</a> — continuous batching + KV 分页的奠基性工作，必读</li>
-      <li><a href="https://arxiv.org/abs/2302.01318" target="_blank">Speculative Decoding 原论文 (Leviathan et al. 2023, Google)</a> — 数学证明 + 算法细节</li>
-      <li><a href="https://arxiv.org/abs/2401.10774" target="_blank">Medusa (2024)</a> — 不用独立小模型的 speculative decoding 变体，加速比 2-3x</li>
-      <li><a href="https://arxiv.org/abs/2208.07339" target="_blank">LLM.int8() (Dettmers 2022)</a> — 大模型量化的开创性工作，QLoRA 作者前传</li>
-      <li><a href="https://arxiv.org/abs/2305.14314" target="_blank">QLoRA / NF4 (Dettmers et al. 2023)</a> — 4-bit 量化 + LoRA 微调的标杆方案</li>
-      <li><a href="https://arxiv.org/abs/2306.00978" target="_blank">AWQ (Lin et al. 2023, MIT)</a> — Activation-aware Weight Quantization，本地部署主流</li>
-      <li><a href="https://github.com/ggerganov/llama.cpp" target="_blank">llama.cpp + GGUF</a> — CPU/Mac 本地推理事实标准</li>
-      <li><a href="https://lilianweng.github.io/posts/2023-01-10-inference-optimization/" target="_blank">Lilian Weng — Large Transformer Model Inference Optimization</a> — 系统性综述，工程视角最佳入门</li>
-      <li><a href="https://kipp.ly/transformer-inference-arithmetic/" target="_blank">Kipply — Transformer Inference Arithmetic</a> — 第一性原理推算延迟/显存/带宽，理解 LLM 推理必看</li>
-      <li><a href="https://www.anyscale.com/blog/continuous-batching-llm-inference" target="_blank">Anyscale — How continuous batching enables 23x throughput</a> — 工程视角最清晰的图文解释</li>
-    </ul>
-  </div>
+<div class="card" data-tts="34ebcbbb5a3a0671" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/2309.06180" target="_blank">vLLM / PagedAttention 论文 (Kwon et al. 2023)</a> — continuous batching + KV 分页的奠基性工作，必读</li>
+<li><a href="https://arxiv.org/abs/2302.01318" target="_blank">Speculative Decoding 原论文 (Leviathan et al. 2023, Google)</a> — 数学证明 + 算法细节</li>
+<li><a href="https://arxiv.org/abs/2401.10774" target="_blank">Medusa (2024)</a> — 不用独立小模型的 speculative decoding 变体，加速比 2-3x</li>
+<li><a href="https://arxiv.org/abs/2208.07339" target="_blank">LLM.int8() (Dettmers 2022)</a> — 大模型量化的开创性工作，QLoRA 作者前传</li>
+<li><a href="https://arxiv.org/abs/2305.14314" target="_blank">QLoRA / NF4 (Dettmers et al. 2023)</a> — 4-bit 量化 + LoRA 微调的标杆方案</li>
+<li><a href="https://arxiv.org/abs/2306.00978" target="_blank">AWQ (Lin et al. 2023, MIT)</a> — Activation-aware Weight Quantization，本地部署主流</li>
+<li><a href="https://github.com/ggerganov/llama.cpp" target="_blank">llama.cpp + GGUF</a> — CPU/Mac 本地推理事实标准</li>
+<li><a href="https://lilianweng.github.io/posts/2023-01-10-inference-optimization/" target="_blank">Lilian Weng — Large Transformer Model Inference Optimization</a> — 系统性综述，工程视角最佳入门</li>
+<li><a href="https://kipp.ly/transformer-inference-arithmetic/" target="_blank">Kipply — Transformer Inference Arithmetic</a> — 第一性原理推算延迟/显存/带宽，理解 LLM 推理必看</li>
+<li><a href="https://www.anyscale.com/blog/continuous-batching-llm-inference" target="_blank">Anyscale — How continuous batching enables 23x throughput</a> — 工程视角最清晰的图文解释</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 为什么说"LLM 推理是显存带宽问题不是算力问题"？这个认知如何重塑你对 GPU 选型 / 成本估算 / 优化优先级的判断？</summary><div>核心数据：H100 算力 ~989 TFLOPS（FP16），显存带宽 ~3 TB/s。Llama-70B 推理 decode 一个 token，参数量 70B × 2 bytes = 140 GB 必须从显存搬到计算单元——理论极限 140/3000 ≈ 47ms，<b>无论算力多强，下界就是这个</b>。这就是"memory-bound"的真实含义。重塑判断：(a) <b>选卡看 HBM 带宽不是 TFLOPS</b>——H100 vs H200 算力一样，但 H200 显存 141GB / 4.8 TB/s 带宽，推理 LLM 直接快 40-60%；(b) <b>batch 大小是免费午餐</b>——同一次参数搬运服务多个请求，吞吐线性涨直到算力打满（这就是 continuous batching 的物理基础）；(c) <b>量化的真正价值是减少搬运</b>，不是减少计算——INT4 让搬运量从 140GB 降到 35GB，立刻 4x 加速；(d) <b>speculative decoding 利用"算力闲置"</b>——既然带宽是瓶颈，多算几个验证 token 几乎免费。BigCat 你的分布式背景里"I/O bound vs CPU bound"诊断习惯直接迁移过来：用 nvidia-smi 看 GPU 利用率，发现持续 30-50% 而不是 90%+ 时，几乎必然是带宽问题，加 batch / 加 speculative / 加量化都比换卡有效。</div></details>
-
-    <details><summary>2. KV cache (Day 9) 和 prompt caching (Day 8) 听起来都在"缓存"，但它们解决的问题完全不同。说清楚区别后，你会怎么组合用？</summary><div>这是非常容易混淆的两层。<b>KV cache</b> 是<b>单次请求内部</b>的优化——生成第 N 个 token 时复用前 N-1 个 token 已经算好的 K/V，每次请求结束就丢弃。这是<b>推理引擎层</b>的事，对应用透明，不开等于 O(n³) 不可用。<b>Prompt caching</b> 是<b>跨请求之间</b>的优化——把多次请求都用的 system prompt / few-shot / 工具 schema 的 KV 持久化到显存或 SSD，下次请求命中就跳过 prefill。这是<b>应用层 + 服务端</b>共同优化，要应用主动标记缓存断点。<b>组合使用</b>：(a) 让你的 prompt 结构稳定不变的部分前置 → prompt caching 命中；(b) 单次推理内部，引擎自动用 KV cache；(c) 在 vLLM / SGLang 上还有第三层 <b>radix tree based prefix cache</b>——多个并发请求共享相同前缀的 KV，比 prompt caching 更细粒度且自动。三层叠加：跨请求 prefix 缓存 + 单请求 KV 缓存 + 显式 prompt caching = LLM 服务最完整的"缓存栈"。这个分层结构和数据库的 buffer pool / query plan cache / materialized view 几乎是一对一映射。</div></details>
-
-    <details><summary>3. Speculative decoding 用"小模型猜 + 大模型验"的模式 —— 这个"廉价近似 + 精确验证"的思想能不能扩展到 Agent 工作流？</summary><div>能且已经在发生。映射模式：把<b>大模型当 verifier</b>，<b>小模型 / 工具 / 启发式当 proposer</b>。具体例子：(a) <b>多路径推理</b>——让 8B 模型并行生成 5 个解题思路，70B 模型只对最有希望的 1-2 个继续展开，成本比纯 70B 思考省 5-10x；(b) <b>工具调用预筛</b>——小模型先决定调哪个工具、参数大概是什么，大模型只在小模型不确定时介入；(c) <b>Code agent 中的 lint-then-think</b>——先跑 type checker / linter 拿"廉价信号"，把明显错误剔除，再让大模型集中处理真正难的；(d) <b>RAG 重排</b>——便宜的 BM25/embedding 召回 1000 条 → 中等模型 rerank 到 20 → 大模型只读 top-5。共同模式：<b>用便宜的过程切除大量明显错误的可能性，让昂贵的资源只处理高价值不确定性</b>。这其实是<b>所有工程系统应对"判断力昂贵 + 候选爆炸"的通用解</b>——查询优化器、CDN 命中分层、人类组织的"流水线审核 → 专家终审"都是这个模式。BigCat 你做"AI 超级个体"时这个思路特别重要：<b>不是所有问题都需要 Opus，先用 Haiku 过一遍，再用 Opus 处理 Haiku 标记为"不确定"或"高风险"的</b>——同样输出质量下成本能降 5-10x。</div></details>
-
-    <details><summary>4. 量化是有损压缩，但 LLM 量化损失比预期小很多——这背后有什么深层结构性原因？和神经科学/信息论的什么发现可以对照？</summary><div>这是 ML 里一个深刻而美丽的现象，连结到几个跨学科观察。<b>表面原因</b>：(a) 神经网络权重是<b>钟形分布</b>，绝大部分集中在零附近，浪费高精度的 head/tail 几乎无信息；(b) 神经网络有<b>大量冗余</b>，多个权重的组合能补偿单个的量化误差（类似纠错码的冗余编码）；(c) 推理时输入也是分布偏中心化的，量化噪声被后续 layer 的非线性"平均掉"。<b>更深层的对应</b>：(i) <b>神经科学</b>——生物神经元的 spike 本质是 <b>1-bit 离散信号</b>，整个大脑用极低精度做高级认知，证明智能不依赖高精度连续表示；(ii) <b>信息论</b>——Shannon 的 rate-distortion 理论早就说过，对于结构化数据，有效信息量远小于原始 bit 数，量化只是逼近真实的"有效熵"；(iii) <b>稀疏编码理论</b>（Olshausen-Field 1996）——感觉皮层用稀疏低精度编码自然图像，效率远高于稠密表示；(iv) <b>佛学/认知科学的"够用就好"</b>——感知和决策从不追求精确，而是追求<b>足够好的辨别力</b>，这正是量化在做的事。这个观察反过来给个体启发：<b>追求"高精度"未必是智能的本质，"在正确的粒度上做对事"才是</b>。BigCat 你做跨学科类比时会注意到这个 pattern 反复出现——大脑、压缩算法、组织管理、个人决策，都在解同一个问题：<b>受限资源下保持有效辨别力</b>。</div></details>
-
-    <details><summary>5. 推理优化让"小模型 + 优化"和"大模型 + 默认设置"的成本曲线发生交叉——这对个体使用 AI 的策略意味着什么？</summary><div>关键事实：今天一个量化到 4-bit 的 Llama-3.1-70B 跑在 M3 Max 上，约等于一年前的 GPT-4 能力，<b>零边际成本 + 完全本地 + 离线可用</b>。一个 14B-32B 的小模型用 speculative + vLLM 服务，单 token 成本比直接调 API 低 5-20x。这意味着<b>能力曲线和成本曲线正在解耦</b>：以前"想用更强能力 = 多付钱"，现在"想用更强能力 = 选对模型 + 用对优化"。对个体策略的含义：(a) <b>按敏感度分流</b>——隐私强相关（家庭、健康、财务、私人想法）走本地量化模型，开放任务走云端最强模型；(b) <b>按延迟需求分流</b>——交互式打字走 speculative decoding 优化的小模型，批量任务走云端高吞吐；(c) <b>按预算长尾分流</b>——大量低价值高频查询（搜索、改写、翻译）走本地 / 小模型，少数高价值决策（重大判断、长链推理）才动用 Opus；(d) <b>"AI 工具箱"而非"AI 单工具"心态</b>——像选编程语言一样选模型，永远是 fit-for-purpose。BigCat 你追求"AI 超级个体"的本质，就是<b>设计自己的 LLM 推理栈</b>——一个本地 + 多云端、按数据敏感度和价值分级的路由系统。这套架构思维你在分布式系统里已经无比熟悉，迁移到个人 AI 工作流是顺势而为。一年内，"个人 AI 编排架构师"会成为有竞争力的隐形技能。</div></details>
-  </div>
+<div class="card think" data-tts="c404f3edd56f8f4f" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 为什么说"LLM 推理是显存带宽问题不是算力问题"？这个认知如何重塑你对 GPU 选型 / 成本估算 / 优化优先级的判断？</summary><div>核心数据：H100 算力 ~989 TFLOPS（FP16），显存带宽 ~3 TB/s。Llama-70B 推理 decode 一个 token，参数量 70B × 2 bytes = 140 GB 必须从显存搬到计算单元——理论极限 140/3000 ≈ 47ms，<b>无论算力多强，下界就是这个</b>。这就是"memory-bound"的真实含义。重塑判断：(a) <b>选卡看 HBM 带宽不是 TFLOPS</b>——H100 vs H200 算力一样，但 H200 显存 141GB / 4.8 TB/s 带宽，推理 LLM 直接快 40-60%；(b) <b>batch 大小是免费午餐</b>——同一次参数搬运服务多个请求，吞吐线性涨直到算力打满（这就是 continuous batching 的物理基础）；(c) <b>量化的真正价值是减少搬运</b>，不是减少计算——INT4 让搬运量从 140GB 降到 35GB，立刻 4x 加速；(d) <b>speculative decoding 利用"算力闲置"</b>——既然带宽是瓶颈，多算几个验证 token 几乎免费。BigCat 你的分布式背景里"I/O bound vs CPU bound"诊断习惯直接迁移过来：用 nvidia-smi 看 GPU 利用率，发现持续 30-50% 而不是 90%+ 时，几乎必然是带宽问题，加 batch / 加 speculative / 加量化都比换卡有效。</div></details>
+<details><summary>2. KV cache (Day 9) 和 prompt caching (Day 8) 听起来都在"缓存"，但它们解决的问题完全不同。说清楚区别后，你会怎么组合用？</summary><div>这是非常容易混淆的两层。<b>KV cache</b> 是<b>单次请求内部</b>的优化——生成第 N 个 token 时复用前 N-1 个 token 已经算好的 K/V，每次请求结束就丢弃。这是<b>推理引擎层</b>的事，对应用透明，不开等于 O(n³) 不可用。<b>Prompt caching</b> 是<b>跨请求之间</b>的优化——把多次请求都用的 system prompt / few-shot / 工具 schema 的 KV 持久化到显存或 SSD，下次请求命中就跳过 prefill。这是<b>应用层 + 服务端</b>共同优化，要应用主动标记缓存断点。<b>组合使用</b>：(a) 让你的 prompt 结构稳定不变的部分前置 → prompt caching 命中；(b) 单次推理内部，引擎自动用 KV cache；(c) 在 vLLM / SGLang 上还有第三层 <b>radix tree based prefix cache</b>——多个并发请求共享相同前缀的 KV，比 prompt caching 更细粒度且自动。三层叠加：跨请求 prefix 缓存 + 单请求 KV 缓存 + 显式 prompt caching = LLM 服务最完整的"缓存栈"。这个分层结构和数据库的 buffer pool / query plan cache / materialized view 几乎是一对一映射。</div></details>
+<details><summary>3. Speculative decoding 用"小模型猜 + 大模型验"的模式 —— 这个"廉价近似 + 精确验证"的思想能不能扩展到 Agent 工作流？</summary><div>能且已经在发生。映射模式：把<b>大模型当 verifier</b>，<b>小模型 / 工具 / 启发式当 proposer</b>。具体例子：(a) <b>多路径推理</b>——让 8B 模型并行生成 5 个解题思路，70B 模型只对最有希望的 1-2 个继续展开，成本比纯 70B 思考省 5-10x；(b) <b>工具调用预筛</b>——小模型先决定调哪个工具、参数大概是什么，大模型只在小模型不确定时介入；(c) <b>Code agent 中的 lint-then-think</b>——先跑 type checker / linter 拿"廉价信号"，把明显错误剔除，再让大模型集中处理真正难的；(d) <b>RAG 重排</b>——便宜的 BM25/embedding 召回 1000 条 → 中等模型 rerank 到 20 → 大模型只读 top-5。共同模式：<b>用便宜的过程切除大量明显错误的可能性，让昂贵的资源只处理高价值不确定性</b>。这其实是<b>所有工程系统应对"判断力昂贵 + 候选爆炸"的通用解</b>——查询优化器、CDN 命中分层、人类组织的"流水线审核 → 专家终审"都是这个模式。BigCat 你做"AI 超级个体"时这个思路特别重要：<b>不是所有问题都需要 Opus，先用 Haiku 过一遍，再用 Opus 处理 Haiku 标记为"不确定"或"高风险"的</b>——同样输出质量下成本能降 5-10x。</div></details>
+<details><summary>4. 量化是有损压缩，但 LLM 量化损失比预期小很多——这背后有什么深层结构性原因？和神经科学/信息论的什么发现可以对照？</summary><div>这是 ML 里一个深刻而美丽的现象，连结到几个跨学科观察。<b>表面原因</b>：(a) 神经网络权重是<b>钟形分布</b>，绝大部分集中在零附近，浪费高精度的 head/tail 几乎无信息；(b) 神经网络有<b>大量冗余</b>，多个权重的组合能补偿单个的量化误差（类似纠错码的冗余编码）；(c) 推理时输入也是分布偏中心化的，量化噪声被后续 layer 的非线性"平均掉"。<b>更深层的对应</b>：(i) <b>神经科学</b>——生物神经元的 spike 本质是 <b>1-bit 离散信号</b>，整个大脑用极低精度做高级认知，证明智能不依赖高精度连续表示；(ii) <b>信息论</b>——Shannon 的 rate-distortion 理论早就说过，对于结构化数据，有效信息量远小于原始 bit 数，量化只是逼近真实的"有效熵"；(iii) <b>稀疏编码理论</b>（Olshausen-Field 1996）——感觉皮层用稀疏低精度编码自然图像，效率远高于稠密表示；(iv) <b>佛学/认知科学的"够用就好"</b>——感知和决策从不追求精确，而是追求<b>足够好的辨别力</b>，这正是量化在做的事。这个观察反过来给个体启发：<b>追求"高精度"未必是智能的本质，"在正确的粒度上做对事"才是</b>。BigCat 你做跨学科类比时会注意到这个 pattern 反复出现——大脑、压缩算法、组织管理、个人决策，都在解同一个问题：<b>受限资源下保持有效辨别力</b>。</div></details>
+<details><summary>5. 推理优化让"小模型 + 优化"和"大模型 + 默认设置"的成本曲线发生交叉——这对个体使用 AI 的策略意味着什么？</summary><div>关键事实：今天一个量化到 4-bit 的 Llama-3.1-70B 跑在 M3 Max 上，约等于一年前的 GPT-4 能力，<b>零边际成本 + 完全本地 + 离线可用</b>。一个 14B-32B 的小模型用 speculative + vLLM 服务，单 token 成本比直接调 API 低 5-20x。这意味着<b>能力曲线和成本曲线正在解耦</b>：以前"想用更强能力 = 多付钱"，现在"想用更强能力 = 选对模型 + 用对优化"。对个体策略的含义：(a) <b>按敏感度分流</b>——隐私强相关（家庭、健康、财务、私人想法）走本地量化模型，开放任务走云端最强模型；(b) <b>按延迟需求分流</b>——交互式打字走 speculative decoding 优化的小模型，批量任务走云端高吞吐；(c) <b>按预算长尾分流</b>——大量低价值高频查询（搜索、改写、翻译）走本地 / 小模型，少数高价值决策（重大判断、长链推理）才动用 Opus；(d) <b>"AI 工具箱"而非"AI 单工具"心态</b>——像选编程语言一样选模型，永远是 fit-for-purpose。BigCat 你追求"AI 超级个体"的本质，就是<b>设计自己的 LLM 推理栈</b>——一个本地 + 多云端、按数据敏感度和价值分级的路由系统。这套架构思维你在分布式系统里已经无比熟悉，迁移到个人 AI 工作流是顺势而为。一年内，"个人 AI 编排架构师"会成为有竞争力的隐形技能。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 9 · 2026-05-26</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

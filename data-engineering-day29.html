@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：数据工程 — Day 29</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,39 +60,32 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：数据工程</h1>
-  <div class="meta">Day 29 · 2026-06-15 · 难度 ★★★☆☆</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="0f7aa560e4c76369">AI/ML 详解：数据工程</h1>
+<div class="meta">Day 29 · 2026-06-15 · 难度 ★★★☆☆</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
-<div class="card" style="border-left-color:#7b61ff">
-  <div class="section">
-    <p style="color:#cfd3df">同样的架构、同样的算力，喂不同的数据，训出来的模型差一个档次。2023 年之后业界的共识逐渐清晰：<strong>模型能力的天花板，越来越多由数据决定，而不是参数量</strong>。今天讲训练数据从「原始网页」变成「能训出好模型的语料」要经过的四道核心工序——合成、策展、去重、质量过滤。这是学术视角的「数据是怎么回事」，不是生产 ETL 的调参手册。</p>
-  </div>
+<div class="card" data-tts="dd3936b6525e67d8" style="border-left-color:#7b61ff">
+<div class="section">
+<p style="color:#cfd3df">同样的架构、同样的算力，喂不同的数据，训出来的模型差一个档次。2023 年之后业界的共识逐渐清晰：<strong>模型能力的天花板，越来越多由数据决定，而不是参数量</strong>。今天讲训练数据从「原始网页」变成「能训出好模型的语料」要经过的四道核心工序——合成、策展、去重、质量过滤。这是学术视角的「数据是怎么回事」，不是生产 ETL 的调参手册。</p>
 </div>
-
+</div>
 <!-- 1. Synthetic Data -->
-<div class="card">
-  <h2>合成数据<span class="en">Synthetic Data</span></h2>
-  <div class="tags"><span class="tag">数据生成</span><span class="tag purple">自举</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>合成数据 = 用一个强模型当「<strong>数据工厂</strong>」批量造训练样本，本质和 AlphaGo 的<strong>自我对弈（self-play）</strong>同源：不靠外部喂棋谱，让系统自己生成经验再从中学习。对后端的你，更熟的类比是<strong>用 faker 造测试夹具（fixtures）</strong>——只不过这里造的不是假数据填表，而是高质量的「指令-答案」对，用来真正训练模型。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：人工写的高质量数据<strong>又少、又贵、又不够多样</strong>。一个标注员一天写不了几百条优质问答，而模型要吃几百万条。<strong>Self-Instruct</strong>（Wang et al. 2022）给出的机制是「自举」：拿少量人写的<strong>种子任务</strong>当样例，让强模型照着风格生成大量全新的「指令+输入+输出」三元组，再<strong>过滤掉无效和重复</strong>的，回头去微调模型本身。用这套方法，原始 GPT-3 在指令遵循上有了接近人工标注版本的跃升。</p>
-    <p style="margin-top:8px"><strong>phi-1</strong>（Gunasekar et al. 2023，"Textbooks Are All You Need"）把这思路推到极致：用 GPT-3.5 生成「教科书质量」的合成代码教材，只用约 70 亿 token、13 亿参数的小模型，在 HumanEval 上做到 50.6% pass@1——<strong>数据质量直接换算成了等效参数量</strong>。这是「数据 > 规模」最有力的实证之一。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="1ad4e2c4fa246502">
+<h2>合成数据<span class="en">Synthetic Data</span></h2>
+<div class="tags"><span class="tag">数据生成</span><span class="tag purple">自举</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>合成数据 = 用一个强模型当「<strong>数据工厂</strong>」批量造训练样本，本质和 AlphaGo 的<strong>自我对弈（self-play）</strong>同源：不靠外部喂棋谱，让系统自己生成经验再从中学习。对后端的你，更熟的类比是<strong>用 faker 造测试夹具（fixtures）</strong>——只不过这里造的不是假数据填表，而是高质量的「指令-答案」对，用来真正训练模型。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：人工写的高质量数据<strong>又少、又贵、又不够多样</strong>。一个标注员一天写不了几百条优质问答，而模型要吃几百万条。<strong>Self-Instruct</strong>（Wang et al. 2022）给出的机制是「自举」：拿少量人写的<strong>种子任务</strong>当样例，让强模型照着风格生成大量全新的「指令+输入+输出」三元组，再<strong>过滤掉无效和重复</strong>的，回头去微调模型本身。用这套方法，原始 GPT-3 在指令遵循上有了接近人工标注版本的跃升。</p>
+<p style="margin-top:8px"><strong>phi-1</strong>（Gunasekar et al. 2023，"Textbooks Are All You Need"）把这思路推到极致：用 GPT-3.5 生成「教科书质量」的合成代码教材，只用约 70 亿 token、13 亿参数的小模型，在 HumanEval 上做到 50.6% pass@1——<strong>数据质量直接换算成了等效参数量</strong>。这是「数据 &gt; 规模」最有力的实证之一。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()  <span class="cmt"># 需要 ANTHROPIC_API_KEY</span>
 
@@ -109,51 +103,43 @@ seed = [<span class="str">"把这段话改写成正式语气"</span>, <span clas
 
 raw = <span class="fn">synthesize</span>(seed)
 <span class="cmt"># 关键：生成≠可用。必须过滤——丢掉与种子过于相似、格式错误、答案错的</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"合成数据是免费午餐，可以无限造"——错。用模型生成的数据训模型，存在<strong>模型坍缩（model collapse）</strong>风险：递归地拿合成数据再训，分布会越来越窄、尾部细节丢失，几代之后退化成「平均废话」。而且合成数据<strong>继承教师模型的偏见和错误</strong>——老师不会的，学生也学不到。所以合成数据几乎总要和真实数据<strong>混合</strong>，并加过滤把关。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：给孩子出练习题时，别一道道手写。拿 3-5 道你认可的「种子题」，让模型按同样的知识点和难度自举生成一批，再<strong>你来当过滤器</strong>挑出合格的。这正是 Self-Instruct 的微缩版——人定标准，模型扩产能。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 合成数据把「数据稀缺」问题转成「如何生成 + 如何过滤」问题——价值全在过滤环节，不在生成。<br>🤔 如果一个模型的训练数据越来越多由上一代模型生成，长期看整个互联网的语料会朝什么方向漂移？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"合成数据是免费午餐，可以无限造"——错。用模型生成的数据训模型，存在<strong>模型坍缩（model collapse）</strong>风险：递归地拿合成数据再训，分布会越来越窄、尾部细节丢失，几代之后退化成「平均废话」。而且合成数据<strong>继承教师模型的偏见和错误</strong>——老师不会的，学生也学不到。所以合成数据几乎总要和真实数据<strong>混合</strong>，并加过滤把关。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：给孩子出练习题时，别一道道手写。拿 3-5 道你认可的「种子题」，让模型按同样的知识点和难度自举生成一批，再<strong>你来当过滤器</strong>挑出合格的。这正是 Self-Instruct 的微缩版——人定标准，模型扩产能。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 合成数据把「数据稀缺」问题转成「如何生成 + 如何过滤」问题——价值全在过滤环节，不在生成。<br/>🤔 如果一个模型的训练数据越来越多由上一代模型生成，长期看整个互联网的语料会朝什么方向漂移？</div>
+</div>
+</div>
 <!-- 2. Data Curation -->
-<div class="card">
-  <h2>数据策展<span class="en">Data Curation</span></h2>
-  <div class="tags"><span class="tag">管线</span><span class="tag purple">ETL</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>数据策展就是大语言模型的 <strong>ETL 管线</strong>：原始 Common Crawl 网页是「<strong>数据湖</strong>」里的脏数据，要经过抽取、清洗、过滤、去重一连串 transform，才变成能进训练的「<strong>数据仓库</strong>」。每个阶段都是一个可独立度量增益的算子——和你搭数据管线时给每个 stage 加监控指标，是同一种工程纪律。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：原始网页<strong>绝大部分是垃圾</strong>——导航栏、广告、SEO 农场、乱码、模板化样板文字。直接拿去训练就是经典的 garbage in, garbage out。<strong>FineWeb</strong>（Penedo et al. 2024）系统化地公开了一条 15 万亿 token 的策展管线，核心阶段如下：</p>
-
+<div class="card" data-tts="462fb0f33d3d7b37">
+<h2>数据策展<span class="en">Data Curation</span></h2>
+<div class="tags"><span class="tag">管线</span><span class="tag purple">ETL</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>数据策展就是大语言模型的 <strong>ETL 管线</strong>：原始 Common Crawl 网页是「<strong>数据湖</strong>」里的脏数据，要经过抽取、清洗、过滤、去重一连串 transform，才变成能进训练的「<strong>数据仓库</strong>」。每个阶段都是一个可独立度量增益的算子——和你搭数据管线时给每个 stage 加监控指标，是同一种工程纪律。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：原始网页<strong>绝大部分是垃圾</strong>——导航栏、广告、SEO 农场、乱码、模板化样板文字。直接拿去训练就是经典的 garbage in, garbage out。<strong>FineWeb</strong>（Penedo et al. 2024）系统化地公开了一条 15 万亿 token 的策展管线，核心阶段如下：</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">网页语料策展管线（每步都丢掉大量数据）</b><br><br>
-<span class="box">原始 Common Crawl</span><br>
-<span class="arrow">↓ ①</span> 正文抽取（HTML → text，去导航/广告/页脚）<br>
-<span class="arrow">↓ ②</span> 语言识别（只留目标语言）<br>
-<span class="arrow">↓ ③</span> <span class="box o">质量过滤</span>（启发式 + 分类器，见概念 4）<br>
-<span class="arrow">↓ ④</span> <span class="box g">去重</span>（删近似重复，见概念 3）<br>
-<span class="arrow">↓ ⑤</span> 去污染（删掉混进来的 benchmark 测试集）<br>
-<span class="arrow">↓</span><br>
+<b style="color:#7b61ff">网页语料策展管线（每步都丢掉大量数据）</b><br/><br/>
+<span class="box">原始 Common Crawl</span><br/>
+<span class="arrow">↓ ①</span> 正文抽取（HTML → text，去导航/广告/页脚）<br/>
+<span class="arrow">↓ ②</span> 语言识别（只留目标语言）<br/>
+<span class="arrow">↓ ③</span> <span class="box o">质量过滤</span>（启发式 + 分类器，见概念 4）<br/>
+<span class="arrow">↓ ④</span> <span class="box g">去重</span>（删近似重复，见概念 3）<br/>
+<span class="arrow">↓ ⑤</span> 去污染（删掉混进来的 benchmark 测试集）<br/>
+<span class="arrow">↓</span><br/>
 <span class="box p">干净训练语料</span> <span style="color:#5a6378">（体量可能只剩原始的几个百分点）</span>
 </div>
-
-    <p style="margin-top:14px">FineWeb 真正的方法论贡献不是「这套流程」，而是<strong>每加一个阶段就训一个小模型、用下游 benchmark 量化它的增益</strong>——把「这步清洗有没有用」从拍脑袋变成可证伪的实验。去污染（decontamination）尤其关键：若测试集泄漏进训练数据，评测分数全是<strong>虚高的作弊分</strong>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">FineWeb 真正的方法论贡献不是「这套流程」，而是<strong>每加一个阶段就训一个小模型、用下游 benchmark 量化它的增益</strong>——把「这步清洗有没有用」从拍脑袋变成可证伪的实验。去污染（decontamination）尤其关键：若测试集泄漏进训练数据，评测分数全是<strong>虚高的作弊分</strong>。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> trafilatura  <span class="cmt"># 网页正文抽取，去掉导航/广告/页脚</span>
 
 <span class="cmt"># 极简管线：每个阶段都是可独立度量的过滤算子（lang/symbol 为示意函数）</span>
@@ -167,39 +153,33 @@ raw = <span class="fn">synthesize</span>(seed)
         <span class="kw">return</span> <span class="kw">None</span>
     <span class="kw">return</span> text
 <span class="cmt"># FineWeb 方法论：每加一个过滤阶段，训个小模型量化它对 benchmark 的增益</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"数据越多越好，多塞总没坏处"——错。Chinchilla 之后大家明白算力固定时<strong>质量和配比比绝对量更重要</strong>；脏数据不仅没增益，还会主动拉低模型、污染评测。策展的本质是<strong>做减法</strong>——15T 原始数据砍到几个百分点，留下的才是金子。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：建个人知识库（喂给 RAG）前，把「数据策展管线」的思路套上去——先抽正文、去掉网页噪声、删重复剪报、按主题分桶。你给 AI 的检索语料越干净，召回质量越高。脏进必然脏出，对个人知识库一样成立。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 数据策展的核心纪律是「每一步都要能量化它的增益」——把数据清洗从手艺变成可证伪的实验。<br>🤔 「去污染」要删掉训练集里的测试题。如果删不干净，模型评测高分到底证明了它会推理，还是只证明它背过答案？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"数据越多越好，多塞总没坏处"——错。Chinchilla 之后大家明白算力固定时<strong>质量和配比比绝对量更重要</strong>；脏数据不仅没增益，还会主动拉低模型、污染评测。策展的本质是<strong>做减法</strong>——15T 原始数据砍到几个百分点，留下的才是金子。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：建个人知识库（喂给 RAG）前，把「数据策展管线」的思路套上去——先抽正文、去掉网页噪声、删重复剪报、按主题分桶。你给 AI 的检索语料越干净，召回质量越高。脏进必然脏出，对个人知识库一样成立。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 数据策展的核心纪律是「每一步都要能量化它的增益」——把数据清洗从手艺变成可证伪的实验。<br/>🤔 「去污染」要删掉训练集里的测试题。如果删不干净，模型评测高分到底证明了它会推理，还是只证明它背过答案？</div>
+</div>
+</div>
 <!-- 3. Deduplication -->
-<div class="card">
-  <h2>去重<span class="en">Deduplication</span></h2>
-  <div class="tags"><span class="tag">MinHash</span><span class="tag purple">相似度</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>去重和你熟的<strong>内容寻址存储（content-addressable storage）/ Git 对象去重</strong>是一回事：同样内容只该存一份。难点在「近似重复」——同一篇文章被 1000 个站转载、改了标题和首段。精确哈希抓不住，需要<strong>MinHash</strong>，它扮演的角色类似<strong>布隆过滤器（Bloom filter）</strong>：用概率签名廉价判断「这两份是不是几乎一样」，而不做昂贵的逐字对比。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：网页语料<strong>重复率惊人</strong>。Lee et al. 2021（"Deduplicating Training Data Makes Language Models Better"）发现 C4 里有一句 61 词的英文句子重复了<strong>六万多次</strong>。重复带来三个害处：模型<strong>逐字背诵</strong>（隐私/版权风险）、<strong>算力浪费</strong>在冗余样本上、<strong>训练-测试泄漏</strong>。该论文证明：去重后模型背诵原文的概率降到约<strong>1/10</strong>，且用更少步数达到同等或更好的准确率。</p>
-    <p style="margin-top:8px">机制分两层：<strong>精确去重</strong>用哈希（整段一字不差才算重复）；<strong>近似去重</strong>用 MinHash + LSH。核心直觉是<strong>Jaccard 相似度</strong>——两个文档词集合的交集占并集的比例。直接算 N 篇两两对比是 O(n²)，海量语料下不可行。MinHash 的巧思：给每篇文档生成一个固定长度的「签名」，使得<strong>两签名相同位的比例 ≈ 它们的 Jaccard 相似度</strong>，于是相似度估计被压成廉价的签名比对，再配 LSH 把可能相似的文档分到同一个桶，只在桶内比较。</p>
-    <p style="margin-top:8px">但<strong>重复不是越少越好</strong>。Muennighoff et al. 2023（"Scaling Data-Constrained Language Models"）发现：数据受限时，<strong>有意重复（多跑几个 epoch）到约 4 轮，损失几乎和用全新数据没差别</strong>，之后才快速衰减。所以去重要删的是<strong>意外的网页冗余</strong>，不是禁止一切重复——刻意的 epoch 重复在预算内完全健康。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="ee7107169922b5f0">
+<h2>去重<span class="en">Deduplication</span></h2>
+<div class="tags"><span class="tag">MinHash</span><span class="tag purple">相似度</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>去重和你熟的<strong>内容寻址存储（content-addressable storage）/ Git 对象去重</strong>是一回事：同样内容只该存一份。难点在「近似重复」——同一篇文章被 1000 个站转载、改了标题和首段。精确哈希抓不住，需要<strong>MinHash</strong>，它扮演的角色类似<strong>布隆过滤器（Bloom filter）</strong>：用概率签名廉价判断「这两份是不是几乎一样」，而不做昂贵的逐字对比。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：网页语料<strong>重复率惊人</strong>。Lee et al. 2021（"Deduplicating Training Data Makes Language Models Better"）发现 C4 里有一句 61 词的英文句子重复了<strong>六万多次</strong>。重复带来三个害处：模型<strong>逐字背诵</strong>（隐私/版权风险）、<strong>算力浪费</strong>在冗余样本上、<strong>训练-测试泄漏</strong>。该论文证明：去重后模型背诵原文的概率降到约<strong>1/10</strong>，且用更少步数达到同等或更好的准确率。</p>
+<p style="margin-top:8px">机制分两层：<strong>精确去重</strong>用哈希（整段一字不差才算重复）；<strong>近似去重</strong>用 MinHash + LSH。核心直觉是<strong>Jaccard 相似度</strong>——两个文档词集合的交集占并集的比例。直接算 N 篇两两对比是 O(n²)，海量语料下不可行。MinHash 的巧思：给每篇文档生成一个固定长度的「签名」，使得<strong>两签名相同位的比例 ≈ 它们的 Jaccard 相似度</strong>，于是相似度估计被压成廉价的签名比对，再配 LSH 把可能相似的文档分到同一个桶，只在桶内比较。</p>
+<p style="margin-top:8px">但<strong>重复不是越少越好</strong>。Muennighoff et al. 2023（"Scaling Data-Constrained Language Models"）发现：数据受限时，<strong>有意重复（多跑几个 epoch）到约 4 轮，损失几乎和用全新数据没差别</strong>，之后才快速衰减。所以去重要删的是<strong>意外的网页冗余</strong>，不是禁止一切重复——刻意的 epoch 重复在预算内完全健康。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> datasketch <span class="kw">import</span> MinHash, MinHashLSH  <span class="cmt"># pip install datasketch</span>
 
 <span class="cmt"># 近似去重：用 MinHash 估计 Jaccard 相似度，避免 O(n²) 两两对比</span>
@@ -216,42 +196,36 @@ docs = {<span class="str">"d1"</span>: <span class="str">"今天天气不错 出
     <span class="kw">if</span> lsh.<span class="fn">query</span>(s):                  <span class="cmt"># 已有近似重复 → 跳过</span>
         <span class="kw">continue</span>
     lsh.<span class="fn">insert</span>(name, s)               <span class="cmt"># 否则入库</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"重复数据必须全删干净，一条不留"——错。把刻意的 epoch 重复也当冗余删掉，反而浪费了「在数据受限时重复利用」这个合法手段（Muennighoff：~4 轮内几乎无损）。要区分<strong>意外冗余</strong>（同文转载、模板样板）和<strong>有意重复</strong>（受控的多轮训练）——前者删，后者留。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：往 RAG / 笔记库灌资料前先做近似去重。同一篇文章你存了网页版、PDF 版、剪藏版，检索时它们会挤占 top-k、稀释多样性。一次 MinHash 去重，召回结果立刻清爽。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 去重的精髓是用概率签名把 O(n²) 的相似度比对压成线性——以及分清「该删的冗余」和「该留的重复」。<br>🤔 模型「逐字背诵」训练数据，和它「学会了泛化规律」，在行为上怎么区分？去重为什么能同时降低背诵又提升泛化？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"重复数据必须全删干净，一条不留"——错。把刻意的 epoch 重复也当冗余删掉，反而浪费了「在数据受限时重复利用」这个合法手段（Muennighoff：~4 轮内几乎无损）。要区分<strong>意外冗余</strong>（同文转载、模板样板）和<strong>有意重复</strong>（受控的多轮训练）——前者删，后者留。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：往 RAG / 笔记库灌资料前先做近似去重。同一篇文章你存了网页版、PDF 版、剪藏版，检索时它们会挤占 top-k、稀释多样性。一次 MinHash 去重，召回结果立刻清爽。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 去重的精髓是用概率签名把 O(n²) 的相似度比对压成线性——以及分清「该删的冗余」和「该留的重复」。<br/>🤔 模型「逐字背诵」训练数据，和它「学会了泛化规律」，在行为上怎么区分？去重为什么能同时降低背诵又提升泛化？</div>
+</div>
+</div>
 <!-- 4. Quality Filtering -->
-<div class="card">
-  <h2>质量过滤<span class="en">Quality Filtering</span></h2>
-  <div class="tags"><span class="tag">分类器</span><span class="tag orange">信噪比</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>质量过滤 = 给训练语料装一道<strong>垃圾邮件过滤器 / 内容评分门禁</strong>。和你熟的反垃圾系统同构：先用<strong>启发式规则</strong>（关键词、比例阈值）拦掉明显垃圾，再用一个<strong>训练好的分类器</strong>给灰色地带打分、按阈值放行。区别只在于这里过滤的不是邮件，而是要不要把这段文本喂给模型。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：去重之后仍有大量<strong>低价值文本</strong>——语法混乱的 SEO 农场、纯链接列表、无意义的机器生成内容。它们不重复，但对模型学习几乎没贡献甚至有害。质量过滤分两档机制：</p>
-    <ul>
-      <li><strong>启发式规则</strong>（如 Gopher 那套）：文档词数、平均词长、符号/词比例、bullet 行占比、是否含足够停用词——廉价、可解释，先粗筛；</li>
-      <li><strong>分类器过滤</strong>：训一个轻量分类器判断「这段文本像不像高质量参考语料（维基、教科书）」。<strong>FineWeb-Edu</strong> 用 LLM 给样本的「教育价值」打分，再训分类器复现这个分数，筛出 1.3T「教育级」语料——在 MMLU、ARC 这类知识/推理 benchmark 上带来显著提升。</li>
-    </ul>
-    <p style="margin-top:8px">关键工程直觉：<strong>用 LLM 打分太贵，过滤 15T token 跑不起</strong>。所以套路是「<strong>LLM 当老师标少量样本 → 训个 fastText/embedding 轻量分类器 → 用它跑全量</strong>」，每条几毫秒。这和 phi-1 的「textbook quality」筛选同源——好数据的定义，由一个可复制的打分器固化下来。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="fbaaf37ff0728c59">
+<h2>质量过滤<span class="en">Quality Filtering</span></h2>
+<div class="tags"><span class="tag">分类器</span><span class="tag orange">信噪比</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>质量过滤 = 给训练语料装一道<strong>垃圾邮件过滤器 / 内容评分门禁</strong>。和你熟的反垃圾系统同构：先用<strong>启发式规则</strong>（关键词、比例阈值）拦掉明显垃圾，再用一个<strong>训练好的分类器</strong>给灰色地带打分、按阈值放行。区别只在于这里过滤的不是邮件，而是要不要把这段文本喂给模型。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：去重之后仍有大量<strong>低价值文本</strong>——语法混乱的 SEO 农场、纯链接列表、无意义的机器生成内容。它们不重复，但对模型学习几乎没贡献甚至有害。质量过滤分两档机制：</p>
+<ul>
+<li><strong>启发式规则</strong>（如 Gopher 那套）：文档词数、平均词长、符号/词比例、bullet 行占比、是否含足够停用词——廉价、可解释，先粗筛；</li>
+<li><strong>分类器过滤</strong>：训一个轻量分类器判断「这段文本像不像高质量参考语料（维基、教科书）」。<strong>FineWeb-Edu</strong> 用 LLM 给样本的「教育价值」打分，再训分类器复现这个分数，筛出 1.3T「教育级」语料——在 MMLU、ARC 这类知识/推理 benchmark 上带来显著提升。</li>
+</ul>
+<p style="margin-top:8px">关键工程直觉：<strong>用 LLM 打分太贵，过滤 15T token 跑不起</strong>。所以套路是「<strong>LLM 当老师标少量样本 → 训个 fastText/embedding 轻量分类器 → 用它跑全量</strong>」，每条几毫秒。这和 phi-1 的「textbook quality」筛选同源——好数据的定义，由一个可复制的打分器固化下来。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()
 
@@ -265,55 +239,45 @@ client = Anthropic()
 
 <span class="cmt"># 保留 ≥3 分的。这批 LLM 标注用来训一个 fastText 轻量分类器，</span>
 <span class="cmt"># 真正过滤海量语料时跑那个分类器（每条几毫秒），而不是调 LLM</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"质量过滤越激进越好，门槛越高越干净"——错。过度过滤会<strong>损失多样性</strong>：若把「质量」定义成「像维基百科」，就会系统性删掉方言、口语、小众领域、非主流写作——模型变得书面化但僵硬、覆盖面窄。质量过滤是在<strong>信噪比和多样性之间权衡</strong>，不是单调地越严越好。"高质量"的定义本身就带价值判断。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：管理「待读清单」时套用分类器思路——先定几条你认可的「高信号」样本，让 AI 学你的口味给新文章打分，低分的直接归档。把稀缺的注意力只投给高信噪比的输入，本质和给训练语料做质量过滤是同一件事。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 质量过滤的工程套路是「LLM 标少量、轻分类器跑全量」；它的根本张力是信噪比 vs 多样性，没有免费的「越干净越好」。<br>🤔 当「高质量」由一个分类器定义，而这个分类器又由人类偏好训练时——我们到底在过滤噪声，还是在悄悄给模型灌输某种世界观？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"质量过滤越激进越好，门槛越高越干净"——错。过度过滤会<strong>损失多样性</strong>：若把「质量」定义成「像维基百科」，就会系统性删掉方言、口语、小众领域、非主流写作——模型变得书面化但僵硬、覆盖面窄。质量过滤是在<strong>信噪比和多样性之间权衡</strong>，不是单调地越严越好。"高质量"的定义本身就带价值判断。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：管理「待读清单」时套用分类器思路——先定几条你认可的「高信号」样本，让 AI 学你的口味给新文章打分，低分的直接归档。把稀缺的注意力只投给高信噪比的输入，本质和给训练语料做质量过滤是同一件事。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 质量过滤的工程套路是「LLM 标少量、轻分类器跑全量」；它的根本张力是信噪比 vs 多样性，没有免费的「越干净越好」。<br/>🤔 当「高质量」由一个分类器定义，而这个分类器又由人类偏好训练时——我们到底在过滤噪声，还是在悄悄给模型灌输某种世界观？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/2406.17557" target="_blank">FineWeb (Penedo et al. 2024)</a> — 15T token 策展管线的逐阶段消融，数据工程的当代标杆，必读</li>
-      <li><a href="https://arxiv.org/abs/2107.06499" target="_blank">Deduplicating Training Data (Lee et al. 2021)</a> — 去重为何让模型更好的奠基性实证</li>
-      <li><a href="https://arxiv.org/abs/2212.10560" target="_blank">Self-Instruct (Wang et al. 2022)</a> — 合成数据「自举」的代表性方法</li>
-      <li><a href="https://arxiv.org/abs/2306.11644" target="_blank">Textbooks Are All You Need / phi-1 (Gunasekar et al. 2023)</a> — 数据质量换算等效参数量的极致案例</li>
-      <li><a href="https://arxiv.org/abs/2305.16264" target="_blank">Scaling Data-Constrained LMs (Muennighoff et al. 2023)</a> — 数据受限下重复 ~4 epoch 几乎无损的实验</li>
-    </ul>
-  </div>
+<div class="card" data-tts="1f31f47ce2dd9df0" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/2406.17557" target="_blank">FineWeb (Penedo et al. 2024)</a> — 15T token 策展管线的逐阶段消融，数据工程的当代标杆，必读</li>
+<li><a href="https://arxiv.org/abs/2107.06499" target="_blank">Deduplicating Training Data (Lee et al. 2021)</a> — 去重为何让模型更好的奠基性实证</li>
+<li><a href="https://arxiv.org/abs/2212.10560" target="_blank">Self-Instruct (Wang et al. 2022)</a> — 合成数据「自举」的代表性方法</li>
+<li><a href="https://arxiv.org/abs/2306.11644" target="_blank">Textbooks Are All You Need / phi-1 (Gunasekar et al. 2023)</a> — 数据质量换算等效参数量的极致案例</li>
+<li><a href="https://arxiv.org/abs/2305.16264" target="_blank">Scaling Data-Constrained LMs (Muennighoff et al. 2023)</a> — 数据受限下重复 ~4 epoch 几乎无损的实验</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 合成数据（造数据）和质量过滤（删数据）看似相反，为什么常被放在同一条管线里互补使用？</summary><div>它们是同一目标的两面：<strong>提高语料的平均信息质量</strong>。质量过滤是<strong>做减法</strong>——从既有海量真实数据里删掉低价值部分；合成数据是<strong>做加法</strong>——在真实数据稀缺或覆盖不到的地方补充高质量样本（如某类罕见任务、某种推理格式）。两者都依赖「能判断什么是好数据」这个核心能力：过滤用判断力打分删除，合成用判断力生成筛选。phi-1 同时用了两者——既从网上筛「教科书质量」真实数据，又用 GPT-3.5 合成教材，混合训练。更深一层：当真实优质数据被开采殆尽（高质量人类文本是有限资源），合成会从「补充」变成「主力」，而过滤的把关作用会更关键——否则模型坍缩风险陡增。BigCat 你的分布式背景里有个对应直觉：缓存命中率上不去时，既可以清理冷数据（过滤），也可以预热热数据（合成）——两手一起才稳。</div></details>
-
-    <details><summary>2. Muennighoff 发现数据可重复 ~4 epoch 几乎无损，但 Lee 又证明去重让模型更好。这两个结论矛盾吗？</summary><div>不矛盾，因为它们说的是<strong>两种不同的重复</strong>。Lee 针对的是<strong>数据集内部的意外冗余</strong>——同一句话在语料里出现六万次，这是分布的严重倾斜：模型会过度拟合那句话、逐字背诵、且这些「免费」的重复挤占了本可学习多样内容的梯度更新。Muennighoff 针对的是<strong>整个干净数据集被有控制地多轮遍历（epoch）</strong>——前提是数据已经去过重、分布健康，此时重复是均匀施加在全体样本上的。区别在于：意外冗余是<strong>局部、不均匀</strong>的过度曝光（有害），epoch 重复是<strong>全局、均匀</strong>的再利用（受限预算下健康）。类比数据库：一个热 key 被打爆（倾斜，要治理）vs 整个表被多次全量扫描（正常批处理）。所以正确顺序是<strong>先去重、再决定跑几个 epoch</strong>——两个结论恰好拼成一条完整的数据策略。</div></details>
-
-    <details><summary>3. 如果未来互联网内容越来越多由 AI 生成，下一代模型不可避免要在「含大量合成数据」的网络上训练，会发生什么？</summary><div>这是「<strong>模型坍缩</strong>」假说的现实版本，也是当前最受关注的开放问题之一。理论担忧：模型生成的文本相比人类文本，<strong>分布更窄、尾部（罕见但真实的表达、少数观点、长尾事实）被系统性削弱</strong>。若新模型大量学旧模型的输出，几代之后分布持续收窄，最终退化成「平滑而贫乏的平均」——像把 JPEG 反复压缩重存，细节一轮轮消失。但现实没这么悲观，缓解手段在被积极研究：(a) 真实数据「锚定」——始终保留足量人类原始数据作压舱石；(b) 来源标注与过滤——识别并控制合成数据占比；(c) 合成数据的质量门禁——只让通过严格过滤的高质量合成内容进入。更深的问题对 BigCat 这样关注复杂性科学的人很有意思：这是一个<strong>带反馈回路的动力系统</strong>——模型塑造内容、内容又训练模型。系统会收敛到一个稳定点，还是持续退化，取决于「人类新增的真实信息」这个外部能量输入能否压过合成回路的熵增。这本质是个开放系统能否维持负熵的问题。</div></details>
-
-    <details><summary>4. 「高质量数据」的定义由人类偏好和分类器固化——这在数据层面悄悄做了哪些价值选择？对模型的世界观意味着什么？</summary><div>这是数据工程里最容易被忽视的<strong>权力问题</strong>。每一道过滤器都是一次隐性的价值排序：把「像维基百科/教科书」当高质量，就把<strong>正式书面语、主流叙事、英语中心、学术规范</strong>定义成了「好」，同时把方言、口语、民间知识、非西方视角、少数群体表达打成「低质量」过滤掉。模型最终的世界观，是这些过滤决策的累积投影——它"觉得"世界是什么样，很大程度上是策展者（通常是少数科技公司的工程师）认为世界应该是什么样。这带来几个具体后果：(a) <strong>能力偏斜</strong>——模型在被判定为高质量的领域（编程、学术英语）强，在被过滤掉的领域（小语种、口语对话）弱；(b) <strong>规范同质化</strong>——大家都用相似的「质量分类器」，不同模型的偏好趋同，多样性在生态层面流失；(c) <strong>难以审计</strong>——价值判断被编码进一个分类器的权重里，外人看不见也质疑不了。对追求「AI 超级个体」的人，启示是：不要把任何模型的输出当中立真理——它带着训练数据策展者的价值指纹。保持对「谁定义了这个模型眼中的好」的清醒，本身就是一种关键的元能力。</div></details>
-  </div>
+<div class="card think" data-tts="1786182de8901413" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 合成数据（造数据）和质量过滤（删数据）看似相反，为什么常被放在同一条管线里互补使用？</summary><div>它们是同一目标的两面：<strong>提高语料的平均信息质量</strong>。质量过滤是<strong>做减法</strong>——从既有海量真实数据里删掉低价值部分；合成数据是<strong>做加法</strong>——在真实数据稀缺或覆盖不到的地方补充高质量样本（如某类罕见任务、某种推理格式）。两者都依赖「能判断什么是好数据」这个核心能力：过滤用判断力打分删除，合成用判断力生成筛选。phi-1 同时用了两者——既从网上筛「教科书质量」真实数据，又用 GPT-3.5 合成教材，混合训练。更深一层：当真实优质数据被开采殆尽（高质量人类文本是有限资源），合成会从「补充」变成「主力」，而过滤的把关作用会更关键——否则模型坍缩风险陡增。BigCat 你的分布式背景里有个对应直觉：缓存命中率上不去时，既可以清理冷数据（过滤），也可以预热热数据（合成）——两手一起才稳。</div></details>
+<details><summary>2. Muennighoff 发现数据可重复 ~4 epoch 几乎无损，但 Lee 又证明去重让模型更好。这两个结论矛盾吗？</summary><div>不矛盾，因为它们说的是<strong>两种不同的重复</strong>。Lee 针对的是<strong>数据集内部的意外冗余</strong>——同一句话在语料里出现六万次，这是分布的严重倾斜：模型会过度拟合那句话、逐字背诵、且这些「免费」的重复挤占了本可学习多样内容的梯度更新。Muennighoff 针对的是<strong>整个干净数据集被有控制地多轮遍历（epoch）</strong>——前提是数据已经去过重、分布健康，此时重复是均匀施加在全体样本上的。区别在于：意外冗余是<strong>局部、不均匀</strong>的过度曝光（有害），epoch 重复是<strong>全局、均匀</strong>的再利用（受限预算下健康）。类比数据库：一个热 key 被打爆（倾斜，要治理）vs 整个表被多次全量扫描（正常批处理）。所以正确顺序是<strong>先去重、再决定跑几个 epoch</strong>——两个结论恰好拼成一条完整的数据策略。</div></details>
+<details><summary>3. 如果未来互联网内容越来越多由 AI 生成，下一代模型不可避免要在「含大量合成数据」的网络上训练，会发生什么？</summary><div>这是「<strong>模型坍缩</strong>」假说的现实版本，也是当前最受关注的开放问题之一。理论担忧：模型生成的文本相比人类文本，<strong>分布更窄、尾部（罕见但真实的表达、少数观点、长尾事实）被系统性削弱</strong>。若新模型大量学旧模型的输出，几代之后分布持续收窄，最终退化成「平滑而贫乏的平均」——像把 JPEG 反复压缩重存，细节一轮轮消失。但现实没这么悲观，缓解手段在被积极研究：(a) 真实数据「锚定」——始终保留足量人类原始数据作压舱石；(b) 来源标注与过滤——识别并控制合成数据占比；(c) 合成数据的质量门禁——只让通过严格过滤的高质量合成内容进入。更深的问题对 BigCat 这样关注复杂性科学的人很有意思：这是一个<strong>带反馈回路的动力系统</strong>——模型塑造内容、内容又训练模型。系统会收敛到一个稳定点，还是持续退化，取决于「人类新增的真实信息」这个外部能量输入能否压过合成回路的熵增。这本质是个开放系统能否维持负熵的问题。</div></details>
+<details><summary>4. 「高质量数据」的定义由人类偏好和分类器固化——这在数据层面悄悄做了哪些价值选择？对模型的世界观意味着什么？</summary><div>这是数据工程里最容易被忽视的<strong>权力问题</strong>。每一道过滤器都是一次隐性的价值排序：把「像维基百科/教科书」当高质量，就把<strong>正式书面语、主流叙事、英语中心、学术规范</strong>定义成了「好」，同时把方言、口语、民间知识、非西方视角、少数群体表达打成「低质量」过滤掉。模型最终的世界观，是这些过滤决策的累积投影——它"觉得"世界是什么样，很大程度上是策展者（通常是少数科技公司的工程师）认为世界应该是什么样。这带来几个具体后果：(a) <strong>能力偏斜</strong>——模型在被判定为高质量的领域（编程、学术英语）强，在被过滤掉的领域（小语种、口语对话）弱；(b) <strong>规范同质化</strong>——大家都用相似的「质量分类器」，不同模型的偏好趋同，多样性在生态层面流失；(c) <strong>难以审计</strong>——价值判断被编码进一个分类器的权重里，外人看不见也质疑不了。对追求「AI 超级个体」的人，启示是：不要把任何模型的输出当中立真理——它带着训练数据策展者的价值指纹。保持对「谁定义了这个模型眼中的好」的清醒，本身就是一种关键的元能力。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 29 · 2026-06-15</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

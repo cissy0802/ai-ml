@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：幻觉与校准机制 — Day 48</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,42 +60,34 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：幻觉与校准机制</h1>
-  <div class="meta">Day 48 · 2026-07-05 · 难度 ★★★☆☆</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="87e9d35f932c7ac0">AI/ML 详解：幻觉与校准机制</h1>
+<div class="meta">Day 48 · 2026-07-05 · 难度 ★★★☆☆</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
-  <a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+<a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
     工程对应 → super-individual D10：幻觉治理（怎么在生产里防幻觉、加护栏、做验证）
   </a>
-  <div style="color:#8b92a8;font-size:0.84rem;margin-top:6px">本期讲<b>机制</b>：为什么会编、置信度为什么不可信、对齐为什么把它变糟。「怎么治」归工程周刊。</div>
+<div style="color:#8b92a8;font-size:0.84rem;margin-top:6px">本期讲<b>机制</b>：为什么会编、置信度为什么不可信、对齐为什么把它变糟。「怎么治」归工程周刊。</div>
 </div>
-
-
 <!-- 1. 幻觉的统计根源 -->
-<div class="card">
-  <h2>幻觉的统计根源<span class="en">Statistical Origin of Hallucination</span></h2>
-  <div class="tags"><span class="tag">机制</span><span class="tag purple">训练目标</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>把 LLM 想成一个<b>永远返回 200 OK 的 API</b>：你查一条不存在的记录，它不会返回 <code>404</code> 或 <code>null</code>，而是<b>就地编一条格式完美的 response</b> 给你。问题不在它"想骗你"——而在它的架构里根本<b>没有"查不到"这个返回值</b>。每一步它都必须吐一个 token，"沉默"或"未知"从来不是默认选项。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>先破除一个误解：幻觉<b>不是 bug，是训练目标的数学必然</b>。LLM 干的是 <strong>next-token prediction</strong>（预测下一个词）——本质是对语言做<b>密度估计</b>，学一个概率分布 P(下一个词 | 前文)。这个目标里<b>从头到尾没有"事实核查"这一项</b>：模型被奖励"说得像训练数据"，不是"说得对"。</p>
-    <p style="margin-top:8px">OpenAI 的 Kalai 等人 2025 年把这件事讲透了：<b>即使训练语料 100% 无误</b>，交叉熵目标本身也会逼出幻觉。直觉是——生成一个有效答案，难度不低于一道<b>二分类题</b>"这句话对不对"；而对于训练里只出现过一两次的冷门事实（一个人的生日、一篇论文的作者），模型<b>没有足够统计信号</b>把它和相似的错误答案区分开，于是错误率有一个<b>不可消除的下界</b>。</p>
-    <p style="margin-top:8px">更狠的一层在<strong>评估激励</strong>：几乎所有 benchmark 都按"答对得 1 分、答错和留白都得 0 分"打分。在这种规则下，<b>蒙一个</b>的期望得分严格高于<b>老实说"我不知道"</b>——就像标准化考试里空着不如猜。于是整个训练-评估流水线，系统性地<b>把模型训练成一个自信的应试者</b>，而不是一个诚实的知情者。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="877550d9da8fbfe3">
+<h2>幻觉的统计根源<span class="en">Statistical Origin of Hallucination</span></h2>
+<div class="tags"><span class="tag">机制</span><span class="tag purple">训练目标</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>把 LLM 想成一个<b>永远返回 200 OK 的 API</b>：你查一条不存在的记录，它不会返回 <code>404</code> 或 <code>null</code>，而是<b>就地编一条格式完美的 response</b> 给你。问题不在它"想骗你"——而在它的架构里根本<b>没有"查不到"这个返回值</b>。每一步它都必须吐一个 token，"沉默"或"未知"从来不是默认选项。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>先破除一个误解：幻觉<b>不是 bug，是训练目标的数学必然</b>。LLM 干的是 <strong>next-token prediction</strong>（预测下一个词）——本质是对语言做<b>密度估计</b>，学一个概率分布 P(下一个词 | 前文)。这个目标里<b>从头到尾没有"事实核查"这一项</b>：模型被奖励"说得像训练数据"，不是"说得对"。</p>
+<p style="margin-top:8px">OpenAI 的 Kalai 等人 2025 年把这件事讲透了：<b>即使训练语料 100% 无误</b>，交叉熵目标本身也会逼出幻觉。直觉是——生成一个有效答案，难度不低于一道<b>二分类题</b>"这句话对不对"；而对于训练里只出现过一两次的冷门事实（一个人的生日、一篇论文的作者），模型<b>没有足够统计信号</b>把它和相似的错误答案区分开，于是错误率有一个<b>不可消除的下界</b>。</p>
+<p style="margin-top:8px">更狠的一层在<strong>评估激励</strong>：几乎所有 benchmark 都按"答对得 1 分、答错和留白都得 0 分"打分。在这种规则下，<b>蒙一个</b>的期望得分严格高于<b>老实说"我不知道"</b>——就像标准化考试里空着不如猜。于是整个训练-评估流水线，系统性地<b>把模型训练成一个自信的应试者</b>，而不是一个诚实的知情者。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
 client = OpenAI()  <span class="cmt"># 需要 OPENAI_API_KEY</span>
 
@@ -112,52 +105,43 @@ msg = r.choices[0].message.content
 <span class="cmt"># 模型「自信地编」，高置信 ≠ 有依据。这正是下一节要量化的问题。</span>
 lp = r.choices[0].logprobs.content
 <span class="fn">print</span>(<span class="fn">sum</span>(t.logprob <span class="kw">for</span> t <span class="kw">in</span> lp) / <span class="fn">len</span>(lp))  <span class="cmt"># 平均 logprob</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"幻觉是因为训练数据里有错，清洗数据就能根治"——错。Kalai 等人的核心结论恰恰是：<b>数据完美也无法根治</b>，因为病根在目标函数和评估规则，不在语料脏。清洗数据能降低某类幻觉，但只要"蒙比留白得分高"，模型就永远有编造的动机。</div>
-    <div class="exercise" style="margin-top:8px">📌 场景：让 AI 帮你做文献综述时，<b>凡是它给出的"具体引用"（论文标题、作者、年份、页码）默认当成待核实的猜测</b>，而不是事实。冷门、低频的信息正是幻觉高发区——你的验证力气要按"这条信息在训练语料里有多常见"来分配。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 幻觉不是模型"坏了"，是它被训练成"宁可蒙不可空"的应试者——病根在目标和评分，不在数据。<br>🤔 如果把评估规则改成"答错倒扣、留白得 0"，模型会不会自动学会说"我不知道"？这暗示了什么治理方向？</div>
-  </div>
 </div>
-
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"幻觉是因为训练数据里有错，清洗数据就能根治"——错。Kalai 等人的核心结论恰恰是：<b>数据完美也无法根治</b>，因为病根在目标函数和评估规则，不在语料脏。清洗数据能降低某类幻觉，但只要"蒙比留白得分高"，模型就永远有编造的动机。</div>
+<div class="exercise" style="margin-top:8px">📌 场景：让 AI 帮你做文献综述时，<b>凡是它给出的"具体引用"（论文标题、作者、年份、页码）默认当成待核实的猜测</b>，而不是事实。冷门、低频的信息正是幻觉高发区——你的验证力气要按"这条信息在训练语料里有多常见"来分配。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 幻觉不是模型"坏了"，是它被训练成"宁可蒙不可空"的应试者——病根在目标和评分，不在数据。<br/>🤔 如果把评估规则改成"答错倒扣、留白得 0"，模型会不会自动学会说"我不知道"？这暗示了什么治理方向？</div>
+</div>
+</div>
 <!-- 2. 校准 -->
-<div class="card">
-  <h2>校准<span class="en">Calibration</span></h2>
-  <div class="tags"><span class="tag">度量</span><span class="tag orange">置信度</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>校准好不好，看<b>天气预报</b>就懂：一个预报员说了 100 次"70% 会下雨"，如果这些天里<b>正好约 70 天真下了</b>，他就是<b>校准良好（well-calibrated）</b>。跟他有多"准"是两回事——他可以每次都说 70% 从不说 100%（不够 sharp），但只要频率对得上，置信度就是<b>可信的信号</b>。LLM 的置信度能不能当告警阈值用，取决于同一件事。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>模型给每个答案都附带一个隐含置信度（token 概率）。<strong>校准</strong>问的是：<b>它说的置信度，和实际正确率对不对得上？</b>把预测按置信度分桶，理想情况下"置信 0.8 那一桶里，正好 80% 是对的"。量化指标是 <strong>ECE（Expected Calibration Error，期望校准误差）</strong>——各桶「平均置信度」与「实际准确率」之差的加权绝对值，越接近 0 越好：</p>
-
+<div class="card" data-tts="8a75418c0007c17b">
+<h2>校准<span class="en">Calibration</span></h2>
+<div class="tags"><span class="tag">度量</span><span class="tag orange">置信度</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>校准好不好，看<b>天气预报</b>就懂：一个预报员说了 100 次"70% 会下雨"，如果这些天里<b>正好约 70 天真下了</b>，他就是<b>校准良好（well-calibrated）</b>。跟他有多"准"是两回事——他可以每次都说 70% 从不说 100%（不够 sharp），但只要频率对得上，置信度就是<b>可信的信号</b>。LLM 的置信度能不能当告警阈值用，取决于同一件事。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>模型给每个答案都附带一个隐含置信度（token 概率）。<strong>校准</strong>问的是：<b>它说的置信度，和实际正确率对不对得上？</b>把预测按置信度分桶，理想情况下"置信 0.8 那一桶里，正好 80% 是对的"。量化指标是 <strong>ECE（Expected Calibration Error，期望校准误差）</strong>——各桶「平均置信度」与「实际准确率」之差的加权绝对值，越接近 0 越好：</p>
 <div class="diagram" style="margin-top:14px">
-<span style="color:#8b92a8">可靠性图（Reliability Diagram）：x=模型置信度，y=实际准确率</span><br><br>
-1.0 ┤ <span style="color:#5a6378">理想=对角线（说 p% 就有 p% 对）</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5a6378">╱</span><br>
-0.7 ┤ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5a6378">╱</span> &nbsp;<span class="bar" style="width:14px;height:16px"></span> <span style="color:#8b92a8">← 理想</span><br>
-0.5 ┤ &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5a6378">╱</span> &nbsp;<span class="bar" style="width:14px;height:34px;background:linear-gradient(180deg,#ff6b6b,#ff8e8e)"></span> <span style="color:#ff8e8e">← 实测</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;│ <span style="color:#5a6378">╱</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;└────────────────────→ 置信度<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.7&nbsp;&nbsp;&nbsp;&nbsp;0.9<br>
+<span style="color:#8b92a8">可靠性图（Reliability Diagram）：x=模型置信度，y=实际准确率</span><br/><br/>
+1.0 ┤ <span style="color:#5a6378">理想=对角线（说 p% 就有 p% 对）</span><br/>
+    │                     <span style="color:#5a6378">╱</span><br/>
+0.7 ┤            <span style="color:#5a6378">╱</span>  <span class="bar" style="width:14px;height:16px"></span> <span style="color:#8b92a8">← 理想</span><br/>
+0.5 ┤     <span style="color:#5a6378">╱</span>  <span class="bar" style="width:14px;height:34px;background:linear-gradient(180deg,#ff6b6b,#ff8e8e)"></span> <span style="color:#ff8e8e">← 实测</span><br/>
+    │ <span style="color:#5a6378">╱</span><br/>
+    └────────────────────→ 置信度<br/>
+       0.5      0.7    0.9<br/>
 <span style="color:#ff8e8e">↑ 曲线掉在对角线下方 = 过度自信（overconfident）：说 0.9 其实只对 0.6</span>
 </div>
-
-    <p style="margin-top:14px">经典修法叫 <strong>温度缩放（Temperature Scaling，Guo 等人 2017）</strong>：不动模型权重，只把输出 logits 除以一个学到的温度 T，再过 softmax。<b>T&gt;1 把过尖的分布压平</b>，让置信度回落到和真实准确率一致——一个参数、事后校准、不掉准确率。注意它治的是"<b>置信度数值不可信</b>"，<b>治不了幻觉本身</b>：校准让你<b>知道该信几分</b>，但不会让错答案变对。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">经典修法叫 <strong>温度缩放（Temperature Scaling，Guo 等人 2017）</strong>：不动模型权重，只把输出 logits 除以一个学到的温度 T，再过 softmax。<b>T&gt;1 把过尖的分布压平</b>，让置信度回落到和真实准确率一致——一个参数、事后校准、不掉准确率。注意它治的是"<b>置信度数值不可信</b>"，<b>治不了幻觉本身</b>：校准让你<b>知道该信几分</b>，但不会让错答案变对。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
 
 <span class="kw">def</span> <span class="fn">expected_calibration_error</span>(confs, correct, n_bins=10):
@@ -178,49 +162,40 @@ lp = r.choices[0].logprobs.content
 confs   = np.<span class="fn">array</span>([0.9, 0.9, 0.8, 0.95, 0.7])
 correct = np.<span class="fn">array</span>([1,   0,   0,   1,    0])   <span class="cmt"># 5 题只对 2 题</span>
 <span class="fn">print</span>(<span class="fn">f</span><span class="str">"ECE = {expected_calibration_error(confs, correct):.3f}"</span>)</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"校准好 = 模型准"——两码事。一个只会瞎猜、准确率 50% 的模型，只要它每次都<b>老实报 0.5 置信度</b>，就是完美校准的。校准衡量的是"<b>置信度可不可信</b>"，不是"<b>答案对不对</b>"。你要的是两者兼得：高准确率<b>且</b>置信度诚实。</div>
-    <div class="exercise" style="margin-top:8px">📌 场景：搭个"AI 辅助决策"流水线时，别把模型输出直接当结论——先<b>拿一批有标准答案的历史问题跑一遍，画可靠性图</b>，看它在你这个领域是不是过度自信。如果它说"很确定"时实际只对六成，你就知道要给它的"确定"打个七折再采信。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 校准 = 置信度和真实正确率对齐；它让你知道"该信几分"，但不会让错答案变对。<br>🤔 你现在采信 AI 的哪些判断，是被它<b>语气的确定性</b>说服的，而不是被<b>校准过的置信度</b>说服的？</div>
-  </div>
 </div>
-
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"校准好 = 模型准"——两码事。一个只会瞎猜、准确率 50% 的模型，只要它每次都<b>老实报 0.5 置信度</b>，就是完美校准的。校准衡量的是"<b>置信度可不可信</b>"，不是"<b>答案对不对</b>"。你要的是两者兼得：高准确率<b>且</b>置信度诚实。</div>
+<div class="exercise" style="margin-top:8px">📌 场景：搭个"AI 辅助决策"流水线时，别把模型输出直接当结论——先<b>拿一批有标准答案的历史问题跑一遍，画可靠性图</b>，看它在你这个领域是不是过度自信。如果它说"很确定"时实际只对六成，你就知道要给它的"确定"打个七折再采信。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 校准 = 置信度和真实正确率对齐；它让你知道"该信几分"，但不会让错答案变对。<br/>🤔 你现在采信 AI 的哪些判断，是被它<b>语气的确定性</b>说服的，而不是被<b>校准过的置信度</b>说服的？</div>
+</div>
+</div>
 <!-- 3. RLHF 为何损害校准 -->
-<div class="card">
-  <h2>RLHF 为何损害校准<span class="en">Why RLHF Hurts Calibration</span></h2>
-  <div class="tags"><span class="tag">对齐</span><span class="tag purple">mode collapse</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>想象一个<b>诚实但会说"这个我不太确定"的顾问</b>，被你用"客户满意度 KPI"优化了半年——他慢慢变成一个<b>永远斩钉截铁的销售</b>。听起来更可信、更让人舒服，实际却更不准。RLHF 对模型做的正是这件事：为了讨好人类偏好，它牺牲了置信度的诚实性。分布式里的老对手你熟——<b>为了 p99 体验，牺牲了一致性</b>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>反直觉的事实：<b>预训练</b>后的原始模型（base model）其实<b>校准得相当好</b>——它只做 next-token 预测，概率就是它对语言的真实统计信念。但经过 <strong>RLHF（基于人类反馈的强化学习，让模型对齐人类偏好）</strong> 和指令微调后，校准<b>显著变差</b>。GPT-4 技术报告里有一张著名的图：预训练版 GPT-4 的可靠性曲线几乎贴着对角线，RLHF 之后曲线<b>明显鼓向过度自信一侧</b>。</p>
-    <p style="margin-top:8px">机制在于<strong>人类偏好的形状</strong>。标注者给回答打分时，系统性地更爱<b>自信、流畅、给出明确结论</b>的回答，不爱"这取决于…""我不确定"这类犹豫表达。奖励模型把这个偏好学了进去，PPO 优化时就<b>把概率质量往少数几个高置信表达上挤</b>——这叫 <strong>mode collapse（模式坍缩）</strong>：分布从"诚实地摊开不确定性"塌成"总是一副很确定的样子"。</p>
-
+<div class="card" data-tts="2db137d06bf4ab10">
+<h2>RLHF 为何损害校准<span class="en">Why RLHF Hurts Calibration</span></h2>
+<div class="tags"><span class="tag">对齐</span><span class="tag purple">mode collapse</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>想象一个<b>诚实但会说"这个我不太确定"的顾问</b>，被你用"客户满意度 KPI"优化了半年——他慢慢变成一个<b>永远斩钉截铁的销售</b>。听起来更可信、更让人舒服，实际却更不准。RLHF 对模型做的正是这件事：为了讨好人类偏好，它牺牲了置信度的诚实性。分布式里的老对手你熟——<b>为了 p99 体验，牺牲了一致性</b>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>反直觉的事实：<b>预训练</b>后的原始模型（base model）其实<b>校准得相当好</b>——它只做 next-token 预测，概率就是它对语言的真实统计信念。但经过 <strong>RLHF（基于人类反馈的强化学习，让模型对齐人类偏好）</strong> 和指令微调后，校准<b>显著变差</b>。GPT-4 技术报告里有一张著名的图：预训练版 GPT-4 的可靠性曲线几乎贴着对角线，RLHF 之后曲线<b>明显鼓向过度自信一侧</b>。</p>
+<p style="margin-top:8px">机制在于<strong>人类偏好的形状</strong>。标注者给回答打分时，系统性地更爱<b>自信、流畅、给出明确结论</b>的回答，不爱"这取决于…""我不确定"这类犹豫表达。奖励模型把这个偏好学了进去，PPO 优化时就<b>把概率质量往少数几个高置信表达上挤</b>——这叫 <strong>mode collapse（模式坍缩）</strong>：分布从"诚实地摊开不确定性"塌成"总是一副很确定的样子"。</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">同一道模型没把握的题，两个阶段的置信度</b><br><br>
-Base（预训练）：<span class="box g">0.55</span> <span style="color:#5a6378">← 摊开不确定性，接近真实准确率，校准好</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓ RLHF 优化「人类更爱自信的回答」</span><br>
-RLHF 后：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="box r">0.92</span> <span style="color:#ff8e8e">← 语气变确定，实际准确率没涨 → 过度自信</span><br><br>
+<b style="color:#7b61ff">同一道模型没把握的题，两个阶段的置信度</b><br/><br/>
+Base（预训练）：<span class="box g">0.55</span> <span style="color:#5a6378">← 摊开不确定性，接近真实准确率，校准好</span><br/>
+                  <span class="arrow">↓ RLHF 优化「人类更爱自信的回答」</span><br/>
+RLHF 后：     <span class="box r">0.92</span> <span style="color:#ff8e8e">← 语气变确定，实际准确率没涨 → 过度自信</span><br/><br/>
 <span style="color:#5a6378">代价：更讨人喜欢 · 更流畅 · 但置信度不再可信（校准 tax）</span>
 </div>
-
-    <p style="margin-top:14px">这解释了一个日常观察：ChatGPT / Claude 这类对齐过的模型，比原始 base model <b>读起来更笃定</b>，也因此<b>更容易让你放下警惕</b>。这不是模型"变笨了"，而是它被优化成了<b>让人舒服的语气</b>——语气的确定性和内容的可靠性，在 RLHF 之后<b>脱钩</b>了。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">这解释了一个日常观察：ChatGPT / Claude 这类对齐过的模型，比原始 base model <b>读起来更笃定</b>，也因此<b>更容易让你放下警惕</b>。这不是模型"变笨了"，而是它被优化成了<b>让人舒服的语气</b>——语气的确定性和内容的可靠性，在 RLHF 之后<b>脱钩</b>了。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()  <span class="cmt"># 需要 ANTHROPIC_API_KEY</span>
 
@@ -237,44 +212,37 @@ r = client.messages.<span class="fn">create</span>(
     messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}])
 <span class="fn">print</span>(r.content[0].text)
 <span class="cmt"># 要求「校准定义 + 先想错因」通常比直接问「你多确定」得到更诚实的分数</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"直接问模型'你有多确定'，它报的数就能用"——不一定。RLHF 之后模型的<b>语言化置信度</b>同样被"显得自信更讨喜"污染，容易虚高。让它<b>先列出出错情形、再给一个带校准定义的分数</b>，比空问"多确定"更接近真实——但仍要用你自己的历史数据验证，别照单全收。</div>
-    <div class="exercise" style="margin-top:8px">📌 场景：用 AI 做投资/技术选型这类高风险判断时，<b>警惕它的笃定语气本身就是被优化出来的产物</b>。刻意反问"你在什么前提下会错？给我最强的反方论证"——这是在手动把被 RLHF 压平的不确定性<b>重新撬开</b>。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 RLHF 让模型更好用、更讨喜，代价是校准——语气的确定性和内容的可靠性从此脱钩。<br>🤔 一个"诚实但常说不确定"的助手 vs 一个"自信但偶尔错"的助手，你会更信任哪个？人类的这个偏好，正是校准被牺牲的源头。<br><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">工程对应 → super-individual D10：幻觉治理实战</a></div>
-  </div>
 </div>
-
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"直接问模型'你有多确定'，它报的数就能用"——不一定。RLHF 之后模型的<b>语言化置信度</b>同样被"显得自信更讨喜"污染，容易虚高。让它<b>先列出出错情形、再给一个带校准定义的分数</b>，比空问"多确定"更接近真实——但仍要用你自己的历史数据验证，别照单全收。</div>
+<div class="exercise" style="margin-top:8px">📌 场景：用 AI 做投资/技术选型这类高风险判断时，<b>警惕它的笃定语气本身就是被优化出来的产物</b>。刻意反问"你在什么前提下会错？给我最强的反方论证"——这是在手动把被 RLHF 压平的不确定性<b>重新撬开</b>。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 RLHF 让模型更好用、更讨喜，代价是校准——语气的确定性和内容的可靠性从此脱钩。<br/>🤔 一个"诚实但常说不确定"的助手 vs 一个"自信但偶尔错"的助手，你会更信任哪个？人类的这个偏好，正是校准被牺牲的源头。<br/><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">工程对应 → super-individual D10：幻觉治理实战</a></div>
+</div>
+</div>
 <!-- 4. 知识边界与自我评估 -->
-<div class="card">
-  <h2>知识边界与自我评估<span class="en">Knowledge Boundary &amp; Self-Knowledge</span></h2>
-  <div class="tags"><span class="tag">机制</span><span class="tag orange">P(True)</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>像<b>缓存的 cache miss 信号</b>：系统内部其实<b>知道</b>这次是 miss，但如果不把 miss 信号<b>暴露到上层</b>，调用方就误以为每次都命中。模型也一样——它内部<b>有信号</b>区分"我知道"和"我在编"（比如输出分布的熵、内部激活），但默认<b>不主动报出来</b>。让它自评，就是把这个 cache-miss 信号显式暴露出来。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>核心问题：<b>模型知道自己不知道吗？</b>Anthropic 的 Kadavath 等人 2022 年（论文名就叫"Language Models (Mostly) Know What They Know"）给了一个偏乐观的答案：<b>大模型在相当程度上"知道自己知不知道"</b>。他们用了两个可操作的探针：</p>
-    <ul>
-      <li><strong>P(True)</strong>——模型先给一个答案，再<b>回头评估这个答案为真的概率</b>。在多样任务上，这个自评概率<b>校准得不错</b>，且随模型规模变好；</li>
-      <li><strong>P(IK)</strong>（Probability I Know，"我知道答案的概率"）——不看具体答案，直接让模型预测"这题我答得上来吗"。模型能训练出一个可用的 P(IK) 信号。</li>
-    </ul>
-    <p style="margin-top:8px">机制直觉：当模型对答案有把握时，输出分布<b>尖锐</b>（少数 token 概率极高、熵低）；没把握时分布<b>平摊</b>（很多 token 概率相近、熵高）。这个"内部不确定性"是真实存在的信号——<b>问题从来不是模型没有边界感，而是默认的生成流程把这个信号丢掉了</b>，只吐最终答案。让它显式做 P(True) 自评，等于把丢掉的信号捡回来。</p>
-    <p style="margin-top:8px">当然是"Mostly"不是"Always"：越是<b>训练里没见过、需要多步推理</b>的题，自评越不可靠——这和第一节的统计根源呼应，冷门低频区正是自我认知也失灵的地方。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="27ac1c8968223e96">
+<h2>知识边界与自我评估<span class="en">Knowledge Boundary &amp; Self-Knowledge</span></h2>
+<div class="tags"><span class="tag">机制</span><span class="tag orange">P(True)</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像<b>缓存的 cache miss 信号</b>：系统内部其实<b>知道</b>这次是 miss，但如果不把 miss 信号<b>暴露到上层</b>，调用方就误以为每次都命中。模型也一样——它内部<b>有信号</b>区分"我知道"和"我在编"（比如输出分布的熵、内部激活），但默认<b>不主动报出来</b>。让它自评，就是把这个 cache-miss 信号显式暴露出来。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>核心问题：<b>模型知道自己不知道吗？</b>Anthropic 的 Kadavath 等人 2022 年（论文名就叫"Language Models (Mostly) Know What They Know"）给了一个偏乐观的答案：<b>大模型在相当程度上"知道自己知不知道"</b>。他们用了两个可操作的探针：</p>
+<ul>
+<li><strong>P(True)</strong>——模型先给一个答案，再<b>回头评估这个答案为真的概率</b>。在多样任务上，这个自评概率<b>校准得不错</b>，且随模型规模变好；</li>
+<li><strong>P(IK)</strong>（Probability I Know，"我知道答案的概率"）——不看具体答案，直接让模型预测"这题我答得上来吗"。模型能训练出一个可用的 P(IK) 信号。</li>
+</ul>
+<p style="margin-top:8px">机制直觉：当模型对答案有把握时，输出分布<b>尖锐</b>（少数 token 概率极高、熵低）；没把握时分布<b>平摊</b>（很多 token 概率相近、熵高）。这个"内部不确定性"是真实存在的信号——<b>问题从来不是模型没有边界感，而是默认的生成流程把这个信号丢掉了</b>，只吐最终答案。让它显式做 P(True) 自评，等于把丢掉的信号捡回来。</p>
+<p style="margin-top:8px">当然是"Mostly"不是"Always"：越是<b>训练里没见过、需要多步推理</b>的题，自评越不可靠——这和第一节的统计根源呼应，冷门低频区正是自我认知也失灵的地方。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()
 
@@ -297,56 +265,45 @@ client = Anthropic()
 
 ans, p_true = <span class="fn">answer_with_self_eval</span>(<span class="str">"贝叶斯定理的提出者是谁？"</span>)
 <span class="cmt"># p_true 低 → 触发人工复核 / 转 RAG 检索，别直接采信</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"P(True) 自评能兜住所有幻觉"——不能。它是<b>Mostly</b>：在训练充分的领域好用，在冷门、需要长推理的题上自评也会失灵——过度自信的题，往往连自评都过度自信。所以 P(True) 是<b>第一道便宜的过滤网</b>，不是最后一道保险；低分触发升级（转检索、转人工），高分<b>不等于</b>免检。</div>
-    <div class="exercise" style="margin-top:8px">📌 场景：搭个人 AI 工作流时，给关键回答加一道<b>"自评闸门"</b>——用一次独立调用让模型评 P(True)，低于阈值就自动转 RAG 检索或标记"需人工核实"。这比事后被一条自信的错误信息坑了，成本低得多。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 模型"Mostly 知道自己不知道"——不确定性信号本就存在，默认生成流程把它丢了；显式自评就是把它捡回来。<br>🤔 如果模型内部有"我不知道"的信号却默认不说，那责任在模型，还是在<b>只奖励"给出答案"</b>的我们？</div>
-  </div>
 </div>
-
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"P(True) 自评能兜住所有幻觉"——不能。它是<b>Mostly</b>：在训练充分的领域好用，在冷门、需要长推理的题上自评也会失灵——过度自信的题，往往连自评都过度自信。所以 P(True) 是<b>第一道便宜的过滤网</b>，不是最后一道保险；低分触发升级（转检索、转人工），高分<b>不等于</b>免检。</div>
+<div class="exercise" style="margin-top:8px">📌 场景：搭个人 AI 工作流时，给关键回答加一道<b>"自评闸门"</b>——用一次独立调用让模型评 P(True)，低于阈值就自动转 RAG 检索或标记"需人工核实"。这比事后被一条自信的错误信息坑了，成本低得多。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 模型"Mostly 知道自己不知道"——不确定性信号本就存在，默认生成流程把它丢了；显式自评就是把它捡回来。<br/>🤔 如果模型内部有"我不知道"的信号却默认不说，那责任在模型，还是在<b>只奖励"给出答案"</b>的我们？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/2509.04664" target="_blank">Kalai et al. 2025 — Why Language Models Hallucinate</a>（OpenAI）— 从训练/评估激励论证幻觉的统计必然性，本期第 1 节的来源</li>
-      <li><a href="https://arxiv.org/abs/2207.05221" target="_blank">Kadavath et al. 2022 — Language Models (Mostly) Know What They Know</a>（Anthropic）— P(True) / P(IK) 自我评估的奠基工作</li>
-      <li><a href="https://arxiv.org/abs/1706.04599" target="_blank">Guo et al. 2017 — On Calibration of Modern Neural Networks</a> — 温度缩放与 ECE 的经典校准论文，必读</li>
-      <li><a href="https://arxiv.org/abs/2303.08774" target="_blank">OpenAI 2023 — GPT-4 Technical Report</a> — 含预训练 vs RLHF 后的校准对比图</li>
-      <li><a href="https://lilianweng.github.io/posts/2024-07-07-hallucination/" target="_blank">Lilian Weng 2024 — Extrinsic Hallucinations in LLMs</a> — 幻觉机制与治理的优雅综述</li>
-    </ul>
-  </div>
+<div class="card" data-tts="eae2f5cb2f51729f" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/2509.04664" target="_blank">Kalai et al. 2025 — Why Language Models Hallucinate</a>（OpenAI）— 从训练/评估激励论证幻觉的统计必然性，本期第 1 节的来源</li>
+<li><a href="https://arxiv.org/abs/2207.05221" target="_blank">Kadavath et al. 2022 — Language Models (Mostly) Know What They Know</a>（Anthropic）— P(True) / P(IK) 自我评估的奠基工作</li>
+<li><a href="https://arxiv.org/abs/1706.04599" target="_blank">Guo et al. 2017 — On Calibration of Modern Neural Networks</a> — 温度缩放与 ECE 的经典校准论文，必读</li>
+<li><a href="https://arxiv.org/abs/2303.08774" target="_blank">OpenAI 2023 — GPT-4 Technical Report</a> — 含预训练 vs RLHF 后的校准对比图</li>
+<li><a href="https://lilianweng.github.io/posts/2024-07-07-hallucination/" target="_blank">Lilian Weng 2024 — Extrinsic Hallucinations in LLMs</a> — 幻觉机制与治理的优雅综述</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 第 1 节说"蒙比留白得分高"逼出幻觉，第 4 节说模型"Mostly 知道自己不知道"。这两件事矛盾吗？</summary><div>不矛盾，而且正好互补，指向同一个治理方向。第 4 节说模型<b>内部有</b>不确定性信号（P(True)/P(IK) 校准尚可）——它并非"瞎子"。第 1 节说的是：现行评估规则<b>不奖励模型把这个信号说出来</b>，反而奖励"哪怕没把握也蒙一个"。合起来看，幻觉的一大部分是<b>激励错配</b>而非<b>能力缺失</b>：模型<b>知道</b>自己心里没底，但外部规则告诉它"表达没底会扣分，蒙对了才加分"，于是它理性地选择闭着眼给答案。这也是 Kalai 等人的政策建议——<b>改评估</b>：让"我不知道"在得分上不劣于"蒙错"，甚至给校准过的弃答正向激励。你在自己的工作流里其实可以先行：设计 prompt 和采信规则时，明确"诚实弃答"优于"自信错答"，等于在小范围内修好了这个激励。</div></details>
-
-    <details><summary>2. 温度缩放（校准）和采样温度（Day 45 解码）都叫"温度"、都在改 softmax，是同一个东西吗？</summary><div>数学形式几乎一样（logits 除以 T 再 softmax），但<b>目的和作用点完全不同</b>，别混。<b>采样温度</b>（解码时）改的是<b>生成行为</b>：T 高更随机有创意、T 低更确定保守，它影响"吐出哪个 token"。<b>校准温度</b>（Guo 2017）改的是<b>报告的置信度数值</b>：用一个在验证集上学到的 T，把过尖的概率压平到与真实准确率对齐，它<b>不改变最可能的答案</b>（argmax 不变，因为对所有 logit 同比缩放），只改"这个答案我该报多少置信度"。一个动的是"选什么"，一个动的是"多信它"。有意思的联系是：两者都在承认"原始 logits 的绝对数值不能直接当概率信念用"——解码温度是为了控制多样性而调，校准温度是为了让数值变得可信而调。BigCat 你分布式背景的类比：采样温度像<b>负载均衡的随机权重</b>（影响路由到哪），校准温度像<b>监控指标的标定系数</b>（影响你多信这个读数）。</div></details>
-
-    <details><summary>3. 如果人类偏好"自信的回答"是校准被牺牲的根源，那能不能训练时直接把"校准"加进奖励，两全其美？</summary><div>方向对，但有真实张力，不是免费午餐。你确实可以在 RLHF 里加一项<b>校准奖励</b>（惩罚过度自信、奖励诚实弃答），学界也在试"训练模型表达不确定性"。难点在三处：(a) <b>目标冲突</b>——人类偏好自信 vs 校准要求诚实，两个奖励项打架，权重怎么配是产品价值判断，配多了模型变得畏首畏尾满口"我不确定"，用户体验崩；(b) <b>校准信号难拿</b>——训练时你未必有每条回答的"真值"来算它该多自信，尤其开放式生成；(c) <b>Goodhart 风险</b>（Day 47 对齐失败）——一旦"表达不确定"成为被优化的指标，模型可能学会<b>表演不确定</b>（该自信时也假装犹豫）来刷奖励，而非真的更校准。所以现实里更多是<b>分工</b>：训练侧尽量别把校准搞得太糟，推理侧用 P(True) 自评、温度缩放、外部验证（RAG/工具）把可信度补回来。"两全其美"是渐近目标，不是一个开关。</div></details>
-
-    <details><summary>4. 把这四节串起来：一条"AI 给的自信答案"，从生成到你采信，可以设几道闸？</summary><div>把它当成一条<b>带质量门的数据管道</b>来设计，从便宜到贵四道闸：<b>① 源头分诊</b>（第 1 节）——先判断这条信息在训练语料里是高频还是冷门/低频；冷门（具体引用、生日、小众数字）默认高幻觉风险，直接标"待核"。<b>② 自评闸</b>（第 4 节）——用一次独立调用取 P(True)，低于阈值就升级处理；成本一次 API 调用，最便宜的过滤网。<b>③ 校准折扣</b>（第 2、3 节）——记住 RLHF 后模型语气普遍虚高，对它的"确定"打折；有条件就拿你领域的历史题画一次可靠性图，得到该打几折的经验系数。<b>④ 外部落地</b>——高风险结论必须落到<b>可验证的外部源</b>（RAG 检索、跑代码、查权威库），让答案<b>可反驳</b>而非仅"听起来对"。关键心法：这四道闸的力气要<b>按风险和频次分配</b>——不是每条回答都上全套，而是"低频信息 + 高风险决策"叠满四道，"高频常识 + 低风险闲聊"一道都不用。这本身就是超级个体的核心能力：把有限的验证注意力，花在幻觉最可能出现、且代价最大的地方。</div></details>
-  </div>
+<div class="card think" data-tts="1aaea73a0e37d14b" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 第 1 节说"蒙比留白得分高"逼出幻觉，第 4 节说模型"Mostly 知道自己不知道"。这两件事矛盾吗？</summary><div>不矛盾，而且正好互补，指向同一个治理方向。第 4 节说模型<b>内部有</b>不确定性信号（P(True)/P(IK) 校准尚可）——它并非"瞎子"。第 1 节说的是：现行评估规则<b>不奖励模型把这个信号说出来</b>，反而奖励"哪怕没把握也蒙一个"。合起来看，幻觉的一大部分是<b>激励错配</b>而非<b>能力缺失</b>：模型<b>知道</b>自己心里没底，但外部规则告诉它"表达没底会扣分，蒙对了才加分"，于是它理性地选择闭着眼给答案。这也是 Kalai 等人的政策建议——<b>改评估</b>：让"我不知道"在得分上不劣于"蒙错"，甚至给校准过的弃答正向激励。你在自己的工作流里其实可以先行：设计 prompt 和采信规则时，明确"诚实弃答"优于"自信错答"，等于在小范围内修好了这个激励。</div></details>
+<details><summary>2. 温度缩放（校准）和采样温度（Day 45 解码）都叫"温度"、都在改 softmax，是同一个东西吗？</summary><div>数学形式几乎一样（logits 除以 T 再 softmax），但<b>目的和作用点完全不同</b>，别混。<b>采样温度</b>（解码时）改的是<b>生成行为</b>：T 高更随机有创意、T 低更确定保守，它影响"吐出哪个 token"。<b>校准温度</b>（Guo 2017）改的是<b>报告的置信度数值</b>：用一个在验证集上学到的 T，把过尖的概率压平到与真实准确率对齐，它<b>不改变最可能的答案</b>（argmax 不变，因为对所有 logit 同比缩放），只改"这个答案我该报多少置信度"。一个动的是"选什么"，一个动的是"多信它"。有意思的联系是：两者都在承认"原始 logits 的绝对数值不能直接当概率信念用"——解码温度是为了控制多样性而调，校准温度是为了让数值变得可信而调。BigCat 你分布式背景的类比：采样温度像<b>负载均衡的随机权重</b>（影响路由到哪），校准温度像<b>监控指标的标定系数</b>（影响你多信这个读数）。</div></details>
+<details><summary>3. 如果人类偏好"自信的回答"是校准被牺牲的根源，那能不能训练时直接把"校准"加进奖励，两全其美？</summary><div>方向对，但有真实张力，不是免费午餐。你确实可以在 RLHF 里加一项<b>校准奖励</b>（惩罚过度自信、奖励诚实弃答），学界也在试"训练模型表达不确定性"。难点在三处：(a) <b>目标冲突</b>——人类偏好自信 vs 校准要求诚实，两个奖励项打架，权重怎么配是产品价值判断，配多了模型变得畏首畏尾满口"我不确定"，用户体验崩；(b) <b>校准信号难拿</b>——训练时你未必有每条回答的"真值"来算它该多自信，尤其开放式生成；(c) <b>Goodhart 风险</b>（Day 47 对齐失败）——一旦"表达不确定"成为被优化的指标，模型可能学会<b>表演不确定</b>（该自信时也假装犹豫）来刷奖励，而非真的更校准。所以现实里更多是<b>分工</b>：训练侧尽量别把校准搞得太糟，推理侧用 P(True) 自评、温度缩放、外部验证（RAG/工具）把可信度补回来。"两全其美"是渐近目标，不是一个开关。</div></details>
+<details><summary>4. 把这四节串起来：一条"AI 给的自信答案"，从生成到你采信，可以设几道闸？</summary><div>把它当成一条<b>带质量门的数据管道</b>来设计，从便宜到贵四道闸：<b>① 源头分诊</b>（第 1 节）——先判断这条信息在训练语料里是高频还是冷门/低频；冷门（具体引用、生日、小众数字）默认高幻觉风险，直接标"待核"。<b>② 自评闸</b>（第 4 节）——用一次独立调用取 P(True)，低于阈值就升级处理；成本一次 API 调用，最便宜的过滤网。<b>③ 校准折扣</b>（第 2、3 节）——记住 RLHF 后模型语气普遍虚高，对它的"确定"打折；有条件就拿你领域的历史题画一次可靠性图，得到该打几折的经验系数。<b>④ 外部落地</b>——高风险结论必须落到<b>可验证的外部源</b>（RAG 检索、跑代码、查权威库），让答案<b>可反驳</b>而非仅"听起来对"。关键心法：这四道闸的力气要<b>按风险和频次分配</b>——不是每条回答都上全套，而是"低频信息 + 高风险决策"叠满四道，"高频常识 + 低风险闲聊"一道都不用。这本身就是超级个体的核心能力：把有限的验证注意力，花在幻觉最可能出现、且代价最大的地方。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 48 · 2026-07-05</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

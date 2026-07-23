@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：推理模型 — Day 28</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,51 +60,42 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：推理模型</h1>
-  <div class="meta">Day 28 · 2026-06-14</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="9e3c3aa5888fb043">AI/ML 详解：推理模型</h1>
+<div class="meta">Day 28 · 2026-06-14</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
-  <a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+<a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
     工程对应 → super-individual D5: Agent Design（怎么把"会思考"的模型用进 agent 工作流）
   </a>
 </div>
-
 <!-- 1. 测试时计算 -->
-<div class="card">
-  <h2>测试时计算<span class="en">Test-time Compute / o1 架构</span></h2>
-  <div class="tags"><span class="tag">范式转移</span><span class="tag purple">推理</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>普通 LLM 像一次 <b>O(1) 查表</b>——不管问题多难，都是一次前向传播立刻吐答案，计算量固定。推理模型（o1 / DeepSeek-R1）则像数据库的<b>查询优化器</b>：简单查询走 fast path，复杂查询<b>愿意在运行时多花 CPU 做规划、试错、回溯</b>，再返回结果。本质是把"算力预算"从训练时一次性投入，挪一部分到<b>每次请求的运行时按需投入</b>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：再大的模型，单次前向的计算深度是<b>固定</b>的——这对"想一眼就答"的题没问题，但对需要多步推演的数学题、代码题，等于<b>逼一个人在 0.5 秒内脱口而出答案</b>，必然出错。2024 年 OpenAI <b>o1</b> 给出的答案是：让模型在回答前先生成一长串<b>内部思考（chain of thought）</b>，把"想"这个动作变成可以花更多 token、更多时间的过程。</p>
-    <p style="margin-top:8px">机制核心不是 prompt 技巧，而是<b>训练方式</b>：o1 用<b>强化学习（RL）</b>训练模型自己"学会怎么想"——奖励信号来自最终答案对不对（数学、代码这类<b>可自动验证</b>的领域），模型在试错中学会拆解步骤、识别并纠正自己的错误、此路不通就换条路。2025 年 DeepSeek-R1 进一步证明：<b>纯 RL（不靠人工标注的推理过程）就能自发涌现</b>出反思、验证、回溯这些行为。</p>
-
+<div class="card" data-tts="ba7c40c5b5779c8b">
+<h2>测试时计算<span class="en">Test-time Compute / o1 架构</span></h2>
+<div class="tags"><span class="tag">范式转移</span><span class="tag purple">推理</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>普通 LLM 像一次 <b>O(1) 查表</b>——不管问题多难，都是一次前向传播立刻吐答案，计算量固定。推理模型（o1 / DeepSeek-R1）则像数据库的<b>查询优化器</b>：简单查询走 fast path，复杂查询<b>愿意在运行时多花 CPU 做规划、试错、回溯</b>，再返回结果。本质是把"算力预算"从训练时一次性投入，挪一部分到<b>每次请求的运行时按需投入</b>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：再大的模型，单次前向的计算深度是<b>固定</b>的——这对"想一眼就答"的题没问题，但对需要多步推演的数学题、代码题，等于<b>逼一个人在 0.5 秒内脱口而出答案</b>，必然出错。2024 年 OpenAI <b>o1</b> 给出的答案是：让模型在回答前先生成一长串<b>内部思考（chain of thought）</b>，把"想"这个动作变成可以花更多 token、更多时间的过程。</p>
+<p style="margin-top:8px">机制核心不是 prompt 技巧，而是<b>训练方式</b>：o1 用<b>强化学习（RL）</b>训练模型自己"学会怎么想"——奖励信号来自最终答案对不对（数学、代码这类<b>可自动验证</b>的领域），模型在试错中学会拆解步骤、识别并纠正自己的错误、此路不通就换条路。2025 年 DeepSeek-R1 进一步证明：<b>纯 RL（不靠人工标注的推理过程）就能自发涌现</b>出反思、验证、回溯这些行为。</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">两条 scaling 轴（推理模型的核心洞察）</b><br><br>
-训练时算力 <span class="bar" style="width:130px;height:18px"></span> 投一次，所有请求受益（传统路线）<br>
-测试时算力 <span class="bar" style="width:130px;height:18px;opacity:0.8"></span> 每次请求按需投，难题多想会儿<br><br>
-<span style="color:#8b92a8">准确率 ∝ log(测试时 token)：</span><br>
-想 1K token <span class="bar" style="width:50px;height:14px"></span><br>
-想 8K token <span class="bar" style="width:90px;height:14px;opacity:0.8"></span><br>
+<b style="color:#7b61ff">两条 scaling 轴（推理模型的核心洞察）</b><br/><br/>
+训练时算力 <span class="bar" style="width:130px;height:18px"></span> 投一次，所有请求受益（传统路线）<br/>
+测试时算力 <span class="bar" style="width:130px;height:18px;opacity:0.8"></span> 每次请求按需投，难题多想会儿<br/><br/>
+<span style="color:#8b92a8">准确率 ∝ log(测试时 token)：</span><br/>
+想 1K token <span class="bar" style="width:50px;height:14px"></span><br/>
+想 8K token <span class="bar" style="width:90px;height:14px;opacity:0.8"></span><br/>
 想 32K token <span class="bar" style="width:115px;height:14px;opacity:0.7"></span> <span style="color:#5a6378">↑ 边际递减但持续上升</span>
 </div>
-
-    <p style="margin-top:14px">关键反直觉：在推理模型里，<b>"更聪明"可以靠"想更久"换</b>——这是"做大模型"之外的<b>第二条 scaling 路径</b>。代价是延迟和 token 成本陡增。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">关键反直觉：在推理模型里，<b>"更聪明"可以靠"想更久"换</b>——这是"做大模型"之外的<b>第二条 scaling 路径</b>。代价是延迟和 token 成本陡增。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
 client = OpenAI()  <span class="cmt"># 需要 OPENAI_API_KEY</span>
 
@@ -118,47 +110,39 @@ resp = client.chat.completions.<span class="fn">create</span>(
 <span class="fn">print</span>(resp.choices[0].message.content)
 <span class="cmt"># 注意：内部 reasoning tokens 你看不到（OpenAI 隐藏），但要付费</span>
 <span class="fn">print</span>(resp.usage.completion_tokens_details.reasoning_tokens)  <span class="cmt"># 监控思考成本</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"推理模型更强，什么都用它"——错。对"总结这段话""改写邮件""查个事实"这类<b>不需要多步推演</b>的任务，推理模型只是<b>更慢更贵</b>，质量未必更高，有时反而因为"想太多"把简单问题复杂化。判断标准：<b>这题需要打草稿吗？</b>需要 → 推理模型；脱口而出就行 → 普通模型。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：用推理模型做<b>需要严谨多步的决策辅助</b>——比如"给定这三个学区房的价格、通勤、学校排名数据，做一个加权对比并指出隐藏风险"。这类题模型需要"算草稿"，o1/R1 的逐步推演明显优于普通模型。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 推理模型的本质是"用运行时算力买准确率"——它把"思考"从瞬时动作变成了可调节的资源。<br>🤔 你的工作流里，哪些任务值得为"模型多想 30 秒"付出 10 倍 token 成本？哪些是浪费？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"推理模型更强，什么都用它"——错。对"总结这段话""改写邮件""查个事实"这类<b>不需要多步推演</b>的任务，推理模型只是<b>更慢更贵</b>，质量未必更高，有时反而因为"想太多"把简单问题复杂化。判断标准：<b>这题需要打草稿吗？</b>需要 → 推理模型；脱口而出就行 → 普通模型。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：用推理模型做<b>需要严谨多步的决策辅助</b>——比如"给定这三个学区房的价格、通勤、学校排名数据，做一个加权对比并指出隐藏风险"。这类题模型需要"算草稿"，o1/R1 的逐步推演明显优于普通模型。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 推理模型的本质是"用运行时算力买准确率"——它把"思考"从瞬时动作变成了可调节的资源。<br/>🤔 你的工作流里，哪些任务值得为"模型多想 30 秒"付出 10 倍 token 成本？哪些是浪费？</div>
+</div>
+</div>
 <!-- 2. 思维链推理 -->
-<div class="card">
-  <h2>思维链推理<span class="en">Chain-of-Thought (CoT)</span></h2>
-  <div class="tags"><span class="tag">机制</span><span class="tag purple">中间状态</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>CoT 就是给黑盒函数<b>加 print 调试</b>——把模型本来藏在权重里、一步算完的隐藏计算，<b>外化成一串可见的中间 token</b>。这些 token 又被喂回模型当下一步的输入，等于模型用自己的输出当<b>暂存盘（scratchpad）</b>。没有 scratchpad，复杂运算只能在一次前向里硬挤；有了它，串行计算被展开成更多步。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点的根源在架构：Transformer 单次前向的<b>计算深度是固定的</b>（层数决定）。一道需要 20 步推演的题，硬塞进固定深度等于让算力不够用。CoT 的机制巧妙：<b>自回归生成是串行的</b>——模型每吐一个 token，都能把已生成的全部 token 重新读一遍再算下一个。所以让它先写出推理步骤，相当于<b>把"计算"摊到 token 序列长度上</b>，用序列长度换有效计算深度。</p>
-    <p style="margin-top:8px">2022 年 Wei et al. 发现：只要在 few-shot 例子里<b>展示推理过程</b>（而非只给答案），大模型在数学、常识推理上的准确率大幅跃升——而且这种能力<b>只在足够大的模型上涌现</b>。即 "Let's think step by step"。</p>
-
+<div class="card" data-tts="67ffd1ce86db4402">
+<h2>思维链推理<span class="en">Chain-of-Thought (CoT)</span></h2>
+<div class="tags"><span class="tag">机制</span><span class="tag purple">中间状态</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>CoT 就是给黑盒函数<b>加 print 调试</b>——把模型本来藏在权重里、一步算完的隐藏计算，<b>外化成一串可见的中间 token</b>。这些 token 又被喂回模型当下一步的输入，等于模型用自己的输出当<b>暂存盘（scratchpad）</b>。没有 scratchpad，复杂运算只能在一次前向里硬挤；有了它，串行计算被展开成更多步。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点的根源在架构：Transformer 单次前向的<b>计算深度是固定的</b>（层数决定）。一道需要 20 步推演的题，硬塞进固定深度等于让算力不够用。CoT 的机制巧妙：<b>自回归生成是串行的</b>——模型每吐一个 token，都能把已生成的全部 token 重新读一遍再算下一个。所以让它先写出推理步骤，相当于<b>把"计算"摊到 token 序列长度上</b>，用序列长度换有效计算深度。</p>
+<p style="margin-top:8px">2022 年 Wei et al. 发现：只要在 few-shot 例子里<b>展示推理过程</b>（而非只给答案），大模型在数学、常识推理上的准确率大幅跃升——而且这种能力<b>只在足够大的模型上涌现</b>。即 "Let's think step by step"。</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">为什么 CoT 有效：把固定深度摊成序列长度</b><br><br>
-<span class="box r">直接答</span> <span class="arrow">→</span> 问题 → <span style="color:#ff8e8e">[一次前向，深度固定]</span> → 答案 <span style="color:#ff8e8e">✗ 易错</span><br><br>
-<span class="box g">CoT</span> <span class="arrow">→</span> 问题 → 步骤1 → 步骤2 → 步骤3 → ... → 答案<br>
+<b style="color:#7b61ff">为什么 CoT 有效：把固定深度摊成序列长度</b><br/><br/>
+<span class="box r">直接答</span> <span class="arrow">→</span> 问题 → <span style="color:#ff8e8e">[一次前向，深度固定]</span> → 答案 <span style="color:#ff8e8e">✗ 易错</span><br/><br/>
+<span class="box g">CoT</span> <span class="arrow">→</span> 问题 → 步骤1 → 步骤2 → 步骤3 → ... → 答案<br/>
 <span style="color:#5a6378">　　　　　└─ 每步都读全部历史再算 → 有效计算深度 ∝ 步数 ─┘</span> <span style="color:#7ed6a0">✓</span>
 </div>
-
-    <p style="margin-top:14px">注意区分两层：<b>CoT prompting</b>（Day 3 讲过的提示技巧，靠 prompt 诱导）和<b>推理模型内建的 CoT</b>（o1/R1 通过 RL 训练，自发生成且远比人写的长、会自我纠错）。后者是把前者从"技巧"升级成了"模型的原生能力"。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">注意区分两层：<b>CoT prompting</b>（Day 3 讲过的提示技巧，靠 prompt 诱导）和<b>推理模型内建的 CoT</b>（o1/R1 通过 RL 训练，自发生成且远比人写的长、会自我纠错）。后者是把前者从"技巧"升级成了"模型的原生能力"。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = Anthropic()
 
@@ -172,52 +156,44 @@ resp = client.messages.<span class="fn">create</span>(
 <span class="cmt"># 模型会先写推理过程（净减 30/天 → 600/30=20），再给答案</span>
 <span class="fn">print</span>(resp.content[0].text)
 <span class="cmt"># 工程上：&lt;thinking&gt; 段可在展示给用户前剥离，只留 &lt;answer&gt;</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"模型写出的推理过程 = 它真实的思考过程"——不一定。研究反复表明 CoT 可能是<b>事后合理化（post-hoc rationalization）</b>：模型先有了倾向，再编一套看起来合理的步骤。所以<b>不能把 CoT 文本当作模型可信度的证据</b>——步骤通顺不代表答案对，也不代表它"真的这么想"。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：跨学科思考时，让模型<b>显式写出推理链再下结论</b>——比如"用复杂性科学的视角分析这个组织问题"。可见的推理链让你能<b>逐步审查</b>哪一步的类比站不住脚，而不是只能接受/拒绝一个黑盒结论。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 CoT 的本质是用"序列长度"换"计算深度"——它不是让模型变聪明，而是给了它打草稿的空间。<br>🤔 如果模型的推理链可能是事后编的，你该如何设计验证机制来判断答案是否真的可信？（下一节就是答案的一半）</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"模型写出的推理过程 = 它真实的思考过程"——不一定。研究反复表明 CoT 可能是<b>事后合理化（post-hoc rationalization）</b>：模型先有了倾向，再编一套看起来合理的步骤。所以<b>不能把 CoT 文本当作模型可信度的证据</b>——步骤通顺不代表答案对，也不代表它"真的这么想"。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：跨学科思考时，让模型<b>显式写出推理链再下结论</b>——比如"用复杂性科学的视角分析这个组织问题"。可见的推理链让你能<b>逐步审查</b>哪一步的类比站不住脚，而不是只能接受/拒绝一个黑盒结论。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 CoT 的本质是用"序列长度"换"计算深度"——它不是让模型变聪明，而是给了它打草稿的空间。<br/>🤔 如果模型的推理链可能是事后编的，你该如何设计验证机制来判断答案是否真的可信？（下一节就是答案的一半）</div>
+</div>
+</div>
 <!-- 3. 自我验证 -->
-<div class="card">
-  <h2>自我验证<span class="en">Self-Verification / Process Reward</span></h2>
-  <div class="tags"><span class="tag">验证</span><span class="tag orange">奖励模型</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>生成答案是 <b>writer</b>，验证答案是 <b>reviewer</b>——就像写代码 vs code review，写单测 vs 跑单测。关键洞察：<b>验证往往比生成容易</b>（看懂一个证明比自己想出来简单，复现 bug 比发现 fix 简单）。推理模型利用这个不对称——用一个<b>验证器（verifier / reward model）</b>来检查生成器的输出，把"难的生成"问题部分转化成"易的验证"问题。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：模型推理链很长时，<b>一步错则步步错</b>——一个早期的小算错会被后续步骤"理所当然"地继承，最后给出自信而错误的答案。怎么知道哪步错了？两类验证器：</p>
-    <ul>
-      <li><b>ORM（Outcome Reward Model，结果奖励）</b>——只看<b>最终答案</b>对不对，像端到端测试。简单但<b>反馈稀疏</b>：知道错了，不知道错在哪一步；</li>
-      <li><b>PRM（Process Reward Model,过程奖励）</b>——给推理链<b>每一步</b>打分，像逐行 lint / 单步断点。反馈密集，能精确定位第一个出错的步骤。</li>
-    </ul>
-    <p style="margin-top:8px">2023 年 OpenAI 的 "Let's Verify Step by Step" 给出关键实证：在高难度数学（MATH 数据集）上，<b>过程监督（PRM）显著优于结果监督（ORM）</b>。直觉：告诉模型"第 3 步错了"比只说"最终答案错了"信息量大得多——前者把信用分配（credit assignment）问题精确到了步骤级。</p>
-
+<div class="card" data-tts="77b409fec8a11887">
+<h2>自我验证<span class="en">Self-Verification / Process Reward</span></h2>
+<div class="tags"><span class="tag">验证</span><span class="tag orange">奖励模型</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>生成答案是 <b>writer</b>，验证答案是 <b>reviewer</b>——就像写代码 vs code review，写单测 vs 跑单测。关键洞察：<b>验证往往比生成容易</b>（看懂一个证明比自己想出来简单，复现 bug 比发现 fix 简单）。推理模型利用这个不对称——用一个<b>验证器（verifier / reward model）</b>来检查生成器的输出，把"难的生成"问题部分转化成"易的验证"问题。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：模型推理链很长时，<b>一步错则步步错</b>——一个早期的小算错会被后续步骤"理所当然"地继承，最后给出自信而错误的答案。怎么知道哪步错了？两类验证器：</p>
+<ul>
+<li><b>ORM（Outcome Reward Model，结果奖励）</b>——只看<b>最终答案</b>对不对，像端到端测试。简单但<b>反馈稀疏</b>：知道错了，不知道错在哪一步；</li>
+<li><b>PRM（Process Reward Model,过程奖励）</b>——给推理链<b>每一步</b>打分，像逐行 lint / 单步断点。反馈密集，能精确定位第一个出错的步骤。</li>
+</ul>
+<p style="margin-top:8px">2023 年 OpenAI 的 "Let's Verify Step by Step" 给出关键实证：在高难度数学（MATH 数据集）上，<b>过程监督（PRM）显著优于结果监督（ORM）</b>。直觉：告诉模型"第 3 步错了"比只说"最终答案错了"信息量大得多——前者把信用分配（credit assignment）问题精确到了步骤级。</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">ORM vs PRM：反馈粒度的差异</b><br><br>
-步骤1 ✓ 步骤2 ✓ 步骤3 ✗ 步骤4 ✓ 步骤5 → 答案<br>
-<span style="color:#5a6378">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span><br>
-<span class="box r">ORM</span> 只看末尾 <span class="arrow">→</span> "答案错" <span style="color:#ff8e8e">（不知错在哪）</span><br>
+<b style="color:#7b61ff">ORM vs PRM：反馈粒度的差异</b><br/><br/>
+步骤1 ✓ 步骤2 ✓ 步骤3 ✗ 步骤4 ✓ 步骤5 → 答案<br/>
+<span style="color:#5a6378">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span><br/>
+<span class="box r">ORM</span> 只看末尾 <span class="arrow">→</span> "答案错" <span style="color:#ff8e8e">（不知错在哪）</span><br/>
 <span class="box g">PRM</span> 逐步打分 <span class="arrow">→</span> "第3步错" <span style="color:#7ed6a0">（精确定位 → 可针对性纠错/重试）</span>
 </div>
-
-    <p style="margin-top:14px">自我验证还有更轻量的形态：让模型<b>自己检查自己</b>（"重新审视上面的推理，有没有算错？"）。但要警惕——验证器本身也是模型，<b>会有盲区</b>，模型对自己错误的"自纠"能力有限，独立训练的验证器通常比"自己查自己"更可靠。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">自我验证还有更轻量的形态：让模型<b>自己检查自己</b>（"重新审视上面的推理，有没有算错？"）。但要警惕——验证器本身也是模型，<b>会有盲区</b>，模型对自己错误的"自纠"能力有限，独立训练的验证器通常比"自己查自己"更可靠。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">def</span> <span class="fn">verify_steps</span>(problem, solution_steps):
     <span class="cmt"># 用一个独立调用当"验证器"，逐步检查（PRM 的轻量实现）</span>
     prompt = <span class="fn">f</span><span class="str">"""问题：{problem}
@@ -233,52 +209,44 @@ resp = client.messages.<span class="fn">create</span>(
 
 <span class="cmt"># 用法：生成 → 验证 → 若有错，带着"第N步错"的信号重试</span>
 verdict = <span class="fn">verify_steps</span>(<span class="str">"求 17×23"</span>, [<span class="str">"17×20=340"</span>, <span class="str">"17×3=51"</span>, <span class="str">"340+51=391"</span>])</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"让模型自己说'我检查过了，没问题'就可信了"——错。模型常常<b>自信地确认错误答案</b>（验证器和生成器共享同样的知识盲区）。真正有效的自我验证要么用<b>独立训练的验证器</b>，要么用<b>外部可验证信号</b>（代码就跑一遍、数学就代入验算）——把验证锚定到模型之外的客观真相。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：让 AI 做关键计算/决策时，<b>显式要求第二步独立验证</b>——"用另一种方法重新算一遍核对"。比如算投资回报，先用复利公式，再让它用逐年累加验证，两个结果对不上就说明有错。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 验证比生成容易，是推理模型的杠杆支点——但"自己查自己"有盲区，独立/外部验证才靠谱。<br>🤔 在你的领域里，哪些问题的"验证"远比"求解"容易？这些正是 AI 推理 + 验证最能发力的地方。</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"让模型自己说'我检查过了，没问题'就可信了"——错。模型常常<b>自信地确认错误答案</b>（验证器和生成器共享同样的知识盲区）。真正有效的自我验证要么用<b>独立训练的验证器</b>，要么用<b>外部可验证信号</b>（代码就跑一遍、数学就代入验算）——把验证锚定到模型之外的客观真相。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：让 AI 做关键计算/决策时，<b>显式要求第二步独立验证</b>——"用另一种方法重新算一遍核对"。比如算投资回报，先用复利公式，再让它用逐年累加验证，两个结果对不上就说明有错。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 验证比生成容易，是推理模型的杠杆支点——但"自己查自己"有盲区，独立/外部验证才靠谱。<br/>🤔 在你的领域里，哪些问题的"验证"远比"求解"容易？这些正是 AI 推理 + 验证最能发力的地方。</div>
+</div>
+</div>
 <!-- 4. Best-of-N -->
-<div class="card">
-  <h2>Best-of-N 采样<span class="en">Best-of-N Sampling</span></h2>
-  <div class="tags"><span class="tag">采样策略</span><span class="tag purple">投机</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>Best-of-N 就是分布式系统的 <b>scatter-gather + ranking</b>：同一个问题并行采样 N 个候选答案（scatter），再用验证器选出最好的一个（gather + rank）。它和 <b>hedged requests（对冲请求）</b>同源——多发几个请求，取最优那个，用冗余换质量。而 <b>self-consistency（自洽）</b>是它的特例：N 个答案做<b>多数投票</b>，类似 Raft 的 quorum 表决。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：模型采样有随机性（temperature &gt; 0），一次生成可能恰好走错路。但<b>"偶尔能答对"≠"答不对"</b>——如果正确答案在 100 次采样里出现过哪怕几次，我们只要有办法<b>把它挑出来</b>，准确率就能大幅提升。两种"挑"的策略：</p>
-    <ul>
-      <li><b>Self-Consistency（多数投票）</b>——采样 N 条推理链，对<b>最终答案</b>投票，取出现最多的那个。数学上是对推理路径做边际化：<b>答案 = argmax 累计到该答案的路径数</b>。无需额外验证器，免费提升；</li>
-      <li><b>Verifier-guided（验证器选优）</b>——用训练好的 verifier 给 N 个候选打分，选最高分。2021 年 Cobbe et al.（GSM8K 那篇）证明：<b>验证器选优比单纯做大模型更省算力</b>，且随样本数持续提升。</li>
-    </ul>
-
+<div class="card" data-tts="e050b64ea24a0a58">
+<h2>Best-of-N 采样<span class="en">Best-of-N Sampling</span></h2>
+<div class="tags"><span class="tag">采样策略</span><span class="tag purple">投机</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>Best-of-N 就是分布式系统的 <b>scatter-gather + ranking</b>：同一个问题并行采样 N 个候选答案（scatter），再用验证器选出最好的一个（gather + rank）。它和 <b>hedged requests（对冲请求）</b>同源——多发几个请求，取最优那个，用冗余换质量。而 <b>self-consistency（自洽）</b>是它的特例：N 个答案做<b>多数投票</b>，类似 Raft 的 quorum 表决。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：模型采样有随机性（temperature &gt; 0），一次生成可能恰好走错路。但<b>"偶尔能答对"≠"答不对"</b>——如果正确答案在 100 次采样里出现过哪怕几次，我们只要有办法<b>把它挑出来</b>，准确率就能大幅提升。两种"挑"的策略：</p>
+<ul>
+<li><b>Self-Consistency（多数投票）</b>——采样 N 条推理链，对<b>最终答案</b>投票，取出现最多的那个。数学上是对推理路径做边际化：<b>答案 = argmax 累计到该答案的路径数</b>。无需额外验证器，免费提升；</li>
+<li><b>Verifier-guided（验证器选优）</b>——用训练好的 verifier 给 N 个候选打分，选最高分。2021 年 Cobbe et al.（GSM8K 那篇）证明：<b>验证器选优比单纯做大模型更省算力</b>，且随样本数持续提升。</li>
+</ul>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">Best-of-N：scatter → gather → rank</b><br><br>
-　　　　　　┌→ <span class="box">候选1</span> → 答案 A<br>
-问题 → <span class="box p">采样×N</span> ┼→ <span class="box">候选2</span> → 答案 B　┐<br>
-　　(temp&gt;0)　├→ <span class="box">候选3</span> → 答案 A　├→ <span class="box g">选优</span> → A<br>
-　　　　　　└→ <span class="box">候选4</span> → 答案 A　┘<br>
+<b style="color:#7b61ff">Best-of-N：scatter → gather → rank</b><br/><br/>
+　　　　　　┌→ <span class="box">候选1</span> → 答案 A<br/>
+问题 → <span class="box p">采样×N</span> ┼→ <span class="box">候选2</span> → 答案 B　┐<br/>
+　　(temp&gt;0)　├→ <span class="box">候选3</span> → 答案 A　├→ <span class="box g">选优</span> → A<br/>
+　　　　　　└→ <span class="box">候选4</span> → 答案 A　┘<br/>
 <span style="color:#5a6378">　　投票：A 出现 3 次 → 胜出 / 或验证器打分选最高</span>
 </div>
-
-    <p style="margin-top:14px">这是<b>测试时计算</b>最直接的体现：N 越大，花的算力越多，准确率越高（log 关系，边际递减）。o1 这类模型则更进一步——把"采样 + 验证 + 回溯"<b>内化进单条长推理链</b>，而不是外部跑 N 次。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">这是<b>测试时计算</b>最直接的体现：N 越大，花的算力越多，准确率越高（log 关系，边际递减）。o1 这类模型则更进一步——把"采样 + 验证 + 回溯"<b>内化进单条长推理链</b>，而不是外部跑 N 次。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> collections <span class="kw">import</span> Counter
 
 <span class="kw">def</span> <span class="fn">self_consistency</span>(problem, n=10):
@@ -296,57 +264,47 @@ verdict = <span class="fn">verify_steps</span>(<span class="str">"求 17×23"</s
 
 <span class="cmt"># N 个独立推理路径殊途同归 → 答对的概率比单次高得多</span>
 best = <span class="fn">self_consistency</span>(<span class="str">"一支笔 3 元，买 7 支再打 9 折，共多少钱？"</span>, n=10)</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"Best-of-N 里 N 越大一定越好"——有上限。(1) 成本随 N <b>线性</b>涨，准确率只 log 涨，性价比迅速下降；(2) 多数投票<b>只对"有唯一确定答案"的题有效</b>（数学、选择题），开放写作没法投票；(3) 如果模型<b>系统性地</b>犯同一个错，100 个候选会一致地错——投票放大的是<b>共识</b>，不是<b>真相</b>。</div>
-    <div class="exercise" style="margin-top:8px">📌 妈妈场景：做<b>有标准答案的高风险计算</b>（税务、剂量、财务）时，手动跑 self-consistency——同一问题问 3-5 次，答案一致才采信，分歧就是危险信号，提示你需要人工介入核对。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 Best-of-N 用"采样冗余 + 选优"把随机性变成优势——但它放大的是共识，对系统性错误无能为力。<br>🤔 投票放大共识不放大真相——在群体决策、科学共识里，这个陷阱你还在哪些地方见过？<br><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#a48cff">工程对应 → super-individual D5: Agent Design</a></div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"Best-of-N 里 N 越大一定越好"——有上限。(1) 成本随 N <b>线性</b>涨，准确率只 log 涨，性价比迅速下降；(2) 多数投票<b>只对"有唯一确定答案"的题有效</b>（数学、选择题），开放写作没法投票；(3) 如果模型<b>系统性地</b>犯同一个错，100 个候选会一致地错——投票放大的是<b>共识</b>，不是<b>真相</b>。</div>
+<div class="exercise" style="margin-top:8px">📌 妈妈场景：做<b>有标准答案的高风险计算</b>（税务、剂量、财务）时，手动跑 self-consistency——同一问题问 3-5 次，答案一致才采信，分歧就是危险信号，提示你需要人工介入核对。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 Best-of-N 用"采样冗余 + 选优"把随机性变成优势——但它放大的是共识，对系统性错误无能为力。<br/>🤔 投票放大共识不放大真相——在群体决策、科学共识里，这个陷阱你还在哪些地方见过？<br/><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#a48cff">工程对应 → super-individual D5: Agent Design</a></div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://openai.com/index/learning-to-reason-with-llms/" target="_blank">OpenAI — Learning to Reason with LLMs (2024)</a> — o1 官方博文，测试时计算 scaling 的奠基性陈述</li>
-      <li><a href="https://arxiv.org/abs/2201.11903" target="_blank">Wei et al. 2022 — Chain-of-Thought Prompting</a> — CoT 的开创论文，必读</li>
-      <li><a href="https://arxiv.org/abs/2203.11171" target="_blank">Wang et al. 2022 — Self-Consistency</a> — 多数投票提升 CoT 的经典工作</li>
-      <li><a href="https://arxiv.org/abs/2305.20050" target="_blank">Lightman et al. 2023 — Let's Verify Step by Step</a> — 过程监督 (PRM) vs 结果监督的关键实证</li>
-      <li><a href="https://arxiv.org/abs/2110.14168" target="_blank">Cobbe et al. 2021 — Training Verifiers (GSM8K)</a> — Best-of-N + 验证器的源头</li>
-      <li><a href="https://arxiv.org/abs/2501.12948" target="_blank">DeepSeek-R1 (2025)</a> — 纯 RL 自发涌现推理能力，开源推理模型代表作</li>
-    </ul>
-  </div>
+<div class="card" data-tts="ad6d5a9c38cb7779" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://openai.com/index/learning-to-reason-with-llms/" target="_blank">OpenAI — Learning to Reason with LLMs (2024)</a> — o1 官方博文，测试时计算 scaling 的奠基性陈述</li>
+<li><a href="https://arxiv.org/abs/2201.11903" target="_blank">Wei et al. 2022 — Chain-of-Thought Prompting</a> — CoT 的开创论文，必读</li>
+<li><a href="https://arxiv.org/abs/2203.11171" target="_blank">Wang et al. 2022 — Self-Consistency</a> — 多数投票提升 CoT 的经典工作</li>
+<li><a href="https://arxiv.org/abs/2305.20050" target="_blank">Lightman et al. 2023 — Let's Verify Step by Step</a> — 过程监督 (PRM) vs 结果监督的关键实证</li>
+<li><a href="https://arxiv.org/abs/2110.14168" target="_blank">Cobbe et al. 2021 — Training Verifiers (GSM8K)</a> — Best-of-N + 验证器的源头</li>
+<li><a href="https://arxiv.org/abs/2501.12948" target="_blank">DeepSeek-R1 (2025)</a> — 纯 RL 自发涌现推理能力，开源推理模型代表作</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. "测试时计算"和"做大模型"是两条 scaling 路径，它们是替代还是互补？2026 年该怎么权衡？</summary><div>是<b>互补且相乘</b>的，不是替代。做大模型（训练时算力）提升<b>基础能力上限</b>——"懂多少"、单步推理多准；测试时计算提升<b>把已有能力榨干的程度</b>。两者像<b>CPU 主频</b> vs <b>允许程序跑多久</b>：主频低的 CPU 跑再久也算不出超纲题，但主频够了，多给时间就能解更难的。实践权衡：(a) 基础任务用小模型 + 低 effort；(b) 难题用强模型 + 高 effort；(c) 测试时计算<b>有边际递减</b>（log），"无脑加 effort"到某点就不划算，不如换更强的基础模型。2024-2025 的行业转向：当预训练数据接近枯竭、训练时 scaling 边际下降，<b>测试时计算成了新的增长曲线</b>——这是 o1/R1 路线爆发的根本原因。分布式类比：像"垂直扩展（更强单机）" vs "给单次请求更多超时预算"——两个旋钮，按 workload 调。</div></details>
-
-    <details><summary>2. CoT 可能是"事后合理化"——那推理模型给出的长思考链到底有没有认知价值？我们该信任它什么、不信任它什么？</summary><div>要把 CoT 拆成<b>两个功能</b>分别评估。功能一：<b>作为计算载体</b>——CoT token 给了模型额外的串行计算空间，<b>真实有效</b>，去掉准确率会掉，证明它不只是装饰。功能二：<b>作为可解释性窗口</b>（faithfulness）——"这串文字忠实反映了模型的真实推理吗？"这部分<b>不可全信</b>：模型可能受 prompt 里的偏见影响却在 CoT 里只字不提，或先有结论再补步骤。所以正确姿态：<b>信任 CoT 的"算力价值"，怀疑它的"自白价值"</b>。它是 scratchpad，不是测谎仪。实践含义：(1) 用 CoT 提升答案质量——放心；(2) 用 CoT 审查"模型哪步想错了"——有用但带怀疑，可见步骤未必是真实因果;(3) 把 CoT 当"置信度证据"——危险，通顺的推理链常常包着错误答案。这也是为什么验证（第3节）不能只靠读模型自己的推理链，要锚定外部信号。深一层：它逼我们重想"理解"是什么——一个系统能产出有用的中间步骤，却不忠实反映其内部机制，它算"会推理"吗？神经科学里也有镜像：人类的"自我解释"同样大量是事后合理化。</div></details>
-
-    <details><summary>3. 第3节（验证器选优）和第4节（Best-of-N）其实是同一件事的两面——它们和 o1 的"单条长思考链"是什么关系？</summary><div>是<b>外部并行</b> vs <b>内部串行</b>两种实现同一思想的方式，思想都是<b>"探索多条路径 + 选择/纠正"</b>。Best-of-N（外部）：跑 N 次独立采样，每条路径互不知晓，最后用投票或验证器在<b>结果层面</b>选优——好处是简单、可并行、可控；坏处是 N 条路径完全冗余，互相不能借鉴，且"选优"只在最后发生。o1/R1（内部）：把搜索<b>压进一条长链</b>——模型在生成过程中自己"试一条路 → 发现不对 → 回溯 → 换一条"，验证和探索<b>交织在一条序列里</b>，后面的步骤能利用前面失败的教训。这更接近人类解题：不是平行做 10 份卷子选最好的，而是一份卷子上反复涂改。代价是这条能力得靠 RL 专门训练（普通模型不会自发回溯）。趋势上 o1 这种"内化搜索"更高效——信息在链内复用，不浪费。但两者不互斥：可对 o1 再叠 Best-of-N，进一步压榨准确率，代价是成本叠乘。搜索算法视角：Best-of-N 像<b>独立随机重启</b>，o1 内部搜索更像<b>带回溯的 DFS / 束搜索</b>——后者用状态记忆避免重复探索。</div></details>
-
-    <details><summary>4. 推理模型擅长"可验证领域"（数学、代码）。那在没有客观对错的领域（写作、战略、人际判断），这套范式还成立吗？</summary><div>核心约束被点中了：推理模型这波突破<b>高度依赖"可自动验证"的奖励信号</b>——数学答案能对照、代码能跑测试，RL 才有干净的奖励。一旦进入<b>没有客观真值</b>的领域，三个机制全部松动：(1) RL 训练缺奖励信号——"这篇文章好不好"没有自动判分器，只能用人类偏好（贵、慢、有偏）或用另一个模型当裁判（引入裁判自己的偏见）;(2) 验证不再比生成容易——判断一个战略决策是否正确，可能和做出它一样难，甚至要等数年才知道结果，验证的杠杆消失;(3) Best-of-N 的投票失效——开放问题没有"唯一答案"可投票。所以现状是：推理模型在<b>软领域的增益远小于硬领域</b>。但有部分迁移：(a) 软问题里常<b>可分解出可验证的子结构</b>——战略分析里的"市场规模计算""财务模型"是硬的，可用推理模型，再由人做软判断;(b) <b>过程合理性</b>仍可部分检查——逻辑自洽、有无自相矛盾、是否遗漏关键因素，比"最终对错"易判。对"AI 超级个体"的启示：<b>人最不可替代的价值，正向"无法自动验证的判断"集中</b>——审美、价值排序、在不确定中下注。AI 把"有标准答案的思考"商品化了，反而凸显了"定义什么是好答案"的人类专属性。</div></details>
-
-    <details><summary>5. 如果"准确率 ∝ log(测试时算力)"，那是否存在一个问题——只要愿意花无限算力，AI 就能解任何题？边界在哪？</summary><div>不能，边界是<b>真实存在且多重</b>的。第一重，<b>log 关系本身就是天花板的信号</b>：要把准确率从 90% 提到 99%，可能要 10 倍算力；99% 到 99.9% 再要 10 倍——指数成本换线性收益，很快撞上经济墙。第二重，<b>基础能力是硬上限</b>：测试时计算只能逼近模型已有能力的上限，<b>不能凭空创造模型不具备的知识或推理模式</b>。一个没学过群论的模型，想再久也证不出需要群论的定理——多想只是把"它能想到的东西"探索得更充分，不是无中生有。第三重，<b>验证信号的有无</b>（见上一题）：没有可验证奖励的领域，加算力没有可靠的"选优"依据，多想可能只是把错误想得更精致。第四重，<b>有些问题计算不可约（computational irreducibility）</b>：某些问题没有捷径，必须真的一步步算到底，再聪明的"思考"也压缩不了。这恰呼应了复杂性科学里 Wolfram 的洞察。更准确的图景：测试时计算是个<b>强力但有界的旋钮</b>——它让"模型力所能及但需要功夫的题"可解，却碰不到"超出能力上限"和"本质不可约"的题。对超级个体的含义：AI 的杠杆在"<b>已知方法、需要耐心执行</b>"的问题上最大；真正的<b>创造性突破</b>仍然稀缺——而这正是人最该投入的地方。</div></details>
-  </div>
+<div class="card think" data-tts="5c40d12959aae54e" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. "测试时计算"和"做大模型"是两条 scaling 路径，它们是替代还是互补？2026 年该怎么权衡？</summary><div>是<b>互补且相乘</b>的，不是替代。做大模型（训练时算力）提升<b>基础能力上限</b>——"懂多少"、单步推理多准；测试时计算提升<b>把已有能力榨干的程度</b>。两者像<b>CPU 主频</b> vs <b>允许程序跑多久</b>：主频低的 CPU 跑再久也算不出超纲题，但主频够了，多给时间就能解更难的。实践权衡：(a) 基础任务用小模型 + 低 effort；(b) 难题用强模型 + 高 effort；(c) 测试时计算<b>有边际递减</b>（log），"无脑加 effort"到某点就不划算，不如换更强的基础模型。2024-2025 的行业转向：当预训练数据接近枯竭、训练时 scaling 边际下降，<b>测试时计算成了新的增长曲线</b>——这是 o1/R1 路线爆发的根本原因。分布式类比：像"垂直扩展（更强单机）" vs "给单次请求更多超时预算"——两个旋钮，按 workload 调。</div></details>
+<details><summary>2. CoT 可能是"事后合理化"——那推理模型给出的长思考链到底有没有认知价值？我们该信任它什么、不信任它什么？</summary><div>要把 CoT 拆成<b>两个功能</b>分别评估。功能一：<b>作为计算载体</b>——CoT token 给了模型额外的串行计算空间，<b>真实有效</b>，去掉准确率会掉，证明它不只是装饰。功能二：<b>作为可解释性窗口</b>（faithfulness）——"这串文字忠实反映了模型的真实推理吗？"这部分<b>不可全信</b>：模型可能受 prompt 里的偏见影响却在 CoT 里只字不提，或先有结论再补步骤。所以正确姿态：<b>信任 CoT 的"算力价值"，怀疑它的"自白价值"</b>。它是 scratchpad，不是测谎仪。实践含义：(1) 用 CoT 提升答案质量——放心；(2) 用 CoT 审查"模型哪步想错了"——有用但带怀疑，可见步骤未必是真实因果;(3) 把 CoT 当"置信度证据"——危险，通顺的推理链常常包着错误答案。这也是为什么验证（第3节）不能只靠读模型自己的推理链，要锚定外部信号。深一层：它逼我们重想"理解"是什么——一个系统能产出有用的中间步骤，却不忠实反映其内部机制，它算"会推理"吗？神经科学里也有镜像：人类的"自我解释"同样大量是事后合理化。</div></details>
+<details><summary>3. 第3节（验证器选优）和第4节（Best-of-N）其实是同一件事的两面——它们和 o1 的"单条长思考链"是什么关系？</summary><div>是<b>外部并行</b> vs <b>内部串行</b>两种实现同一思想的方式，思想都是<b>"探索多条路径 + 选择/纠正"</b>。Best-of-N（外部）：跑 N 次独立采样，每条路径互不知晓，最后用投票或验证器在<b>结果层面</b>选优——好处是简单、可并行、可控；坏处是 N 条路径完全冗余，互相不能借鉴，且"选优"只在最后发生。o1/R1（内部）：把搜索<b>压进一条长链</b>——模型在生成过程中自己"试一条路 → 发现不对 → 回溯 → 换一条"，验证和探索<b>交织在一条序列里</b>，后面的步骤能利用前面失败的教训。这更接近人类解题：不是平行做 10 份卷子选最好的，而是一份卷子上反复涂改。代价是这条能力得靠 RL 专门训练（普通模型不会自发回溯）。趋势上 o1 这种"内化搜索"更高效——信息在链内复用，不浪费。但两者不互斥：可对 o1 再叠 Best-of-N，进一步压榨准确率，代价是成本叠乘。搜索算法视角：Best-of-N 像<b>独立随机重启</b>，o1 内部搜索更像<b>带回溯的 DFS / 束搜索</b>——后者用状态记忆避免重复探索。</div></details>
+<details><summary>4. 推理模型擅长"可验证领域"（数学、代码）。那在没有客观对错的领域（写作、战略、人际判断），这套范式还成立吗？</summary><div>核心约束被点中了：推理模型这波突破<b>高度依赖"可自动验证"的奖励信号</b>——数学答案能对照、代码能跑测试，RL 才有干净的奖励。一旦进入<b>没有客观真值</b>的领域，三个机制全部松动：(1) RL 训练缺奖励信号——"这篇文章好不好"没有自动判分器，只能用人类偏好（贵、慢、有偏）或用另一个模型当裁判（引入裁判自己的偏见）;(2) 验证不再比生成容易——判断一个战略决策是否正确，可能和做出它一样难，甚至要等数年才知道结果，验证的杠杆消失;(3) Best-of-N 的投票失效——开放问题没有"唯一答案"可投票。所以现状是：推理模型在<b>软领域的增益远小于硬领域</b>。但有部分迁移：(a) 软问题里常<b>可分解出可验证的子结构</b>——战略分析里的"市场规模计算""财务模型"是硬的，可用推理模型，再由人做软判断;(b) <b>过程合理性</b>仍可部分检查——逻辑自洽、有无自相矛盾、是否遗漏关键因素，比"最终对错"易判。对"AI 超级个体"的启示：<b>人最不可替代的价值，正向"无法自动验证的判断"集中</b>——审美、价值排序、在不确定中下注。AI 把"有标准答案的思考"商品化了，反而凸显了"定义什么是好答案"的人类专属性。</div></details>
+<details><summary>5. 如果"准确率 ∝ log(测试时算力)"，那是否存在一个问题——只要愿意花无限算力，AI 就能解任何题？边界在哪？</summary><div>不能，边界是<b>真实存在且多重</b>的。第一重，<b>log 关系本身就是天花板的信号</b>：要把准确率从 90% 提到 99%，可能要 10 倍算力；99% 到 99.9% 再要 10 倍——指数成本换线性收益，很快撞上经济墙。第二重，<b>基础能力是硬上限</b>：测试时计算只能逼近模型已有能力的上限，<b>不能凭空创造模型不具备的知识或推理模式</b>。一个没学过群论的模型，想再久也证不出需要群论的定理——多想只是把"它能想到的东西"探索得更充分，不是无中生有。第三重，<b>验证信号的有无</b>（见上一题）：没有可验证奖励的领域，加算力没有可靠的"选优"依据，多想可能只是把错误想得更精致。第四重，<b>有些问题计算不可约（computational irreducibility）</b>：某些问题没有捷径，必须真的一步步算到底，再聪明的"思考"也压缩不了。这恰呼应了复杂性科学里 Wolfram 的洞察。更准确的图景：测试时计算是个<b>强力但有界的旋钮</b>——它让"模型力所能及但需要功夫的题"可解，却碰不到"超出能力上限"和"本质不可约"的题。对超级个体的含义：AI 的杠杆在"<b>已知方法、需要耐心执行</b>"的问题上最大；真正的<b>创造性突破</b>仍然稀缺——而这正是人最该投入的地方。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 28 · 2026-06-14</footer>
-
 </div>
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

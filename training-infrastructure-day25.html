@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：训练基础设施 — Day 25</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,46 +60,38 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：训练基础设施</h1>
-  <div class="meta">Day 25 · 2026-06-11 · 难度：进阶</div>
-  <div class="audience">面向：有分布式系统经验的非 AI 方向工程师</div>
+<h1 data-tts="76e51187784cc24c">AI/ML 详解：训练基础设施</h1>
+<div class="meta">Day 25 · 2026-06-11 · 难度：进阶</div>
+<div class="audience">面向：有分布式系统经验的非 AI 方向工程师</div>
 </header>
-
-
 <!-- 1. 分布式训练 -->
-<div class="card">
-  <h2>分布式训练<span class="en">Distributed Training</span></h2>
-  <div class="tags"><span class="tag">系统</span><span class="tag purple">并行</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>一个 70B 模型单卡装不下，就像一张表太大单机存不下——你的本能是<b>分片（sharding）</b>。但训练有<b>三个正交的切分维度</b>：切数据（像多个只读副本）、切模型的层（像微服务流水线）、切单层里的大矩阵（像把一个大 JOIN 拆到多机）。理解分布式训练，本质是理解<b>这三个轴怎么组合</b>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点是<b>显存（VRAM）</b>，不是算力。一个 70B 模型用 fp16，光参数就 140GB；加上梯度和 Adam 优化器状态，训练时每个参数要占 <strong>~16 字节</strong>（下张卡的 ZeRO 会拆解这个数字），总共 1TB 出头——一张 80GB 的 H100 根本放不下。三种并行各解决一块：</p>
-    <ul>
-      <li><b>数据并行 Data Parallel（DP）</b>：每张卡存<b>一份完整模型</b>，只把训练 batch 切开。各卡独立前向反向，再用 <b>all-reduce</b> 把梯度求平均同步。类比：多个只读副本各处理一批请求，定期对账。<b>前提是模型本身塞得进单卡</b>；</li>
-      <li><b>流水线并行 Pipeline Parallel（PP）</b>：把模型<b>按层</b>切成几段，分到不同卡，像装配线 / CPU 流水线。代价是 <b>bubble（气泡）</b>——第 1 段算完在等第 2 段，靠把 batch 拆成 micro-batch 填满流水线来缓解；</li>
-      <li><b>张量并行 Tensor Parallel（TP）</b>：把<b>单层内</b>的大矩阵乘法横竖切到多卡（第 4 张卡详解）。通信最密集，只在一台机器的高速 <b>NVLink</b> 内做。</li>
-    </ul>
-
+<div class="card" data-tts="be159435f1662803">
+<h2>分布式训练<span class="en">Distributed Training</span></h2>
+<div class="tags"><span class="tag">系统</span><span class="tag purple">并行</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>一个 70B 模型单卡装不下，就像一张表太大单机存不下——你的本能是<b>分片（sharding）</b>。但训练有<b>三个正交的切分维度</b>：切数据（像多个只读副本）、切模型的层（像微服务流水线）、切单层里的大矩阵（像把一个大 JOIN 拆到多机）。理解分布式训练，本质是理解<b>这三个轴怎么组合</b>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点是<b>显存（VRAM）</b>，不是算力。一个 70B 模型用 fp16，光参数就 140GB；加上梯度和 Adam 优化器状态，训练时每个参数要占 <strong>~16 字节</strong>（下张卡的 ZeRO 会拆解这个数字），总共 1TB 出头——一张 80GB 的 H100 根本放不下。三种并行各解决一块：</p>
+<ul>
+<li><b>数据并行 Data Parallel（DP）</b>：每张卡存<b>一份完整模型</b>，只把训练 batch 切开。各卡独立前向反向，再用 <b>all-reduce</b> 把梯度求平均同步。类比：多个只读副本各处理一批请求，定期对账。<b>前提是模型本身塞得进单卡</b>；</li>
+<li><b>流水线并行 Pipeline Parallel（PP）</b>：把模型<b>按层</b>切成几段，分到不同卡，像装配线 / CPU 流水线。代价是 <b>bubble（气泡）</b>——第 1 段算完在等第 2 段，靠把 batch 拆成 micro-batch 填满流水线来缓解；</li>
+<li><b>张量并行 Tensor Parallel（TP）</b>：把<b>单层内</b>的大矩阵乘法横竖切到多卡（第 4 张卡详解）。通信最密集，只在一台机器的高速 <b>NVLink</b> 内做。</li>
+</ul>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">三个正交的切分维度</b><br><br>
-<span class="box">Data 并行</span> 切 batch，复制模型 <span style="color:#5a6378">→ all-reduce 同步梯度</span><br>
-<span class="box o">Pipeline 并行</span> 切层（纵向）<span style="color:#5a6378">→ 卡A:层1-8 │ 卡B:层9-16 …</span><br>
-<span class="box p">Tensor 并行</span> 切单层矩阵（横向）<span style="color:#5a6378">→ 一个 matmul 拆到多卡</span><br><br>
+<b style="color:#7b61ff">三个正交的切分维度</b><br/><br/>
+<span class="box">Data 并行</span> 切 batch，复制模型 <span style="color:#5a6378">→ all-reduce 同步梯度</span><br/>
+<span class="box o">Pipeline 并行</span> 切层（纵向）<span style="color:#5a6378">→ 卡A:层1-8 │ 卡B:层9-16 …</span><br/>
+<span class="box p">Tensor 并行</span> 切单层矩阵（横向）<span style="color:#5a6378">→ 一个 matmul 拆到多卡</span><br/><br/>
 <span style="color:#8b92a8">现代万卡训练 = 三者组合，叫 3D 并行</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># 最简单的数据并行：PyTorch DDP。用 torchrun 启动多进程</span>
 <span class="kw">import</span> torch, torch.distributed <span class="kw">as</span> dist
 <span class="kw">from</span> torch.nn.parallel <span class="kw">import</span> DistributedDataParallel <span class="kw">as</span> DDP
@@ -115,55 +108,47 @@ model = <span class="fn">DDP</span>(model, device_ids=[rank])  <span class="cmt"
     loss.<span class="fn">backward</span>()                  <span class="cmt"># ← 梯度在这一步跨卡求平均</span>
     optimizer.<span class="fn">step</span>(); optimizer.<span class="fn">zero_grad</span>()
 <span class="cmt"># 启动：torchrun --nproc_per_node=8 train.py</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"加卡 = 线性加速"——错。加卡会引入<b>通信开销</b>（梯度同步、参数收集），而 all-reduce 的成本随卡数增长。8 卡常能到 7x，但 512 卡可能只有 ~380x（约 74% 效率）。这就是 Megatron 论文专门报告"<b>scaling efficiency</b>"而不是只说倍数的原因——通信永远在和你抢带宽。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：你大概率<b>不会</b>从头训 70B，但会<b>微调</b>。判断"要不要多卡"的第一性原理就是这张卡的逻辑——先估算「参数+梯度+优化器状态」总显存，超过单卡就必须 sharding。把它当容量规划（capacity planning）问题，和你规划数据库分片是同一套思维。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 分布式训练的瓶颈是<b>显存与通信</b>，不是算力。三种并行是三个正交轴，按"什么装不下"来选。<br>🤔 你熟悉的分布式存储里「复制 vs 分片」的权衡，怎么精确映射到「数据并行 vs ZeRO 分片」？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"加卡 = 线性加速"——错。加卡会引入<b>通信开销</b>（梯度同步、参数收集），而 all-reduce 的成本随卡数增长。8 卡常能到 7x，但 512 卡可能只有 ~380x（约 74% 效率）。这就是 Megatron 论文专门报告"<b>scaling efficiency</b>"而不是只说倍数的原因——通信永远在和你抢带宽。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：你大概率<b>不会</b>从头训 70B，但会<b>微调</b>。判断"要不要多卡"的第一性原理就是这张卡的逻辑——先估算「参数+梯度+优化器状态」总显存，超过单卡就必须 sharding。把它当容量规划（capacity planning）问题，和你规划数据库分片是同一套思维。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 分布式训练的瓶颈是<b>显存与通信</b>，不是算力。三种并行是三个正交轴，按"什么装不下"来选。<br/>🤔 你熟悉的分布式存储里「复制 vs 分片」的权衡，怎么精确映射到「数据并行 vs ZeRO 分片」？</div>
+</div>
+</div>
 <!-- 2. ZeRO -->
-<div class="card">
-  <h2>零冗余优化器<span class="en">ZeRO (Zero Redundancy Optimizer)</span></h2>
-  <div class="tags"><span class="tag">显存</span><span class="tag purple">分片</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>纯数据并行有个巨大浪费：<b>每张卡都存一份完整的参数、梯度、优化器状态</b>——这是 N 份冗余副本，等于分布式存储里"全量复制到每个节点"。ZeRO 的洞察是：这些状态<b>大部分时间用不到</b>，干嘛每张卡都存满？于是把它们<b>切片（shard）</b>到各卡，每卡只存 1/N，用到时临时 <b>all-gather</b> 拼回来。本质是<b>用通信换显存</b>——和用 erasure coding 替代全量复制是同一个 trade-off。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>先把"每参数 16 字节"拆开看——这是理解 ZeRO 的关键。混合精度训练里，每个参数要存：</p>
-
+<div class="card" data-tts="54df6ed5c9ef1269">
+<h2>零冗余优化器<span class="en">ZeRO (Zero Redundancy Optimizer)</span></h2>
+<div class="tags"><span class="tag">显存</span><span class="tag purple">分片</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>纯数据并行有个巨大浪费：<b>每张卡都存一份完整的参数、梯度、优化器状态</b>——这是 N 份冗余副本，等于分布式存储里"全量复制到每个节点"。ZeRO 的洞察是：这些状态<b>大部分时间用不到</b>，干嘛每张卡都存满？于是把它们<b>切片（shard）</b>到各卡，每卡只存 1/N，用到时临时 <b>all-gather</b> 拼回来。本质是<b>用通信换显存</b>——和用 erasure coding 替代全量复制是同一个 trade-off。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>先把"每参数 16 字节"拆开看——这是理解 ZeRO 的关键。混合精度训练里，每个参数要存：</p>
 <div class="diagram" style="margin-top:8px">
-<b style="color:#7b61ff">混合精度训练，每个参数的显存账单</b><br><br>
-fp16 参数 <span class="bar" style="width:24px;height:14px"></span> 2 字节<br>
-fp16 梯度 <span class="bar" style="width:24px;height:14px"></span> 2 字节<br>
-fp32 参数副本 <span class="bar" style="width:48px;height:14px"></span> 4 字节 <span style="color:#5a6378">┐</span><br>
-fp32 动量 m <span class="bar" style="width:48px;height:14px"></span> 4 字节 <span style="color:#5a6378">├ Adam 优化器状态</span><br>
-fp32 方差 v <span class="bar" style="width:48px;height:14px"></span> 4 字节 <span style="color:#5a6378">┘</span><br><br>
+<b style="color:#7b61ff">混合精度训练，每个参数的显存账单</b><br/><br/>
+fp16 参数 <span class="bar" style="width:24px;height:14px"></span> 2 字节<br/>
+fp16 梯度 <span class="bar" style="width:24px;height:14px"></span> 2 字节<br/>
+fp32 参数副本 <span class="bar" style="width:48px;height:14px"></span> 4 字节 <span style="color:#5a6378">┐</span><br/>
+fp32 动量 m <span class="bar" style="width:48px;height:14px"></span> 4 字节 <span style="color:#5a6378">├ Adam 优化器状态</span><br/>
+fp32 方差 v <span class="bar" style="width:48px;height:14px"></span> 4 字节 <span style="color:#5a6378">┘</span><br/><br/>
 <span style="color:#8b92a8">合计 ≈ 16 字节/参数。70B 模型 ≈ 1.1 TB——其中 12 字节是优化器状态，最肥</span>
 </div>
-
-    <p style="margin-top:14px">ZeRO 分三级，<b>渐进式地切掉冗余</b>，省得越多、通信越重：</p>
-    <ul>
-      <li><b>ZeRO-1</b>：切<b>优化器状态</b>（那 12 字节）。最肥的部分先分片，几乎不增加通信，性价比最高；</li>
-      <li><b>ZeRO-2</b>：再切<b>梯度</b>。反向算完即把梯度 reduce-scatter 到负责的卡，本地只留自己那片；</li>
-      <li><b>ZeRO-3</b>：连<b>参数本身</b>也切。前向/反向走到某层时才 all-gather 出完整参数，用完<b>立刻丢弃</b>。每卡显存降到约 <strong>16/N 字节/参数</strong>——理论上加卡就能线性降显存。</li>
-    </ul>
-    <p style="margin-top:8px">这是微软 DeepSpeed 的 <b>ZeRO</b>（Rajbhandari et al. 2019, arXiv 1910.02054）。它最优雅的地方：在<b>数据并行的编程模型</b>下（每卡看到的还是"完整模型"的假象），偷偷把内存冗余消掉了。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<p style="margin-top:14px">ZeRO 分三级，<b>渐进式地切掉冗余</b>，省得越多、通信越重：</p>
+<ul>
+<li><b>ZeRO-1</b>：切<b>优化器状态</b>（那 12 字节）。最肥的部分先分片，几乎不增加通信，性价比最高；</li>
+<li><b>ZeRO-2</b>：再切<b>梯度</b>。反向算完即把梯度 reduce-scatter 到负责的卡，本地只留自己那片；</li>
+<li><b>ZeRO-3</b>：连<b>参数本身</b>也切。前向/反向走到某层时才 all-gather 出完整参数，用完<b>立刻丢弃</b>。每卡显存降到约 <strong>16/N 字节/参数</strong>——理论上加卡就能线性降显存。</li>
+</ul>
+<p style="margin-top:8px">这是微软 DeepSpeed 的 <b>ZeRO</b>（Rajbhandari et al. 2019, arXiv 1910.02054）。它最优雅的地方：在<b>数据并行的编程模型</b>下（每卡看到的还是"完整模型"的假象），偷偷把内存冗余消掉了。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># DeepSpeed 用一份 JSON config 开启 ZeRO，业务代码几乎不变</span>
 ds_config = {
     <span class="str">"train_micro_batch_size_per_gpu"</span>: 4,
@@ -181,54 +166,47 @@ engine, _, _, _ = deepspeed.<span class="fn">initialize</span>(
     loss = engine(batch).loss
     engine.<span class="fn">backward</span>(loss)   <span class="cmt"># ZeRO 在这里做 reduce-scatter + all-gather</span>
     engine.<span class="fn">step</span>()</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"ZeRO-3 最省显存，那就无脑开 stage 3"——错。stage 越高，<b>每一步前向/反向都要 all-gather 参数</b>，通信量暴涨。如果你的瓶颈本来是显存就值；如果模型其实塞得下、瓶颈在速度，stage 3 反而拖慢。规则：<b>先用最低能装下的 stage</b>。这和"别为了省一点磁盘把热数据也压缩"是同一种工程判断。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：用 4 张消费级 GPU（如 24GB ×4）微调一个 13B 模型时，ZeRO-2 + 优化器 CPU offload 常常是"勉强能跑"和"OOM 崩溃"的分界线。理解 16 字节账单，你就能<b>事前算出</b>开哪个 stage，而不是撞墙试错。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 ZeRO = 把数据并行里的冗余副本换成分片 + 按需收集，<b>用通信带宽换显存</b>。<br>🤔 ZeRO-3 的"用到才 all-gather、用完就丢"，和虚拟内存的按需分页（demand paging）在思想上是不是同一招？它们各自的"缺页代价"是什么？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"ZeRO-3 最省显存，那就无脑开 stage 3"——错。stage 越高，<b>每一步前向/反向都要 all-gather 参数</b>，通信量暴涨。如果你的瓶颈本来是显存就值；如果模型其实塞得下、瓶颈在速度，stage 3 反而拖慢。规则：<b>先用最低能装下的 stage</b>。这和"别为了省一点磁盘把热数据也压缩"是同一种工程判断。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：用 4 张消费级 GPU（如 24GB ×4）微调一个 13B 模型时，ZeRO-2 + 优化器 CPU offload 常常是"勉强能跑"和"OOM 崩溃"的分界线。理解 16 字节账单，你就能<b>事前算出</b>开哪个 stage，而不是撞墙试错。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 ZeRO = 把数据并行里的冗余副本换成分片 + 按需收集，<b>用通信带宽换显存</b>。<br/>🤔 ZeRO-3 的"用到才 all-gather、用完就丢"，和虚拟内存的按需分页（demand paging）在思想上是不是同一招？它们各自的"缺页代价"是什么？</div>
+</div>
+</div>
 <!-- 3. FSDP -->
-<div class="card">
-  <h2>全分片数据并行<span class="en">FSDP (Fully Sharded Data Parallel)</span></h2>
-  <div class="tags"><span class="tag">PyTorch</span><span class="tag orange">原生</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>FSDP 就是 <b>PyTorch 官方把 ZeRO-3 写进了标准库</b>。机制几乎等价，区别像<b>第三方库 vs 内置实现</b>：DeepSpeed/ZeRO 是外挂的（类似 requests），FSDP 是和 PyTorch 的 autograd、dispatcher、显存分配器<b>深度同源</b>的官方版本（类似内置的 urllib，但更顺手）。对大多数纯 PyTorch 项目，FSDP 是"不引入新生态就能拿到 ZeRO-3"的默认选择。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>解决的痛点和 ZeRO-3 一样——消除数据并行的内存冗余——但要<b>无缝融进原生 PyTorch</b>。机制可以一句话概括：<b>平时分片、用时聚合、用完释放</b>。</p>
-    <ul>
-      <li><b>包裹（wrap）成单元</b>：把模型按层/模块切成若干 FSDP unit。平时每个 unit 的参数只在本卡留 1/N 分片；</li>
-      <li><b>前向到某 unit</b>：先 <b>all-gather</b> 拼出这一层的完整参数 → 算这一层 → <b>立刻 free 掉</b>非本地的那部分，只留回 1/N；</li>
-      <li><b>反向同理</b>：再 all-gather 一次算梯度，然后 <b>reduce-scatter</b> 把梯度切片分发回各自负责的卡；</li>
-      <li><b>通信-计算重叠</b>：算第 i 层时，后台预取第 i+1 层的参数，把 all-gather 的延迟藏在计算背后——这是它能跑快的关键。</li>
-    </ul>
-    <p style="margin-top:8px">权威参考是 <b>PyTorch FSDP</b> 论文（Zhao et al. 2023, arXiv 2304.11277），里面讲清了它怎么和 PyTorch 核心组件协同设计。<b>auto_wrap_policy</b> 决定切分粒度：unit 切太细 → all-gather 次数多、通信碎；切太粗 → 单次聚合的峰值显存高。粒度本身就是显存与通信的连续权衡。</p>
-
+<div class="card" data-tts="2bfb65db53cb87c3">
+<h2>全分片数据并行<span class="en">FSDP (Fully Sharded Data Parallel)</span></h2>
+<div class="tags"><span class="tag">PyTorch</span><span class="tag orange">原生</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>FSDP 就是 <b>PyTorch 官方把 ZeRO-3 写进了标准库</b>。机制几乎等价，区别像<b>第三方库 vs 内置实现</b>：DeepSpeed/ZeRO 是外挂的（类似 requests），FSDP 是和 PyTorch 的 autograd、dispatcher、显存分配器<b>深度同源</b>的官方版本（类似内置的 urllib，但更顺手）。对大多数纯 PyTorch 项目，FSDP 是"不引入新生态就能拿到 ZeRO-3"的默认选择。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>解决的痛点和 ZeRO-3 一样——消除数据并行的内存冗余——但要<b>无缝融进原生 PyTorch</b>。机制可以一句话概括：<b>平时分片、用时聚合、用完释放</b>。</p>
+<ul>
+<li><b>包裹（wrap）成单元</b>：把模型按层/模块切成若干 FSDP unit。平时每个 unit 的参数只在本卡留 1/N 分片；</li>
+<li><b>前向到某 unit</b>：先 <b>all-gather</b> 拼出这一层的完整参数 → 算这一层 → <b>立刻 free 掉</b>非本地的那部分，只留回 1/N；</li>
+<li><b>反向同理</b>：再 all-gather 一次算梯度，然后 <b>reduce-scatter</b> 把梯度切片分发回各自负责的卡；</li>
+<li><b>通信-计算重叠</b>：算第 i 层时，后台预取第 i+1 层的参数，把 all-gather 的延迟藏在计算背后——这是它能跑快的关键。</li>
+</ul>
+<p style="margin-top:8px">权威参考是 <b>PyTorch FSDP</b> 论文（Zhao et al. 2023, arXiv 2304.11277），里面讲清了它怎么和 PyTorch 核心组件协同设计。<b>auto_wrap_policy</b> 决定切分粒度：unit 切太细 → all-gather 次数多、通信碎；切太粗 → 单次聚合的峰值显存高。粒度本身就是显存与通信的连续权衡。</p>
 <div class="diagram" style="margin-top:8px">
-<b style="color:#7b61ff">FSDP 单层的生命周期（每层重复）</b><br><br>
-<span class="box r">分片态: 本卡只有 1/N 参数</span><br>
-<span class="arrow">↓ all-gather（拼出完整层）</span><br>
-<span class="box g">完整态: 算 forward / backward</span><br>
-<span class="arrow">↓ free 非本地分片 + reduce-scatter 梯度</span><br>
-<span class="box r">回到分片态，显存释放</span><br><br>
+<b style="color:#7b61ff">FSDP 单层的生命周期（每层重复）</b><br/><br/>
+<span class="box r">分片态: 本卡只有 1/N 参数</span><br/>
+<span class="arrow">↓ all-gather（拼出完整层）</span><br/>
+<span class="box g">完整态: 算 forward / backward</span><br/>
+<span class="arrow">↓ free 非本地分片 + reduce-scatter 梯度</span><br/>
+<span class="box r">回到分片态，显存释放</span><br/><br/>
 <span style="color:#8b92a8">峰值显存 ≈ 全模型分片(1/N) + 当前这一层的完整参数（不是整个模型）</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># PyTorch 原生 FSDP，无需第三方库</span>
 <span class="kw">import</span> torch, functools
 <span class="kw">from</span> torch.distributed.fsdp <span class="kw">import</span> FullyShardedDataParallel <span class="kw">as</span> FSDP
@@ -249,62 +227,53 @@ model = <span class="fn">FSDP</span>(
     loss = model(batch).loss
     loss.<span class="fn">backward</span>()      <span class="cmt"># FSDP 在此处理 all-gather / reduce-scatter</span>
     optimizer.<span class="fn">step</span>(); optimizer.<span class="fn">zero_grad</span>()</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"FSDP 是 DDP 的无脑升级，换个 wrapper 就行"——要小心。FSDP 改变了模型的<b>状态语义</b>：参数是分片的，直接 <code>model.state_dict()</code> 存档、或写一段假设"本卡有完整参数"的自定义逻辑，都可能出错——得用 FSDP 提供的 state_dict 接口先把分片聚合回来。<b>分片是透明的，但不是隐形的</b>：碰参数内部时它就会冒出来。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：2026 年微调大模型，FSDP 几乎是 HuggingFace <code>accelerate</code> / <code>trl</code> 背后的默认引擎。哪怕你只写一行 <code>accelerate launch</code>，理解"它在每层 all-gather 又 free"能让你看懂为什么<b>峰值显存和你算的参数量对不上</b>——多出来的就是当前层的完整副本。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 FSDP = 原生 PyTorch 版的 ZeRO-3：平时分片、用时聚合、用完释放，通信藏在计算背后。<br>🤔 FSDP 把"完整参数"做成了一个短暂、即用即弃的对象——这和你写缓存时"按需物化、立即失效"的模式是不是一回事？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"FSDP 是 DDP 的无脑升级，换个 wrapper 就行"——要小心。FSDP 改变了模型的<b>状态语义</b>：参数是分片的，直接 <code>model.state_dict()</code> 存档、或写一段假设"本卡有完整参数"的自定义逻辑，都可能出错——得用 FSDP 提供的 state_dict 接口先把分片聚合回来。<b>分片是透明的，但不是隐形的</b>：碰参数内部时它就会冒出来。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：2026 年微调大模型，FSDP 几乎是 HuggingFace <code>accelerate</code> / <code>trl</code> 背后的默认引擎。哪怕你只写一行 <code>accelerate launch</code>，理解"它在每层 all-gather 又 free"能让你看懂为什么<b>峰值显存和你算的参数量对不上</b>——多出来的就是当前层的完整副本。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 FSDP = 原生 PyTorch 版的 ZeRO-3：平时分片、用时聚合、用完释放，通信藏在计算背后。<br/>🤔 FSDP 把"完整参数"做成了一个短暂、即用即弃的对象——这和你写缓存时"按需物化、立即失效"的模式是不是一回事？</div>
+</div>
+</div>
 <!-- 4. Megatron-LM -->
-<div class="card">
-  <h2>Megatron-LM 张量并行<span class="en">Megatron-LM / Tensor Parallelism</span></h2>
-  <div class="tags"><span class="tag">张量并行</span><span class="tag purple">3D 并行</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>ZeRO 和 FSDP 都假设<b>单层算得动</b>——它们切的是"谁存参数"，但算的时候还是把整层拼回单卡。可如果<b>单层的矩阵本身就大到一张卡放不下</b>呢？那就得把<b>单个矩阵乘法本身</b>切开，让多张卡协同算一个 matmul。类比：一行记录大到单机存不下，你只能把<b>这一行的字段</b>也拆到多机（垂直拆单个算子）。这就是<b>张量并行（Tensor Parallel）</b>，Megatron-LM 是它的经典实现。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>Megatron-LM（Shoeybi et al. 2019, arXiv 1909.08053）的精妙之处：怎么切 Transformer 的两大算子，<b>让切分边界刚好落在非线性函数之外</b>，从而一次前向只需<b>一次同步</b>。看 MLP 层 <code>Y = GeLU(X·A)·B</code>：</p>
-    <ul>
-      <li><b>第一个矩阵 A 按「列」切</b>成 [A₁, A₂]：X·A₁ 和 X·A₂ 分到两卡独立算。因为 <b>GeLU 是逐元素的</b>，GeLU(X·A₁) 不需要看 A₂ 的结果——非线性可以在各卡<b>本地</b>完成，<strong>无需中间同步</strong>；</li>
-      <li><b>第二个矩阵 B 按「行」切</b>成 [B₁; B₂]：两卡各算出部分和，最后用<b>一次 all-reduce 求和</b>得到完整 Y。</li>
-    </ul>
-    <p style="margin-top:8px">为什么是"列切 A、行切 B"而不是反过来？因为这个组合让<b>唯一的非线性（GeLU）落在切分内部</b>，整层前向只在末尾同步一次。换个切法就得在 GeLU 前后各同步一次——通信翻倍。自注意力则更自然：<b>按 attention head 切</b>，每个 head 本就独立计算，天生适合并行。</p>
-
+<div class="card" data-tts="2763ce9403707493">
+<h2>Megatron-LM 张量并行<span class="en">Megatron-LM / Tensor Parallelism</span></h2>
+<div class="tags"><span class="tag">张量并行</span><span class="tag purple">3D 并行</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>ZeRO 和 FSDP 都假设<b>单层算得动</b>——它们切的是"谁存参数"，但算的时候还是把整层拼回单卡。可如果<b>单层的矩阵本身就大到一张卡放不下</b>呢？那就得把<b>单个矩阵乘法本身</b>切开，让多张卡协同算一个 matmul。类比：一行记录大到单机存不下，你只能把<b>这一行的字段</b>也拆到多机（垂直拆单个算子）。这就是<b>张量并行（Tensor Parallel）</b>，Megatron-LM 是它的经典实现。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Megatron-LM（Shoeybi et al. 2019, arXiv 1909.08053）的精妙之处：怎么切 Transformer 的两大算子，<b>让切分边界刚好落在非线性函数之外</b>，从而一次前向只需<b>一次同步</b>。看 MLP 层 <code>Y = GeLU(X·A)·B</code>：</p>
+<ul>
+<li><b>第一个矩阵 A 按「列」切</b>成 [A₁, A₂]：X·A₁ 和 X·A₂ 分到两卡独立算。因为 <b>GeLU 是逐元素的</b>，GeLU(X·A₁) 不需要看 A₂ 的结果——非线性可以在各卡<b>本地</b>完成，<strong>无需中间同步</strong>；</li>
+<li><b>第二个矩阵 B 按「行」切</b>成 [B₁; B₂]：两卡各算出部分和，最后用<b>一次 all-reduce 求和</b>得到完整 Y。</li>
+</ul>
+<p style="margin-top:8px">为什么是"列切 A、行切 B"而不是反过来？因为这个组合让<b>唯一的非线性（GeLU）落在切分内部</b>，整层前向只在末尾同步一次。换个切法就得在 GeLU 前后各同步一次——通信翻倍。自注意力则更自然：<b>按 attention head 切</b>，每个 head 本就独立计算，天生适合并行。</p>
 <div class="diagram" style="margin-top:8px">
-<b style="color:#7b61ff">Megatron MLP 张量并行：Y = GeLU(X·A)·B</b><br><br>
-<span class="box">输入 X（两卡都有完整 X）</span><br>
-<span class="arrow">↓ 卡1: X·A₁ │ 卡2: X·A₂（A 按列切）</span><br>
-<span class="box g">卡1: GeLU(X·A₁)</span> <span class="box g">卡2: GeLU(X·A₂)</span> <span style="color:#5a6378">← 非线性本地完成，不同步</span><br>
-<span class="arrow">↓ 卡1: (…)·B₁ │ 卡2: (…)·B₂（B 按行切）</span><br>
-<span class="box o">部分和₁</span> <span style="color:#5a6378">+</span> <span class="box o">部分和₂</span> <span class="arrow">→ all-reduce →</span> <span class="box p">完整 Y</span><br>
+<b style="color:#7b61ff">Megatron MLP 张量并行：Y = GeLU(X·A)·B</b><br/><br/>
+<span class="box">输入 X（两卡都有完整 X）</span><br/>
+<span class="arrow">↓ 卡1: X·A₁ │ 卡2: X·A₂（A 按列切）</span><br/>
+<span class="box g">卡1: GeLU(X·A₁)</span> <span class="box g">卡2: GeLU(X·A₂)</span> <span style="color:#5a6378">← 非线性本地完成，不同步</span><br/>
+<span class="arrow">↓ 卡1: (…)·B₁ │ 卡2: (…)·B₂（B 按行切）</span><br/>
+<span class="box o">部分和₁</span> <span style="color:#5a6378">+</span> <span class="box o">部分和₂</span> <span class="arrow">→ all-reduce →</span> <span class="box p">完整 Y</span><br/>
 <span style="color:#8b92a8">整层只在最后同步一次（前向 1 次 all-reduce）</span>
 </div>
-
-    <p style="margin-top:14px">张量并行通信极重（每层都要 all-reduce），所以<b>只在一台机器内的 NVLink 上做</b>（带宽 ~900GB/s），绝不跨节点。最终的万卡训练是 <b>3D 并行</b>：</p>
-
+<p style="margin-top:14px">张量并行通信极重（每层都要 all-reduce），所以<b>只在一台机器内的 NVLink 上做</b>（带宽 ~900GB/s），绝不跨节点。最终的万卡训练是 <b>3D 并行</b>：</p>
 <div class="diagram" style="margin-top:8px">
-<b style="color:#7b61ff">3D 并行：三个轴正交组合</b><br><br>
-<span class="box p">Tensor 并行（TP）</span> <span style="color:#5a6378">→ 机内 NVLink，切单层矩阵，通信最重</span><br>
-<span class="box o">Pipeline 并行（PP）</span> <span style="color:#5a6378">→ 跨机，切层，通信中等</span><br>
-<span class="box">Data 并行（DP）</span> <span style="color:#5a6378">→ 跨机/跨集群，切数据，通信最稀</span><br><br>
+<b style="color:#7b61ff">3D 并行：三个轴正交组合</b><br/><br/>
+<span class="box p">Tensor 并行（TP）</span> <span style="color:#5a6378">→ 机内 NVLink，切单层矩阵，通信最重</span><br/>
+<span class="box o">Pipeline 并行（PP）</span> <span style="color:#5a6378">→ 跨机，切层，通信中等</span><br/>
+<span class="box">Data 并行（DP）</span> <span style="color:#5a6378">→ 跨机/跨集群，切数据，通信最稀</span><br/><br/>
 <span style="color:#8b92a8">原则：通信越重的并行，放在带宽越高的层级。这是按「带宽层级」做的放置优化</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># 张量并行的核心思想，用纯 PyTorch 示意「列切 + 行切 + all-reduce」</span>
 <span class="kw">import</span> torch, torch.distributed <span class="kw">as</span> dist
 <span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
@@ -318,65 +287,53 @@ model = <span class="fn">FSDP</span>(
     dist.<span class="fn">all_reduce</span>(Y_partial, op=dist.ReduceOp.SUM)
     <span class="kw">return</span> Y_partial            <span class="cmt"># 整层前向只通信了一次</span>
 <span class="cmt"># 真实生产用 NVIDIA Megatron-LM / Megatron-Core，已封装好这套切分</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"张量并行能像数据并行一样横向扩到几百卡"——错。TP 每层都要 all-reduce，<b>带宽就是天花板</b>：跨节点走 InfiniBand（~50GB/s）比机内 NVLink（~900GB/s）慢一个量级，TP 一旦跨机性能就崩。所以 TP 几乎只用 8（一台 8 卡机内），更大规模靠 PP 和 DP 往外叠。<b>并行策略的本质是按通信量匹配带宽层级</b>。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：你基本不会自己配 3D 并行，但读懂大模型技术报告里"TP=8, PP=4, DP=16, 共 512 卡"这行时，就能立刻反推它的集群拓扑和瓶颈在哪——这是判断一个开源模型"好不好复现 / 微调成本多高"的关键信息。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 张量并行切的是<b>单个算子</b>，Megatron 的巧思是让切分边界避开非线性，把每层同步压到一次；3D 并行 = 按带宽层级摆放三种并行。<br>🤔 "把通信最重的并行放在带宽最高的层级"——这条原则和你做存储/缓存分层（热数据上内存、冷数据下磁盘）是不是同一个第一性原理？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"张量并行能像数据并行一样横向扩到几百卡"——错。TP 每层都要 all-reduce，<b>带宽就是天花板</b>：跨节点走 InfiniBand（~50GB/s）比机内 NVLink（~900GB/s）慢一个量级，TP 一旦跨机性能就崩。所以 TP 几乎只用 8（一台 8 卡机内），更大规模靠 PP 和 DP 往外叠。<b>并行策略的本质是按通信量匹配带宽层级</b>。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：你基本不会自己配 3D 并行，但读懂大模型技术报告里"TP=8, PP=4, DP=16, 共 512 卡"这行时，就能立刻反推它的集群拓扑和瓶颈在哪——这是判断一个开源模型"好不好复现 / 微调成本多高"的关键信息。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 张量并行切的是<b>单个算子</b>，Megatron 的巧思是让切分边界避开非线性，把每层同步压到一次；3D 并行 = 按带宽层级摆放三种并行。<br/>🤔 "把通信最重的并行放在带宽最高的层级"——这条原则和你做存储/缓存分层（热数据上内存、冷数据下磁盘）是不是同一个第一性原理？</div>
+</div>
+</div>
 <!-- 工程 cross-reference -->
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
-  <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+<a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
     工程对应 → super-individual D12: Fine-tuning（多卡微调时 FSDP / ZeRO 的实战配置与显存调优）
   </a>
 </div>
-
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/1910.02054" target="_blank">ZeRO 论文 (Rajbhandari et al. 2019)</a> — 内存冗余分析与三级分片的奠基性工作</li>
-      <li><a href="https://arxiv.org/abs/1909.08053" target="_blank">Megatron-LM 论文 (Shoeybi et al. 2019)</a> — 张量并行怎么切 Transformer，必读</li>
-      <li><a href="https://arxiv.org/abs/2304.11277" target="_blank">PyTorch FSDP 论文 (Zhao et al. 2023)</a> — FSDP 与 PyTorch 核心的协同设计</li>
-      <li><a href="https://arxiv.org/abs/1811.06965" target="_blank">GPipe 论文 (Huang et al. 2018)</a> — 流水线并行与 micro-batch、bubble 的原始论文</li>
-      <li><a href="https://www.deepspeed.ai/tutorials/zero/" target="_blank">DeepSpeed ZeRO 官方教程</a> — config 用法与各 stage 的工程取舍</li>
-      <li><a href="https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html" target="_blank">PyTorch FSDP 官方教程</a> — auto_wrap_policy、state_dict 等实操</li>
-    </ul>
-  </div>
+<div class="card" data-tts="65d3c26d0bb0ea03" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/1910.02054" target="_blank">ZeRO 论文 (Rajbhandari et al. 2019)</a> — 内存冗余分析与三级分片的奠基性工作</li>
+<li><a href="https://arxiv.org/abs/1909.08053" target="_blank">Megatron-LM 论文 (Shoeybi et al. 2019)</a> — 张量并行怎么切 Transformer，必读</li>
+<li><a href="https://arxiv.org/abs/2304.11277" target="_blank">PyTorch FSDP 论文 (Zhao et al. 2023)</a> — FSDP 与 PyTorch 核心的协同设计</li>
+<li><a href="https://arxiv.org/abs/1811.06965" target="_blank">GPipe 论文 (Huang et al. 2018)</a> — 流水线并行与 micro-batch、bubble 的原始论文</li>
+<li><a href="https://www.deepspeed.ai/tutorials/zero/" target="_blank">DeepSpeed ZeRO 官方教程</a> — config 用法与各 stage 的工程取舍</li>
+<li><a href="https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html" target="_blank">PyTorch FSDP 官方教程</a> — auto_wrap_policy、state_dict 等实操</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 数据并行的 all-reduce、ZeRO 的 reduce-scatter + all-gather、张量并行的 all-reduce——这些都是「集合通信原语」。它们和你熟悉的分布式系统通信模式有什么对应？</summary><div>它们就是 MPI / NCCL 的<b>集合通信（collective communication）原语</b>，和分布式系统里的 gossip、quorum、聚合查询是同一族思想。<b>all-reduce</b> = 每个节点都贡献一份数据、最终每个节点都拿到全局聚合结果（如求和/求平均），等价于"分布式求和后广播回所有人"——数据并行同步梯度、张量并行合并部分和都用它。<b>reduce-scatter</b> = 聚合的同时把结果<b>切片分发</b>，每个节点只拿到自己负责的那一片（ZeRO/FSDP 用它把梯度切回各卡）。<b>all-gather</b> = 反向操作，每个节点把自己的分片广播出去，最终人人持有完整数据（FSDP 临时拼回整层参数）。关键洞察：<b>all-reduce ≈ reduce-scatter + all-gather</b>——这正是为什么 ZeRO 能"免费"地把数据并行的同步拆成两半，在中间插入分片。底层算法（ring all-reduce）的通信量与节点数无关、只和数据量有关，这是它能扩展到上千卡的数学基础。你做过分布式聚合查询，就已经懂这套了，只是换了名字。</div></details>
-
-    <details><summary>2. ZeRO-3 / FSDP「用到才 all-gather、用完就丢」和操作系统的虚拟内存按需分页，本质是不是同一招？代价分别是什么？</summary><div>思想内核确实一致：<b>不把全部数据常驻昂贵存储，而是按需把"页"换入、用完换出</b>。虚拟内存把不活跃的页换到磁盘，进程访问时触发缺页中断再换回；FSDP 把不活跃层的参数"换出"成 1/N 分片，前向走到该层时 all-gather"换入"完整参数，算完再"换出"。但代价的性质不同：(a) <b>缺页代价的来源不同</b>——虚拟内存的代价是<b>磁盘 I/O 延迟</b>（随机访问、毫秒级），FSDP 的代价是<b>跨卡通信带宽</b>（NVLink/IB，微秒级但量大）；(b) <b>可预测性不同</b>——虚拟内存的缺页是<b>被动、不可预测</b>的（取决于程序访问模式），而 FSDP 的"换入顺序"是<b>完全确定</b>的（就按层的前向/反向顺序），所以它能做<b>预取（prefetch）</b>——算第 i 层时后台拉第 i+1 层，把通信延迟完全藏在计算背后。这是 FSDP 能高效的根本原因：确定性的访问序列让预取变得完美，而 OS 的通用预取只能猜。(c) ZeRO 还能把状态进一步 offload 到 CPU 内存甚至 NVMe——这时就<b>真的</b>变成了和虚拟内存几乎一样的多级换页，延迟代价也随之逼近磁盘级。</div></details>
-
-    <details><summary>3. 为什么张量并行（TP）只能在机内做、数据并行（DP）却能跨集群扩展？这背后是什么定量原则？</summary><div>核心是<b>「通信量 / 计算量」的比值</b>，决定了一种并行对带宽有多敏感。<b>张量并行</b>：每一层前向都要至少一次 all-reduce，通信发生得<b>极其频繁</b>（每层、每步），且和计算紧耦合——一次同步没完成，下一层算不了。它对带宽和延迟都极度敏感，所以必须放在带宽最高的层级（机内 NVLink ~900GB/s）。一旦跨节点走 InfiniBand（~50GB/s，慢约 20 倍），TP 立刻被通信拖垮。<b>数据并行</b>：只在<b>每步反向结束后</b>同步一次梯度，一步里就一次通信，而且可以和反向计算<b>重叠</b>（算完一层的梯度就立刻开始传，不用等整个反向结束）。通信频率低、可隐藏，所以即使带宽较低也能扛，能扩到跨机房上千卡。<b>流水线并行</b>居中：只在层段边界传激活值，通信量中等。这就推出了 3D 并行的<b>放置定律</b>：<b>把通信最密集的并行放在带宽最高的层级</b>——TP 进 NVLink 域（通常 8 卡），PP 跨节点，DP 跨集群。这和你做存储分层（热数据进内存、温数据进 SSD、冷数据进对象存储）是<b>同一个第一性原理</b>：按访问/通信强度匹配资源带宽。理解这条，你就能看一眼"TP=8, PP=4, DP=N"反推出整个集群的物理拓扑。</div></details>
-
-    <details><summary>4. 这四种技术（DP/ZeRO/FSDP/TP）——如果你要训练一个模型，决策树应该怎么走？</summary><div>按"<b>什么装不下</b>"逐级升级，这是最干净的决策框架：<b>第一步问：单卡能装下完整模型（参数+梯度+优化器）吗？</b>能 → 直接 <b>DDP 数据并行</b>，最简单、通信最少、扩展性最好。这是首选，别过度工程。<b>装不下，第二步问：是优化器状态太肥，还是模型本身太大？</b>如果是前者（参数其实塞得下，是 Adam 的 12 字节/参数压垮了显存）→ 上 <b>ZeRO / FSDP</b>，按需选 stage：先 ZeRO-1（只切优化器状态，几乎不加通信），不够再 ZeRO-2（切梯度），还不够 ZeRO-3 / FSDP（连参数也切）。原则是<b>用能装下的最低 stage</b>。<b>第三步：如果连单层都大到一张卡放不下</b>（百亿/千亿级的巨大 FFN 或 embedding）→ 必须 <b>张量并行（Megatron）</b>，但只在机内 8 卡做。<b>第四步：模型层数太多、单机放不下整个模型</b> → 加<b>流水线并行</b>跨节点切层。<b>最终的超大规模</b>就是全叠起来：TP（机内）× PP（跨节点）× DP/ZeRO（跨集群）= 3D 并行。关键心法：<b>每一级都是"上一级装不下"才引入，因为每加一种并行都增加通信和复杂度</b>。这和数据库扩展完全同构——先单机、再读副本（DP）、再分库分表（sharding/TP）、能不分就不分。</div></details>
-
-    <details><summary>5. 这些技术让"训练万亿参数模型"成为可能，但它们都是在「绕过单卡显存墙」。如果显存墙是根本约束，这是否预示着架构层面（而非系统层面）的解法？</summary><div>这是个深刻的跨层问题。DP/ZeRO/FSDP/TP 全是<b>系统层</b>的"搬运工"——它们不改变"训练这个模型需要多少总显存"，只是把它<b>摊薄到更多卡 + 用通信换空间</b>。摊薄有上限：卡越多，通信占比越高，最终通信会吃掉所有收益（这也是 scaling efficiency 永远 <100% 的根因）。所以真正的突破往往来自<b>架构层</b>——直接降低"每个有效参数的训练成本"：(a) <b>MoE（专家混合）</b>：每个 token 只激活一小部分专家，参数总量巨大但单次计算/激活显存小，用"稀疏激活"绕开稠密矩阵的显存墙（Day 34 主题）；(b) <b>更省的注意力</b>（FlashAttention 不省参数但省激活显存，把 O(n²) 中间矩阵不落地）；(c) <b>状态空间模型 / 线性注意力</b>：从根上把 O(n²) 降到 O(n)。系统层和架构层是<b>互补</b>而非替代：架构决定"理论需要多少资源"，系统决定"怎么把它铺到真实硬件上"。BigCat 你可以这样看——分布式训练是把"墙"推远的工程学，而架构创新是<b>重新设计房子让它根本不需要那么大的墙</b>。两条路线的张力，正是 2026 年大模型基础设施最核心的研究主线之一。</div></details>
-  </div>
+<div class="card think" data-tts="c193feac2239b39f" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 数据并行的 all-reduce、ZeRO 的 reduce-scatter + all-gather、张量并行的 all-reduce——这些都是「集合通信原语」。它们和你熟悉的分布式系统通信模式有什么对应？</summary><div>它们就是 MPI / NCCL 的<b>集合通信（collective communication）原语</b>，和分布式系统里的 gossip、quorum、聚合查询是同一族思想。<b>all-reduce</b> = 每个节点都贡献一份数据、最终每个节点都拿到全局聚合结果（如求和/求平均），等价于"分布式求和后广播回所有人"——数据并行同步梯度、张量并行合并部分和都用它。<b>reduce-scatter</b> = 聚合的同时把结果<b>切片分发</b>，每个节点只拿到自己负责的那一片（ZeRO/FSDP 用它把梯度切回各卡）。<b>all-gather</b> = 反向操作，每个节点把自己的分片广播出去，最终人人持有完整数据（FSDP 临时拼回整层参数）。关键洞察：<b>all-reduce ≈ reduce-scatter + all-gather</b>——这正是为什么 ZeRO 能"免费"地把数据并行的同步拆成两半，在中间插入分片。底层算法（ring all-reduce）的通信量与节点数无关、只和数据量有关，这是它能扩展到上千卡的数学基础。你做过分布式聚合查询，就已经懂这套了，只是换了名字。</div></details>
+<details><summary>2. ZeRO-3 / FSDP「用到才 all-gather、用完就丢」和操作系统的虚拟内存按需分页，本质是不是同一招？代价分别是什么？</summary><div>思想内核确实一致：<b>不把全部数据常驻昂贵存储，而是按需把"页"换入、用完换出</b>。虚拟内存把不活跃的页换到磁盘，进程访问时触发缺页中断再换回；FSDP 把不活跃层的参数"换出"成 1/N 分片，前向走到该层时 all-gather"换入"完整参数，算完再"换出"。但代价的性质不同：(a) <b>缺页代价的来源不同</b>——虚拟内存的代价是<b>磁盘 I/O 延迟</b>（随机访问、毫秒级），FSDP 的代价是<b>跨卡通信带宽</b>（NVLink/IB，微秒级但量大）；(b) <b>可预测性不同</b>——虚拟内存的缺页是<b>被动、不可预测</b>的（取决于程序访问模式），而 FSDP 的"换入顺序"是<b>完全确定</b>的（就按层的前向/反向顺序），所以它能做<b>预取（prefetch）</b>——算第 i 层时后台拉第 i+1 层，把通信延迟完全藏在计算背后。这是 FSDP 能高效的根本原因：确定性的访问序列让预取变得完美，而 OS 的通用预取只能猜。(c) ZeRO 还能把状态进一步 offload 到 CPU 内存甚至 NVMe——这时就<b>真的</b>变成了和虚拟内存几乎一样的多级换页，延迟代价也随之逼近磁盘级。</div></details>
+<details><summary>3. 为什么张量并行（TP）只能在机内做、数据并行（DP）却能跨集群扩展？这背后是什么定量原则？</summary><div>核心是<b>「通信量 / 计算量」的比值</b>，决定了一种并行对带宽有多敏感。<b>张量并行</b>：每一层前向都要至少一次 all-reduce，通信发生得<b>极其频繁</b>（每层、每步），且和计算紧耦合——一次同步没完成，下一层算不了。它对带宽和延迟都极度敏感，所以必须放在带宽最高的层级（机内 NVLink ~900GB/s）。一旦跨节点走 InfiniBand（~50GB/s，慢约 20 倍），TP 立刻被通信拖垮。<b>数据并行</b>：只在<b>每步反向结束后</b>同步一次梯度，一步里就一次通信，而且可以和反向计算<b>重叠</b>（算完一层的梯度就立刻开始传，不用等整个反向结束）。通信频率低、可隐藏，所以即使带宽较低也能扛，能扩到跨机房上千卡。<b>流水线并行</b>居中：只在层段边界传激活值，通信量中等。这就推出了 3D 并行的<b>放置定律</b>：<b>把通信最密集的并行放在带宽最高的层级</b>——TP 进 NVLink 域（通常 8 卡），PP 跨节点，DP 跨集群。这和你做存储分层（热数据进内存、温数据进 SSD、冷数据进对象存储）是<b>同一个第一性原理</b>：按访问/通信强度匹配资源带宽。理解这条，你就能看一眼"TP=8, PP=4, DP=N"反推出整个集群的物理拓扑。</div></details>
+<details><summary>4. 这四种技术（DP/ZeRO/FSDP/TP）——如果你要训练一个模型，决策树应该怎么走？</summary><div>按"<b>什么装不下</b>"逐级升级，这是最干净的决策框架：<b>第一步问：单卡能装下完整模型（参数+梯度+优化器）吗？</b>能 → 直接 <b>DDP 数据并行</b>，最简单、通信最少、扩展性最好。这是首选，别过度工程。<b>装不下，第二步问：是优化器状态太肥，还是模型本身太大？</b>如果是前者（参数其实塞得下，是 Adam 的 12 字节/参数压垮了显存）→ 上 <b>ZeRO / FSDP</b>，按需选 stage：先 ZeRO-1（只切优化器状态，几乎不加通信），不够再 ZeRO-2（切梯度），还不够 ZeRO-3 / FSDP（连参数也切）。原则是<b>用能装下的最低 stage</b>。<b>第三步：如果连单层都大到一张卡放不下</b>（百亿/千亿级的巨大 FFN 或 embedding）→ 必须 <b>张量并行（Megatron）</b>，但只在机内 8 卡做。<b>第四步：模型层数太多、单机放不下整个模型</b> → 加<b>流水线并行</b>跨节点切层。<b>最终的超大规模</b>就是全叠起来：TP（机内）× PP（跨节点）× DP/ZeRO（跨集群）= 3D 并行。关键心法：<b>每一级都是"上一级装不下"才引入，因为每加一种并行都增加通信和复杂度</b>。这和数据库扩展完全同构——先单机、再读副本（DP）、再分库分表（sharding/TP）、能不分就不分。</div></details>
+<details><summary>5. 这些技术让"训练万亿参数模型"成为可能，但它们都是在「绕过单卡显存墙」。如果显存墙是根本约束，这是否预示着架构层面（而非系统层面）的解法？</summary><div>这是个深刻的跨层问题。DP/ZeRO/FSDP/TP 全是<b>系统层</b>的"搬运工"——它们不改变"训练这个模型需要多少总显存"，只是把它<b>摊薄到更多卡 + 用通信换空间</b>。摊薄有上限：卡越多，通信占比越高，最终通信会吃掉所有收益（这也是 scaling efficiency 永远 &lt;100% 的根因）。所以真正的突破往往来自<b>架构层</b>——直接降低"每个有效参数的训练成本"：(a) <b>MoE（专家混合）</b>：每个 token 只激活一小部分专家，参数总量巨大但单次计算/激活显存小，用"稀疏激活"绕开稠密矩阵的显存墙（Day 34 主题）；(b) <b>更省的注意力</b>（FlashAttention 不省参数但省激活显存，把 O(n²) 中间矩阵不落地）；(c) <b>状态空间模型 / 线性注意力</b>：从根上把 O(n²) 降到 O(n)。系统层和架构层是<b>互补</b>而非替代：架构决定"理论需要多少资源"，系统决定"怎么把它铺到真实硬件上"。BigCat 你可以这样看——分布式训练是把"墙"推远的工程学，而架构创新是<b>重新设计房子让它根本不需要那么大的墙</b>。两条路线的张力，正是 2026 年大模型基础设施最核心的研究主线之一。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 25 · 2026-06-11</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

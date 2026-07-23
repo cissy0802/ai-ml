@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：公平、偏见与去偏 — Day 51</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -61,47 +62,40 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：公平、偏见与去偏</h1>
-  <div class="meta">Day 51 · 2026-07-08</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：进阶</div>
+<h1 data-tts="9ef18f2952d4db39">AI/ML 详解：公平、偏见与去偏</h1>
+<div class="meta">Day 51 · 2026-07-08</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：进阶</div>
 </header>
-
 <!-- 1. 偏见来源 -->
-<div class="card">
-  <h2>偏见的来源<span class="en">Sources of Bias</span></h2>
-  <div class="tags"><span class="tag">数据管线</span><span class="tag purple">机制</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>模型偏见不是"某行代码写错了"，而是像一条 <b>ETL 数据管线</b>——采集、抽样、打标、聚合每层都可能注入系统性偏斜，最后在模型里<b>累积放大</b>。跟分布式系统一样：污染往往不在终点，而是上游某个采样节点悄悄丢了数据，下游全盘继承还不自知。"垃圾进垃圾出"是对的，但偏见更隐蔽——<b>合规、完整、没有 bug 的数据，依然可以是有偏的</b>。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>要治理偏见，先得知道它从哪进来。学界把机器学习管线里的偏见拆成几个<b>互相独立</b>的注入点——这很重要，因为不同来源要用完全不同的手段修，混为一谈只会白费力气：</p>
-    <ul>
-      <li><b>历史偏见（historical bias）</b>——数据<b>如实</b>反映了一个不公正的世界。某岗位历来男性居多，模型学到的是"事实"，但这事实本身就需要纠正；</li>
-      <li><b>代表性偏见（representation bias）</b>——采样让某些群体样本过少。人脸数据集深肤色样本稀缺 → 模型在这些人群误差系统性偏高；</li>
-      <li><b>测量偏见（measurement bias）</b>——想预测的东西无法直测，只能用<b>代理标签（proxy）</b>。想预测"犯罪"却只有"被捕"数据，而执法强度在人群间不均——代理与真值的偏差直接变成模型偏见；</li>
-      <li><b>聚合偏见（aggregation bias）</b>——用<b>一个</b>模型硬套异质人群，对谁都不最优；</li>
-      <li><b>学习/评估偏见</b>——损失函数最小化<b>总体</b>误差，天然牺牲少数群体；测试集若同样不均还会掩盖问题。</li>
-    </ul>
-
+<div class="card" data-tts="601b4fabc3589df0">
+<h2>偏见的来源<span class="en">Sources of Bias</span></h2>
+<div class="tags"><span class="tag">数据管线</span><span class="tag purple">机制</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>模型偏见不是"某行代码写错了"，而是像一条 <b>ETL 数据管线</b>——采集、抽样、打标、聚合每层都可能注入系统性偏斜，最后在模型里<b>累积放大</b>。跟分布式系统一样：污染往往不在终点，而是上游某个采样节点悄悄丢了数据，下游全盘继承还不自知。"垃圾进垃圾出"是对的，但偏见更隐蔽——<b>合规、完整、没有 bug 的数据，依然可以是有偏的</b>。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>要治理偏见，先得知道它从哪进来。学界把机器学习管线里的偏见拆成几个<b>互相独立</b>的注入点——这很重要，因为不同来源要用完全不同的手段修，混为一谈只会白费力气：</p>
+<ul>
+<li><b>历史偏见（historical bias）</b>——数据<b>如实</b>反映了一个不公正的世界。某岗位历来男性居多，模型学到的是"事实"，但这事实本身就需要纠正；</li>
+<li><b>代表性偏见（representation bias）</b>——采样让某些群体样本过少。人脸数据集深肤色样本稀缺 → 模型在这些人群误差系统性偏高；</li>
+<li><b>测量偏见（measurement bias）</b>——想预测的东西无法直测，只能用<b>代理标签（proxy）</b>。想预测"犯罪"却只有"被捕"数据，而执法强度在人群间不均——代理与真值的偏差直接变成模型偏见；</li>
+<li><b>聚合偏见（aggregation bias）</b>——用<b>一个</b>模型硬套异质人群，对谁都不最优；</li>
+<li><b>学习/评估偏见</b>——损失函数最小化<b>总体</b>误差，天然牺牲少数群体；测试集若同样不均还会掩盖问题。</li>
+</ul>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">偏见沿管线的注入点</b><br><br>
-<span class="box r">真实世界(不公正)</span><span class="arrow">→①历史</span><span class="box o">数据采集</span><span class="arrow">→②代表性</span><span class="box o">抽样</span><span class="arrow">→③测量</span><span class="box o">打标(代理)</span><br>
-<span class="arrow">　　　　　　　　　　　　　　　　　　　　↓</span><br>
-<span class="box">训练</span><span class="arrow">→④聚合/学习</span><span class="box p">模型</span><span class="arrow">→</span><span class="box r">放大的偏见</span><span class="arrow">→</span><span class="box">部署→反馈回真实世界(闭环强化)</span><br>
+<b style="color:#7b61ff">偏见沿管线的注入点</b><br/><br/>
+<span class="box r">真实世界(不公正)</span><span class="arrow">→①历史</span><span class="box o">数据采集</span><span class="arrow">→②代表性</span><span class="box o">抽样</span><span class="arrow">→③测量</span><span class="box o">打标(代理)</span><br/>
+<span class="arrow">　　　　　　　　　　　　　　　　　　　　↓</span><br/>
+<span class="box">训练</span><span class="arrow">→④聚合/学习</span><span class="box p">模型</span><span class="arrow">→</span><span class="box r">放大的偏见</span><span class="arrow">→</span><span class="box">部署→反馈回真实世界(闭环强化)</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ 每个 ① ~ ④ 是独立注入点，需要不同修法；部署又把偏见喂回世界，形成正反馈</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
 
 <span class="cmt"># 一份"看起来干净"的招聘历史数据：无缺失、无错误，但有偏</span>
@@ -116,45 +110,39 @@ base_rates = df.<span class="fn">groupby</span>(<span class="str">"gender"</span
 <span class="fn">print</span>(base_rates)
 <span class="fn">print</span>(<span class="str">"基础比率差(disparity):"</span>, base_rates.<span class="fn">max</span>() - base_rates.<span class="fn">min</span>())
 <span class="cmt"># 差距大 → 直接拿去训练 = 把历史不公固化进模型</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"把 gender、race 敏感列删掉，模型就公平了"——错，这叫 <b>fairness through unawareness</b>，几乎无效。敏感属性会通过<b>代理变量</b>泄漏：邮编关联种族、名字暗示性别、消费暴露收入。删标签只让你<b>看不见</b>偏见，模型照样从代理里重建它。要做的是<b>测量</b>偏见，而非蒙上眼睛。</div>
-    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：用 AI 筛简历 / 供应商 / 投资标的时，先问自己——参考数据来自<b>哪个历史时期、哪种筛选逻辑</b>？若历史本身有系统性倾斜，AI 给的"最优推荐"其实是在放大那个历史，而非给你中立判断。</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"把 gender、race 敏感列删掉，模型就公平了"——错，这叫 <b>fairness through unawareness</b>，几乎无效。敏感属性会通过<b>代理变量</b>泄漏：邮编关联种族、名字暗示性别、消费暴露收入。删标签只让你<b>看不见</b>偏见，模型照样从代理里重建它。要做的是<b>测量</b>偏见，而非蒙上眼睛。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：用 AI 筛简历 / 供应商 / 投资标的时，先问自己——参考数据来自<b>哪个历史时期、哪种筛选逻辑</b>？若历史本身有系统性倾斜，AI 给的"最优推荐"其实是在放大那个历史，而非给你中立判断。</div>
+</div>
+</div>
 <!-- 2. 公平性度量 -->
-<div class="card">
-  <h2>公平性度量<span class="en">Fairness Metrics</span></h2>
-  <div class="tags"><span class="tag">定义</span><span class="tag purple">群体公平</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>"公平"不是一个指标，而是像 <b>SLA 定义</b>——同一个系统，你可以承诺"每个租户吞吐量相同"，也可以承诺"每个租户错误率相同"，这是<b>两份不同的合同</b>，无法同时满足所有人。公平性度量就是把"公平"翻译成可计算的数学条件，而<b>选哪个定义本身就是价值判断</b>，不是技术细节。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>"这个模型公平吗"无法回答，除非你先说清<b>按哪种公平</b>。两个最主流的群体公平（group fairness）定义，分歧的根源在于：<b>看输出，还是看错误？</b></p>
-    <ul>
-      <li><b>人口均等（Demographic Parity / 统计均等）</b>——要求<b>正预测率</b>在各群体相等：P(Ŷ=1 | A=甲) = P(Ŷ=1 | A=乙)。直觉：录取率对每个群体一样，<b>不管</b>各群体真实合格率如何。它只看模型输出的分布；</li>
-      <li><b>机会均等（Equalized Odds）</b>——要求<b>真阳率(TPR)和假阳率(FPR)</b>在各群体都相等。直觉：在<b>真正合格</b>的人里，各群体被录取的概率一样（TPR 相等）；在<b>不合格</b>的人里，各群体被误录的概率也一样（FPR 相等）。它看的是"模型犯错的方式"是否对各群体一致；</li>
-      <li><b>均等机会（Equal Opportunity）</b>——机会均等的放松版，<b>只</b>要求 TPR 相等（合格者被公平对待），不管 FPR。当"漏掉真正合格的人"是主要伤害时用它。</li>
-    </ul>
-    <p style="margin-top:8px">关键区别：人口均等<b>无视真值 Y</b>，只看输出比率；机会均等<b>以真值为条件</b>，要求错误分布一致。所以若两群体真实合格率本就不同，<b>这两个定义会打架</b>——强行拉平录取率，必然在某群体制造更高错误率。这不是 bug，是下一张卡的数学必然。</p>
-
+<div class="card" data-tts="c715696ac037e148">
+<h2>公平性度量<span class="en">Fairness Metrics</span></h2>
+<div class="tags"><span class="tag">定义</span><span class="tag purple">群体公平</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>"公平"不是一个指标，而是像 <b>SLA 定义</b>——同一个系统，你可以承诺"每个租户吞吐量相同"，也可以承诺"每个租户错误率相同"，这是<b>两份不同的合同</b>，无法同时满足所有人。公平性度量就是把"公平"翻译成可计算的数学条件，而<b>选哪个定义本身就是价值判断</b>，不是技术细节。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>"这个模型公平吗"无法回答，除非你先说清<b>按哪种公平</b>。两个最主流的群体公平（group fairness）定义，分歧的根源在于：<b>看输出，还是看错误？</b></p>
+<ul>
+<li><b>人口均等（Demographic Parity / 统计均等）</b>——要求<b>正预测率</b>在各群体相等：P(Ŷ=1 | A=甲) = P(Ŷ=1 | A=乙)。直觉：录取率对每个群体一样，<b>不管</b>各群体真实合格率如何。它只看模型输出的分布；</li>
+<li><b>机会均等（Equalized Odds）</b>——要求<b>真阳率(TPR)和假阳率(FPR)</b>在各群体都相等。直觉：在<b>真正合格</b>的人里，各群体被录取的概率一样（TPR 相等）；在<b>不合格</b>的人里，各群体被误录的概率也一样（FPR 相等）。它看的是"模型犯错的方式"是否对各群体一致；</li>
+<li><b>均等机会（Equal Opportunity）</b>——机会均等的放松版，<b>只</b>要求 TPR 相等（合格者被公平对待），不管 FPR。当"漏掉真正合格的人"是主要伤害时用它。</li>
+</ul>
+<p style="margin-top:8px">关键区别：人口均等<b>无视真值 Y</b>，只看输出比率；机会均等<b>以真值为条件</b>，要求错误分布一致。所以若两群体真实合格率本就不同，<b>这两个定义会打架</b>——强行拉平录取率，必然在某群体制造更高错误率。这不是 bug，是下一张卡的数学必然。</p>
 <table class="fm">
 <tr><th>定义</th><th>数学条件</th><th>以真值为条件？</th><th>适用直觉</th></tr>
 <tr><td>人口均等</td><td>正预测率相等</td><td>否</td><td>要求结果分布本身平等</td></tr>
 <tr><td>机会均等</td><td>TPR 且 FPR 相等</td><td>是</td><td>要求"犯错方式"平等</td></tr>
 <tr><td>均等机会</td><td>仅 TPR 相等</td><td>是</td><td>只在意别漏掉合格者</td></tr>
 </table>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> fairlearn.metrics <span class="kw">import</span> (MetricFrame,
     demographic_parity_difference, equalized_odds_difference)
 <span class="kw">from</span> sklearn.metrics <span class="kw">import</span> selection_rate, true_positive_rate
@@ -172,48 +160,42 @@ mf = <span class="fn">MetricFrame</span>(
 <span class="fn">print</span>(<span class="str">"机会均等差:"</span>, <span class="fn">equalized_odds_difference</span>(
     y_true, y_pred, sensitive_features=A))     <span class="cmt"># TPR/FPR 组间极差的较大者</span>
 <span class="cmt"># 两个数往往一个小一个大——印证它们在衡量不同的"公平"</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"选一个公平指标优化到 0 就万事大吉"——错。单一指标可被<b>钻空子</b>：只满足人口均等，可以靠"甲群体随机录取、乙群体精准录取"凑数，录取率相等但质量天差地别。指标是<b>诊断工具</b>不是目标函数；孤立地优化某个数值到 0，往往在别处制造新的不公。</div>
-    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：当有人（或某供应商）宣称"我们的 AI 模型经过公平性认证"，第一个要追问的是——<b>按哪个定义？</b> 人口均等还是机会均等？这两个答案对应完全不同的价值取向和适用场景。听不到明确答案，"公平"就是营销词。</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"选一个公平指标优化到 0 就万事大吉"——错。单一指标可被<b>钻空子</b>：只满足人口均等，可以靠"甲群体随机录取、乙群体精准录取"凑数，录取率相等但质量天差地别。指标是<b>诊断工具</b>不是目标函数；孤立地优化某个数值到 0，往往在别处制造新的不公。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：当有人（或某供应商）宣称"我们的 AI 模型经过公平性认证"，第一个要追问的是——<b>按哪个定义？</b> 人口均等还是机会均等？这两个答案对应完全不同的价值取向和适用场景。听不到明确答案，"公平"就是营销词。</div>
+</div>
+</div>
 <!-- 3. 不可能定理 -->
-<div class="card">
-  <h2>公平的不可能定理<span class="en">Impossibility Theorem</span></h2>
-  <div class="tags"><span class="tag">数学</span><span class="tag purple">trade-off</span><span class="tag orange">核心</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>公平性有自己的 <b>CAP 定理</b>。就像分布式系统里一致性(C)、可用性(A)、分区容忍(P) 三者不可兼得，风险评分模型里的三种公平——<b>校准（calibration）、假阳率均衡、真阳率均衡</b>——在群体<b>基础比率不同</b>时，数学上<b>不可能同时满足</b>。这不是工程没做好，是定理证明了的天花板：你必须选择牺牲哪一个。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>2016 年，两组研究者（Kleinberg 等；以及 Chouldechova）几乎同时证明了这个结果，起因是著名的 <b>COMPAS 累犯预测</b>争议——ProPublica 指控该算法对黑人被告假阳率更高，厂商 Northpointe 反驳说算法是<b>校准</b>的（同一分数对各群体含义相同）。不可能定理揭示：<b>双方都对，因为他们要的两种公平根本无法共存</b>。</p>
-    <p style="margin-top:8px">三个条件的白话：</p>
-    <ul>
-      <li><b>校准</b>：模型说"70% 会累犯"，那在各群体里打这个分的人，实际累犯率都该是 70%。分数含义对所有群体一致；</li>
-      <li><b>假阳率均衡</b>：在<b>不会</b>累犯的人里，各群体被误判为高危的比例相同；</li>
-      <li><b>真阳率均衡</b>：在<b>会</b>累犯的人里，各群体被正确识别的比例相同。</li>
-    </ul>
-    <p style="margin-top:8px">定理内容：只要两群体<b>基础比率不同</b>（真实累犯率不一样）、且模型不是 100% 完美，上面三条<b>最多同时满足两条</b>。为什么？——校准强迫"同一分数=同一真实风险"，但当一个群体整体基础比率更高，为维持校准，模型必然在该群体<b>要么放更多假阳、要么漏更多真阳</b>，错误无法在群体间对齐。基础比率的差异被"挤"进了错误率里，躲不掉。</p>
-
+<div class="card" data-tts="1dc16d8295570040">
+<h2>公平的不可能定理<span class="en">Impossibility Theorem</span></h2>
+<div class="tags"><span class="tag">数学</span><span class="tag purple">trade-off</span><span class="tag orange">核心</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>公平性有自己的 <b>CAP 定理</b>。就像分布式系统里一致性(C)、可用性(A)、分区容忍(P) 三者不可兼得，风险评分模型里的三种公平——<b>校准（calibration）、假阳率均衡、真阳率均衡</b>——在群体<b>基础比率不同</b>时，数学上<b>不可能同时满足</b>。这不是工程没做好，是定理证明了的天花板：你必须选择牺牲哪一个。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>2016 年，两组研究者（Kleinberg 等；以及 Chouldechova）几乎同时证明了这个结果，起因是著名的 <b>COMPAS 累犯预测</b>争议——ProPublica 指控该算法对黑人被告假阳率更高，厂商 Northpointe 反驳说算法是<b>校准</b>的（同一分数对各群体含义相同）。不可能定理揭示：<b>双方都对，因为他们要的两种公平根本无法共存</b>。</p>
+<p style="margin-top:8px">三个条件的白话：</p>
+<ul>
+<li><b>校准</b>：模型说"70% 会累犯"，那在各群体里打这个分的人，实际累犯率都该是 70%。分数含义对所有群体一致；</li>
+<li><b>假阳率均衡</b>：在<b>不会</b>累犯的人里，各群体被误判为高危的比例相同；</li>
+<li><b>真阳率均衡</b>：在<b>会</b>累犯的人里，各群体被正确识别的比例相同。</li>
+</ul>
+<p style="margin-top:8px">定理内容：只要两群体<b>基础比率不同</b>（真实累犯率不一样）、且模型不是 100% 完美，上面三条<b>最多同时满足两条</b>。为什么？——校准强迫"同一分数=同一真实风险"，但当一个群体整体基础比率更高，为维持校准，模型必然在该群体<b>要么放更多假阳、要么漏更多真阳</b>，错误无法在群体间对齐。基础比率的差异被"挤"进了错误率里，躲不掉。</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">公平性的"CAP 三角"（基础比率不同时）</b><br><br>
-<span class="arrow">　　　　</span><span class="box g">校准 Calibration</span><br>
-<span class="arrow">　　　　　／　　　＼</span><br>
-<span class="arrow">　　　／　　　　　　＼</span><br>
-<span class="box o">假阳率均衡</span><span class="arrow">— ✗ 不可兼得 —</span><span class="box o">真阳率均衡</span><br><br>
+<b style="color:#7b61ff">公平性的"CAP 三角"（基础比率不同时）</b><br/><br/>
+<span class="arrow">　　　　</span><span class="box g">校准 Calibration</span><br/>
+<span class="arrow">　　　　　／　　　＼</span><br/>
+<span class="arrow">　　　／　　　　　　＼</span><br/>
+<span class="box o">假阳率均衡</span><span class="arrow">— ✗ 不可兼得 —</span><span class="box o">真阳率均衡</span><br/><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ 三选二。COMPAS 之争：Northpointe 守"校准"，ProPublica 要"假阳率均衡"——两者数学互斥</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
 <span class="cmt"># 用最小例子看"校准"和"假阳率均衡"如何互相绞杀</span>
 <span class="cmt"># 两个群体, 基础比率不同: A组真实正例率 0.6, B组 0.3</span>
@@ -235,47 +217,41 @@ sB = np.<span class="fn">where</span>(yB==1, rng.<span class="fn">random</span>(
 <span class="fn">print</span>(<span class="str">"B组 TPR,FPR:"</span>, <span class="fn">rates</span>(yB, sB))
 <span class="cmt"># 两组用同一阈值(都校准)→ 但 FPR 不相等; 想拉平 FPR 就得</span>
 <span class="cmt"># 给两组不同阈值 → 同一分数含义就不同了 → 打破校准。无解。</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"总能找到一个足够聪明的算法同时满足所有公平定义"——错，这被<b>数学证明</b>排除了（除非基础比率恰好相等或模型完美，现实都不成立）。这不是"再努力一下"能突破的工程难题，而是<b>逻辑天花板</b>。当 CAP 定理对待：接受取舍存在，<b>显式选择</b>牺牲哪个、为什么。</div>
-    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：任何声称"我们的 AI 完全公平、没有任何偏见"的产品，要么没理解不可能定理，要么在回避取舍。作为技术决策者，正确的问题不是"公平吗"，而是"<b>你选了哪种公平、放弃了哪种、这个取舍谁来承担</b>"——这才是负责任的表述。</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"总能找到一个足够聪明的算法同时满足所有公平定义"——错，这被<b>数学证明</b>排除了（除非基础比率恰好相等或模型完美，现实都不成立）。这不是"再努力一下"能突破的工程难题，而是<b>逻辑天花板</b>。当 CAP 定理对待：接受取舍存在，<b>显式选择</b>牺牲哪个、为什么。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：任何声称"我们的 AI 完全公平、没有任何偏见"的产品，要么没理解不可能定理，要么在回避取舍。作为技术决策者，正确的问题不是"公平吗"，而是"<b>你选了哪种公平、放弃了哪种、这个取舍谁来承担</b>"——这才是负责任的表述。</div>
+</div>
+</div>
 <!-- 4. 去偏与因果公平 -->
-<div class="card">
-  <h2>去偏方法与因果公平<span class="en">Debiasing &amp; Causal Fairness</span></h2>
-  <div class="tags"><span class="tag">干预</span><span class="tag purple">因果</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>去偏就像<b>数据质量治理</b>——你可以在<b>入库时清洗</b>（预处理）、<b>写入约束里强制</b>（训练中）、或<b>读取时打补丁</b>（后处理），三个位置各有代价。<b>因果公平</b>更进一步：不满足于"相关性上看起来平等"，而是问一个反事实——"<b>如果这个人的敏感属性被改掉，决策会变吗？</b>"——把公平从统计相关升级到因果机制。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>知道了偏见来源和度量，怎么修？三类干预按<b>作用于管线的位置</b>划分：</p>
-    <ul>
-      <li><b>预处理（pre-processing）</b>——改数据：重加权、重采样、或变换特征表示去掉敏感信息。经典是 Bolukbasi 2016 词向量去偏——找出嵌入里的"性别方向"并把职业词投影掉。优点：与下游解耦；缺点：可能损失有用信号；</li>
-      <li><b>训练中（in-processing）</b>——改目标：损失里加<b>公平约束</b>，或用<b>对抗</b>去偏——加一个判别器专门从表示里猜敏感属性，主模型被训练到让它<b>猜不出来</b>。优点：权衡最优；缺点：要动模型内部；</li>
-      <li><b>后处理（post-processing）</b>——改输出：模型不动，只<b>按群体调决策阈值</b>。Hardt 等 2016 证明用群体特定阈值可精确达成机会均等。优点：无需重训、可套黑盒 API；缺点：显式按群体区别对待，可能有法律/伦理争议。</li>
-    </ul>
-    <p style="margin-top:8px"><b>因果公平（causal fairness）</b>是另一条路线。前面所有度量都是<b>相关性</b>的，无法区分"邮编影响决策"是因为邮编<b>本身相关</b>，还是因为它是种族的<b>代理</b>。<b>反事实公平</b>（Kusner 等 2017）的定义：一个决策公平，当且仅当在<b>反事实世界</b>里——把个体敏感属性 A 改成另一个值、并沿因果图更新所有<b>由 A 导致</b>的下游变量——预测分布不变。它要求先画<b>因果图（causal DAG）</b>，区分"A 的合法后代"和"应被阻断的歧视路径"。</p>
-
+<div class="card" data-tts="35f633c6544c4bac">
+<h2>去偏方法与因果公平<span class="en">Debiasing &amp; Causal Fairness</span></h2>
+<div class="tags"><span class="tag">干预</span><span class="tag purple">因果</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>去偏就像<b>数据质量治理</b>——你可以在<b>入库时清洗</b>（预处理）、<b>写入约束里强制</b>（训练中）、或<b>读取时打补丁</b>（后处理），三个位置各有代价。<b>因果公平</b>更进一步：不满足于"相关性上看起来平等"，而是问一个反事实——"<b>如果这个人的敏感属性被改掉，决策会变吗？</b>"——把公平从统计相关升级到因果机制。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>知道了偏见来源和度量，怎么修？三类干预按<b>作用于管线的位置</b>划分：</p>
+<ul>
+<li><b>预处理（pre-processing）</b>——改数据：重加权、重采样、或变换特征表示去掉敏感信息。经典是 Bolukbasi 2016 词向量去偏——找出嵌入里的"性别方向"并把职业词投影掉。优点：与下游解耦；缺点：可能损失有用信号；</li>
+<li><b>训练中（in-processing）</b>——改目标：损失里加<b>公平约束</b>，或用<b>对抗</b>去偏——加一个判别器专门从表示里猜敏感属性，主模型被训练到让它<b>猜不出来</b>。优点：权衡最优；缺点：要动模型内部；</li>
+<li><b>后处理（post-processing）</b>——改输出：模型不动，只<b>按群体调决策阈值</b>。Hardt 等 2016 证明用群体特定阈值可精确达成机会均等。优点：无需重训、可套黑盒 API；缺点：显式按群体区别对待，可能有法律/伦理争议。</li>
+</ul>
+<p style="margin-top:8px"><b>因果公平（causal fairness）</b>是另一条路线。前面所有度量都是<b>相关性</b>的，无法区分"邮编影响决策"是因为邮编<b>本身相关</b>，还是因为它是种族的<b>代理</b>。<b>反事实公平</b>（Kusner 等 2017）的定义：一个决策公平，当且仅当在<b>反事实世界</b>里——把个体敏感属性 A 改成另一个值、并沿因果图更新所有<b>由 A 导致</b>的下游变量——预测分布不变。它要求先画<b>因果图（causal DAG）</b>，区分"A 的合法后代"和"应被阻断的歧视路径"。</p>
 <div class="diagram" style="margin-top:14px">
-<b style="color:#7b61ff">去偏干预的三个位置 + 因果视角</b><br><br>
-<span class="box o">数据</span><span class="arrow">→[预处理:重采样/表示去偏]→</span><span class="box">训练</span><span class="arrow">→[训练中:公平约束/对抗]→</span><span class="box p">模型</span><span class="arrow">→[后处理:分组阈值]→</span><span class="box g">决策</span><br><br>
-<b style="color:#a48cff">因果图视角（反事实公平）</b><br>
-<span class="box r">A 敏感属性</span><span class="arrow">──合法路径?──→</span><span class="box g">Ŷ 决策</span><br>
-<span class="arrow">　　└──代理泄漏(邮编/名字)──✗应阻断──→</span><br>
+<b style="color:#7b61ff">去偏干预的三个位置 + 因果视角</b><br/><br/>
+<span class="box o">数据</span><span class="arrow">→[预处理:重采样/表示去偏]→</span><span class="box">训练</span><span class="arrow">→[训练中:公平约束/对抗]→</span><span class="box p">模型</span><span class="arrow">→[后处理:分组阈值]→</span><span class="box g">决策</span><br/><br/>
+<b style="color:#a48cff">因果图视角（反事实公平）</b><br/>
+<span class="box r">A 敏感属性</span><span class="arrow">──合法路径?──→</span><span class="box g">Ŷ 决策</span><br/>
+<span class="arrow">　　└──代理泄漏(邮编/名字)──✗应阻断──→</span><br/>
 <span style="color:#5a6378;font-size:0.78rem">↑ 反事实问：改掉 A 并更新其后代，Ŷ 会变吗？变=不公</span>
 </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> fairlearn.postprocessing <span class="kw">import</span> ThresholdOptimizer
 <span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> GradientBoostingClassifier
 
@@ -293,56 +269,46 @@ fair.<span class="fn">fit</span>(X_tr, y_tr, sensitive_features=A_tr)
 y_fair = fair.<span class="fn">predict</span>(X_te, sensitive_features=A_te)
 <span class="cmt"># 代价: 通常总体精度略降——这就是不可能定理里你付的"公平税"</span>
 <span class="cmt"># 注意: 推理时也要敏感属性, 部署上可能涉及合规限制</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">"去偏 = 让模型更准"——错，恰恰相反。在不可能定理的约束下，去偏通常要<b>牺牲一部分总体精度</b>换取错误分布更均衡——这是<b>成本</b>不是免费午餐。诚实的做法是量化这个"公平税"有多大、谁受益谁承担。此外因果公平强依赖你画的<b>因果图</b>——图画错了，"因果公平"只是给错误结论套层严谨外壳。</div>
-    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：搭个人 AI 决策辅助（筛人、选项目）时，与其事后补救，不如在<b>设计阶段</b>就想清楚：哪些因素是<b>合法依据</b>、哪些只是<b>相关的代理</b>。把这张"因果图"显式画出来——既是去偏前提，也逼你把判断标准讲清楚，本身就是一次高质量思维训练。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 公平不是能"达成"的状态，而是一组需<b>显式选择</b>的取舍：选定义、认代价、画因果、担后果。回避取舍的"绝对公平"，是最不负责任的公平。<br>🤔 你用 AI 辅助决策时，有没有把某个"统计相关"误当成"合理依据"？画一张因果图，哪些箭头其实该被阻断？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"去偏 = 让模型更准"——错，恰恰相反。在不可能定理的约束下，去偏通常要<b>牺牲一部分总体精度</b>换取错误分布更均衡——这是<b>成本</b>不是免费午餐。诚实的做法是量化这个"公平税"有多大、谁受益谁承担。此外因果公平强依赖你画的<b>因果图</b>——图画错了，"因果公平"只是给错误结论套层严谨外壳。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：搭个人 AI 决策辅助（筛人、选项目）时，与其事后补救，不如在<b>设计阶段</b>就想清楚：哪些因素是<b>合法依据</b>、哪些只是<b>相关的代理</b>。把这张"因果图"显式画出来——既是去偏前提，也逼你把判断标准讲清楚，本身就是一次高质量思维训练。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 公平不是能"达成"的状态，而是一组需<b>显式选择</b>的取舍：选定义、认代价、画因果、担后果。回避取舍的"绝对公平"，是最不负责任的公平。<br/>🤔 你用 AI 辅助决策时，有没有把某个"统计相关"误当成"合理依据"？画一张因果图，哪些箭头其实该被阻断？</div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://fairmlbook.org/" target="_blank">Fairness and Machine Learning（Barocas, Hardt, Narayanan）</a> — 领域权威免费教科书，偏见来源与公平定义讲得最清楚，首选</li>
-      <li><a href="https://arxiv.org/abs/1609.05807" target="_blank">Kleinberg, Mullainathan, Raghavan 2016 — Inherent Trade-Offs in the Fair Determination of Risk Scores</a> — 不可能定理的奠基论文</li>
-      <li><a href="https://arxiv.org/abs/1610.07524" target="_blank">Chouldechova 2017 — Fair Prediction with Disparate Impact</a> — COMPAS 争议与不可能定理的另一独立证明</li>
-      <li><a href="https://arxiv.org/abs/1610.02413" target="_blank">Hardt, Price, Srebro 2016 — Equality of Opportunity in Supervised Learning</a> — 机会均等定义 + 后处理去偏方法</li>
-      <li><a href="https://arxiv.org/abs/1703.06856" target="_blank">Kusner et al. 2017 — Counterfactual Fairness</a> — 用因果推断定义公平的代表作</li>
-      <li><a href="https://arxiv.org/abs/1607.06520" target="_blank">Bolukbasi et al. 2016 — Debiasing Word Embeddings</a> — 词向量性别偏见与预处理去偏经典</li>
-    </ul>
-  </div>
+<div class="card" data-tts="f583cdfc2caac8a9" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://fairmlbook.org/" target="_blank">Fairness and Machine Learning（Barocas, Hardt, Narayanan）</a> — 领域权威免费教科书，偏见来源与公平定义讲得最清楚，首选</li>
+<li><a href="https://arxiv.org/abs/1609.05807" target="_blank">Kleinberg, Mullainathan, Raghavan 2016 — Inherent Trade-Offs in the Fair Determination of Risk Scores</a> — 不可能定理的奠基论文</li>
+<li><a href="https://arxiv.org/abs/1610.07524" target="_blank">Chouldechova 2017 — Fair Prediction with Disparate Impact</a> — COMPAS 争议与不可能定理的另一独立证明</li>
+<li><a href="https://arxiv.org/abs/1610.02413" target="_blank">Hardt, Price, Srebro 2016 — Equality of Opportunity in Supervised Learning</a> — 机会均等定义 + 后处理去偏方法</li>
+<li><a href="https://arxiv.org/abs/1703.06856" target="_blank">Kusner et al. 2017 — Counterfactual Fairness</a> — 用因果推断定义公平的代表作</li>
+<li><a href="https://arxiv.org/abs/1607.06520" target="_blank">Bolukbasi et al. 2016 — Debiasing Word Embeddings</a> — 词向量性别偏见与预处理去偏经典</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. "删掉敏感属性就公平"为什么几乎总是无效？这和"数据匿名化为什么会失败"是不是同一个道理？</summary><div>是同一个道理，机制都是<b>信息通过相关变量泄漏（proxy leakage / 高维重识别）</b>。匿名化失败在于：删掉姓名身份证，"邮编+生日+性别"就能重识别绝大多数人（Sweeney 的经典结果），身份信息<b>冗余分布</b>在其他字段里。删敏感属性同理：种族编码在邮编、消费、语言、社交图里，模型有足够代理去<b>重建</b>那一列——你删的是"标签"不是"信息"。深层教训一致：<b>信息不因你不看它就消失</b>。正解方向也一致：从"藏起来"转向"显式建模并控制"——隐私用差分隐私给出可量化的泄漏上界，公平用<b>感知</b>敏感属性的方法主动测量约束。反直觉但关键：要实现公平，你往往<b>必须</b>在训练/评估时用敏感属性，而不是删掉它。</div></details>
-
-    <details><summary>2. 相关性公平和因果公平在什么情况下会给出相反结论？为什么"画因果图"既是因果公平的力量，也是它最大的软肋？</summary><div>分歧的经典场景：存在<b>合法中介变量</b>。某岗位录取和"相关工作经验"强相关，经验又和敏感属性相关。纯相关度量（人口均等）看到录取率组间不等就判不公、要求拉平；因果视角可能认为"经验→录取"是<b>合法路径</b>，只要不是敏感属性的直接歧视或代理泄漏就不算不公——结论相反。因果公平的<b>力量</b>在于能区分"合法相关"和"歧视相关"，这是纯统计做不到的（统计上二者一模一样）。<b>软肋</b>也在此：区分依赖你<b>先验假设的因果图</b>，而因果图通常<b>无法只从数据验证</b>（相关不能证因果）。把"经验"当合法中介还是历史歧视的产物？换张图结论就翻转。所以因果公平没消除价值判断，只是把它<b>前移显式化</b>到画图这步——既让假设可讨论（好事），也藏着一个可能被操纵的建模选择（风险）。</div></details>
-
-    <details><summary>3. 部署后模型会把预测反馈回真实世界（"高危"标签影响执法强度、再产出新数据）。这个回路怎样让偏见自我强化？和"缓存雪崩/重试风暴"有何异同？</summary><div>机制是<b>正反馈导致的自我实现</b>：判某区"高犯罪"→ 警力倾斜 → 逮捕数上升（哪怕真实犯罪率没变）→ 新数据"证实"高犯罪 → 模型更笃定。偏见不是静态的，而是<b>被自己的预测放大</b>，测量偏见（逮捕≠犯罪）在闭环里被加固。和分布式失控回路<b>相似</b>：正反馈缺阻尼、局部扰动被放大成系统性偏移，像"失败→重试→更过载→更多失败"。<b>关键不同</b>：分布式失控<b>快而显性</b>（秒级雪崩、监控立刻报警），算法偏见<b>慢而隐性</b>（月/年尺度、每步都"数据支持"自洽合理），发现时已固化成"事实"。可迁移治理：(1) <b>加阻尼/断路器</b>，限制单一模型对世界的干预强度；(2) <b>反事实监控</b>，对照"没有模型干预会怎样"的基线；(3) <b>探索性采样</b>，主动在模型"不看好"的区域采真实标签，打破自证闭环。</div></details>
-
-    <details><summary>4. 如果"完全公平"被证明不可能，那追求公平的意义是什么？这和佛学"不圆满中如何行动"、复杂系统"没有全局最优只有局部权衡"是否指向同一种成熟？</summary><div>不可能定理消解的是"存在一个客观正确的公平解"这个幻觉，却恰恰<b>提升</b>了追求公平的意义——它把问题从"找到正确答案"转成"<b>承认取舍的前提下，负责任地选择并承担</b>"。这与几种成熟观指向同一处：佛学讲<b>缘起</b>——没有孤立自性的"公平"实体可执取，公平是随条件（基础比率、伤害类型、谁受影响）缘起的关系性判断，执着于绝对公平反而是苦的来源；但"空"不导向不作为，而是<b>因无固定标准，故每个选择都需当下的觉察与担当</b>。复杂系统亦然：没有全局最优，只有约束下的帕累托前沿，成熟是<b>清醒地知道自己站在前沿哪一点、代价谁付</b>。三者共通：<b>放弃"有唯一正确答案"的确定性焦虑，换取"在不圆满中持续、透明、负责地选择"的能力</b>。对追求"AI 超级个体"的人，这或是最重要的元技能——你和 AI 的每个判断都不是逼近某个客观正确，而是<b>显式选择要成为什么样的决策者</b>。</div></details>
-  </div>
+<div class="card think" data-tts="714522d328984d03" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. "删掉敏感属性就公平"为什么几乎总是无效？这和"数据匿名化为什么会失败"是不是同一个道理？</summary><div>是同一个道理，机制都是<b>信息通过相关变量泄漏（proxy leakage / 高维重识别）</b>。匿名化失败在于：删掉姓名身份证，"邮编+生日+性别"就能重识别绝大多数人（Sweeney 的经典结果），身份信息<b>冗余分布</b>在其他字段里。删敏感属性同理：种族编码在邮编、消费、语言、社交图里，模型有足够代理去<b>重建</b>那一列——你删的是"标签"不是"信息"。深层教训一致：<b>信息不因你不看它就消失</b>。正解方向也一致：从"藏起来"转向"显式建模并控制"——隐私用差分隐私给出可量化的泄漏上界，公平用<b>感知</b>敏感属性的方法主动测量约束。反直觉但关键：要实现公平，你往往<b>必须</b>在训练/评估时用敏感属性，而不是删掉它。</div></details>
+<details><summary>2. 相关性公平和因果公平在什么情况下会给出相反结论？为什么"画因果图"既是因果公平的力量，也是它最大的软肋？</summary><div>分歧的经典场景：存在<b>合法中介变量</b>。某岗位录取和"相关工作经验"强相关，经验又和敏感属性相关。纯相关度量（人口均等）看到录取率组间不等就判不公、要求拉平；因果视角可能认为"经验→录取"是<b>合法路径</b>，只要不是敏感属性的直接歧视或代理泄漏就不算不公——结论相反。因果公平的<b>力量</b>在于能区分"合法相关"和"歧视相关"，这是纯统计做不到的（统计上二者一模一样）。<b>软肋</b>也在此：区分依赖你<b>先验假设的因果图</b>，而因果图通常<b>无法只从数据验证</b>（相关不能证因果）。把"经验"当合法中介还是历史歧视的产物？换张图结论就翻转。所以因果公平没消除价值判断，只是把它<b>前移显式化</b>到画图这步——既让假设可讨论（好事），也藏着一个可能被操纵的建模选择（风险）。</div></details>
+<details><summary>3. 部署后模型会把预测反馈回真实世界（"高危"标签影响执法强度、再产出新数据）。这个回路怎样让偏见自我强化？和"缓存雪崩/重试风暴"有何异同？</summary><div>机制是<b>正反馈导致的自我实现</b>：判某区"高犯罪"→ 警力倾斜 → 逮捕数上升（哪怕真实犯罪率没变）→ 新数据"证实"高犯罪 → 模型更笃定。偏见不是静态的，而是<b>被自己的预测放大</b>，测量偏见（逮捕≠犯罪）在闭环里被加固。和分布式失控回路<b>相似</b>：正反馈缺阻尼、局部扰动被放大成系统性偏移，像"失败→重试→更过载→更多失败"。<b>关键不同</b>：分布式失控<b>快而显性</b>（秒级雪崩、监控立刻报警），算法偏见<b>慢而隐性</b>（月/年尺度、每步都"数据支持"自洽合理），发现时已固化成"事实"。可迁移治理：(1) <b>加阻尼/断路器</b>，限制单一模型对世界的干预强度；(2) <b>反事实监控</b>，对照"没有模型干预会怎样"的基线；(3) <b>探索性采样</b>，主动在模型"不看好"的区域采真实标签，打破自证闭环。</div></details>
+<details><summary>4. 如果"完全公平"被证明不可能，那追求公平的意义是什么？这和佛学"不圆满中如何行动"、复杂系统"没有全局最优只有局部权衡"是否指向同一种成熟？</summary><div>不可能定理消解的是"存在一个客观正确的公平解"这个幻觉，却恰恰<b>提升</b>了追求公平的意义——它把问题从"找到正确答案"转成"<b>承认取舍的前提下，负责任地选择并承担</b>"。这与几种成熟观指向同一处：佛学讲<b>缘起</b>——没有孤立自性的"公平"实体可执取，公平是随条件（基础比率、伤害类型、谁受影响）缘起的关系性判断，执着于绝对公平反而是苦的来源；但"空"不导向不作为，而是<b>因无固定标准，故每个选择都需当下的觉察与担当</b>。复杂系统亦然：没有全局最优，只有约束下的帕累托前沿，成熟是<b>清醒地知道自己站在前沿哪一点、代价谁付</b>。三者共通：<b>放弃"有唯一正确答案"的确定性焦虑，换取"在不圆满中持续、透明、负责地选择"的能力</b>。对追求"AI 超级个体"的人，这或是最重要的元技能——你和 AI 的每个判断都不是逼近某个客观正确，而是<b>显式选择要成为什么样的决策者</b>。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 51 · 2026-07-08</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>

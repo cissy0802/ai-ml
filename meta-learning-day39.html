@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>AI/ML 详解：元学习与小样本 — Day 39</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -61,46 +62,38 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 </style>
 </head>
 <body>
-
 <div class="container">
-
 <header>
-  <h1>AI/ML 详解：元学习与小样本</h1>
-  <div class="meta">Day 39 · 2026-06-25 · 难度 ★★★☆☆</div>
-  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+<h1 data-tts="33ac52aa88756ba0">AI/ML 详解：元学习与小样本</h1>
+<div class="meta">Day 39 · 2026-06-25 · 难度 ★★★☆☆</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师</div>
 </header>
-
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
-  <a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-day1.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+<a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-day1.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
     工程对应 → super-individual D1: Prompt Engineering（few-shot 示例怎么挑、怎么排）
   </a>
 </div>
-
-<div class="card" style="border-left-color:#7b61ff;background:#11162a">
-  <div class="section">
-    <div class="label">今日主线</div>
-    <p>「<strong>小样本</strong>」是一个问题：只给几个例子，怎么学会一个新任务？今天的四个概念是<strong>四种逐级递进的答案</strong>——从「复用旧权重」（迁移学习），到「学一个好的起点」（MAML），到「干脆不更新权重、用距离查表」（度量学习），最后到 LLM 最神奇的「连前向传播都不出、在 prompt 里就学会了」（In-context Learning）。核心张力始终是一句话：<strong>数据少到不够梯度下降时，「学习」该发生在哪一层？</strong></p>
-  </div>
+<div class="card" data-tts="b28f9e366142db8b" style="border-left-color:#7b61ff;background:#11162a">
+<div class="section">
+<div class="label">今日主线</div>
+<p>「<strong>小样本</strong>」是一个问题：只给几个例子，怎么学会一个新任务？今天的四个概念是<strong>四种逐级递进的答案</strong>——从「复用旧权重」（迁移学习），到「学一个好的起点」（MAML），到「干脆不更新权重、用距离查表」（度量学习），最后到 LLM 最神奇的「连前向传播都不出、在 prompt 里就学会了」（In-context Learning）。核心张力始终是一句话：<strong>数据少到不够梯度下降时，「学习」该发生在哪一层？</strong></p>
 </div>
-
+</div>
 <!-- 1. Transfer Learning -->
-<div class="card">
-  <h2>迁移学习<span class="en">Transfer Learning</span></h2>
-  <div class="tags"><span class="tag">基础范式</span><span class="tag purple">特征复用</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>迁移学习就是<strong>不从零写服务，而是 fork 一个跑顺了的基础镜像（base image）</strong>，只改最上面那层业务逻辑。预训练模型 = 已经预热好连接池、装好通用依赖的母镜像；你的小数据集 = 那点业务定制。<strong>底层的通用能力（识别边缘、理解语法）早就有了，你只补「最后一公里」。</strong></p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：从零训一个深度网络要海量标注数据 + 巨量算力。但很多任务的<strong>底层特征是共享的</strong>——识别猫和识别狗都要先会识别边缘、纹理、形状。重新学一遍这些是浪费。</p>
-    <p style="margin-top:8px">机制：拿一个在大数据集上预训练好的网络，<strong>冻结（freeze）前面大部分层</strong>（它们已经学会通用特征），只重新训练最后一两层来适配你的新任务。神经网络天然分层：浅层学通用低级特征（边缘、词法），深层学任务相关的高级特征。所以「<strong>底层冻结、顶层微调</strong>」既省数据又省算力。这是后面三个概念的共同地基——没有好的预训练表示，小样本学习根本无从谈起。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="3e794bc81677741f">
+<h2>迁移学习<span class="en">Transfer Learning</span></h2>
+<div class="tags"><span class="tag">基础范式</span><span class="tag purple">特征复用</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>迁移学习就是<strong>不从零写服务，而是 fork 一个跑顺了的基础镜像（base image）</strong>，只改最上面那层业务逻辑。预训练模型 = 已经预热好连接池、装好通用依赖的母镜像；你的小数据集 = 那点业务定制。<strong>底层的通用能力（识别边缘、理解语法）早就有了，你只补「最后一公里」。</strong></p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：从零训一个深度网络要海量标注数据 + 巨量算力。但很多任务的<strong>底层特征是共享的</strong>——识别猫和识别狗都要先会识别边缘、纹理、形状。重新学一遍这些是浪费。</p>
+<p style="margin-top:8px">机制：拿一个在大数据集上预训练好的网络，<strong>冻结（freeze）前面大部分层</strong>（它们已经学会通用特征），只重新训练最后一两层来适配你的新任务。神经网络天然分层：浅层学通用低级特征（边缘、词法），深层学任务相关的高级特征。所以「<strong>底层冻结、顶层微调</strong>」既省数据又省算力。这是后面三个概念的共同地基——没有好的预训练表示，小样本学习根本无从谈起。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
 <span class="kw">from</span> torchvision <span class="kw">import</span> models
 
@@ -118,52 +111,46 @@ net.fc = nn.<span class="fn">Linear</span>(net.fc.in_features, <span class="kw">
 opt = torch.optim.<span class="fn">Adam</span>(
     (p <span class="kw">for</span> p <span class="kw">in</span> net.<span class="fn">parameters</span>() <span class="kw">if</span> p.requires_grad), lr=<span class="kw">1e-3</span>)
 <span class="cmt"># → 几百张图就能训出一个像样的分类器，而非几百万张</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区：「冻结越多越好、永远只训最后一层」。错。当你的新任务和预训练数据<strong>差异很大</strong>时（医学影像 vs 自然照片），深层的高级特征也不再适用，这时该「<strong>解冻更多层 + 用更小学习率</strong>」做全网微调。数据极少→只训顶层；数据中等且域接近→解冻几层；数据较多且域差异大→全网微调。</div>
-    <div class="exercise" style="margin-top:8px">📌 超级个体场景：你想做一个「自动给个人项目截图分类」的小工具，手头只有 200 张标注图。别从零训——拿预训练 ViT/ResNet 冻结、只训分类头，一个下午就能上线。<strong>迁移学习是「小数据也能玩深度学习」的入场券。</strong></div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 迁移学习的本质不是「学得更快」，而是「<strong>把昂贵的通用表示当成公共基础设施复用</strong>」——和你复用开源库、复用 base image 是同一种工程智慧。<br>🤔 如果浅层特征是「通用」的，为什么不同模态（图像 vs 文本）的预训练模型几乎无法互相迁移？通用到什么粒度才是真通用？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「冻结越多越好、永远只训最后一层」。错。当你的新任务和预训练数据<strong>差异很大</strong>时（医学影像 vs 自然照片），深层的高级特征也不再适用，这时该「<strong>解冻更多层 + 用更小学习率</strong>」做全网微调。数据极少→只训顶层；数据中等且域接近→解冻几层；数据较多且域差异大→全网微调。</div>
+<div class="exercise" style="margin-top:8px">📌 超级个体场景：你想做一个「自动给个人项目截图分类」的小工具，手头只有 200 张标注图。别从零训——拿预训练 ViT/ResNet 冻结、只训分类头，一个下午就能上线。<strong>迁移学习是「小数据也能玩深度学习」的入场券。</strong></div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 迁移学习的本质不是「学得更快」，而是「<strong>把昂贵的通用表示当成公共基础设施复用</strong>」——和你复用开源库、复用 base image 是同一种工程智慧。<br/>🤔 如果浅层特征是「通用」的，为什么不同模态（图像 vs 文本）的预训练模型几乎无法互相迁移？通用到什么粒度才是真通用？</div>
+</div>
+</div>
 <!-- 2. MAML -->
-<div class="card">
-  <h2>元学习 / MAML<span class="en">Meta-Learning / MAML</span></h2>
-  <div class="tags"><span class="tag">学会学习</span><span class="tag purple">双层优化</span><span class="tag orange">2017</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>普通训练是「<strong>为某个具体任务找最优解</strong>」；MAML 是「<strong>找一个最好的『起点』，让它对任意新任务只需几步就能适应</strong>」。类比：你不是为每个新项目手搭环境，而是精心配一个<strong>黄金母镜像（golden base image）</strong>——任何新项目从它 clone 后，改三五行配置就能跑。MAML 优化的不是终点，是起点。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：迁移学习复用的是「特征」，但新任务还是要训。能不能让模型<strong>学会「如何快速学新任务」本身</strong>？这就是元学习（meta-learning，「学会学习」）。MAML（Model-Agnostic Meta-Learning，Finn et al. 2017）给了一个优雅答案。</p>
-    <p style="margin-top:8px">机制是<strong>双层优化（bi-level optimization）</strong>，两个嵌套的循环：</p>
-    <ul style="margin-top:6px">
-      <li><strong>内循环（inner loop）</strong>：拿当前初始参数 θ，对某个任务用它的几个样本做 1～几步梯度下降，得到任务专属参数 θ'。这模拟「快速适应」。</li>
-      <li><strong>外循环（outer loop / meta-update）</strong>：用 θ' 在该任务<strong>新样本</strong>上的表现，反过来更新原始 θ。注意——更新的是<strong>起点 θ，不是 θ'</strong>。</li>
-    </ul>
-    <p style="margin-top:8px">用一行直觉化的公式说清外循环更新（每个符号都解释）：</p>
-    <p style="margin-top:6px;text-align:center;font-family:'SF Mono',monospace;color:#a48cff">θ ← θ − β ∇<sub>θ</sub> Σ<sub>任务 i</sub> L<sub>i</sub>( θ − α ∇<sub>θ</sub> L<sub>i</sub>(θ) )</p>
-    <p style="margin-top:8px">内层括号 <strong>θ − α∇L<sub>i</sub>(θ)</strong> 就是「在任务 i 上走一步」得到的 θ'（α 是内循环学习率）；外层对这个适应后的损失再求一次梯度，去更新起点 θ（β 是外循环学习率）。关键反直觉点：<strong>这里出现了「梯度的梯度」</strong>——你在对「一步梯度下降之后会有多好」求导。MAML 不是在找「现在好」的参数，而是在找「<strong>一推就到位</strong>」的参数。</p>
-    <div class="diagram">
-      <div style="color:#8b92a8;margin-bottom:8px">MAML 双层结构（meta vs inner）</div>
-      <span class="box p">起点 θ</span><span class="arrow">──内循环 α 几步──▶</span><span class="box g">θ'₁ (任务1)</span><br>
-      <span class="box p" style="visibility:hidden">起点 θ</span><span class="arrow">└─</span><span class="box g">θ'₂ (任务2)</span><span class="arrow">…</span><span class="box g">θ'ₙ</span><br>
-      <span style="color:#5a6378;margin-left:6px">▲</span><br>
-      <span class="box o">外循环 β：用各 θ' 的「适应后表现」回头修正 θ → 让 θ 成为更好的起点</span>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="a45c958dbba6f4cf">
+<h2>元学习 / MAML<span class="en">Meta-Learning / MAML</span></h2>
+<div class="tags"><span class="tag">学会学习</span><span class="tag purple">双层优化</span><span class="tag orange">2017</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>普通训练是「<strong>为某个具体任务找最优解</strong>」；MAML 是「<strong>找一个最好的『起点』，让它对任意新任务只需几步就能适应</strong>」。类比：你不是为每个新项目手搭环境，而是精心配一个<strong>黄金母镜像（golden base image）</strong>——任何新项目从它 clone 后，改三五行配置就能跑。MAML 优化的不是终点，是起点。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：迁移学习复用的是「特征」，但新任务还是要训。能不能让模型<strong>学会「如何快速学新任务」本身</strong>？这就是元学习（meta-learning，「学会学习」）。MAML（Model-Agnostic Meta-Learning，Finn et al. 2017）给了一个优雅答案。</p>
+<p style="margin-top:8px">机制是<strong>双层优化（bi-level optimization）</strong>，两个嵌套的循环：</p>
+<ul style="margin-top:6px">
+<li><strong>内循环（inner loop）</strong>：拿当前初始参数 θ，对某个任务用它的几个样本做 1～几步梯度下降，得到任务专属参数 θ'。这模拟「快速适应」。</li>
+<li><strong>外循环（outer loop / meta-update）</strong>：用 θ' 在该任务<strong>新样本</strong>上的表现，反过来更新原始 θ。注意——更新的是<strong>起点 θ，不是 θ'</strong>。</li>
+</ul>
+<p style="margin-top:8px">用一行直觉化的公式说清外循环更新（每个符号都解释）：</p>
+<p style="margin-top:6px;text-align:center;font-family:'SF Mono',monospace;color:#a48cff">θ ← θ − β ∇<sub>θ</sub> Σ<sub>任务 i</sub> L<sub>i</sub>( θ − α ∇<sub>θ</sub> L<sub>i</sub>(θ) )</p>
+<p style="margin-top:8px">内层括号 <strong>θ − α∇L<sub>i</sub>(θ)</strong> 就是「在任务 i 上走一步」得到的 θ'（α 是内循环学习率）；外层对这个适应后的损失再求一次梯度，去更新起点 θ（β 是外循环学习率）。关键反直觉点：<strong>这里出现了「梯度的梯度」</strong>——你在对「一步梯度下降之后会有多好」求导。MAML 不是在找「现在好」的参数，而是在找「<strong>一推就到位</strong>」的参数。</p>
+<div class="diagram">
+<div style="color:#8b92a8;margin-bottom:8px">MAML 双层结构（meta vs inner）</div>
+<span class="box p">起点 θ</span><span class="arrow">──内循环 α 几步──▶</span><span class="box g">θ'₁ (任务1)</span><br/>
+<span class="box p" style="visibility:hidden">起点 θ</span><span class="arrow">└─</span><span class="box g">θ'₂ (任务2)</span><span class="arrow">…</span><span class="box g">θ'ₙ</span><br/>
+<span style="color:#5a6378;margin-left:6px">▲</span><br/>
+<span class="box o">外循环 β：用各 θ' 的「适应后表现」回头修正 θ → 让 θ 成为更好的起点</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="cmt"># MAML 一步外循环的骨架（伪 PyTorch，省去数据加载）</span>
 <span class="kw">def</span> <span class="fn">maml_step</span>(theta, tasks, alpha=<span class="kw">0.01</span>, beta=<span class="kw">0.001</span>):
     meta_loss = <span class="kw">0</span>
@@ -179,46 +166,40 @@ opt = torch.optim.<span class="fn">Adam</span>(
     meta_grad = torch.autograd.<span class="fn">grad</span>(meta_loss, theta)
     <span class="kw">return</span> [w - beta*g <span class="kw">for</span> w, g <span class="kw">in</span> <span class="fn">zip</span>(theta, meta_grad)]
 <span class="cmt"># create_graph=True 让我们能对「一步梯度后的损失」再求导（梯度的梯度）</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区：「MAML 和迁移学习一样，都是给个好初始化」。表面像，本质不同。迁移学习的初始化是<strong>预训练任务的副产品</strong>（碰巧通用）；MAML 的初始化是<strong>显式地为『快速适应』优化出来的</strong>——它在训练时就模拟了「来个新任务、走几步」的全过程。代价：二阶梯度<strong>计算和显存开销大</strong>，所以实践中常用一阶近似（FOMAML / Reptile）。</div>
-    <div class="exercise" style="margin-top:8px">📌 跨学科思考场景：MAML 的「优化起点而非终点」是一个可迁移的元认知模型。你培养孩子、或自己学新领域时，与其灌满某个具体技能（终点），不如打磨「<strong>快速进入任意新领域的元能力</strong>」（起点）——好的提问方式、类比迁移习惯。这正是「超级个体」的底层算法。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 MAML 把「学习」抬高了一个抽象层：普通训练优化<strong>参数</strong>，MAML 优化<strong>「学习参数的过程」</strong>。这种「对过程求导」的思路，是 2017 年后小样本研究的分水岭。<br>🤔 如果「学会学习」可以再往上叠一层（「学会『学会学习』」），它会收敛到什么？还是会无限递归？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「MAML 和迁移学习一样，都是给个好初始化」。表面像，本质不同。迁移学习的初始化是<strong>预训练任务的副产品</strong>（碰巧通用）；MAML 的初始化是<strong>显式地为『快速适应』优化出来的</strong>——它在训练时就模拟了「来个新任务、走几步」的全过程。代价：二阶梯度<strong>计算和显存开销大</strong>，所以实践中常用一阶近似（FOMAML / Reptile）。</div>
+<div class="exercise" style="margin-top:8px">📌 跨学科思考场景：MAML 的「优化起点而非终点」是一个可迁移的元认知模型。你培养孩子、或自己学新领域时，与其灌满某个具体技能（终点），不如打磨「<strong>快速进入任意新领域的元能力</strong>」（起点）——好的提问方式、类比迁移习惯。这正是「超级个体」的底层算法。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 MAML 把「学习」抬高了一个抽象层：普通训练优化<strong>参数</strong>，MAML 优化<strong>「学习参数的过程」</strong>。这种「对过程求导」的思路，是 2017 年后小样本研究的分水岭。<br/>🤔 如果「学会学习」可以再往上叠一层（「学会『学会学习』」），它会收敛到什么？还是会无限递归？</div>
+</div>
+</div>
 <!-- 3. Metric-based Few-shot -->
-<div class="card">
-  <h2>度量式小样本 / 原型网络<span class="en">Metric-based / Prototypical Networks</span></h2>
-  <div class="tags"><span class="tag">无梯度适应</span><span class="tag purple">嵌入 + 距离</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>前两个概念都还在「训练/更新权重」。原型网络换了思路：<strong>新任务来了根本不训，把每个类算成一个『质心向量』存起来，新样本来了算它离哪个质心最近——这就是答案。</strong>本质就是你熟悉的<strong>向量检索 + 最近邻（KNN）</strong>，只不过嵌入空间是学出来的。「分类」退化成了「查表」。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>痛点：MAML 每个新任务还要跑内循环梯度下降，在线推理时不够轻。能不能让「适应新类」<strong>完全不涉及梯度</strong>？原型网络（Prototypical Networks，Snell et al. 2017）的答案：把分类变成几何问题。</p>
-    <p style="margin-top:8px">机制（这是 <strong>N-way K-shot</strong> 的标准设定——N 个新类、每类 K 个样本）：</p>
-    <ul style="margin-top:6px">
-      <li>用一个学好的编码器 f 把每个样本映射成向量；</li>
-      <li>每个类的 K 个支持样本向量<strong>取平均 = 该类的「原型」c<sub>k</sub></strong>（质心）；</li>
-      <li>新样本 x 来了，算它的向量 f(x) 到各原型的距离，<strong>最近的原型就是预测类别</strong>。</li>
-    </ul>
-    <p style="margin-top:8px">用 softmax 把距离变成概率（每个符号都解释）：</p>
-    <p style="margin-top:6px;text-align:center;font-family:'SF Mono',monospace;color:#a48cff">p(y=k | x) = softmax( −d( f(x), c<sub>k</sub> ) )</p>
-    <p style="margin-top:8px">d 是距离（通常欧氏距离），<strong>距离越近 → −d 越大 → 概率越高</strong>。整个「适应」过程就是「算几个平均向量」——<strong>零次梯度更新</strong>。模型真正学的是那个编码器 f：让<strong>同类样本在嵌入空间里抱团、异类拉开</strong>。一旦空间学好，分类新类就只是查询最近质心。这和 RAG 里「查最相关文档」是同一套向量几何。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="8079b8ffec0bbcd1">
+<h2>度量式小样本 / 原型网络<span class="en">Metric-based / Prototypical Networks</span></h2>
+<div class="tags"><span class="tag">无梯度适应</span><span class="tag purple">嵌入 + 距离</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>前两个概念都还在「训练/更新权重」。原型网络换了思路：<strong>新任务来了根本不训，把每个类算成一个『质心向量』存起来，新样本来了算它离哪个质心最近——这就是答案。</strong>本质就是你熟悉的<strong>向量检索 + 最近邻（KNN）</strong>，只不过嵌入空间是学出来的。「分类」退化成了「查表」。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：MAML 每个新任务还要跑内循环梯度下降，在线推理时不够轻。能不能让「适应新类」<strong>完全不涉及梯度</strong>？原型网络（Prototypical Networks，Snell et al. 2017）的答案：把分类变成几何问题。</p>
+<p style="margin-top:8px">机制（这是 <strong>N-way K-shot</strong> 的标准设定——N 个新类、每类 K 个样本）：</p>
+<ul style="margin-top:6px">
+<li>用一个学好的编码器 f 把每个样本映射成向量；</li>
+<li>每个类的 K 个支持样本向量<strong>取平均 = 该类的「原型」c<sub>k</sub></strong>（质心）；</li>
+<li>新样本 x 来了，算它的向量 f(x) 到各原型的距离，<strong>最近的原型就是预测类别</strong>。</li>
+</ul>
+<p style="margin-top:8px">用 softmax 把距离变成概率（每个符号都解释）：</p>
+<p style="margin-top:6px;text-align:center;font-family:'SF Mono',monospace;color:#a48cff">p(y=k | x) = softmax( −d( f(x), c<sub>k</sub> ) )</p>
+<p style="margin-top:8px">d 是距离（通常欧氏距离），<strong>距离越近 → −d 越大 → 概率越高</strong>。整个「适应」过程就是「算几个平均向量」——<strong>零次梯度更新</strong>。模型真正学的是那个编码器 f：让<strong>同类样本在嵌入空间里抱团、异类拉开</strong>。一旦空间学好，分类新类就只是查询最近质心。这和 RAG 里「查最相关文档」是同一套向量几何。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
 
 <span class="cmt"># support: [N, K, D] 已编码向量；query: [Q, D]</span>
@@ -234,52 +215,46 @@ opt = torch.optim.<span class="fn">Adam</span>(
 <span class="cmt"># 不需要任何反向传播——"适应"就是几次 mean()</span>
 probs = <span class="fn">proto_classify</span>(support_emb, query_emb)
 pred = probs.<span class="fn">argmax</span>(dim=<span class="kw">1</span>)</pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区：「原型网络这么简单，肯定不如 MAML」。恰恰相反——在很多 few-shot 基准上，简单的度量法<strong>持平甚至超过</strong>复杂的 MAML，且推理快得多、没有二阶梯度的麻烦。教训：<strong>小样本场景里，一个好的嵌入空间 + 简单几何，往往打败花哨的优化技巧。</strong>简单的归纳偏置在数据稀缺时反而是优势。</div>
-    <div class="exercise" style="margin-top:8px">📌 个人项目场景：做「人脸/声纹/商品识别」这类<strong>类别会不断新增</strong>的系统，别用固定分类头（每加一类要重训）。用度量式：编码器固定，新类只需存一个原型向量。这正是现代人脸识别、向量库语义检索的工作方式——<strong>「注册即可用」，不重训</strong>。</div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 度量式小样本把「学习」从「调权重」彻底搬到了「<strong>设计一个好的表示空间</strong>」——之后所有新任务都用同一把几何尺子去量。这是「表示 > 模型」哲学的极致体现。<br>🤔 如果一个类的 K 个样本本身很分散（高方差），「取平均当原型」就会失真。你会怎么改进——加权？多原型？还是这暴露了「类」这个概念本身的局限？</div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「原型网络这么简单，肯定不如 MAML」。恰恰相反——在很多 few-shot 基准上，简单的度量法<strong>持平甚至超过</strong>复杂的 MAML，且推理快得多、没有二阶梯度的麻烦。教训：<strong>小样本场景里，一个好的嵌入空间 + 简单几何，往往打败花哨的优化技巧。</strong>简单的归纳偏置在数据稀缺时反而是优势。</div>
+<div class="exercise" style="margin-top:8px">📌 个人项目场景：做「人脸/声纹/商品识别」这类<strong>类别会不断新增</strong>的系统，别用固定分类头（每加一类要重训）。用度量式：编码器固定，新类只需存一个原型向量。这正是现代人脸识别、向量库语义检索的工作方式——<strong>「注册即可用」，不重训</strong>。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 度量式小样本把「学习」从「调权重」彻底搬到了「<strong>设计一个好的表示空间</strong>」——之后所有新任务都用同一把几何尺子去量。这是「表示 &gt; 模型」哲学的极致体现。<br/>🤔 如果一个类的 K 个样本本身很分散（高方差），「取平均当原型」就会失真。你会怎么改进——加权？多原型？还是这暴露了「类」这个概念本身的局限？</div>
+</div>
+</div>
 <!-- 4. In-context Learning -->
-<div class="card">
-  <h2>上下文学习机制<span class="en">In-context Learning (ICL)</span></h2>
-  <div class="tags"><span class="tag">无权重更新</span><span class="tag purple">前向传播内学习</span><span class="tag orange">LLM 涌现</span></div>
-
-  <div class="section">
-    <div class="label">一句话类比</div>
-    <p>前三个概念好歹都「算了点东西」（训权重、求原型）。ICL 最神奇：<strong>你在 prompt 里塞几个示例，模型权重一个字节都不变，它就「学会」了新任务。</strong>类比：数据库的 <strong>prepared statement</strong>——同一个引擎不重新编译，根据你传入的几个参数即时生成一个执行计划。「学习」发生在<strong>一次前向传播内部</strong>，推理结束即蒸发。</p>
-  </div>
-
-  <div class="section">
-    <div class="label">它解决什么问题 + 工作机制</div>
-    <p>现象：GPT-3（Brown et al. 2020，「Language Models are Few-Shot Learners」）发现一件怪事——<strong>不微调、只在 prompt 里给几个「输入→输出」示例，大模型就能做新任务</strong>。这就是 in-context learning（上下文学习），是 prompt engineering 中 few-shot 的底层原理。但「为什么不更新权重也能学」一直是谜，目前有两条主流解释：</p>
-    <ul style="margin-top:6px">
-      <li><strong>隐式贝叶斯推断</strong>（Xie et al. 2021）：预训练让模型见过海量「有共同潜在主题的连贯文本」。给几个示例时，模型其实在<strong>推断这些示例共享的「潜在任务概念」</strong>，然后按那个概念续写。示例不是在「教」，而是在「<strong>定位</strong>」你想要哪个已学会的能力。</li>
-      <li><strong>隐式梯度下降</strong>（von Oswald et al. 2023）：在简化的线性 attention 设定下，可以证明 Transformer 处理示例的前向计算，<strong>等价于对一个内部小模型做梯度下降</strong>。换句话说，attention 层在前向传播里「偷偷」实现了一个学习器——这把 ICL 和 MAML 在数学上联系了起来。</li>
-    </ul>
-    <p style="margin-top:8px">一个反直觉的实证（Min et al. 2022）：把 few-shot 示例的<strong>标签随机打乱、故意标错</strong>，性能<strong>几乎不掉</strong>。说明示例的核心作用不是提供「正确答案」，而是提供<strong>任务的「格式、标签空间、输入分布」</strong>——即帮模型「定位」该激活哪种能力，呼应了贝叶斯解释。</p>
-    <div class="diagram">
-      <div style="color:#8b92a8;margin-bottom:8px">四范式：「学习」发生在哪一层？</div>
-      <table class="cmp">
-        <tr><th>范式</th><th>更新权重？</th><th>「适应」发生在</th></tr>
-        <tr><td>迁移学习</td><td>是（顶层）</td><td>微调阶段</td></tr>
-        <tr><td>MAML</td><td>是（内循环几步）</td><td>显式梯度下降</td></tr>
-        <tr><td>原型网络</td><td>否</td><td>算几个均值向量</td></tr>
-        <tr><td><strong>ICL</strong></td><td><strong>否（永不变）</strong></td><td><strong>一次前向传播内</strong></td></tr>
-      </table>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="label">代码示例</div>
+<div class="card" data-tts="cf4f7f7d4b90f3db">
+<h2>上下文学习机制<span class="en">In-context Learning (ICL)</span></h2>
+<div class="tags"><span class="tag">无权重更新</span><span class="tag purple">前向传播内学习</span><span class="tag orange">LLM 涌现</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>前三个概念好歹都「算了点东西」（训权重、求原型）。ICL 最神奇：<strong>你在 prompt 里塞几个示例，模型权重一个字节都不变，它就「学会」了新任务。</strong>类比：数据库的 <strong>prepared statement</strong>——同一个引擎不重新编译，根据你传入的几个参数即时生成一个执行计划。「学习」发生在<strong>一次前向传播内部</strong>，推理结束即蒸发。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>现象：GPT-3（Brown et al. 2020，「Language Models are Few-Shot Learners」）发现一件怪事——<strong>不微调、只在 prompt 里给几个「输入→输出」示例，大模型就能做新任务</strong>。这就是 in-context learning（上下文学习），是 prompt engineering 中 few-shot 的底层原理。但「为什么不更新权重也能学」一直是谜，目前有两条主流解释：</p>
+<ul style="margin-top:6px">
+<li><strong>隐式贝叶斯推断</strong>（Xie et al. 2021）：预训练让模型见过海量「有共同潜在主题的连贯文本」。给几个示例时，模型其实在<strong>推断这些示例共享的「潜在任务概念」</strong>，然后按那个概念续写。示例不是在「教」，而是在「<strong>定位</strong>」你想要哪个已学会的能力。</li>
+<li><strong>隐式梯度下降</strong>（von Oswald et al. 2023）：在简化的线性 attention 设定下，可以证明 Transformer 处理示例的前向计算，<strong>等价于对一个内部小模型做梯度下降</strong>。换句话说，attention 层在前向传播里「偷偷」实现了一个学习器——这把 ICL 和 MAML 在数学上联系了起来。</li>
+</ul>
+<p style="margin-top:8px">一个反直觉的实证（Min et al. 2022）：把 few-shot 示例的<strong>标签随机打乱、故意标错</strong>，性能<strong>几乎不掉</strong>。说明示例的核心作用不是提供「正确答案」，而是提供<strong>任务的「格式、标签空间、输入分布」</strong>——即帮模型「定位」该激活哪种能力，呼应了贝叶斯解释。</p>
+<div class="diagram">
+<div style="color:#8b92a8;margin-bottom:8px">四范式：「学习」发生在哪一层？</div>
+<table class="cmp">
+<tr><th>范式</th><th>更新权重？</th><th>「适应」发生在</th></tr>
+<tr><td>迁移学习</td><td>是（顶层）</td><td>微调阶段</td></tr>
+<tr><td>MAML</td><td>是（内循环几步）</td><td>显式梯度下降</td></tr>
+<tr><td>原型网络</td><td>否</td><td>算几个均值向量</td></tr>
+<tr><td><strong>ICL</strong></td><td><strong>否（永不变）</strong></td><td><strong>一次前向传播内</strong></td></tr>
+</table>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
 <pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
 client = <span class="fn">Anthropic</span>()  <span class="cmt"># 读 ANTHROPIC_API_KEY 环境变量</span>
 
@@ -295,59 +270,48 @@ resp = client.messages.<span class="fn">create</span>(
 <span class="fn">print</span>(resp.content[<span class="kw">0</span>].text)  <span class="cmt"># → 正面</span>
 <span class="cmt"># 模型从 3 个示例里"读懂"了任务格式与标签空间，</span>
 <span class="cmt"># 无需任何训练就完成分类——这就是 in-context learning</span></pre>
-  </div>
-
-  <div class="section">
-    <div class="label">常见误区 + 实践场景</div>
-    <div class="tip">误区：「ICL 是模型在 prompt 里真的『学到了新知识』」。要小心——示例主要在「<strong>定位任务、规范格式</strong>」，而非灌输新事实。模型答不出的知识，给几个示例也变不出来（那是 RAG/微调的活）。ICL 擅长的是「<strong>把已有能力切换到你要的模式</strong>」：风格、格式、分类边界。</div>
-    <div class="exercise" style="margin-top:8px">📌 决策辅助场景：你想让 AI 按你的固定框架分析问题（比如「先列假设→再找反例→最后给置信度」）。与其每次长篇描述要求，不如给 1～2 个<strong>完整范例</strong>，模型立刻 in-context 对齐你的思维格式。这比写一大段指令更稳——<strong>示范胜过说明。</strong></div>
-  </div>
-
-  <div class="section">
-    <div class="label">Takeaway + 思考题</div>
-    <div class="takeaway">💡 ICL 是小样本学习的「终极形态」：学习从「训练阶段」彻底移进了「<strong>推理的那一次前向传播</strong>」，零权重更新、即用即弃。从迁移学习到 ICL，「学习」一路向运行时（runtime）迁移——这条线索本身就是过去十年 ML 的缩影。<br>🤔 既然示例标签错了也不太影响，那 few-shot「学习」到底有几分是「学」，几分是「检索 + 定位」？<br><a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-day1.html" style="color:#7b61ff">工程对应 → super-individual D1: Prompt Engineering（few-shot 示例怎么挑、怎么排序、几个最优）</a></div>
-  </div>
 </div>
-
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「ICL 是模型在 prompt 里真的『学到了新知识』」。要小心——示例主要在「<strong>定位任务、规范格式</strong>」，而非灌输新事实。模型答不出的知识，给几个示例也变不出来（那是 RAG/微调的活）。ICL 擅长的是「<strong>把已有能力切换到你要的模式</strong>」：风格、格式、分类边界。</div>
+<div class="exercise" style="margin-top:8px">📌 决策辅助场景：你想让 AI 按你的固定框架分析问题（比如「先列假设→再找反例→最后给置信度」）。与其每次长篇描述要求，不如给 1～2 个<strong>完整范例</strong>，模型立刻 in-context 对齐你的思维格式。这比写一大段指令更稳——<strong>示范胜过说明。</strong></div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 ICL 是小样本学习的「终极形态」：学习从「训练阶段」彻底移进了「<strong>推理的那一次前向传播</strong>」，零权重更新、即用即弃。从迁移学习到 ICL，「学习」一路向运行时（runtime）迁移——这条线索本身就是过去十年 ML 的缩影。<br/>🤔 既然示例标签错了也不太影响，那 few-shot「学习」到底有几分是「学」，几分是「检索 + 定位」？<br/><a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-day1.html" style="color:#7b61ff">工程对应 → super-individual D1: Prompt Engineering（few-shot 示例怎么挑、怎么排序、几个最优）</a></div>
+</div>
+</div>
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
-  <h2>深入资源<span class="en">Further Reading</span></h2>
-  <div class="section">
-    <ul>
-      <li><a href="https://arxiv.org/abs/1703.03400" target="_blank">Finn et al. 2017 — Model-Agnostic Meta-Learning (MAML)</a> — 元学习「优化起点」的奠基论文，必读</li>
-      <li><a href="https://arxiv.org/abs/1703.05175" target="_blank">Snell et al. 2017 — Prototypical Networks</a> — 度量式小样本最简洁优雅的代表作</li>
-      <li><a href="https://arxiv.org/abs/2005.14165" target="_blank">Brown et al. 2020 — GPT-3 / Language Models are Few-Shot Learners</a> — in-context learning 的开山现象论文</li>
-      <li><a href="https://arxiv.org/abs/2111.02080" target="_blank">Xie et al. 2021 — ICL as Implicit Bayesian Inference</a> — 「示例在定位潜在任务」的理论解释</li>
-      <li><a href="https://arxiv.org/abs/2202.12837" target="_blank">Min et al. 2022 — Rethinking the Role of Demonstrations</a> — 「标签错了也不太掉」的反直觉实证</li>
-      <li><a href="https://arxiv.org/abs/2212.07677" target="_blank">von Oswald et al. 2023 — Transformers learn in-context by gradient descent</a> — 把 ICL 与梯度下降在数学上打通</li>
-      <li><a href="https://lilianweng.github.io/posts/2018-11-30-meta-learning/" target="_blank">Lilian Weng — Meta-Learning 综述博文</a> — 元学习三大流派的清晰地图</li>
-    </ul>
-  </div>
+<div class="card" data-tts="f0bc4fa434923724" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/1703.03400" target="_blank">Finn et al. 2017 — Model-Agnostic Meta-Learning (MAML)</a> — 元学习「优化起点」的奠基论文，必读</li>
+<li><a href="https://arxiv.org/abs/1703.05175" target="_blank">Snell et al. 2017 — Prototypical Networks</a> — 度量式小样本最简洁优雅的代表作</li>
+<li><a href="https://arxiv.org/abs/2005.14165" target="_blank">Brown et al. 2020 — GPT-3 / Language Models are Few-Shot Learners</a> — in-context learning 的开山现象论文</li>
+<li><a href="https://arxiv.org/abs/2111.02080" target="_blank">Xie et al. 2021 — ICL as Implicit Bayesian Inference</a> — 「示例在定位潜在任务」的理论解释</li>
+<li><a href="https://arxiv.org/abs/2202.12837" target="_blank">Min et al. 2022 — Rethinking the Role of Demonstrations</a> — 「标签错了也不太掉」的反直觉实证</li>
+<li><a href="https://arxiv.org/abs/2212.07677" target="_blank">von Oswald et al. 2023 — Transformers learn in-context by gradient descent</a> — 把 ICL 与梯度下降在数学上打通</li>
+<li><a href="https://lilianweng.github.io/posts/2018-11-30-meta-learning/" target="_blank">Lilian Weng — Meta-Learning 综述博文</a> — 元学习三大流派的清晰地图</li>
+</ul>
 </div>
-
+</div>
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
-  <h2>深入思考<span class="en">Deep Questions</span></h2>
-  <div class="section">
-    <details><summary>1. 把今天四个概念排成一条线（迁移学习 → MAML → 原型网络 → ICL），「学习」这件事在沿线发生了什么迁移？</summary><div>一条清晰的「<b>学习向运行时迁移</b>」主线。迁移学习仍在<b>训练阶段</b>学，只是复用了别人的底座。MAML 抬高一层，训练阶段学「如何快速学」，但适应新任务仍要跑几步真梯度。原型网络的适应阶段<b>不再有梯度</b>，退化成「算几个均值 + 比距离」。ICL 连算原型都省了，适应<b>完全发生在一次前向传播内</b>，权重恒定不变。所以这条线是「<b>把适应成本从训练时一路推到推理时</b>」：越往后边际成本越低，代价是越来越依赖一个强大的预训练底座。这也解释了 LLM 时代为何 ICL 成主角——底座够强，运行时适应几乎免费。BigCat 的分布式直觉：像「把计算从批处理推向实时流」，延迟换灵活，前提是基础设施够厚。</div></details>
-
-    <details><summary>2. MAML 的「梯度的梯度」到底在优化什么？为什么说它和普通预训练「碰巧给个好初始化」有本质区别？</summary><div>普通预训练优化「在预训练任务上表现好」，它给的初始化<b>恰好</b>对下游也不错，是个<b>副产品</b>——没人保证它易于适应。MAML 的二阶梯度直接优化「<b>走一步梯度后会有多好</b>」：内层 θ−α∇L 模拟适应一步，外层对适应后的损失再求导。几何上它在找一个「对所有任务都近、且梯度方向友好」的中心点。本质区别：迁移学习找「一个好位置」，MAML 找「一个好、且周围地形利于快速下降的位置」——后者把「未来的优化过程」纳入了当前目标。代价是二阶导很贵，故有 FOMAML/Reptile 一阶近似；它们丢掉二阶项却往往依然好用，提示 MAML 的多数收益可能来自「找到任务中心」而非二阶修正。</div></details>
-
-    <details><summary>3. 「示例标签打乱也不太掉点」（Min et al. 2022）——这对「in-context learning 是不是真『学习』」意味着什么？</summary><div>它逼我们重新定义「学习」。若把学习理解为「从示例的输入-标签对应中提取规律」，那 ICL 在分类任务上<b>很大程度不是这种学习</b>——打乱标签破坏了对应关系，性能却几乎不变。Min et al. 认为示例真正传递的是<b>标签空间、输入分布、序列格式</b>，以及「这是个分类任务」本身——即「<b>唤起/定位</b>」模型已习得的能力，而非现场教新映射，呼应 Xie 的贝叶斯解释。但有边界：这主要基于分类/多选；对需真正从示例归纳新映射的任务（如学没见过的合成函数），von Oswald 的「隐式梯度下降」更贴切。所以答案是「<b>看任务</b>」——ICL 是「检索定位」与「隐式优化」之间的连续谱，而非非黑即白。</div></details>
-
-    <details><summary>4. 原型网络说「学好嵌入空间比设计复杂模型更重要」——这个「表示优先」哲学还在哪些地方反复出现？</summary><div>这是现代 ML 的一条暗线。(a) <b>RAG / 语义检索</b>：质量几乎全取决于 embedding 空间，检索算法只是工程细节——与原型网络「编码器决定一切」同构。(b) <b>对比学习</b>：SimCLR、CLIP 就是「不训分类器，只训一个让同类抱团、异类拉开的表示」，下游线性探针甚至零样本就能解——原型网络思想的大规模版。(c) <b>词向量线性结构</b>（Day 30）：king−man+woman≈queen，意义被编码进几何。共同信念：<b>瓶颈是「如何表示世界」，而非「如何在表示上决策」</b>——表示对了，决策往往退化成简单几何。BigCat 的可迁移启发：与其堆复杂业务逻辑，不如先投资「把数据嵌入好空间」，很多下游问题自动变简单——和数据库「schema 设计对了，查询自然好写」是同一种智慧。</div></details>
-
-    <details><summary>5. 既然「学习」可以一路推到运行时（ICL），那「训练」和「推理」的边界还清晰吗？这对未来 AI 系统设计意味着什么？</summary><div>边界正系统性模糊。传统里训练（改权重、慢、离线）与推理（用权重、快、在线）泾渭分明，但 ICL 把「适应新任务」搬进推理；o1/推理模型让模型在推理时「<b>花更多算力思考</b>」（test-time compute）；带 memory 的 Agent 让经验跨会话累积，像慢速在线学习。未来更像一个<b>连续谱</b>：权重（最慢最持久）→ 长期 memory → context/prompt → 单次前向的隐式计算（最快即蒸发）。设计意涵：(1) <b>稳定通用能力固化进权重，多变个性化留给 context</b>——是 Day 8 context engineering「数据生命周期分层」放大到「学习生命周期」。(2) 会 in-context 适应的模型「会什么」取决于你喂什么，静态 benchmark 失真。(3) 对超级个体最现实：协作质量越来越不取决于「模型训得多好」（改不了），而取决于「<b>你运行时给它什么 context</b>」（你可控）——主动权交回用户手里。</div></details>
-  </div>
+<div class="card think" data-tts="d5a0aa7a66038674" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 把今天四个概念排成一条线（迁移学习 → MAML → 原型网络 → ICL），「学习」这件事在沿线发生了什么迁移？</summary><div>一条清晰的「<b>学习向运行时迁移</b>」主线。迁移学习仍在<b>训练阶段</b>学，只是复用了别人的底座。MAML 抬高一层，训练阶段学「如何快速学」，但适应新任务仍要跑几步真梯度。原型网络的适应阶段<b>不再有梯度</b>，退化成「算几个均值 + 比距离」。ICL 连算原型都省了，适应<b>完全发生在一次前向传播内</b>，权重恒定不变。所以这条线是「<b>把适应成本从训练时一路推到推理时</b>」：越往后边际成本越低，代价是越来越依赖一个强大的预训练底座。这也解释了 LLM 时代为何 ICL 成主角——底座够强，运行时适应几乎免费。BigCat 的分布式直觉：像「把计算从批处理推向实时流」，延迟换灵活，前提是基础设施够厚。</div></details>
+<details><summary>2. MAML 的「梯度的梯度」到底在优化什么？为什么说它和普通预训练「碰巧给个好初始化」有本质区别？</summary><div>普通预训练优化「在预训练任务上表现好」，它给的初始化<b>恰好</b>对下游也不错，是个<b>副产品</b>——没人保证它易于适应。MAML 的二阶梯度直接优化「<b>走一步梯度后会有多好</b>」：内层 θ−α∇L 模拟适应一步，外层对适应后的损失再求导。几何上它在找一个「对所有任务都近、且梯度方向友好」的中心点。本质区别：迁移学习找「一个好位置」，MAML 找「一个好、且周围地形利于快速下降的位置」——后者把「未来的优化过程」纳入了当前目标。代价是二阶导很贵，故有 FOMAML/Reptile 一阶近似；它们丢掉二阶项却往往依然好用，提示 MAML 的多数收益可能来自「找到任务中心」而非二阶修正。</div></details>
+<details><summary>3. 「示例标签打乱也不太掉点」（Min et al. 2022）——这对「in-context learning 是不是真『学习』」意味着什么？</summary><div>它逼我们重新定义「学习」。若把学习理解为「从示例的输入-标签对应中提取规律」，那 ICL 在分类任务上<b>很大程度不是这种学习</b>——打乱标签破坏了对应关系，性能却几乎不变。Min et al. 认为示例真正传递的是<b>标签空间、输入分布、序列格式</b>，以及「这是个分类任务」本身——即「<b>唤起/定位</b>」模型已习得的能力，而非现场教新映射，呼应 Xie 的贝叶斯解释。但有边界：这主要基于分类/多选；对需真正从示例归纳新映射的任务（如学没见过的合成函数），von Oswald 的「隐式梯度下降」更贴切。所以答案是「<b>看任务</b>」——ICL 是「检索定位」与「隐式优化」之间的连续谱，而非非黑即白。</div></details>
+<details><summary>4. 原型网络说「学好嵌入空间比设计复杂模型更重要」——这个「表示优先」哲学还在哪些地方反复出现？</summary><div>这是现代 ML 的一条暗线。(a) <b>RAG / 语义检索</b>：质量几乎全取决于 embedding 空间，检索算法只是工程细节——与原型网络「编码器决定一切」同构。(b) <b>对比学习</b>：SimCLR、CLIP 就是「不训分类器，只训一个让同类抱团、异类拉开的表示」，下游线性探针甚至零样本就能解——原型网络思想的大规模版。(c) <b>词向量线性结构</b>（Day 30）：king−man+woman≈queen，意义被编码进几何。共同信念：<b>瓶颈是「如何表示世界」，而非「如何在表示上决策」</b>——表示对了，决策往往退化成简单几何。BigCat 的可迁移启发：与其堆复杂业务逻辑，不如先投资「把数据嵌入好空间」，很多下游问题自动变简单——和数据库「schema 设计对了，查询自然好写」是同一种智慧。</div></details>
+<details><summary>5. 既然「学习」可以一路推到运行时（ICL），那「训练」和「推理」的边界还清晰吗？这对未来 AI 系统设计意味着什么？</summary><div>边界正系统性模糊。传统里训练（改权重、慢、离线）与推理（用权重、快、在线）泾渭分明，但 ICL 把「适应新任务」搬进推理；o1/推理模型让模型在推理时「<b>花更多算力思考</b>」（test-time compute）；带 memory 的 Agent 让经验跨会话累积，像慢速在线学习。未来更像一个<b>连续谱</b>：权重（最慢最持久）→ 长期 memory → context/prompt → 单次前向的隐式计算（最快即蒸发）。设计意涵：(1) <b>稳定通用能力固化进权重，多变个性化留给 context</b>——是 Day 8 context engineering「数据生命周期分层」放大到「学习生命周期」。(2) 会 in-context 适应的模型「会什么」取决于你喂什么，静态 benchmark 失真。(3) 对超级个体最现实：协作质量越来越不取决于「模型训得多好」（改不了），而取决于「<b>你运行时给它什么 context</b>」（你可控）——主动权交回用户手里。</div></details>
 </div>
-
+</div>
 <footer>BigCat · AI &amp; ML · Day 39 · 2026-06-25</footer>
-
 </div>
-
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>
