@@ -76,3 +76,4 @@
 - Day 53: 音频与语音模型 — STT(Whisper/wav2vec/CTC), TTS 架构(自回归/diffusion/神经声码器), 音频 codec 与离散化, 实时与流式机制（语音工程见 super-individual Day 46）
 - Day 54: LLM-as-Judge 的偏差与校准 — 位置/冗长/措辞伪影偏差, 自我偏好与错误趋同(correlated errors), 生成-验证鸿沟(GV-Gap), 多裁判聚合与校准实务(钩子·源自 deep-research #2)
 - Day 55: CoT 监控与可监控性 — 思维链监控原理与生产数字(GPT-5 标记 2.1-4.8%), obfuscated reward hacking(对 CoT 优化会教模型藏意图), 忠实度实测(提示复述率 25-39%), monitorability tax 与三家实验室联署立场(钩子·源自 deep-research #3)
+- Day 56: 同名不同物 — 模型版本学与评测的可复现性 — 发布会 checkpoint vs 发售产品(o3-preview 在 ARC-AGI-1 得 87.5%,发布版 41-53%,OpenAI 确认非同一模型)、代号漂移(Orion 最终以 GPT-4.5 而非 GPT-5 发布)、scaffold 作为最大混杂变量(同模型同基准同日,Agentless 39% vs 内部工具 61%)、厂商自报与独立复测的系统性落差(SWE-bench 96% vs 83.5%);工程后果:把评测、成本模型与 SLA 绑定在一个会变的名字上(钩子·源自 deep-research #10)
