@@ -62,13 +62,12 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 <body>
 <div class="container">
 <header>
-<h1>AI/ML 详解：同名不同物 — 模型版本学与评测可复现性</h1>
+<h1 data-tts="122e79e2e9aaf7ba">AI/ML 详解：同名不同物 — 模型版本学与评测可复现性</h1>
 <div class="meta">Day 56 · 2026-08-30</div>
 <div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：方法论 / 前沿</div>
 </header>
-
 <!-- 1. 指称漂移 -->
-<div class="card">
+<div class="card" data-tts="99492854829e8f4d">
 <h2>指称漂移与模型版本学<span class="en">Referential Drift &amp; Model Versioning</span></h2>
 <div class="tags"><span class="tag">测量方法论</span><span class="tag purple">版本学</span></div>
 <div class="section">
@@ -120,9 +119,8 @@ fp = hashlib.<span class="fn">sha256</span>(json.<span class="fn">dumps</span>(r
 <div class="takeaway">💡 模型名是可变指针；能复现的实验必须锚在内容指纹上，不是锚在字符串上。<br/>🤔 你系统里有多少判断，实际是挂在一个「会变的名字」上的？如果它今晚静默换了权重，你多久能发现？</div>
 </div>
 </div>
-
 <!-- 2. Scaffold 混杂 -->
-<div class="card">
+<div class="card" data-tts="1ca114a46f1ef30a">
 <h2>Scaffold 混杂变量<span class="en">Scaffolding as a Confounder</span></h2>
 <div class="tags"><span class="tag">实验设计</span><span class="tag orange">反直觉</span></div>
 <div class="section">
@@ -173,9 +171,8 @@ fp = hashlib.<span class="fn">sha256</span>(json.<span class="fn">dumps</span>(r
 <div class="takeaway">💡 Agent 基准测的是「模型 × 脚手架」的联合系统；不报 scaffold 和 k 的分数，等价于不报硬件的性能测试。<br/>🤔 如果一个分数可以靠加大 k 单调抬升，那「能力」这个词到底该定义在哪个预算档位上？<br/>📎 工程对应 → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6：Eval 工程</a></div>
 </div>
 </div>
-
 <!-- 3. 实现即定义 -->
-<div class="card">
+<div class="card" data-tts="80e2f1c4cd3262ed">
 <h2>实现即定义：评测的可复现性<span class="en">The Harness Is the Benchmark</span></h2>
 <div class="tags"><span class="tag">可复现性</span><span class="tag purple">评分协议</span></div>
 <div class="section">
@@ -191,7 +188,7 @@ fp = hashlib.<span class="fn">sha256</span>(json.<span class="fn">dumps</span>(r
 <span style="color:#5a6378;font-size:0.78rem">论文里通常只公开第一格和最后一格</span>
 </div>
 <p style="margin-top:14px">最容易被忽视的是<b>打分方式</b>。多选题有两条主流路径：(a) 让模型生成，再用正则抠出「A/B/C/D」；(b) 不生成，直接比较四个选项各自的 <code>log P(选项 | 题干)</code>，取最大。路径 (b) 里还有一个岔路——要不要<b>按 token 数归一</b>：</p>
-<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#00d4ff">score<sub>raw</sub> = Σ log P(t<sub>i</sub>)&nbsp;&nbsp;&nbsp;vs&nbsp;&nbsp;&nbsp;score<sub>norm</sub> = (1/T) Σ log P(t<sub>i</sub>)</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#00d4ff">score<sub>raw</sub> = Σ log P(t<sub>i</sub>)   vs   score<sub>norm</sub> = (1/T) Σ log P(t<sub>i</sub>)</p>
 <p style="margin-top:8px">直觉解释：每个 token 的 log 概率都是负数，所以<b>选项越长，累加和越负</b>。不归一化就系统性偏爱短选项；除以 token 数 <em>T</em>，变成「平均每 token 有多自然」，就转而偏爱长而流畅的选项。<strong>两种都合理，两种会选出不同答案</strong>——「同一个 MMLU」于是有了两个分数，差距常大于榜单上相邻名次之差。</p>
 </div>
 <div class="section">
@@ -228,9 +225,8 @@ q = <span class="str">"The capital of France is"</span>
 <div class="takeaway">💡 分数不可移植，配置才可移植：能共享的最小可复现单元是「harness 版本 + 完整配置」，不是那个数字。<br/>🤔 如果一个基准的分数只在给定实现下有意义，那跨论文、跨年份的「进步曲线」，我们到底在比较什么？</div>
 </div>
 </div>
-
 <!-- 4. 效度与误差棒 -->
-<div class="card">
+<div class="card" data-tts="c6e9065ce9af8928">
 <h2>构念效度与误差棒<span class="en">Construct Validity &amp; Error Bars</span></h2>
 <div class="tags"><span class="tag">测量理论</span><span class="tag orange">统计</span></div>
 <div class="section">
@@ -246,8 +242,8 @@ q = <span class="str">"The capital of France is"</span>
 <p style="margin-top:8px">直觉解释：分子 <code>p(1−p)</code> 是单题对错这个伯努利变量的方差（p=0.5 时最大，越靠近 0 或 1 越小）；除以 n 再开方，就是「多测几道题，噪声按 √n 变小」。代进 n=500、p=0.70：SE≈2.0%，<b>95% 置信区间约 ±4 个百分点</b>。所以榜单上 70.3% 与 68.9% 的差距，在 500 题上通常<b>根本不显著</b>。而且这还是乐观估计——同仓库、同题型的题目彼此相关（成簇），真实方差比独立假设更大。</p>
 <div class="diagram" style="margin-top:14px">
 <span style="color:#8b92a8">n=500 时两个「相差 1.4 个点」的模型，95% CI 几乎完全重叠</span><br/><br/>
-模型 A  66 ├<span class="bar" style="width:150px;height:12px"></span>┤ 74&nbsp;&nbsp;<span style="color:#8b92a8">点估计 70.3%</span><br/>
-模型 B  65 ├<span class="bar" style="width:150px;height:12px;background:linear-gradient(180deg,#ffb450,#ff6b6b)"></span>┤ 73&nbsp;&nbsp;<span style="color:#8b92a8">点估计 68.9%</span><br/><br/>
+模型 A  66 ├<span class="bar" style="width:150px;height:12px"></span>┤ 74  <span style="color:#8b92a8">点估计 70.3%</span><br/>
+模型 B  65 ├<span class="bar" style="width:150px;height:12px;background:linear-gradient(180deg,#ffb450,#ff6b6b)"></span>┤ 73  <span style="color:#8b92a8">点估计 68.9%</span><br/><br/>
 <span style="color:#5a6378;font-size:0.78rem">→ 排名靠前 ≠ 更强；有效对策：配对比较（同题比同题）把共同难度差消掉</span>
 </div>
 </div>
@@ -280,9 +276,8 @@ d = a.<span class="fn">astype</span>(<span class="fn">float</span>) - b.<span cl
 <div class="takeaway">💡 一个分数要能被相信，得同时过三关：测的是对的东西（效度）、没被污染（干净）、差距超过噪声（显著）。<br/>🤔 你手上正在依赖的那个「模型 A 更好」的判断，如果补上误差棒，还剩下多少？<br/>📎 工程对应 → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6：Eval 工程</a></div>
 </div>
 </div>
-
 <!-- 深入资源 -->
-<div class="card" style="border-left-color:#7b61ff">
+<div class="card" data-tts="c7bde4f244848f0d" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>
 <div class="section">
 <ul>
@@ -294,9 +289,8 @@ d = a.<span class="fn">astype</span>(<span class="fn">float</span>) - b.<span cl
 </ul>
 </div>
 </div>
-
 <!-- 深入思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
+<div class="card think" data-tts="bc8ffc04c69072e8" style="border-left-color:#7ed6a0">
 <h2>深入思考<span class="en">Deep Questions</span></h2>
 <div class="section">
 <details><summary>1. 卡1 说名字会漂移，卡3 说实现即定义。把两者叠加，「模型 A 在基准 B 上得 X 分」这句话还剩多少信息量？</summary><div>这句话表面是二元函数 f(模型, 基准)，实际是 f(权重快照, 推理配置, scaffold, 采样预算, harness 版本, 评分协议, 抽取规则)——七个自变量只锁了两个，而这两个本身还是<b>可变指针</b>。所以它约等于「某个未指明系统在某个未指明协议下的一次观测」。不是零信息：数量级仍可靠（70% 与 20% 的差别抹不平），但<b>不足以支撑细粒度排序</b>——而排序恰恰是榜单的主要用法。解法和处理不可靠外部依赖同构：把隐含自变量<b>显式化</b>（记指纹、锁版本、报 k），把细粒度比较<b>内部化</b>（只信自己固定 harness 上跑出来的对比）。</div></details>
@@ -306,7 +300,6 @@ d = a.<span class="fn">astype</span>(<span class="fn">float</span>) - b.<span cl
 <details><summary>5. 把四张卡合起来：什么样的模型评测结论，才可以写进决策文档？</summary><div>一张四项检查表，缺一项就降级为「参考信息」。<b>(a) 指称</b>：实验对象可唯一确定——记带版本的快照 id 与响应返回的实际 model id，标注观测日期，开源模型记 checkpoint hash（卡1）。<b>(b) 联合系统</b>：分数必须连同 scaffold 版本、采样预算 k、是否做了筛选/重排一起报，比较时三者一致（卡2）。<b>(c) 协议</b>：harness 版本、prompt 模板、few-shot 配置、抽取规则随结果归档，配置文件本身进版本库（卡3）。<b>(d) 统计与效度</b>：点估计带 95% 置信区间，比较优先用配对差分，并说明这个集<b>宣称测什么</b>、做没做污染检查（卡4）。再加一条元规矩：<b>外部榜单数字进决策文档前一律降一档权重</b>——它至多说明数量级，细粒度排序必须在你自己的评测栈上复现。本质和分布式系统的纪律同构：不可信的外部依赖不是不能用，而是必须<b>显式声明不确定性边界</b>，并在自己这侧建立可观测基线。</div></details>
 </div>
 </div>
-
 <footer>BigCat · AI &amp; ML · Day 56 · 2026-08-30</footer>
 </div>
 <script src="https://hub.cissychen.com/comments.js" defer></script>
