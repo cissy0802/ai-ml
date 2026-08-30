@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML 详解：同名不同物 — 模型版本学与评测可复现性 — Day 56</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML 详解：同名不同物 — 模型版本学与评测可复现性</h1>
+<div class="meta">Day 56 · 2026-08-30</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：方法论 / 前沿</div>
+</header>
+
+<!-- 1. 指称漂移 -->
+<div class="card">
+<h2>指称漂移与模型版本学<span class="en">Referential Drift &amp; Model Versioning</span></h2>
+<div class="tags"><span class="tag">测量方法论</span><span class="tag purple">版本学</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>模型名是 Docker 的 <code>:latest</code> 标签，不是 Git 的 commit SHA。<strong>它是可变指针，不是内容寻址的不可变引用。</strong>你在论文里读到的「o3」、你 SLA 里写的「o3」、半年后 API 真正返回的「o3」，可以是三坨不同的权重。你团队里没人会拿 <code>:latest</code> 做生产回滚基准，但整个行业都在拿模型名做基准。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：科学的最低要求是<b>可指称</b>——「实验对象是什么」必须能被唯一确定。而基准分数、论文结论、成本模型、SLA，全都靠一个字符串来指称对象。一旦名字→实际系统的映射会变，挂在这个名字上的结论就<b>静默失效</b>：没有报错，没有版本冲突，只有某天分数莫名掉了几个点。</p>
+<p style="margin-top:8px">机制上，一个「模型名」底下串着一整条会变的栈，每层都改变可观测行为：</p>
+<div class="diagram" style="margin-top:12px">
+<span style="color:#8b92a8">「同一个名字」底下的可变栈（任一层变化 → 行为变，名字不变）</span><br/><br/>
+<span class="box p">底座权重 checkpoint</span><span class="arrow">→</span><span class="box p">蒸馏 / 量化版本</span><br/>
+<span class="arrow">↓</span><br/>
+<span class="box">隐藏 system prompt</span><span class="arrow">→</span><span class="box">安全过滤 / 拒答层</span><br/>
+<span class="arrow">↓</span><br/>
+<span class="box o">推理时算力预算</span><span class="arrow">→</span><span class="box o">路由到哪个副本</span><span class="arrow">→</span><span class="box r">你看到的输出</span><br/><br/>
+<span style="color:#5a6378;font-size:0.78rem">你能观测的只有最右边一格；名字只锚定了最左边一格，而且锚得很松</span>
+</div>
+<p style="margin-top:14px">这不是假设。ARC Prize 在 2024 年 12 月验证了一个<b>未发布</b>的 o3 预览版（high 配置、极高推理算力），在 ARC-AGI-1 上拿到 <strong>87.5%</strong>；2025 年真正发售的 o3，在同一基准上 low 档约 <strong>41%</strong>、medium 档约 <strong>53%</strong>。OpenAI 说明生产版 o3 与当初的预览版<b>并非同一个模型</b>（生产版整合了多模态能力，预览版当时用的推理算力预算在产品里并不可得）。名字相同，数字差三十多个点——<b>指称漂移</b>最干净的标本。</p>
+<p style="margin-top:8px">另一个方向是<b>代号漂移</b>：内部代号「Orion」曾被广泛预期是 GPT-5，最终于 2025 年 2 月以 <strong>GPT-4.5</strong> 发布。传闻里的代号性能和产品名的实测性能之间，连稳定对应关系都没有。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> anthropic, hashlib, json
+client = anthropic.<span class="fn">Anthropic</span>()          <span class="cmt"># 需要 ANTHROPIC_API_KEY</span>
+
+REQUESTED = <span class="str">"claude-sonnet-4-5"</span>            <span class="cmt"># 你请求的名字：一个可变指针</span>
+resp = client.messages.<span class="fn">create</span>(
+    model=REQUESTED, max_tokens=<span class="str">64</span>, temperature=<span class="str">0</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"回复 OK"</span>}],
+)
+<span class="cmt"># 关键：响应体带回服务端实际使用的 model id —— 记它，别记你请求的字符串</span>
+<span class="fn">print</span>(<span class="str">"requested:"</span>, REQUESTED, <span class="str">"| served:"</span>, resp.model)
+
+<span class="cmt"># 给每次评测运行打「内容指纹」：任一维度变了，历史分数就不再可比</span>
+run = {<span class="str">"served_model"</span>: resp.model, <span class="str">"temperature"</span>: <span class="str">0</span>,
+       <span class="str">"max_tokens"</span>: <span class="str">64</span>, <span class="str">"prompt_tmpl"</span>: <span class="str">"eval-v3"</span>, <span class="str">"harness"</span>: <span class="str">"lm-eval@0.4"</span>}
+fp = hashlib.<span class="fn">sha256</span>(json.<span class="fn">dumps</span>(run, sort_keys=<span class="kw">True</span>).<span class="fn">encode</span>()).<span class="fn">hexdigest</span>()[:<span class="str">12</span>]
+<span class="fn">print</span>(<span class="str">"run_fingerprint:"</span>, fp)   <span class="cmt"># 用它当结果表的主键，而不是用模型名</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">「我固定了模型名，实验就可复现了」——不对。固定名字只固定了<b>请求</b>，没固定<b>服务</b>。尽量用带日期/版本后缀的快照 id，并把响应返回的实际 model id 记进结果，两者不一致时报警。开源权重之所以在研究上更硬，正因为它是<b>内容寻址</b>的：一个 checkpoint hash 就唯一确定了实验对象。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：工作流里凡是「上周还好好的、这周输出风格变了」的怪事，先别怀疑自己的 prompt——把 <code>resp.model</code> 记下来对比。当成分布式系统里的<b>依赖版本漂移</b>处理：pin 快照、记指纹、留基线样本集做回归。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 模型名是可变指针；能复现的实验必须锚在内容指纹上，不是锚在字符串上。<br/>🤔 你系统里有多少判断，实际是挂在一个「会变的名字」上的？如果它今晚静默换了权重，你多久能发现？</div>
+</div>
+</div>
+
+<!-- 2. Scaffold 混杂 -->
+<div class="card">
+<h2>Scaffold 混杂变量<span class="en">Scaffolding as a Confounder</span></h2>
+<div class="tags"><span class="tag">实验设计</span><span class="tag orange">反直觉</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像有人拿着一张「MySQL：18000 QPS」的图找你，却不说索引、连接池、缓存命中率、机器规格。你会立刻说：<strong>这不是数据库的属性，这是整个系统的属性。</strong>Agent 基准分数完全一样——分数属于 <code>(模型 × scaffold × 采样预算)</code> 这个联合系统，但排行榜只给你一列「模型名」。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：排行榜的<b>数据结构</b>本身在撒谎。它呈现为「模型名 → 分数」的映射，暗示分数是模型的<b>内在属性</b>。但在 agentic 基准（SWE-bench、终端类任务）里，模型只是被反复调用的一个函数，外面那层<b>脚手架（scaffold）</b>——检索哪些文件、跑不跑测试、失败重试几次、候选补丁怎么排序——贡献了大量分数。</p>
+<p style="margin-top:8px">最关键的混杂是<b>把多次尝试折叠成一个数</b>。设单次尝试成功率为 <em>p</em>，若 scaffold 允许 <em>k</em> 次独立尝试、并能用回归测试筛出对的那个，成功率就变成：</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#00d4ff">pass@k = 1 − (1 − p)<sup>k</sup></p>
+<p style="margin-top:8px">直觉解释：<code>(1−p)</code> 是一次失败的概率，<em>k</em> 次全失败就是它的 <em>k</em> 次方，用 1 减掉即「至少成功一次」。含义是<strong>只要 p&gt;0，分数就随预算单调上升</strong>——p=0.3 时 pass@1≈0.30，pass@10≈0.97。所以只报分数不报 <em>k</em> 的榜单，藏起了一个可以随便调的自变量。</p>
+<p style="margin-top:8px">量级有多大？Anthropic 公布的数字：Claude 3.7 Sonnet 在 SWE-bench Verified 上是 <strong>62.3%</strong>，加自定义 scaffold 后 <strong>70.3%</strong>。<b>同模型、同基准、同一天</b>，差 8 个点——足以颠倒榜单上任何两个相邻名次。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">SWE-bench Verified · Claude 3.7 Sonnet · 唯一变化的是 scaffold</span><br/><br/>
+标准配置   <span class="bar" style="width:187px;height:18px"></span> 62.3%<br/>
+自定义脚手架 <span class="bar" style="width:211px;height:18px;background:linear-gradient(180deg,#7ed6a0,#00d4ff)"></span> 70.3%<br/><br/>
+<span class="box g">分数</span><span class="arrow">=</span><span class="box p">模型</span><span class="arrow">×</span><span class="box o">scaffold</span><span class="arrow">×</span><span class="box r">采样预算 k</span><span class="arrow">×</span><span class="box">评分协议</span><br/>
+<span style="color:#5a6378;font-size:0.78rem">榜单只标注了左起第一项</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">pass_at_k</span>(n, c, k):
+    <span class="str">"""pass@k 的无偏估计（HumanEval 论文的标准做法）：
+    n 次采样中 c 次正确 → 1 - C(n-c,k)/C(n,k)，用连乘避免大组合数溢出。"""</span>
+    <span class="kw">if</span> n - c &lt; k:
+        <span class="kw">return</span> <span class="str">1.0</span>          <span class="cmt"># 错的样本不够凑满 k 次全错，必然成功</span>
+    <span class="kw">return</span> <span class="str">1.0</span> - np.<span class="fn">prod</span>(<span class="str">1.0</span> - k / np.<span class="fn">arange</span>(n - c + <span class="str">1</span>, n + <span class="str">1</span>))
+
+<span class="cmt"># 同一个模型、同一道题，单次成功率固定为 30%（100 次采样对 30 次）</span>
+<span class="cmt"># 唯一变化的是 scaffold 允许试几次</span>
+<span class="kw">for</span> k <span class="kw">in</span> (<span class="str">1</span>, <span class="str">2</span>, <span class="str">5</span>, <span class="str">10</span>, <span class="str">40</span>):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"pass@{k:&lt;2} = {pass_at_k(n=100, c=30, k=k):.3f}"</span>)
+
+<span class="cmt"># pass@1 =0.300 / pass@5 =0.839 / pass@40=1.000</span>
+<span class="cmt"># 模型能力一个比特都没变，涨的全是采样预算 —— 报分不报 k 等于没报</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">「A 榜上比 B 高 3 分，所以 A 更强」——在 agentic 基准上几乎没有信息量：A、B 常跑在不同 scaffold、不同采样预算下。比较模型必须<b>控制变量</b>：同一 harness、同一 k、同一评分协议。否则你比的是两个团队的工程能力，不是两个模型的能力。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：给自己的 agent 建私有评测集时，把 scaffold 版本号和采样预算写进结果表的<b>主键</b>。否则三个月后你看到一条上扬曲线，却分不清是换了模型、改了 prompt，还是当初把重试从 1 次调成了 3 次。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 Agent 基准测的是「模型 × 脚手架」的联合系统；不报 scaffold 和 k 的分数，等价于不报硬件的性能测试。<br/>🤔 如果一个分数可以靠加大 k 单调抬升，那「能力」这个词到底该定义在哪个预算档位上？<br/>📎 工程对应 → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6：Eval 工程</a></div>
+</div>
+</div>
+
+<!-- 3. 实现即定义 -->
+<div class="card">
+<h2>实现即定义：评测的可复现性<span class="en">The Harness Is the Benchmark</span></h2>
+<div class="tags"><span class="tag">可复现性</span><span class="tag purple">评分协议</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>两个团队都说「我实现了 JSON 解析」，但一个接受尾逗号一个不接受——<strong>规范之外的边界情况，由实现来定义。</strong>基准也一样：「MMLU」不是一个数据集，它是<b>数据集 + prompt 模板 + 打分方式 + 抽取规则</b>的四元组。换掉任一项，同一个模型能报出差好几个点的成绩，而两边都没撒谎。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点：你想复现别人的数字，跑出来差 4 个点，于是花一周怀疑自己的环境。真因通常在<b>评分协议</b>里，而论文往往只写了「我们在 MMLU 上评测」。EleutherAI 团队的 <em>Lessons from the Trenches on Reproducible Evaluation of Language Models</em>（arXiv 2405.14782）把这件事讲透了：模型分数对评测设置<b>高度敏感</b>，跨方法比较因此极难成立；结论是真正可共享的不是分数，而是<b>完整的评测代码与配置</b>——这正是 lm-eval 这类 harness 存在的理由。</p>
+<p style="margin-top:8px">从数据集到一个数字之间，有五道会改结果的闸门：</p>
+<div class="diagram" style="margin-top:12px">
+<span class="box g">数据集</span><span class="arrow">→</span><span class="box">prompt 模板<br/><span style="color:#5a6378;font-size:0.72rem">措辞 / chat 模板</span></span><span class="arrow">→</span><span class="box o">few-shot<br/><span style="color:#5a6378;font-size:0.72rem">条数 / 顺序</span></span><span class="arrow">→</span><span class="box p">打分方式<br/><span style="color:#5a6378;font-size:0.72rem">生成 vs 比 logprob</span></span><span class="arrow">→</span><span class="box r">答案抽取<br/><span style="color:#5a6378;font-size:0.72rem">正则 / 归一化</span></span><span class="arrow">→</span><span class="box">分数</span><br/><br/>
+<span style="color:#5a6378;font-size:0.78rem">论文里通常只公开第一格和最后一格</span>
+</div>
+<p style="margin-top:14px">最容易被忽视的是<b>打分方式</b>。多选题有两条主流路径：(a) 让模型生成，再用正则抠出「A/B/C/D」；(b) 不生成，直接比较四个选项各自的 <code>log P(选项 | 题干)</code>，取最大。路径 (b) 里还有一个岔路——要不要<b>按 token 数归一</b>：</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#00d4ff">score<sub>raw</sub> = Σ log P(t<sub>i</sub>)&nbsp;&nbsp;&nbsp;vs&nbsp;&nbsp;&nbsp;score<sub>norm</sub> = (1/T) Σ log P(t<sub>i</sub>)</p>
+<p style="margin-top:8px">直觉解释：每个 token 的 log 概率都是负数，所以<b>选项越长，累加和越负</b>。不归一化就系统性偏爱短选项；除以 token 数 <em>T</em>，变成「平均每 token 有多自然」，就转而偏爱长而流畅的选项。<strong>两种都合理，两种会选出不同答案</strong>——「同一个 MMLU」于是有了两个分数，差距常大于榜单上相邻名次之差。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForCausalLM
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)
+m = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>).<span class="fn">eval</span>()
+
+<span class="kw">def</span> <span class="fn">score</span>(ctx, cont):
+    <span class="str">"""返回候选续写的 (原始 log 似然和, 长度归一均值)"""</span>
+    ids = tok(ctx + cont, return_tensors=<span class="str">"pt"</span>).input_ids
+    n_ctx = <span class="fn">len</span>(tok(ctx).input_ids)
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        lp = torch.<span class="fn">log_softmax</span>(m(ids).logits[<span class="str">0</span>, :-<span class="str">1</span>], dim=-<span class="str">1</span>)
+    tgt = ids[<span class="str">0</span>, <span class="str">1</span>:]                          <span class="cmt"># 每个位置的真实下一 token</span>
+    s = lp[<span class="fn">range</span>(<span class="fn">len</span>(tgt)), tgt][n_ctx - <span class="str">1</span>:]   <span class="cmt"># 只取候选答案那几个 token</span>
+    <span class="kw">return</span> s.<span class="fn">sum</span>().<span class="fn">item</span>(), s.<span class="fn">mean</span>().<span class="fn">item</span>()
+
+q = <span class="str">"The capital of France is"</span>
+<span class="kw">for</span> c <span class="kw">in</span> [<span class="str">" Paris"</span>, <span class="str">" the beautiful old city of Paris"</span>]:
+    raw, norm = <span class="fn">score</span>(q, c)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{c!r:34} raw={raw:8.2f}  len-norm={norm:6.2f}"</span>)
+<span class="cmt"># raw 偏爱短选项，len-norm 偏爱长选项 —— 排序可能整个反过来</span>
+<span class="cmt"># 同一模型、同一题、两种都「正确」的评分协议 → 两个不同的基准分</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">「基准是个数据集，谁跑都一样」——错。基准是<b>数据集 + 协议</b>，协议藏在代码里。「我们用 lm-eval v0.4.x 的 <code>mmlu</code> 任务、5-shot、默认模板」是可复现的表述；「我们在 MMLU 上得了 X 分」不是。复现别人的数字前，先问「你用的哪个 harness、哪个版本」。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：把评测 harness 当<b>依赖</b>管——锁版本、进 lockfile、随结果归档配置。这和处理「同一段 SQL 在不同 optimizer 版本下执行计划变了」是同一套纪律：结果不可比的根因往往不在数据，在执行引擎。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 分数不可移植，配置才可移植：能共享的最小可复现单元是「harness 版本 + 完整配置」，不是那个数字。<br/>🤔 如果一个基准的分数只在给定实现下有意义，那跨论文、跨年份的「进步曲线」，我们到底在比较什么？</div>
+</div>
+</div>
+
+<!-- 4. 效度与误差棒 -->
+<div class="card">
+<h2>构念效度与误差棒<span class="en">Construct Validity &amp; Error Bars</span></h2>
+<div class="tags"><span class="tag">测量理论</span><span class="tag orange">统计</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>拿「单元测试通过率」当「代码质量」的指标，会遇到两个独立的问题：一是<strong>它测的是代理不是本体</strong>（测试可以写得很弱，也可以被针对性地喂答案）；二是<strong>它是有限抽样，本身有方差</strong>（跑 20 个测试和跑 2000 个，可信度完全不同）。基准分数一模一样地吃这两记。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p><b>问题一：构念效度（construct validity）</b>——测的东西是不是你以为的那个东西。Raji 等人 2021 的 <em>AI and the Everything in the Whole Wide World Benchmark</em>（arXiv 2111.15366）系统地指出：被当作「通用能力」里程碑的那些基准，其任务选择本身是任意的，把它们的分数读成「通用智能进展」存在根本的效度问题。</p>
+<p style="margin-top:8px">两个硬实证。<b>污染方向</b>：Scale AI 团队重建了一套与 GSM8k 同分布、同难度的新题 GSM1k（arXiv 2405.00332），发现部分模型族掉最多 <strong>13 个百分点</strong>，呈系统性过拟合迹象（多个前沿模型族则基本没掉）——原分数里混了「记住了」而非「会做」的成分。<b>弱判定方向</b>：SWE-Bench+（arXiv 2410.06992）审查 SWE-bench 上被判「解决」的补丁，发现约 <strong>32.7%</strong> 的通过样本答案就写在 issue 或评论里（solution leakage），另约 <strong>31.1%</strong> 因测试太弱而无法判定补丁真的正确。那个数字里有相当一部分，不是在测「修 bug 的能力」。</p>
+<p style="margin-top:8px"><b>问题二：统计不确定性。</b>Miller 2024 的 <em>Adding Error Bars to Evals</em>（arXiv 2411.00640）说了句朴素却被普遍忽略的话：<strong>评测就是实验</strong>——题目是从一个看不见的超总体里抽的样，分数因此是估计量，必须带误差棒。n 道题、正确率 p 时，均值的标准误是：</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#00d4ff">SE ≈ √( p(1−p) / n )</p>
+<p style="margin-top:8px">直觉解释：分子 <code>p(1−p)</code> 是单题对错这个伯努利变量的方差（p=0.5 时最大，越靠近 0 或 1 越小）；除以 n 再开方，就是「多测几道题，噪声按 √n 变小」。代进 n=500、p=0.70：SE≈2.0%，<b>95% 置信区间约 ±4 个百分点</b>。所以榜单上 70.3% 与 68.9% 的差距，在 500 题上通常<b>根本不显著</b>。而且这还是乐观估计——同仓库、同题型的题目彼此相关（成簇），真实方差比独立假设更大。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">n=500 时两个「相差 1.4 个点」的模型，95% CI 几乎完全重叠</span><br/><br/>
+模型 A  66 ├<span class="bar" style="width:150px;height:12px"></span>┤ 74&nbsp;&nbsp;<span style="color:#8b92a8">点估计 70.3%</span><br/>
+模型 B  65 ├<span class="bar" style="width:150px;height:12px;background:linear-gradient(180deg,#ffb450,#ff6b6b)"></span>┤ 73&nbsp;&nbsp;<span style="color:#8b92a8">点估计 68.9%</span><br/><br/>
+<span style="color:#5a6378;font-size:0.78rem">→ 排名靠前 ≠ 更强；有效对策：配对比较（同题比同题）把共同难度差消掉</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+rng = np.random.<span class="fn">default_rng</span>(<span class="str">0</span>)
+n = <span class="str">500</span>                                <span class="cmt"># 基准题目数</span>
+a = rng.<span class="fn">random</span>(n) &lt; <span class="str">0.703</span>              <span class="cmt"># 模型 A 每题对错（真实率 70.3%）</span>
+b = rng.<span class="fn">random</span>(n) &lt; <span class="str">0.689</span>              <span class="cmt"># 模型 B（真实率 68.9%）</span>
+
+<span class="kw">def</span> <span class="fn">se</span>(x):                             <span class="cmt"># 均值的标准误 = 样本标准差 / √n</span>
+    <span class="kw">return</span> x.<span class="fn">std</span>(ddof=<span class="str">1</span>) / np.<span class="fn">sqrt</span>(<span class="fn">len</span>(x))
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"A = {a.mean():.3f} ± {1.96*se(a):.3f}"</span>)   <span class="cmt"># 95% CI 约 ±0.04</span>
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"B = {b.mean():.3f} ± {1.96*se(b):.3f}"</span>)
+
+<span class="cmt"># 配对差分：同一道题上比 A 和 B，消掉「题目本身难易」这个共同噪声源</span>
+d = a.<span class="fn">astype</span>(<span class="fn">float</span>) - b.<span class="fn">astype</span>(<span class="fn">float</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"A-B = {d.mean():+.3f} ± {1.96*se(d):.3f}"</span>)
+<span class="cmt"># 区间跨 0 → 差距不显著。配对比独立比较更省题，是私有 eval 的默认做法</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">「榜单上差 1 分是真差距」——在几百道题的基准上，1 分通常淹没在噪声里。反过来也要小心：<b>分数没掉不等于没退化</b>，聚合分数会把你在意的那个子集的退化平均掉。总分之外，永远要看你关心的切片。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：建私有评测集时，宁可 <b>150 道贴合真实任务的题 + 配对比较</b>，也不要 1500 道泛化题目。前者构念效度高（真的在测你的用途），配对设计又把方差压下来；后者分数漂亮，却对你的决策没有信息量。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 一个分数要能被相信，得同时过三关：测的是对的东西（效度）、没被污染（干净）、差距超过噪声（显著）。<br/>🤔 你手上正在依赖的那个「模型 A 更好」的判断，如果补上误差棒，还剩下多少？<br/>📎 工程对应 → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6：Eval 工程</a></div>
+</div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>深入资源<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/2405.14782" target="_blank">Biderman, Schoelkopf, Sutawika et al. 2024 — Lessons from the Trenches on Reproducible Evaluation of Language Models</a> — 可复现评测的方法论奠基，lm-eval harness 的设计理由</li>
+<li><a href="https://arxiv.org/abs/2411.00640" target="_blank">Miller 2024 — Adding Error Bars to Evals</a> — 把评测当实验做：误差棒、配对比较、样本量规划</li>
+<li><a href="https://arxiv.org/abs/2111.15366" target="_blank">Raji, Bender et al. 2021 — AI and the Everything in the Whole Wide World Benchmark</a> — 「通用基准」的构念效度批判</li>
+<li><a href="https://arxiv.org/abs/2405.00332" target="_blank">Zhang et al. 2024 — A Careful Examination of LLM Performance on Grade School Arithmetic (GSM1k)</a> — 用同分布新题把污染/过拟合量化出来</li>
+<li><a href="https://arxiv.org/abs/2410.06992" target="_blank">Aleithan et al. 2024 — SWE-Bench+: Enhanced Coding Benchmark for LLMs</a> — solution leakage 与弱测试如何抬高「解决率」</li>
+</ul>
+</div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>深入思考<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. 卡1 说名字会漂移，卡3 说实现即定义。把两者叠加，「模型 A 在基准 B 上得 X 分」这句话还剩多少信息量？</summary><div>这句话表面是二元函数 f(模型, 基准)，实际是 f(权重快照, 推理配置, scaffold, 采样预算, harness 版本, 评分协议, 抽取规则)——七个自变量只锁了两个，而这两个本身还是<b>可变指针</b>。所以它约等于「某个未指明系统在某个未指明协议下的一次观测」。不是零信息：数量级仍可靠（70% 与 20% 的差别抹不平），但<b>不足以支撑细粒度排序</b>——而排序恰恰是榜单的主要用法。解法和处理不可靠外部依赖同构：把隐含自变量<b>显式化</b>（记指纹、锁版本、报 k），把细粒度比较<b>内部化</b>（只信自己固定 harness 上跑出来的对比）。</div></details>
+<details><summary>2. 卡2 说分数可以靠加大采样预算 k 单调抬升。那「模型能力」能不能脱离预算被定义？</summary><div>严格说不能，只能相对于一条<b>能力-成本曲线</b>定义：横轴推理预算（k 或美元），纵轴成功率；单点分数只是曲线上一个采样。不同模型的曲线<b>形状</b>不同：有的 pass@1 低但随 k 陡升（生成多样，能被筛选器救回），有的 pass@1 高但迅速饱和（错得自信，多试无用）。二者在某个 k 上可能打平，适用场景却相反。这接回 Day 54 的生成-验证鸿沟：<b>k 的价值完全取决于你有没有比生成更强的验证器</b>。没有验证器时，加大 k 只是多了几个分不清好坏的候选——pass@k 那条曲线在现实里兑现不了。报单点分数不仅丢了预算维度，还默认了「验证器免费且完美」。</div></details>
+<details><summary>3. 开源权重是内容寻址的（一个 hash 定一个模型），闭源 API 不是。这是否意味着只有开源上的研究才算科学？</summary><div>结论太强，方向对。可复现性有<b>层级</b>：开源权重给「同一对象 + 同一环境」的完全可复现；闭源 API 至多给「同一快照 id + 同一参数」的<b>条件可复现</b>——条件是厂商没有静默换掉底层服务，而这一点你无法验证，只能信任。所以闭源上的实验更接近<b>观测性科学</b>（像天文学：对象不受你控制，你能做的是记录观测条件、重复观测、报告漂移）而非受控实验。这要求不同的纪律：标注观测日期、保留原始输出、维护一个跑得起来的金标准回归集去探测漂移。真正危险的是<b>用受控实验的语气写观测性结果</b>——把「GPT-X 具有性质 P」写成永久事实，而它其实是某个时间窗口内某个服务端点的行为。</div></details>
+<details><summary>4. 卡4 的两个问题（效度、方差）能不能靠「把基准做大做难」一起解决？</summary><div>只能解决一半，还会引入新问题。<b>加大 n 压方差</b>（SE 按 √n 降），对效度<b>毫无帮助</b>——测错东西测一万遍只是错得更精确。二者还有张力：题目要多就得放宽收集标准或自动生成，这恰恰<b>增加污染风险</b>，也更容易混进弱判定（GSM1k 与 SWE-Bench+ 的发现都指向这里）。「做难」同样不是万灵药：更难常意味着更小众、分布更偏，离你真实用途更远，效度反降。提升效度靠的是另一类工作：重建同分布的新鲜题、加固判定、明确写出这个基准<b>宣称测什么、不测什么</b>。正确姿势是拆开做——统计设计管方差，测量理论管效度。混为一谈的结果，是把噪声压到 0.1 个点，却仍在测一件没人想测的事。</div></details>
+<details><summary>5. 把四张卡合起来：什么样的模型评测结论，才可以写进决策文档？</summary><div>一张四项检查表，缺一项就降级为「参考信息」。<b>(a) 指称</b>：实验对象可唯一确定——记带版本的快照 id 与响应返回的实际 model id，标注观测日期，开源模型记 checkpoint hash（卡1）。<b>(b) 联合系统</b>：分数必须连同 scaffold 版本、采样预算 k、是否做了筛选/重排一起报，比较时三者一致（卡2）。<b>(c) 协议</b>：harness 版本、prompt 模板、few-shot 配置、抽取规则随结果归档，配置文件本身进版本库（卡3）。<b>(d) 统计与效度</b>：点估计带 95% 置信区间，比较优先用配对差分，并说明这个集<b>宣称测什么</b>、做没做污染检查（卡4）。再加一条元规矩：<b>外部榜单数字进决策文档前一律降一档权重</b>——它至多说明数量级，细粒度排序必须在你自己的评测栈上复现。本质和分布式系统的纪律同构：不可信的外部依赖不是不能用，而是必须<b>显式声明不确定性边界</b>，并在自己这侧建立可观测基线。</div></details>
+</div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 56 · 2026-08-30</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML Explained: Same Name, Different Thing — Model Versioning &amp; Eval Reproducibility — Day 56</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML Explained: Same Name, Different Thing — Model Versioning &amp; Eval Reproducibility</h1>
+<div class="meta">Day 56 · 2026-08-30</div>
+<div class="audience">For: engineers outside AI · Level: methodology / frontier</div>
+</header>
+
+<!-- 1. Referential drift -->
+<div class="card">
+<h2>Referential Drift &amp; Model Versioning<span class="en">Referential Drift</span></h2>
+<div class="tags"><span class="tag">measurement</span><span class="tag purple">versioning</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>A model name is Docker's <code>:latest</code> tag, not a Git commit SHA. <strong>It is a mutable pointer, not a content-addressed immutable reference.</strong> The "o3" you read about in a paper, the "o3" written into your SLA, and the "o3" the API actually serves six months later can be three different piles of weights. Nobody on your team would use <code>:latest</code> as a rollback baseline — yet the whole industry uses model names as benchmark identity.</p>
+</div>
+<div class="section">
+<div class="label">The problem it exposes + how it works</div>
+<p>Pain point: the minimum requirement for science is <b>referability</b> — "what is the object under study" must be uniquely determinable. Yet benchmark scores, paper conclusions, cost models and SLAs all identify that object with a single string. Once the mapping from name to actual system can change, every conclusion pinned to that name <b>fails silently</b>: no error, no version conflict, just a score that mysteriously drops a few points one day.</p>
+<p style="margin-top:8px">Mechanically, one "model name" sits on top of a whole mutable stack, and every layer changes observable behavior:</p>
+<div class="diagram" style="margin-top:12px">
+<span style="color:#8b92a8">The mutable stack under a single name (any layer changes → behavior changes, name doesn't)</span><br/><br/>
+<span class="box p">base checkpoint</span><span class="arrow">→</span><span class="box p">distilled / quantized variant</span><br/>
+<span class="arrow">↓</span><br/>
+<span class="box">hidden system prompt</span><span class="arrow">→</span><span class="box">safety filter / refusal layer</span><br/>
+<span class="arrow">↓</span><br/>
+<span class="box o">test-time compute budget</span><span class="arrow">→</span><span class="box o">which replica you route to</span><span class="arrow">→</span><span class="box r">the output you see</span><br/><br/>
+<span style="color:#5a6378;font-size:0.78rem">You can only observe the rightmost box; the name anchors only the leftmost one, and loosely at that</span>
+</div>
+<p style="margin-top:14px">This is not hypothetical. In December 2024 ARC Prize verified an <b>unreleased</b> o3 preview (high configuration, very large test-time compute) at <strong>87.5%</strong> on ARC-AGI-1. The o3 that actually shipped in 2025 scored roughly <strong>41%</strong> at the low setting and <strong>53%</strong> at medium on the same benchmark. OpenAI clarified that the production o3 is <b>not the same model</b> as that preview (production integrates multimodal capability, and the compute budget the preview used is not available in the product). Same name, thirty-plus points apart — the cleanest specimen of <b>referential drift</b> we have.</p>
+<p style="margin-top:8px">The other direction is <b>codename drift</b>: the internal codename "Orion" was widely expected to ship as GPT-5, and was ultimately released in February 2025 as <strong>GPT-4.5</strong>. There is not even a stable correspondence between rumored codename performance and measured product-name performance.</p>
+</div>
+<div class="section">
+<div class="label">Code</div>
+<pre><span class="kw">import</span> anthropic, hashlib, json
+client = anthropic.<span class="fn">Anthropic</span>()          <span class="cmt"># needs ANTHROPIC_API_KEY</span>
+
+REQUESTED = <span class="str">"claude-sonnet-4-5"</span>            <span class="cmt"># the name you request: a mutable pointer</span>
+resp = client.messages.<span class="fn">create</span>(
+    model=REQUESTED, max_tokens=<span class="str">64</span>, temperature=<span class="str">0</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"Reply OK"</span>}],
+)
+<span class="cmt"># Key: the response carries the model id the server actually used. Log that,</span>
+<span class="cmt"># not the string you asked for.</span>
+<span class="fn">print</span>(<span class="str">"requested:"</span>, REQUESTED, <span class="str">"| served:"</span>, resp.model)
+
+<span class="cmt"># Fingerprint every eval run: if any dimension changed, old scores are not comparable</span>
+run = {<span class="str">"served_model"</span>: resp.model, <span class="str">"temperature"</span>: <span class="str">0</span>,
+       <span class="str">"max_tokens"</span>: <span class="str">64</span>, <span class="str">"prompt_tmpl"</span>: <span class="str">"eval-v3"</span>, <span class="str">"harness"</span>: <span class="str">"lm-eval@0.4"</span>}
+fp = hashlib.<span class="fn">sha256</span>(json.<span class="fn">dumps</span>(run, sort_keys=<span class="kw">True</span>).<span class="fn">encode</span>()).<span class="fn">hexdigest</span>()[:<span class="str">12</span>]
+<span class="fn">print</span>(<span class="str">"run_fingerprint:"</span>, fp)   <span class="cmt"># use this as the primary key, not the model name</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + where it applies</div>
+<div class="tip">"I pinned the model name, so my experiment is reproducible" — no. Pinning a name pins the <b>request</b>, not the <b>service</b>. Use dated/versioned snapshot ids where the API offers them, log the served model id from the response, and alert when the two disagree. Open weights are scientifically harder precisely because they are <b>content-addressed</b>: one checkpoint hash uniquely determines the object under study.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: whenever your workflow shows the "it was fine last week, now the style changed" symptom, don't start by doubting your prompt — diff the logged <code>resp.model</code> first. Treat it exactly like <b>dependency version drift</b> in a distributed system: pin snapshots, record fingerprints, keep a baseline sample set for regression.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + question</div>
+<div class="takeaway">💡 A model name is a mutable pointer; a reproducible experiment must be anchored to a content fingerprint, not a string.<br/>🤔 How many of your judgments currently hang on a name that can change? If the weights behind it were swapped tonight, how long until you noticed?</div>
+</div>
+</div>
+
+<!-- 2. Scaffolding confounder -->
+<div class="card">
+<h2>Scaffolding as a Confounder<span class="en">Scaffolding Confound</span></h2>
+<div class="tags"><span class="tag">experiment design</span><span class="tag orange">counterintuitive</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Imagine someone hands you a chart reading "MySQL: 18,000 QPS" with no mention of indexes, connection pool, cache hit rate, or hardware. You'd say immediately: <strong>that isn't a property of the database, it's a property of the whole system.</strong> Agent benchmark scores work the same way — the score belongs to the <code>(model × scaffold × sampling budget)</code> joint system, while the leaderboard shows you a single column: the model name.</p>
+</div>
+<div class="section">
+<div class="label">The problem it exposes + how it works</div>
+<p>Pain point: the leaderboard's <b>data structure</b> is itself misleading. It presents as a map from model name to score, implying the score is an <b>intrinsic property</b> of the model. But on agentic benchmarks (SWE-bench, terminal-style tasks) the model is just a function being called repeatedly; the <b>scaffold</b> around it — which files get retrieved, whether tests are run, how many retries on failure, how candidate patches are ranked — contributes a large share of the score.</p>
+<p style="margin-top:8px">The most important confound is <b>collapsing many attempts into one number</b>. Let <em>p</em> be the success rate of a single attempt. If the scaffold allows <em>k</em> independent attempts and can filter the right one using regression tests, the success rate becomes:</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#00d4ff">pass@k = 1 − (1 − p)<sup>k</sup></p>
+<p style="margin-top:8px">Intuition: <code>(1−p)</code> is the probability of one failure, so <em>k</em> failures in a row is that raised to the <em>k</em>-th power, and subtracting from 1 gives "succeeds at least once." The consequence is that <strong>as long as p&gt;0, the score climbs monotonically with budget</strong> — at p=0.3, pass@1≈0.30 but pass@10≈0.97. A leaderboard that reports a score without <em>k</em> has hidden a freely tunable independent variable.</p>
+<p style="margin-top:8px">How large is the effect? Anthropic's own published numbers: Claude 3.7 Sonnet scores <strong>62.3%</strong> on SWE-bench Verified, and <strong>70.3%</strong> with a custom scaffold. <b>Same model, same benchmark, same day</b> — eight points, enough to flip any two adjacent leaderboard ranks.</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">SWE-bench Verified · Claude 3.7 Sonnet · the only thing that changed is the scaffold</span><br/><br/>
+standard        <span class="bar" style="width:187px;height:18px"></span> 62.3%<br/>
+custom scaffold <span class="bar" style="width:211px;height:18px;background:linear-gradient(180deg,#7ed6a0,#00d4ff)"></span> 70.3%<br/><br/>
+<span class="box g">score</span><span class="arrow">=</span><span class="box p">model</span><span class="arrow">×</span><span class="box o">scaffold</span><span class="arrow">×</span><span class="box r">budget k</span><span class="arrow">×</span><span class="box">scoring protocol</span><br/>
+<span style="color:#5a6378;font-size:0.78rem">The leaderboard labels only the first term</span>
+</div>
+</div>
+<div class="section">
+<div class="label">Code</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">pass_at_k</span>(n, c, k):
+    <span class="str">"""Unbiased pass@k estimator (the standard HumanEval formulation):
+    c correct out of n samples -> 1 - C(n-c,k)/C(n,k), as a product to avoid overflow."""</span>
+    <span class="kw">if</span> n - c &lt; k:
+        <span class="kw">return</span> <span class="str">1.0</span>          <span class="cmt"># not enough wrong samples to fill k failures</span>
+    <span class="kw">return</span> <span class="str">1.0</span> - np.<span class="fn">prod</span>(<span class="str">1.0</span> - k / np.<span class="fn">arange</span>(n - c + <span class="str">1</span>, n + <span class="str">1</span>))
+
+<span class="cmt"># Same model, same task: single-attempt success fixed at 30% (30 correct out of 100).</span>
+<span class="cmt"># The only thing that varies is how many attempts the scaffold allows.</span>
+<span class="kw">for</span> k <span class="kw">in</span> (<span class="str">1</span>, <span class="str">2</span>, <span class="str">5</span>, <span class="str">10</span>, <span class="str">40</span>):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"pass@{k:&lt;2} = {pass_at_k(n=100, c=30, k=k):.3f}"</span>)
+
+<span class="cmt"># pass@1 =0.300 / pass@5 =0.839 / pass@40=1.000</span>
+<span class="cmt"># Model capability did not change by a single bit; only the budget did.</span>
+<span class="cmt"># Reporting a score without k is reporting nothing.</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + where it applies</div>
+<div class="tip">"A beats B by 3 points on the leaderboard, so A is stronger" — on agentic benchmarks this carries almost no information, because A and B often ran under different scaffolds and different sampling budgets. Comparing models requires <b>controlling the variables</b>: same harness, same k, same scoring protocol. Otherwise you are comparing two teams' engineering, not two models' capability.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: when you build a private eval set for your own agent, put the scaffold version and sampling budget into the <b>primary key</b> of your results table. Otherwise, three months later you'll see a rising curve and be unable to tell whether you swapped the model, edited the prompt, or simply bumped retries from 1 to 3.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + question</div>
+<div class="takeaway">💡 Agent benchmarks measure the "model × scaffold" joint system; a score without the scaffold and k is like a performance benchmark without the hardware.<br/>🤔 If a score can be pushed up monotonically by raising k, at which budget level should "capability" even be defined?<br/>📎 Engineering counterpart → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6: Eval Engineering</a></div>
+</div>
+</div>
+
+<!-- 3. The harness is the benchmark -->
+<div class="card">
+<h2>The Harness Is the Benchmark<span class="en">Implementation as Definition</span></h2>
+<div class="tags"><span class="tag">reproducibility</span><span class="tag purple">scoring protocol</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Two teams both say "I implemented JSON parsing," but one accepts trailing commas and the other doesn't — <strong>whatever the spec leaves open, the implementation defines.</strong> Benchmarks are the same: "MMLU" is not a dataset, it is a four-tuple of <b>dataset + prompt template + scoring method + answer extraction</b>. Change any one of them and the same model reports a score several points apart, with neither side lying.</p>
+</div>
+<div class="section">
+<div class="label">The problem it exposes + how it works</div>
+<p>Pain point: you try to reproduce someone's number, land 4 points off, and spend a week suspecting your environment. The real cause is usually in the <b>scoring protocol</b>, while the paper only said "we evaluated on MMLU." EleutherAI's <em>Lessons from the Trenches on Reproducible Evaluation of Language Models</em> (arXiv 2405.14782) lays this out: model scores are <b>highly sensitive</b> to evaluation setup, which makes cross-method comparison very hard to justify. Their conclusion is that what can genuinely be shared is not a score but the <b>complete evaluation code and configuration</b> — precisely why a harness like lm-eval exists.</p>
+<p style="margin-top:8px">Between the dataset and a single number sit five gates, each of which changes the result:</p>
+<div class="diagram" style="margin-top:12px">
+<span class="box g">dataset</span><span class="arrow">→</span><span class="box">prompt template<br/><span style="color:#5a6378;font-size:0.72rem">wording / chat format</span></span><span class="arrow">→</span><span class="box o">few-shot<br/><span style="color:#5a6378;font-size:0.72rem">count / order</span></span><span class="arrow">→</span><span class="box p">scoring method<br/><span style="color:#5a6378;font-size:0.72rem">generate vs compare logprob</span></span><span class="arrow">→</span><span class="box r">extraction<br/><span style="color:#5a6378;font-size:0.72rem">regex / normalization</span></span><span class="arrow">→</span><span class="box">score</span><br/><br/>
+<span style="color:#5a6378;font-size:0.78rem">Papers usually publish only the first box and the last one</span>
+</div>
+<p style="margin-top:14px">The most overlooked gate is the <b>scoring method</b>. Multiple choice has two mainstream paths: (a) let the model generate, then regex out "A/B/C/D"; (b) skip generation and compare <code>log P(option | stem)</code> across the four options, taking the max. Path (b) has a further fork — whether to <b>normalize by token count</b>:</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#00d4ff">score<sub>raw</sub> = Σ log P(t<sub>i</sub>)&nbsp;&nbsp;&nbsp;vs&nbsp;&nbsp;&nbsp;score<sub>norm</sub> = (1/T) Σ log P(t<sub>i</sub>)</p>
+<p style="margin-top:8px">Intuition: every token's log probability is negative, so <b>the longer the option, the more negative the sum</b>. Without normalization you systematically favor short options; dividing by token count <em>T</em> turns it into "how natural per token on average," which flips the bias toward long, fluent options. <strong>Both are defensible, and both pick different answers</strong> — so "the same MMLU" has two scores, and the gap is often larger than the gap between adjacent leaderboard ranks.</p>
+</div>
+<div class="section">
+<div class="label">Code</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForCausalLM
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>)
+m = AutoModelForCausalLM.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>).<span class="fn">eval</span>()
+
+<span class="kw">def</span> <span class="fn">score</span>(ctx, cont):
+    <span class="str">"""Return (raw log-likelihood sum, length-normalized mean) for a candidate."""</span>
+    ids = tok(ctx + cont, return_tensors=<span class="str">"pt"</span>).input_ids
+    n_ctx = <span class="fn">len</span>(tok(ctx).input_ids)
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        lp = torch.<span class="fn">log_softmax</span>(m(ids).logits[<span class="str">0</span>, :-<span class="str">1</span>], dim=-<span class="str">1</span>)
+    tgt = ids[<span class="str">0</span>, <span class="str">1</span>:]                          <span class="cmt"># actual next token at each position</span>
+    s = lp[<span class="fn">range</span>(<span class="fn">len</span>(tgt)), tgt][n_ctx - <span class="str">1</span>:]   <span class="cmt"># keep only the candidate's tokens</span>
+    <span class="kw">return</span> s.<span class="fn">sum</span>().<span class="fn">item</span>(), s.<span class="fn">mean</span>().<span class="fn">item</span>()
+
+q = <span class="str">"The capital of France is"</span>
+<span class="kw">for</span> c <span class="kw">in</span> [<span class="str">" Paris"</span>, <span class="str">" the beautiful old city of Paris"</span>]:
+    raw, norm = <span class="fn">score</span>(q, c)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{c!r:34} raw={raw:8.2f}  len-norm={norm:6.2f}"</span>)
+<span class="cmt"># raw favors the short option, len-norm favors the long one: ranking can invert.</span>
+<span class="cmt"># One model, one question, two equally "correct" protocols -> two benchmark scores.</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + where it applies</div>
+<div class="tip">"A benchmark is a dataset, so anyone running it gets the same thing" — wrong. A benchmark is <b>dataset + protocol</b>, and the protocol lives in code. "We used lm-eval v0.4.x, task <code>mmlu</code>, 5-shot, default template" is a reproducible statement; "we scored X on MMLU" is not. Before reproducing someone's number, ask which harness and which version.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: manage the eval harness as a <b>dependency</b> — pin the version, put it in the lockfile, archive the config alongside results. Same discipline as handling "the same SQL got a different plan under a new optimizer version": the root cause of incomparable results is usually not the data, it's the execution engine.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + question</div>
+<div class="takeaway">💡 Scores don't travel, configs do: the smallest reproducible unit you can share is "harness version + full config," not the number.<br/>🤔 If a benchmark score only means something under a given implementation, what exactly are we comparing in those cross-paper, cross-year "progress curves"?</div>
+</div>
+</div>
+
+<!-- 4. Validity and error bars -->
+<div class="card">
+<h2>Construct Validity &amp; Error Bars<span class="en">Validity + Uncertainty</span></h2>
+<div class="tags"><span class="tag">measurement theory</span><span class="tag orange">statistics</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Using "unit test pass rate" as a proxy for "code quality" hits two independent problems: first, <strong>it measures the proxy, not the thing</strong> (tests can be weak, and can be gamed by feeding them the answer); second, <strong>it is a finite sample and therefore has variance</strong> (20 tests and 2,000 tests carry very different confidence). Benchmark scores take both hits identically.</p>
+</div>
+<div class="section">
+<div class="label">The problem it exposes + how it works</div>
+<p><b>Problem one: construct validity</b> — whether what you measure is what you think you're measuring. Raji et al. 2021, <em>AI and the Everything in the Whole Wide World Benchmark</em> (arXiv 2111.15366), argue systematically that the benchmarks treated as milestones of "general capability" involve fundamentally arbitrary task selection, so reading their scores as progress toward general intelligence has a validity problem at the root.</p>
+<p style="margin-top:8px">Two hard pieces of evidence. <b>Contamination</b>: the Scale AI team rebuilt a fresh set of problems matched to GSM8k in distribution and difficulty, called GSM1k (arXiv 2405.00332), and found drops of up to <strong>13 percentage points</strong> for some model families, with signs of systematic overfitting (while several frontier families barely moved) — meaning the original score mixed "memorized" with "can do." <b>Weak adjudication</b>: SWE-Bench+ (arXiv 2410.06992) audited patches judged "resolved" on SWE-bench and found roughly <strong>32.7%</strong> of passing samples had the solution written directly in the issue or its comments (solution leakage), and about another <strong>31.1%</strong> were suspicious because the tests were too weak to verify correctness. A substantial part of that number is not measuring bug-fixing ability.</p>
+<p style="margin-top:8px"><b>Problem two: statistical uncertainty.</b> Miller 2024, <em>Adding Error Bars to Evals</em> (arXiv 2411.00640), makes a plain point that is widely ignored: <strong>an evaluation is an experiment</strong> — the questions are a sample drawn from an unseen super-population, so the score is an estimator and needs error bars. With n questions and accuracy p, the standard error of the mean is:</p>
+<p style="margin-top:8px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#00d4ff">SE ≈ √( p(1−p) / n )</p>
+<p style="margin-top:8px">Intuition: the numerator <code>p(1−p)</code> is the variance of a single Bernoulli right/wrong outcome (largest at p=0.5, smaller as p approaches 0 or 1); dividing by n and taking the square root is "more questions shrink the noise as √n." Plug in n=500, p=0.70: SE≈2.0%, so the <b>95% confidence interval is roughly ±4 percentage points</b>. The leaderboard gap between 70.3% and 68.9% is therefore usually <b>not significant</b> at 500 questions. And that's the optimistic case — questions from the same repository or template are correlated (clustered), so real variance exceeds the independence assumption.</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">At n=500, two models "1.4 points apart" have nearly overlapping 95% CIs</span><br/><br/>
+model A  66 ├<span class="bar" style="width:150px;height:12px"></span>┤ 74&nbsp;&nbsp;<span style="color:#8b92a8">point estimate 70.3%</span><br/>
+model B  65 ├<span class="bar" style="width:150px;height:12px;background:linear-gradient(180deg,#ffb450,#ff6b6b)"></span>┤ 73&nbsp;&nbsp;<span style="color:#8b92a8">point estimate 68.9%</span><br/><br/>
+<span style="color:#5a6378;font-size:0.78rem">→ Ranking higher ≠ being better. Fix: paired comparison (same question, both models) cancels shared difficulty</span>
+</div>
+</div>
+<div class="section">
+<div class="label">Code</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+rng = np.random.<span class="fn">default_rng</span>(<span class="str">0</span>)
+n = <span class="str">500</span>                                <span class="cmt"># number of benchmark questions</span>
+a = rng.<span class="fn">random</span>(n) &lt; <span class="str">0.703</span>              <span class="cmt"># model A per-question outcome (true rate 70.3%)</span>
+b = rng.<span class="fn">random</span>(n) &lt; <span class="str">0.689</span>              <span class="cmt"># model B (true rate 68.9%)</span>
+
+<span class="kw">def</span> <span class="fn">se</span>(x):                             <span class="cmt"># standard error of the mean = sd / sqrt(n)</span>
+    <span class="kw">return</span> x.<span class="fn">std</span>(ddof=<span class="str">1</span>) / np.<span class="fn">sqrt</span>(<span class="fn">len</span>(x))
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"A = {a.mean():.3f} ± {1.96*se(a):.3f}"</span>)   <span class="cmt"># 95% CI is about ±0.04</span>
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"B = {b.mean():.3f} ± {1.96*se(b):.3f}"</span>)
+
+<span class="cmt"># Paired difference: compare A and B on the same question, cancelling the shared</span>
+<span class="cmt"># noise source of "how hard this question is"</span>
+d = a.<span class="fn">astype</span>(<span class="fn">float</span>) - b.<span class="fn">astype</span>(<span class="fn">float</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"A-B = {d.mean():+.3f} ± {1.96*se(d):.3f}"</span>)
+<span class="cmt"># Interval straddles 0 -> not significant. Pairing needs fewer questions than</span>
+<span class="cmt"># independent comparison, so it should be the default for a private eval.</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + where it applies</div>
+<div class="tip">"A one-point leaderboard gap is a real difference" — on a few-hundred-question benchmark, one point is usually buried in noise. The converse deserves care too: <b>a flat score does not mean no regression</b>, because an aggregate averages away the degradation on the subset you care about. Beyond the total, always look at your slice.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: when building a private eval set, prefer <b>150 questions drawn from your real tasks plus paired comparison</b> over 1,500 generic ones. The former has high construct validity (it really measures your use case) and the paired design suppresses variance; the latter produces a pretty number that carries no information for your decision.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + question</div>
+<div class="takeaway">💡 For a score to be trusted it must clear three gates at once: it measures the right thing (validity), it isn't contaminated (clean), and the gap exceeds the noise (significant).<br/>🤔 If you added error bars to the "model A is better" judgment you currently rely on, how much of it would survive?<br/>📎 Engineering counterpart → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6: Eval Engineering</a></div>
+</div>
+</div>
+
+<!-- Further reading -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>Further Reading<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li><a href="https://arxiv.org/abs/2405.14782" target="_blank">Biderman, Schoelkopf, Sutawika et al. 2024 — Lessons from the Trenches on Reproducible Evaluation of Language Models</a> — the methodological foundation for reproducible evals, and the rationale behind the lm-eval harness</li>
+<li><a href="https://arxiv.org/abs/2411.00640" target="_blank">Miller 2024 — Adding Error Bars to Evals</a> — treating evaluation as an experiment: error bars, paired comparison, sample-size planning</li>
+<li><a href="https://arxiv.org/abs/2111.15366" target="_blank">Raji, Bender et al. 2021 — AI and the Everything in the Whole Wide World Benchmark</a> — the construct-validity critique of "general" benchmarks</li>
+<li><a href="https://arxiv.org/abs/2405.00332" target="_blank">Zhang et al. 2024 — A Careful Examination of LLM Performance on Grade School Arithmetic (GSM1k)</a> — quantifying contamination/overfitting with freshly built, distribution-matched problems</li>
+<li><a href="https://arxiv.org/abs/2410.06992" target="_blank">Aleithan et al. 2024 — SWE-Bench+: Enhanced Coding Benchmark for LLMs</a> — how solution leakage and weak tests inflate "resolution rate"</li>
+</ul>
+</div>
+</div>
+
+<!-- Deep questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>Deep Questions<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>1. Card 1 says names drift; card 3 says the implementation is the definition. Stacked together, how much information is left in "model A scores X on benchmark B"?</summary><div>On the surface that sentence is a binary function f(model, benchmark). In reality it is f(weight snapshot, inference config, scaffold, sampling budget, harness version, scoring protocol, extraction rule) — seven independent variables, of which the sentence pins two, and those two are themselves <b>mutable pointers</b>. So it amounts to "one observation of an unspecified system under an unspecified protocol." Not zero information: the order of magnitude still holds (70% vs 20% cannot be explained away by these degrees of freedom), but it <b>cannot support fine-grained ranking</b> — which is exactly what leaderboards are used for. The fix is isomorphic to handling an unreliable external dependency: make hidden variables <b>explicit</b> (log fingerprints, pin versions, report k), and <b>internalize</b> fine-grained comparison (trust only the comparisons you ran on your own fixed harness).</div></details>
+<details><summary>2. Card 2 says a score can be pushed up monotonically by raising the sampling budget k. Can "model capability" be defined independently of budget at all?</summary><div>Strictly, no — only relative to a <b>capability–cost curve</b>: inference budget (k, or dollars) on the x-axis, success rate on the y-axis, with a single score being one sample on that curve. Different models have different curve <b>shapes</b>: some have low pass@1 but climb steeply with k (diverse generations that a filter can rescue), others have high pass@1 and saturate fast (confidently wrong, so extra attempts don't help). Two such models can tie at some k while suiting opposite situations. This connects back to Day 54's generation–verification gap: <b>the value of k depends entirely on whether you have a verifier stronger than your generator</b>. Without one, raising k just gives you more candidates you can't tell apart — the pass@k curve is not redeemable in practice. Reporting a single-point score not only drops the budget dimension, it silently assumes a free and perfect verifier.</div></details>
+<details><summary>3. Open weights are content-addressed (one hash fixes one model); closed APIs are not. Does that mean only research on open models counts as science?</summary><div>Too strong a conclusion, but the direction is right. Reproducibility has <b>tiers</b>: open weights give full reproducibility ("same object, same environment"); a closed API gives at best <b>conditional</b> reproducibility ("same snapshot id, same parameters") — conditional on the vendor not having silently swapped the underlying service, which you cannot verify and can only trust. So experiments on closed models resemble <b>observational science</b> (astronomy: the object is outside your control, so you record observation conditions, repeat observations, and report drift) rather than controlled experiments. That demands a different discipline: stamp the observation date, keep raw outputs, and maintain a runnable gold-standard regression set to detect drift. The genuinely dangerous move is <b>writing observational results in the voice of controlled experiments</b> — turning "GPT-X has property P" into a permanent fact when it was the behavior of one service endpoint within one time window.</div></details>
+<details><summary>4. Can the two problems in card 4 (validity and variance) both be solved by making benchmarks bigger and harder?</summary><div>Only half, and it introduces new problems. <b>Raising n suppresses variance</b> (SE falls as √n) but does <b>nothing</b> for validity — measuring the wrong thing ten thousand times just makes you precisely wrong. The two are also in tension: getting more questions means loosening collection standards or generating them automatically, which <b>increases contamination risk</b> and lets weak adjudication slip in (both the GSM1k and SWE-Bench+ findings point here). "Harder" is no cure either: harder usually means more niche and more skewed, taking the set further from your real use case and lowering validity. Validity is improved by a different class of work: rebuilding fresh distribution-matched problems, hardening adjudication, and stating explicitly what the benchmark <b>claims to measure and what it does not</b>. So handle them separately — statistical design for variance, measurement theory for validity. Conflating them yields an industry that drives noise down to a tenth of a point while still measuring something nobody wanted measured.</div></details>
+<details><summary>5. Putting all four cards together: what kind of model-evaluation conclusion is allowed into a decision document?</summary><div>A four-item checklist; miss one and it drops to "reference information" rather than "conclusion." <b>(a) Reference</b>: the object under study must be uniquely determinable — log the versioned snapshot id and the served model id from the response, stamp the observation date, and record the checkpoint hash for open models (card 1). <b>(b) Joint system</b>: report the score together with scaffold version, sampling budget k, and whether filtering/reranking was used, and hold all three equal when comparing (card 2). <b>(c) Protocol</b>: archive the harness version, prompt template, few-shot configuration and extraction rules with the results, and put the config file itself under version control (card 3). <b>(d) Statistics and validity</b>: point estimates come with 95% confidence intervals, comparisons prefer paired differences, and you state what the set <b>claims to measure</b> and whether contamination was checked (card 4). Plus one meta-rule: <b>discount every external leaderboard number by one tier before it enters a decision document</b> — it tells you the order of magnitude at most; fine-grained ranking must be reproduced on your own eval stack. The essence matches distributed-systems discipline: an untrusted external dependency isn't unusable, it just has to have its <b>uncertainty bounds declared explicitly</b>, with an observable baseline maintained on your side.</div></details>
+</div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 56 · 2026-08-30</footer>
+</div>
+</body>
+</html>
