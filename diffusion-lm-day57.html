@@ -61,12 +61,12 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 <body>
 <div class="container">
 <header>
-<h1>AI/ML 详解：扩散语言模型</h1>
+<h1 data-tts="731c8a58a91a2caa">AI/ML 详解：扩散语言模型</h1>
 <div class="meta">Day 57 · 2026-10-03</div>
 <div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：前沿</div>
 </header>
 <!-- 1 -->
-<div class="card">
+<div class="card" data-tts="29c1338e25fc12dc">
 <h2>掩码扩散语言模型<span class="en">Masked Diffusion Language Model</span></h2>
 <div class="tags"><span class="tag">生成机制</span><span class="tag purple">非自回归</span></div>
 <div class="section">
@@ -124,7 +124,7 @@ ids[<span class="str">0</span>, <span class="str">0</span>], ids[<span class="st
 </div>
 </div>
 <!-- 2 -->
-<div class="card">
+<div class="card" data-tts="c9016dc4b064e5de">
 <h2>任意顺序生成与灵活性陷阱<span class="en">Any-Order Generation &amp; the Flexibility Trap</span></h2>
 <div class="tags"><span class="tag">采样机制</span><span class="tag orange">反直觉</span></div>
 <div class="section">
@@ -177,7 +177,7 @@ ent = -(p * p.<span class="fn">clamp_min</span>(<span class="str">1e-9</span>).<
 </div>
 </div>
 <!-- 3 -->
-<div class="card">
+<div class="card" data-tts="037125e5aee591c3">
 <h2>块并行去噪<span class="en">Block Diffusion</span></h2>
 <div class="tags"><span class="tag">架构</span><span class="tag purple">延迟</span></div>
 <div class="section">
@@ -233,7 +233,7 @@ N = <span class="str">512</span>
 </div>
 </div>
 <!-- 4 -->
-<div class="card">
+<div class="card" data-tts="0a98db4886e075bf">
 <h2>三方取舍：似然 · 可控性 · 延迟<span class="en">Likelihood / Controllability / Latency</span></h2>
 <div class="tags"><span class="tag">对比</span><span class="tag orange">诚实边界</span></div>
 <div class="section">
@@ -290,7 +290,7 @@ slots = (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">
 </div>
 </div>
 <!-- 资源 -->
-<div class="card" style="border-left-color:#7b61ff">
+<div class="card" data-tts="51b8ddb92b5d3834" style="border-left-color:#7b61ff">
 <h2>深入资源</h2>
 <div class="section">
 <ul>
@@ -304,7 +304,7 @@ slots = (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">
 </div>
 </div>
 <!-- 思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
+<div class="card think" data-tts="101713ad908e7b16" style="border-left-color:#7ed6a0">
 <h2>深入思考</h2>
 <div class="section">
 <details><summary>如果 BERT 一直是个"只跑一步的扩散模型"，为什么 2018 年没人用它生成文本？</summary><div>缺的不是直觉，是三件具体的东西。一、训练目标：BERT 固定 mask 15%，而采样必须从"全 mask"起步，模型从没见过高 mask 比例的输入，第一步就崩——MDLM 的随机 t 加 1/t 加权正是补这个。二、理论形式：需要把多步去噪写成一个有 ELBO 的生成过程，否则你不知道每步该定稿多少、该选哪些位置，这要等 D3PM。三、工程动机：那几年自回归的质量优势压倒一切，解码延迟还不值得换掉整个范式——是长输出和 agent 时代才把延迟推成一等公民。</div></details>
@@ -315,9 +315,9 @@ slots = (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">
 </div>
 <footer>BigCat · AI &amp; ML · 2026 · Day 57</footer>
 </div>
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>
