@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML 详解：扩散语言模型 — Day 57</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style></head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML 详解：扩散语言模型</h1>
+<div class="meta">Day 57 · 2026-10-03</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：前沿</div>
+</header>
+<!-- 1 -->
+<div class="card">
+<h2>掩码扩散语言模型<span class="en">Masked Diffusion Language Model</span></h2>
+<div class="tags"><span class="tag">生成机制</span><span class="tag purple">非自回归</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>GPT 这类<b>自回归（autoregressive，逐个往后猜下一个词）</b>模型像一个游标：<code>fetch</code> 一行、再 <code>fetch</code> 一行，第 i 行必须等第 i-1 行回来。<strong>掩码扩散</strong>换了个写法：先 <code>INSERT</code> 一条定长记录、所有字段全是 NULL，然后跑<b>若干轮批量 UPDATE</b>，每轮把最有把握的几个字段填成实值，直到没有 NULL。文本不是"写出来"的，是从一张空画布上<b>显影</b>出来的。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>痛点是一面<b>顺序依赖的硬墙</b>：自回归生成 N 个 token 就得做 N 次前向，因为第 i 个 token 的输入里含着第 i-1 个。加再多 GPU 也压不成 10 步——延迟被<b>串行步数</b>锁死，不是被算力锁死。</p>
+<p style="margin-top:8px">扩散的思路来自图像生成，但文本是离散的，<b>加高斯噪声没有意义</b>（"猫"加一点噪声不会变成"狗"）。D3PM（Austin et al., 2021，arXiv:2107.03006）给出了可用的离散版本：噪声不是抖动而是<strong>遗忘</strong>——前向过程按噪声水平 <b>t</b> 把一部分真 token 换成 <code>[MASK]</code>，而 <code>[MASK]</code> 是<b>吸收态（absorbing state，进去出不来）</b>；t=0 是原文，t=1 全是 mask。反向过程训一个 Transformer，<strong>去掉 causal mask</strong>——这是和 GPT 最本质的结构差别：它能同时看见左右两边，一次前向把所有 <code>[MASK]</code> 位置的分布全预测出来。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">前向=遗忘（t: 0→1）　反向=显影（t: 1→0）</span><br/><br/>
+t=0.0　<span class="box g">缓</span><span class="box g">存</span><span class="box g">击</span><span class="box g">穿</span><span class="box g">的</span><span class="box g">解</span><span class="box g">法</span>　<span style="color:#5a6378">原文</span><br/>
+t=0.4　<span class="box g">缓</span><span class="box r">■</span><span class="box g">击</span><span class="box r">■</span><span class="box g">的</span><span class="box r">■</span><span class="box g">法</span>　<span style="color:#5a6378">按比例 t 替换成 [MASK]</span><br/>
+t=1.0　<span class="box r">■</span><span class="box r">■</span><span class="box r">■</span><span class="box r">■</span><span class="box r">■</span><span class="box r">■</span><span class="box r">■</span>　<span style="color:#5a6378">全 mask = 纯噪声</span><br/><br/>
+<span class="box p">双向 Transformer</span><span class="arrow">→</span><span class="box">一次前向预测<b>所有</b>■ 的分布</span><span class="arrow">→</span><span class="box g">定稿置信度最高的 k 个</span>
+</div>
+<p style="margin-top:14px">训练目标更让人意外。MDLM（Sahoo et al., NeurIPS 2024，arXiv:2406.07524）证明这套扩散的 ELBO 可以化简成一个<b>加权的 masked LM 损失</b>：</p>
+<pre>L(θ) = E<sub>t~U(0,1]</sub> [ (1/t) · Σ<sub>i∈被mask的位置</sub> −log p<sub>θ</sub>(x<sub>i</sub> | x<sub>t</sub>) ]</pre>
+<p style="margin-top:8px">逐项读：<b>t</b> 是本次采样的 mask 比例（即噪声水平）；<b>x<sub>t</sub></b> 是挖掉 t 比例后的序列；括号里就是"预测被挖掉的字"——<strong>和 BERT 的训练任务一模一样</strong>，只是 mask 比例每个样本随机抽，不是固定 15%。那个 <b>1/t</b> 权重是关键：t 很小时只挖掉几个字、上下文几乎全在，样本太容易、信号太稀疏，<b>1/t</b> 把它放大，让各噪声水平对总损失的贡献被摆平——否则模型只擅长"几乎没挖空"的简单情形，而采样恰恰从 t=1 开始。换句话说：<strong>训练扩散语言模型，就是训练一个能承受任意 mask 比例的 BERT</strong>。LLaDA（Nie et al., arXiv:2502.09992）用这条路把掩码扩散推到 8B，在 in-context learning 上做到与同规模 LLaMA3 可比。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForMaskedLM
+
+name = <span class="str">"bert-base-chinese"</span>          <span class="cmt"># 任何 masked LM 都能当"一步去噪器"</span>
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(name)
+mdl = AutoModelForMaskedLM.<span class="fn">from_pretrained</span>(name).<span class="fn">eval</span>()
+
+L, STEPS = <span class="str">16</span>, <span class="str">8</span>                    <span class="cmt"># 画布长 16，但只跑 8 步（AR 要 16 次前向）</span>
+ids = torch.<span class="fn">full</span>((<span class="str">1</span>, L), tok.mask_token_id)   <span class="cmt"># t=1：整张画布全 [MASK]</span>
+ids[<span class="str">0</span>, <span class="str">0</span>], ids[<span class="str">0</span>, -<span class="str">1</span>] = tok.cls_token_id, tok.sep_token_id
+
+<span class="kw">for</span> s <span class="kw">in</span> <span class="fn">range</span>(STEPS):
+    masked = (ids == tok.mask_token_id)
+    <span class="kw">if</span> <span class="kw">not</span> masked.<span class="fn">any</span>(): <span class="kw">break</span>
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        logits = <span class="fn">mdl</span>(input_ids=ids).logits       <span class="cmt"># 双向：一次预测所有槽位</span>
+    prob, pred = logits.<span class="fn">softmax</span>(-<span class="str">1</span>).<span class="fn">max</span>(-<span class="str">1</span>)      <span class="cmt"># 每槽的最佳 token + 置信度</span>
+    prob[~masked] = -<span class="str">1</span>                           <span class="cmt"># 已定稿的不再改（吸收态）</span>
+    k = <span class="fn">max</span>(<span class="str">1</span>, <span class="fn">int</span>(masked.<span class="fn">sum</span>()) // (STEPS - s))  <span class="cmt"># 剩余 mask 均摊到剩余步</span>
+    <span class="kw">for</span> i <span class="kw">in</span> prob[<span class="str">0</span>].<span class="fn">topk</span>(k).indices:            <span class="cmt"># 置信度最高的 k 个 → 写实</span>
+        ids[<span class="str">0</span>, i] = pred[<span class="str">0</span>, i]
+    <span class="fn">print</span>(s, tok.<span class="fn">decode</span>(ids[<span class="str">0</span>]))                 <span class="cmt"># 看文本从噪声里显影</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"扩散语言模型就是把图像扩散的高斯噪声搬到文本上"——错。主流离散扩散的"噪声"是<b>把 token 换成 [MASK]</b>，是遗忘而非抖动。它和 BERT 的血缘比和 Stable Diffusion 更近：<b>BERT 一直是个只跑一步的扩散模型，只是当年没人这么用</b>。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：本地跑一个能<b>双向填空</b>的小模型做模板/代码中段补全——给定函数签名和 return 语句，补中间的实现。自回归模型天生做不好这件事（它看不见右边），而掩码扩散的训练任务本身就是填空。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 离散扩散把"逐个写"换成"整张画布多轮收敛"，噪声=mask，训练=任意比例的 BERT。<br/>🤔 如果生成不再有"顺序"，那"流式输出 token"这个你用惯的 UX 契约还成立吗？</div>
+</div>
+</div>
+<!-- 2 -->
+<div class="card">
+<h2>任意顺序生成与灵活性陷阱<span class="en">Any-Order Generation &amp; the Flexibility Trap</span></h2>
+<div class="tags"><span class="tag">采样机制</span><span class="tag orange">反直觉</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>自回归像<b>固定拓扑排序</b>的任务调度：顺序写死，没得选。扩散像一个<b>能任意挑任务的调度器</b>：哪个槽位最有把握就先做。听上去是调度器的胜利——但真实调度器都有这个毛病：<strong>一直先捡简单任务，把关键路径节点拖到最后</strong>。等你终于去做它，周围全已定稿，选择空间被挤没了。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>掩码扩散的 ELBO 实际上是在<b>所有生成顺序上取期望</b>——它学的是一个 <b>any-order（任意顺序）</b>模型，自回归只是其中一种固定顺序的特例。采样时最常用的策略是 <strong>置信度优先解码（confidence-based unmasking）</strong>：每轮把预测熵最低、也就是模型最笃定的几个槽位定稿。直觉上很合理：先确定能确定的，让它们给后面当上下文。</p>
+<p style="margin-top:8px">ICML 2026 Outstanding Paper《The Flexibility Trap》（Ni et al., arXiv:2601.15165）指出这里有个结构性毛病。推理任务里<strong>真正的决策点恰恰是高熵 token</strong>——"因此"/"所以"/"设 x ="，它们熵高正是因为<b>下面挂着好几条都合法的推理分支</b>。置信度优先会系统性绕开它们，先把周边确定无疑的词填满；等绕回来，左右文已把这个位置夹死，几条分支只剩一条还说得通。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">置信度优先解码如何绕开决策点</span><br/><br/>
+第1轮　<span class="box r">■</span><span class="box r">■</span><span class="box o">■熵高</span><span class="box r">■</span><span class="box r">■</span>　<span style="color:#5a6378">→ 先填两端最笃定的</span><br/>
+第2轮　<span class="box g">小明</span><span class="box r">■</span><span class="box o">■熵高</span><span class="box r">■</span><span class="box g">8个</span>　<span style="color:#5a6378">→ 继续填确定的</span><br/>
+第3轮　<span class="box g">小明</span><span class="box g">有3+5</span><span class="box o">■熵高</span><span class="box g">一共</span><span class="box g">8个</span>　<span style="color:#5a6378">→ 决策点最后才填</span><br/>
+第4轮　<span class="box g">小明</span><span class="box g">有3+5</span><span class="box p">所以</span><span class="box g">一共</span><span class="box g">8个</span>　<span style="color:#5a6378">→ 只剩一条路可走</span><br/><br/>
+<span style="color:#ff8e8e">后果：分支在被"考虑"之前就已经被上下文剪掉 → 解的多样性塌缩 → RL 探索不出更好的推理轨迹</span>
+</div>
+<p style="margin-top:14px">作者的修法很简洁：RL 训练时<b>强制按左到右顺序探索</b>（把自回归顺序当训练脚手架），推理时完全保留双向注意力和并行解码。这套 JustGRPO 在 GSM8K 上 89.1%、MATH-500 上 45.1%（生成长度 256）。结论反直觉但干净：<strong>更大的假设空间配一个贪心的顺序选择器，可以比更小的假设空间更差</strong>。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForMaskedLM
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-chinese"</span>)
+mdl = AutoModelForMaskedLM.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-chinese"</span>).<span class="fn">eval</span>()
+
+M = tok.mask_token
+<span class="cmt"># 中间两格留给"因此/所以"这类连接词，两端是确定的算式</span>
+text = <span class="fn">f</span><span class="str">"小明有 3 个苹果又买了 5 个， {M} {M} 他一共有 8 个。"</span>
+ids = <span class="fn">tok</span>(text, return_tensors=<span class="str">"pt"</span>).input_ids
+<span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+    p = <span class="fn">mdl</span>(input_ids=ids).logits.<span class="fn">softmax</span>(-<span class="str">1</span>)
+
+ent = -(p * p.<span class="fn">clamp_min</span>(<span class="str">1e-9</span>).<span class="fn">log</span>()).<span class="fn">sum</span>(-<span class="str">1</span>)[<span class="str">0</span>]   <span class="cmt"># 每个位置的预测熵</span>
+<span class="kw">for</span> i <span class="kw">in</span> (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">nonzero</span>().<span class="fn">flatten</span>():
+    top3 = tok.<span class="fn">convert_ids_to_tokens</span>(p[<span class="str">0</span>, i].<span class="fn">topk</span>(<span class="str">3</span>).indices)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"槽位{i.item()} 熵={ent[i]:.2f} 候选={top3}"</span>)
+<span class="cmt"># 熵高的槽位 = 有多条合法分支的决策点；</span>
+<span class="cmt"># 置信度优先策略恰恰把它们排在最后 —— 这就是"灵活性陷阱"</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"任意顺序一定不比固定顺序差，因为自回归是它的特例"——这是把<b>表达能力</b>和<b>可优化性</b>搞混了。模型类的包含关系只说"存在一组参数能做到"，不保证"训练和采样能找到它"——和你见过无数次的"更通用的框架跑得更慢"同类。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：这个陷阱不只属于扩散模型。你让 AI agent 拆一个复杂任务时，它也倾向于先做"最有把握"的子任务，把真正含糊的核心决策（选哪个方案、定哪个口径）一路后推；等终于面对时，前面的产出已经把答案夹定了。对抗办法和 JustGRPO 一样：<b>人为规定顺序</b>，先逼它把最含糊的那一步定下来。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 置信度优先解码会绕开高熵决策点，等绕回来时分支已被上下文剪掉——灵活性反而成了约束。<br/>🤔 你自己的工作流里，有哪个"先做容易的"的习惯，实际上在悄悄替你砍掉选项？</div>
+</div>
+</div>
+<!-- 3 -->
+<div class="card">
+<h2>块并行去噪<span class="en">Block Diffusion</span></h2>
+<div class="tags"><span class="tag">架构</span><span class="tag purple">延迟</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>自回归解码是教科书级的 <b>N+1 查询问题</b>：要 512 个 token 就发 512 次串行请求，每次付一个完整往返。纯扩散是另一极端：一次全发出去，但要重试很多轮，且<b>每轮都得把整批重算</b>。块扩散是中间那个所有 DBA 都会告诉你的答案——<strong>分页批处理</strong>：按 256 一页，页内并行、页间顺序。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>纯掩码扩散有两个硬伤，都不在数学上而在工程上。<b>一、必须定长</b>：得先 allocate 一张固定长度的画布，而真实请求的输出长度事先不知道。<b>二、KV cache 失效</b>：双向注意力意味着每个 token 都依赖所有其他 token，上一轮的 key/value 下一轮全部作废——自回归省时间的最大法宝没了。</p>
+<p style="margin-top:8px">Block Diffusion（Arriola et al., ICLR 2025，arXiv:2503.09573）两刀都解了：把序列切块，<strong>块之间自回归</strong>（前块已定稿，可缓存、可想生成多少块就多少块），<strong>块内部扩散</strong>（并行去噪）。块大小成了连续旋钮：块=1 退化成纯自回归，块=全长退化成纯扩散。</p>
+<p style="margin-top:8px">DiffusionGemma（Google DeepMind，2026-06，Apache 2.0 开放权重）走的就是这条路：基于 Gemma 4 的 26B 级 MoE、每步只激活约 4B 参数，一次并行去噪 256 token 的块。官方口径：解码比 Gemma 4 快约 4×，单张 H100 上超过 1000 tokens/s。</p>
+<p style="margin-top:8px">速度到底从哪来？全篇最值得记住的一句：<strong>延迟 ≈ NFE（网络前向次数）× 单次前向耗时</strong>。自回归的 NFE 等于 token 数，一步都省不掉；块扩散的 NFE = 块数 × 块内去噪步数，而块内步数<b>远小于</b>块长（256 个位置可能只跑三四十步）。注意它<b>没减少 FLOPs</b>——每次前向算的是整块 256 个位置，总计算量不降甚至略升。省掉的是"必须等上一个 token 回来"的那 N−1 次往返。</p>
+<p style="margin-top:8px">为什么这笔买卖划得来？因为自回归解码时 GPU 其实<b>在等内存</b>：batch=1 下每生成一个 token 都要把全部权重从显存搬进计算单元，算力大半空转（memory-bound）。块扩散把闲着的算力拿去一次处理整块，<strong>把 memory-bound 的解码推回 compute-bound</strong>——和"把 N+1 查询改成一条批量 SQL"同理：往返次数才是瓶颈。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">512 token 的 NFE 账本（单次前向按 10ms 估）</span><br/><br/>
+纯自回归　　<span class="bar" style="width:260px;height:18px;background:linear-gradient(180deg,#ff6b6b,#ffb450)"></span> 512 次 ≈ 5.1s<br/>
+块扩散(256块/32步)　<span class="bar" style="width:33px;height:18px"></span> 64 次 ≈ 0.6s<br/>
+纯扩散(全长/128步)　<span class="bar" style="width:65px;height:18px;background:linear-gradient(180deg,#7b61ff,#a48cff)"></span> 128 次，但无 KV cache 且定长<br/><br/>
+<span class="box">块1 扩散</span><span class="arrow">→定稿→</span><span class="box g">KV 缓存</span><span class="arrow">→</span><span class="box">块2 扩散</span><span class="arrow">→定稿→</span><span class="box g">KV 缓存</span><span class="arrow">→</span><span class="box p">…</span><br/>
+<span style="color:#5a6378;font-size:0.78rem">块间自回归（可缓存·可变长）　块内扩散（可并行）</span><br/>
+<span style="color:#5a6378;font-size:0.78rem">这笔账是理想化的（8×）；真实只到约 4×，因为块扩散每次前向更贵</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> math
+
+<span class="kw">def</span> <span class="fn">nfe_ar</span>(n):                      <span class="cmt"># 自回归：一个 token 一次前向，无法并行</span>
+    <span class="kw">return</span> n
+
+<span class="kw">def</span> <span class="fn">nfe_block</span>(n, block=<span class="str">256</span>, steps=<span class="str">32</span>):   <span class="cmt"># 块间顺序、块内并行去噪</span>
+    <span class="kw">return</span> math.<span class="fn">ceil</span>(n / block) * steps
+
+N = <span class="str">512</span>
+<span class="kw">for</span> fwd_ms <span class="kw">in</span> (<span class="str">10</span>, <span class="str">14</span>):              <span class="cmt"># 单次前向耗时（MoE 稀疏激活后更小）</span>
+    a, d = <span class="fn">nfe_ar</span>(N), <span class="fn">nfe_block</span>(N)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"前向{fwd_ms}ms | AR {a}次={a*fwd_ms/1000:.2f}s | "</span>
+          <span class="fn">f</span><span class="str">"块扩散 {d}次={d*fwd_ms/1000:.2f}s | 加速{a/d:.1f}x"</span>)
+
+<span class="cmt"># 调 block/steps 看旋钮效果：block=1 就退化成自回归。</span>
+<span class="cmt"># 关键：块扩散每次前向算的是"整块 256 个位置"，FLOPs 并没少，</span>
+<span class="cmt"># 省掉的是 N-1 次"必须等上一个 token"的往返。算力换延迟。</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"快 4 倍就是便宜 4 倍"——不成立。降的是<b>延迟（步数）</b>，不是<b>算力（FLOPs）</b>：单请求变快，但每次前向都在算整块位置，GPU 做的功没少。成本账要落在吞吐和利用率上，不是单请求时延上。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：本地部署这类模型做"即时改写/补全"等人在等着的交互——延迟就是体验，<b>快 4× 比准 5% 更值</b>。反过来跑夜间批处理时优势几乎为零：那里你本来就能把 batch 堆满，GPU 早已 compute-bound。</div>
+<p style="margin-top:10px"><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.html" style="color:#7b61ff">工程对应 → super-individual D16 (Cost：稀疏激活与推理成本账)</a></p>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 延迟 ≈ NFE × 单次前向耗时；块扩散砍的是 NFE 不是 FLOPs，本质是用闲置算力换串行往返。<br/>🤔 你负责过的系统里，有多少次"性能优化"其实只是把 N+1 往返改成一次批量？这件事在模型解码上刚刚才被做掉。</div>
+</div>
+</div>
+<!-- 4 -->
+<div class="card">
+<h2>三方取舍：似然 · 可控性 · 延迟<span class="en">Likelihood / Controllability / Latency</span></h2>
+<div class="tags"><span class="tag">对比</span><span class="tag orange">诚实边界</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>自回归像<b>单主强一致写入</b>：顺序明确、可缓存、每步都看得见前面已提交的全部内容，代价是写入串行。扩散像<b>多主并发写</b>：吞吐高，但同一轮里各槽位<b>互相看不见对方这轮写了什么</b>，于是可能写出"每格单看都合理、合起来不一致"的组合。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>并行解码要付的根本税就藏在这个类比里：模型一次前向给出的是每个 mask 位置的<b>边缘分布</b> p(x<sub>i</sub> | x<sub>t</sub>)，而你一次定稿 k 个位置，等于悄悄假设<strong>这 k 个位置在当前上下文下条件独立</strong>。可语言里相邻位置强相关——"纽"和"约"各自单看都可能是别的字，一起看才只有一种读法。k 越大，这个假设离真实联合分布越远。<strong>所以"并行度 ↔ 质量"是一条真实存在的曲线，不是实现问题</strong>；靠置信度门限自适应控制 k，就是在这条曲线上找工作点。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">三个轴上的真实位置</span><br/><br/>
+<span style="color:#cfd3df">似然打分</span>　自回归 <span class="box g">精确链式分解</span>　扩散 <span class="box o">只有 ELBO 下界</span><br/>
+<span style="color:#cfd3df">双向可控</span>　自回归 <span class="box o">需专门训 FIM</span>　扩散 <span class="box g">填空是原生任务</span><br/>
+<span style="color:#cfd3df">解码延迟</span>　自回归 <span class="box r">NFE = token 数</span>　扩散 <span class="box g">NFE = 块数 × 步数</span><br/><br/>
+<span style="color:#8b92a8">厂商公布的同代对比（DiffusionGemma vs Gemma 4）</span><br/>
+MMLU Pro　77.6 <span style="color:#5a6378">vs</span> 82.6　　AIME 2026　69.1 <span style="color:#5a6378">vs</span> 88.3<br/>
+<span style="color:#ff8e8e;font-size:0.78rem">质量确实还有差距——这条路线目前买到的是延迟，不是能力</span>
+</div>
+<p style="margin-top:14px">逐轴说清楚。<b>似然</b>：自回归的链式分解 log p(x) = Σ log p(x<sub>i</sub>|x<sub>&lt;i</sub>) 是恒等式，给的是精确值，能直接用来打分、比困惑度、做重排序；扩散的顺序是随机的，只能给一个对顺序取期望的<b>下界</b>（ELBO），<b>两者的 perplexity 不可直接比大小</b>。<b>可控性</b>：扩散天生支持双向约束——给定开头和结尾填中间、固定格式槽位、从右往左补全，这些自回归要靠 fill-in-the-middle 专门训练才勉强做到；LLaDA 还报告它缓解了<b>反转诅咒（reversal curse，学了"A 是 B"却答不出"B 是 A"）</b>，那正是单向训练留下的伤。<b>延迟</b>：扩散赢，代价是定长画布和 KV cache 重建。</p>
+<p style="margin-top:8px">什么时候<b>不要</b>用，说实话：需要精确似然去打分或比模型时；追求长链推理的极限正确率时（上面那组数字还在差距里）；以及<b>需要逐 token 流式输出</b>时——块内 token 不按左到右定稿，"打字机效果"这个 UX 契约得重新设计。目前的主流判断不是替代，而是<b>互补并融合</b>：块扩散本身就是两极之间的插值，块大小就是那个滑块。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForMaskedLM
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-chinese"</span>)
+mdl = AutoModelForMaskedLM.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-chinese"</span>).<span class="fn">eval</span>()
+
+<span class="cmt"># 双向约束填空：前缀和后缀同时给定 —— 自回归看不见右边，天生做不到</span>
+M = tok.mask_token
+prompt = <span class="fn">f</span><span class="str">"缓存击穿的常见解法是 {M} {M} {M} {M} ，代价是写入延迟变高。"</span>
+ids = <span class="fn">tok</span>(prompt, return_tensors=<span class="str">"pt"</span>).input_ids
+slots = (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">nonzero</span>().<span class="fn">flatten</span>().<span class="fn">tolist</span>()
+
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(slots)):           <span class="cmt"># 一次只定稿 1 个 → 绕开条件独立假设</span>
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        p = <span class="fn">mdl</span>(input_ids=ids).logits.<span class="fn">softmax</span>(-<span class="str">1</span>)[<span class="str">0</span>]
+    left = [i <span class="kw">for</span> i <span class="kw">in</span> slots <span class="kw">if</span> ids[<span class="str">0</span>, i] == tok.mask_token_id]
+    <span class="kw">if</span> <span class="kw">not</span> left: <span class="kw">break</span>
+    best = <span class="fn">max</span>(left, key=<span class="kw">lambda</span> i: p[i].<span class="fn">max</span>().<span class="fn">item</span>())  <span class="cmt"># 最有把握的槽位先写</span>
+    ids[<span class="str">0</span>, best] = p[best].<span class="fn">argmax</span>()
+<span class="fn">print</span>(tok.<span class="fn">decode</span>(ids[<span class="str">0</span>], skip_special_tokens=<span class="kw">True</span>))
+<span class="cmt"># 把循环改成"一轮定稿全部 4 个"，就能亲眼看到条件独立的代价</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">"扩散语言模型会取代自回归"——目前没有证据支持。两条路线在<b>融合</b>：块扩散是显式插值，而《Flexibility Trap》给出的最佳配方干脆是"训练用自回归顺序、推理用并行解码"。更可能的未来不是替代，而是<b>块大小变成一个可调的部署参数</b>。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：需要"填进固定模板"的任务（周报槽位、结构化字段、代码骨架补中段）可以试掩码扩散模型，而不是硬凑 prompt 让自回归模型别越界——双向约束在这里是模型的原生能力，不是你要和它搏斗的东西。</div>
+<p style="margin-top:10px"><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.html" style="color:#7b61ff">工程对应 → super-individual D16 (Cost：延迟、吞吐与成本的三角)</a></p>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 并行解码的根本税是"同一步内条件独立"；扩散用似然精度和推理质量，换到了延迟和双向可控性。<br/>🤔 如果块大小是个可调参数，你会按什么信号在线调它——输入长度、任务类型，还是用户在不在等？</div>
+</div>
+</div>
+<!-- 资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>深入资源</h2>
+<div class="section">
+<ul>
+<li>Austin et al., <b>Structured Denoising Diffusion Models in Discrete State-Spaces</b> (D3PM), arXiv:2107.03006 — 离散扩散的奠基工作，吸收态变体是今天掩码扩散的源头</li>
+<li>Sahoo et al., <b>Simple and Effective Masked Diffusion Language Models</b> (MDLM), NeurIPS 2024, arXiv:2406.07524 — 把 ELBO 化简成加权 MLM 损失，是读懂训练目标的最短路径</li>
+<li>Nie et al., <b>Large Language Diffusion Models</b> (LLaDA), arXiv:2502.09992 — 掩码扩散首次推到 8B 并与同规模 LLaMA3 对标，含反转诅咒的讨论</li>
+<li>Arriola et al., <b>Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models</b> (BD3-LM), ICLR 2025 Oral, arXiv:2503.09573 — 块结构如何同时救回 KV cache 和可变长度</li>
+<li>Ni et al., <b>The Flexibility Trap: Rethinking the Value of Arbitrary Order in Diffusion Language Models</b>, ICML 2026 Outstanding Paper, arXiv:2601.15165 — 任意顺序为何伤推理，以及 JustGRPO 的修法</li>
+<li>Google DeepMind, <b>DiffusionGemma</b>（2026-06，Apache 2.0 开放权重）— 首个开放权重的文本扩散模型，官方模型卡与推理文档</li>
+</ul>
+</div>
+</div>
+<!-- 思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>深入思考</h2>
+<div class="section">
+<details><summary>如果 BERT 一直是个"只跑一步的扩散模型"，为什么 2018 年没人用它生成文本？</summary><div>缺的不是直觉，是三件具体的东西。一、训练目标：BERT 固定 mask 15%，而采样必须从"全 mask"起步，模型从没见过高 mask 比例的输入，第一步就崩——MDLM 的随机 t 加 1/t 加权正是补这个。二、理论形式：需要把多步去噪写成一个有 ELBO 的生成过程，否则你不知道每步该定稿多少、该选哪些位置，这要等 D3PM。三、工程动机：那几年自回归的质量优势压倒一切，解码延迟还不值得换掉整个范式——是长输出和 agent 时代才把延迟推成一等公民。</div></details>
+<details><summary>卡 2 的"灵活性陷阱"和卡 4 的"条件独立税"，是同一个问题吗？</summary><div>不是，它们在不同的轴上。条件独立税是<b>一步之内</b>的空间误差：同时定稿 k 个位置，用边缘分布近似联合分布，k 降到 1 就消失。灵活性陷阱是<b>跨步之间</b>的策略偏差：即便每步只定稿一个位置、完全没有独立性误差，"按置信度挑位置"这个顺序本身就会把高熵决策点系统性后置，从而剪掉分支。证据正是 JustGRPO——它没降低并行度，只换了探索顺序就拿到提升。两者可以独立缓解，也可以同时存在。</div></details>
+<details><summary>为什么"给不出精确似然"比"benchmark 低几分"更值得在意？</summary><div>因为精确似然是很多上层机制的地基，不只是一个指标。重排序（生成 n 条按 log p 选）、推测解码的接受判据、置信度校准与弃答、带评分的检索重排，都要一个可比的、精确的"这段文本有多可能"。换成 ELBO 下界，这些机制要么失效，要么引入一个你不知道多大的偏差——而下界的松紧本身随文本变化，同一个阈值在不同输入上含义就不同。benchmark 差几分能靠训练追；缺一个精确可比的概率量级，是范式层面的缺口。</div></details>
+<details><summary>"快 4× 但 FLOPs 没降"在什么条件下会从优势变成劣势？</summary><div>当 GPU 已经 compute-bound 的时候。自回归 batch=1 解码是典型 memory-bound，算力大半空转，这时"多算一些、少走几趟"是纯赚。但把 batch 堆到几十上百（离线批处理、高并发服务），权重搬运已被多请求摊薄，GPU 真在满负荷算，扩散多算的那些位置就变成真实成本，吞吐可能反而下降。推论是：最优块大小取决于当下负载，所以它更像一个<b>运行时参数</b>，而不是模型超参。</div></details>
+</div>
+</div>
+<footer>BigCat · AI &amp; ML · 2026 · Day 57</footer>
+</div>
+<script src="https://hub.cissychen.com/comments.js" defer></script>
+<script src="https://hub.cissychen.com/search.js" defer></script>
+<script src="https://hub.cissychen.com/index-button.js" defer></script>
+<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+</body>
+</html>

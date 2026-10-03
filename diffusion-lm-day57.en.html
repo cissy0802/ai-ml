@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML Explained: Diffusion Language Models — Day 57</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style></head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML Explained: Diffusion Language Models</h1>
+<div class="meta">Day 57 · 2026-10-03</div>
+<div class="audience">For: engineers with a coding background, non-AI specialty · Level: frontier</div>
+</header>
+<!-- 1 -->
+<div class="card">
+<h2>Masked Diffusion Language Model<span class="en">Masked Diffusion LM</span></h2>
+<div class="tags"><span class="tag">generation mechanism</span><span class="tag purple">non-autoregressive</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>An <b>autoregressive</b> model like GPT behaves like a cursor: <code>fetch</code> one row, then the next, where row i must wait for row i-1 to come back. <strong>Masked diffusion</strong> writes differently: first <code>INSERT</code> one fixed-length record with every field NULL, then run <b>several rounds of batch UPDATE</b>, each round filling in the few fields it is most confident about, until no NULLs remain. Text is not "written out" — it is <b>developed</b>, like a photograph, from a blank canvas.</p>
+</div>
+<div class="section">
+<div class="label">The problem it solves + how it works</div>
+<p>The pain point is a <b>hard wall of sequential dependency</b>: generating N tokens autoregressively requires N forward passes, because the input for token i contains token i-1. No amount of extra GPU compresses those N steps into 10 — latency is locked by <b>serial step count</b>, not by compute.</p>
+<p style="margin-top:8px">The diffusion idea comes from image generation, but text is discrete, so <b>adding Gaussian noise is meaningless</b> (nudging "cat" with noise does not produce "dog"). D3PM (Austin et al., 2021, arXiv:2107.03006) gave the usable discrete version: noise is not jitter but <strong>forgetting</strong> — the forward process replaces a fraction of real tokens with <code>[MASK]</code> according to noise level <b>t</b>, and <code>[MASK]</code> is an <b>absorbing state</b> (once in, never out); t=0 is the original text, t=1 is an all-mask canvas. The reverse process trains a Transformer with the <strong>causal mask removed</strong> — the most fundamental structural difference from GPT: it sees left and right simultaneously, and predicts the distribution at every <code>[MASK]</code> position in a single forward pass.</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">forward = forgetting (t: 0→1)&nbsp;&nbsp;reverse = developing (t: 1→0)</span><br/><br/>
+t=0.0&nbsp;&nbsp;<span class="box g">cache</span><span class="box g">stampede</span><span class="box g">is</span><span class="box g">fixed</span><span class="box g">by</span><span class="box g">locks</span>&nbsp;&nbsp;<span style="color:#5a6378">original</span><br/>
+t=0.4&nbsp;&nbsp;<span class="box g">cache</span><span class="box r">■</span><span class="box g">is</span><span class="box r">■</span><span class="box g">by</span><span class="box r">■</span>&nbsp;&nbsp;<span style="color:#5a6378">fraction t replaced by [MASK]</span><br/>
+t=1.0&nbsp;&nbsp;<span class="box r">■</span><span class="box r">■</span><span class="box r">■</span><span class="box r">■</span><span class="box r">■</span><span class="box r">■</span>&nbsp;&nbsp;<span style="color:#5a6378">all masked = pure noise</span><br/><br/>
+<span class="box p">bidirectional Transformer</span><span class="arrow">→</span><span class="box">one pass predicts <b>all</b> ■ distributions</span><span class="arrow">→</span><span class="box g">commit the top-k most confident</span>
+</div>
+<p style="margin-top:14px">The training objective is the surprising part. MDLM (Sahoo et al., NeurIPS 2024, arXiv:2406.07524) showed this diffusion ELBO simplifies to a <b>weighted masked-LM loss</b>:</p>
+<pre>L(θ) = E<sub>t~U(0,1]</sub> [ (1/t) · Σ<sub>i∈masked positions</sub> −log p<sub>θ</sub>(x<sub>i</sub> | x<sub>t</sub>) ]</pre>
+<p style="margin-top:8px">Term by term: <b>t</b> is the mask ratio sampled this step (i.e. the noise level); <b>x<sub>t</sub></b> is the sequence after removing a fraction t of tokens; the bracket is simply "predict the removed tokens" — <strong>exactly BERT's training task</strong>, except the mask ratio is drawn at random per example instead of being fixed at 15%. That <b>1/t</b> weight is the key: when t is small only a few tokens are removed, nearly all context is present, the example is too easy and the signal too sparse, so <b>1/t</b> amplifies it and levels out each noise level's contribution to the total loss — otherwise the model only gets good at the barely-masked regime, while sampling starts precisely at t=1. In other words: <strong>training a diffusion language model is training a BERT that tolerates any mask ratio</strong>. LLaDA (Nie et al., arXiv:2502.09992) took this route to 8B and reached in-context-learning performance comparable to a same-size LLaMA3.</p>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForMaskedLM
+
+name = <span class="str">"bert-base-uncased"</span>          <span class="cmt"># any masked LM works as a one-step denoiser</span>
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(name)
+mdl = AutoModelForMaskedLM.<span class="fn">from_pretrained</span>(name).<span class="fn">eval</span>()
+
+L, STEPS = <span class="str">16</span>, <span class="str">8</span>                    <span class="cmt"># canvas of 16, only 8 steps (AR would need 16)</span>
+ids = torch.<span class="fn">full</span>((<span class="str">1</span>, L), tok.mask_token_id)   <span class="cmt"># t=1: canvas all [MASK]</span>
+ids[<span class="str">0</span>, <span class="str">0</span>], ids[<span class="str">0</span>, -<span class="str">1</span>] = tok.cls_token_id, tok.sep_token_id
+
+<span class="kw">for</span> s <span class="kw">in</span> <span class="fn">range</span>(STEPS):
+    masked = (ids == tok.mask_token_id)
+    <span class="kw">if</span> <span class="kw">not</span> masked.<span class="fn">any</span>(): <span class="kw">break</span>
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        logits = <span class="fn">mdl</span>(input_ids=ids).logits       <span class="cmt"># bidirectional: all slots at once</span>
+    prob, pred = logits.<span class="fn">softmax</span>(-<span class="str">1</span>).<span class="fn">max</span>(-<span class="str">1</span>)      <span class="cmt"># best token + confidence per slot</span>
+    prob[~masked] = -<span class="str">1</span>                           <span class="cmt"># committed slots stay (absorbing)</span>
+    k = <span class="fn">max</span>(<span class="str">1</span>, <span class="fn">int</span>(masked.<span class="fn">sum</span>()) // (STEPS - s))  <span class="cmt"># spread remaining masks over steps</span>
+    <span class="kw">for</span> i <span class="kw">in</span> prob[<span class="str">0</span>].<span class="fn">topk</span>(k).indices:            <span class="cmt"># commit the k most confident</span>
+        ids[<span class="str">0</span>, i] = pred[<span class="str">0</span>, i]
+    <span class="fn">print</span>(s, tok.<span class="fn">decode</span>(ids[<span class="str">0</span>]))                 <span class="cmt"># watch text develop out of noise</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">"A diffusion language model is just image diffusion's Gaussian noise applied to text" — wrong. In mainstream discrete diffusion the "noise" is <b>replacing a token with [MASK]</b>: forgetting, not jitter. Its lineage runs closer to BERT than to Stable Diffusion: <b>BERT was always a one-step diffusion model; nobody used it that way</b>.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: run a small model locally that genuinely <b>fills in blanks bidirectionally</b> — give it a function signature and a return statement, let it write the middle. Autoregressive models are inherently bad at this (they cannot see the right-hand side), while masked diffusion's training task <i>is</i> filling blanks.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + question</div>
+<div class="takeaway">💡 Discrete diffusion swaps "write one at a time" for "converge over a whole canvas in rounds": noise = mask, training = BERT at any ratio.<br/>🤔 If generation no longer has an order, does the "stream tokens as they come" UX contract you rely on still hold?</div>
+</div>
+</div>
+<!-- 2 -->
+<div class="card">
+<h2>Any-Order Generation and the Flexibility Trap<span class="en">The Flexibility Trap</span></h2>
+<div class="tags"><span class="tag">sampling mechanism</span><span class="tag orange">counterintuitive</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Autoregression is task scheduling under a <b>fixed topological order</b>: the order is hard-coded, you get no choice. Diffusion is a scheduler that <b>may pick any task</b>: whichever slot it is most confident about goes first. That sounds like a win for the scheduler — but every real scheduler has this flaw: <strong>it keeps picking the easy tasks and pushes the critical-path node to the very end</strong>. By the time you get to that node, everything around it is already committed and its option space has been squeezed shut.</p>
+</div>
+<div class="section">
+<div class="label">The problem it solves + how it works</div>
+<p>The masked-diffusion ELBO is in fact an expectation <b>over all generation orders</b> — what it learns is an <b>any-order</b> model, of which autoregression is one fixed-order special case. The standard sampling strategy is <strong>confidence-based unmasking</strong>: each round, commit the few slots with the lowest predictive entropy, i.e. the ones the model is surest about. The intuition is appealing: settle what can be settled, and let it serve as context for the rest.</p>
+<p style="margin-top:8px">The ICML 2026 Outstanding Paper <i>The Flexibility Trap</i> (Ni et al., arXiv:2601.15165) identifies a structural flaw here. In reasoning tasks, <strong>the real decision points are precisely the high-entropy tokens</strong> — "therefore", "since", "let x =". Their entropy is high exactly because <b>several legitimate reasoning branches hang off them</b>. Confidence-first decoding systematically routes around them, filling in the unambiguous surrounding words first; by the time it comes back, the left and right context have pinned the position down, and of those several branches only one still reads coherently.</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">how confidence-first decoding routes around the decision point</span><br/><br/>
+round 1&nbsp;&nbsp;<span class="box r">■</span><span class="box r">■</span><span class="box o">■ high entropy</span><span class="box r">■</span><span class="box r">■</span>&nbsp;&nbsp;<span style="color:#5a6378">→ fill the surest ends first</span><br/>
+round 2&nbsp;&nbsp;<span class="box g">Amy</span><span class="box r">■</span><span class="box o">■ high entropy</span><span class="box r">■</span><span class="box g">has 8</span>&nbsp;&nbsp;<span style="color:#5a6378">→ keep filling the certain ones</span><br/>
+round 3&nbsp;&nbsp;<span class="box g">Amy</span><span class="box g">had 3+5</span><span class="box o">■ high entropy</span><span class="box g">in total</span><span class="box g">has 8</span>&nbsp;&nbsp;<span style="color:#5a6378">→ decision point filled last</span><br/>
+round 4&nbsp;&nbsp;<span class="box g">Amy</span><span class="box g">had 3+5</span><span class="box p">so</span><span class="box g">in total</span><span class="box g">has 8</span>&nbsp;&nbsp;<span style="color:#5a6378">→ only one path left</span><br/><br/>
+<span style="color:#ff8e8e">consequence: branches are pruned by context before they are ever considered → solution diversity collapses → RL cannot explore better reasoning traces</span>
+</div>
+<p style="margin-top:14px">The authors' fix is elegantly small: during RL, <b>force left-to-right exploration order</b> (autoregressive order as a training scaffold), while inference keeps full bidirectional attention and parallel decoding. This JustGRPO recipe reaches 89.1% on GSM8K and 45.1% on MATH-500 (generation length 256). The conclusion is counterintuitive but clean: <strong>a larger hypothesis space plus a greedy order-selector can be worse than a smaller hypothesis space</strong>.</p>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForMaskedLM
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-uncased"</span>)
+mdl = AutoModelForMaskedLM.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-uncased"</span>).<span class="fn">eval</span>()
+
+M = tok.mask_token
+<span class="cmt"># the middle slots are where a connective like "therefore" belongs</span>
+text = <span class="fn">f</span><span class="str">"Amy had 3 apples and bought 5 more , {M} {M} she has 8 in total ."</span>
+ids = <span class="fn">tok</span>(text, return_tensors=<span class="str">"pt"</span>).input_ids
+<span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+    p = <span class="fn">mdl</span>(input_ids=ids).logits.<span class="fn">softmax</span>(-<span class="str">1</span>)
+
+ent = -(p * p.<span class="fn">clamp_min</span>(<span class="str">1e-9</span>).<span class="fn">log</span>()).<span class="fn">sum</span>(-<span class="str">1</span>)[<span class="str">0</span>]   <span class="cmt"># predictive entropy per slot</span>
+<span class="kw">for</span> i <span class="kw">in</span> (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">nonzero</span>().<span class="fn">flatten</span>():
+    top3 = tok.<span class="fn">convert_ids_to_tokens</span>(p[<span class="str">0</span>, i].<span class="fn">topk</span>(<span class="str">3</span>).indices)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"slot {i.item()} entropy={ent[i]:.2f} candidates={top3}"</span>)
+<span class="cmt"># high-entropy slots = decision points with several valid branches;</span>
+<span class="cmt"># confidence-first decoding schedules them last — that is the flexibility trap</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">"Any order can never be worse than a fixed order, since autoregression is a special case" — this conflates <b>expressive power</b> with <b>optimizability</b>. A model-class inclusion only says "some parameter setting can do it"; it does not promise training and sampling will find it. Same family of phenomena as the countless times you have seen a more general framework run slower.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: the trap is not exclusive to diffusion models. When you ask an AI agent to decompose a complex task, it also tends to do the "most confident" subtasks first and push the genuinely ambiguous core decisions (which approach, which definition) to the end; by the time it faces them, its earlier output has already pinned the answer. The countermeasure is JustGRPO's: <b>impose the order yourself</b> — force the most ambiguous step to be settled first.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + question</div>
+<div class="takeaway">💡 Confidence-first decoding routes around high-entropy decision points, and by the time it returns, context has pruned the branches — flexibility becomes a constraint.<br/>🤔 Which "do the easy part first" habit in your own workflow is quietly cutting off your options?</div>
+</div>
+</div>
+<!-- 3 -->
+<div class="card">
+<h2>Block Diffusion<span class="en">Block-Parallel Denoising</span></h2>
+<div class="tags"><span class="tag">architecture</span><span class="tag purple">latency</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Autoregressive decoding is the textbook <b>N+1 query problem</b>: 512 tokens means 512 serial requests, each paying a full round trip. Pure diffusion is the other extreme: fire the whole batch at once, but retry for many rounds, and <b>recompute the entire batch every round</b>. Block diffusion is the middle answer every DBA would give you — <strong>paged batching</strong>: one page of 256 at a time, parallel within a page, sequential across pages.</p>
+</div>
+<div class="section">
+<div class="label">The problem it solves + how it works</div>
+<p>Pure masked diffusion has two hard problems, neither mathematical but both engineering. <b>One, fixed length</b>: you must allocate a canvas of fixed length, yet a real request's output length is not known in advance. <b>Two, dead KV cache</b>: bidirectional attention means every token depends on every other, so last round's keys/values are all invalid this round — autoregression's single biggest time-saver is gone.</p>
+<p style="margin-top:8px">Block Diffusion (Arriola et al., ICLR 2025, arXiv:2503.09573) solves both: cut the sequence into blocks, make it <strong>autoregressive across blocks</strong> (earlier blocks are committed, so they cache, and you can generate as many blocks as you like) and <strong>diffusion inside a block</strong> (parallel denoising). Block size becomes a continuous dial: block=1 degenerates to pure autoregression, block=full length to pure diffusion.</p>
+<p style="margin-top:8px">DiffusionGemma (Google DeepMind, 2026-06, open weights under Apache 2.0) follows exactly this route: a 26B-class MoE on the Gemma 4 architecture with only about 4B parameters active per step, denoising blocks of 256 tokens in parallel. The vendor's stated figures: decoding roughly 4× faster than Gemma 4, and over 1,000 tokens/s on a single H100.</p>
+<p style="margin-top:8px">Where does the speed actually come from? The one line worth remembering: <strong>latency ≈ NFE (number of forward passes) × time per forward pass</strong>. Autoregression's NFE equals the token count and not one step can be skipped. Block diffusion's NFE = number of blocks × denoising steps per block, and steps per block is <b>far smaller</b> than block length (256 positions might take only thirty or forty steps). Note it <b>does not reduce FLOPs</b> — each forward pass computes the whole 256-position block, so total compute does not drop and may even rise slightly. What is saved are the N−1 round trips of "must wait for the previous token".</p>
+<p style="margin-top:8px">Why is that trade worth it? Because during autoregressive decoding the GPU is actually <b>waiting on memory</b>: at batch=1, every single token requires moving all weights from VRAM into the compute units, leaving most of the arithmetic idle (memory-bound). Block diffusion spends that idle arithmetic processing a whole block at once, <strong>pushing memory-bound decoding back toward compute-bound</strong> — the same logic as rewriting an N+1 query as one batched SQL statement: round trips are the bottleneck, not arithmetic per query.</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">NFE ledger for 512 tokens (10ms per forward pass)</span><br/><br/>
+pure autoregressive&nbsp;&nbsp;<span class="bar" style="width:260px;height:18px;background:linear-gradient(180deg,#ff6b6b,#ffb450)"></span> 512 passes ≈ 5.1s<br/>
+block diffusion (256/32 steps)&nbsp;&nbsp;<span class="bar" style="width:33px;height:18px"></span> 64 passes ≈ 0.6s<br/>
+pure diffusion (full length/128)&nbsp;&nbsp;<span class="bar" style="width:65px;height:18px;background:linear-gradient(180deg,#7b61ff,#a48cff)"></span> 128 passes, but no KV cache and fixed length<br/><br/>
+<span class="box">block 1 diffusion</span><span class="arrow">→commit→</span><span class="box g">KV cache</span><span class="arrow">→</span><span class="box">block 2 diffusion</span><span class="arrow">→commit→</span><span class="box g">KV cache</span><span class="arrow">→</span><span class="box p">…</span><br/>
+<span style="color:#5a6378;font-size:0.78rem">autoregressive across blocks (cacheable, variable length)&nbsp;&nbsp;diffusion within a block (parallel)</span><br/>
+<span style="color:#5a6378;font-size:0.78rem">this ledger is idealized (8×); reality lands near 4×, because each block pass costs more</span>
+</div>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> math
+
+<span class="kw">def</span> <span class="fn">nfe_ar</span>(n):                      <span class="cmt"># autoregressive: one pass per token, no parallelism</span>
+    <span class="kw">return</span> n
+
+<span class="kw">def</span> <span class="fn">nfe_block</span>(n, block=<span class="str">256</span>, steps=<span class="str">32</span>):   <span class="cmt"># sequential blocks, parallel inside</span>
+    <span class="kw">return</span> math.<span class="fn">ceil</span>(n / block) * steps
+
+N = <span class="str">512</span>
+<span class="kw">for</span> fwd_ms <span class="kw">in</span> (<span class="str">10</span>, <span class="str">14</span>):              <span class="cmt"># time per forward (smaller with sparse MoE)</span>
+    a, d = <span class="fn">nfe_ar</span>(N), <span class="fn">nfe_block</span>(N)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"fwd {fwd_ms}ms | AR {a} passes={a*fwd_ms/1000:.2f}s | "</span>
+          <span class="fn">f</span><span class="str">"block diff {d} passes={d*fwd_ms/1000:.2f}s | speedup {a/d:.1f}x"</span>)
+
+<span class="cmt"># turn the block/steps dials: block=1 degenerates to autoregression.</span>
+<span class="cmt"># Key point: each block-diffusion pass computes the whole 256-position block,</span>
+<span class="cmt"># so FLOPs do not drop. What is saved are N-1 "wait for the previous token"</span>
+<span class="cmt"># round trips. Arithmetic traded for latency.</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">"4× faster means 4× cheaper" — it does not hold. What drops is <b>latency (step count)</b>, not <b>arithmetic (FLOPs)</b>: a single request gets faster, but every pass still computes a whole block, so the GPU does no less work. The cost argument lands on throughput and utilization, not single-request latency.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: deploy this kind of model locally for interactions where a human is waiting — instant rewrite, instant completion. There latency <i>is</i> the experience, and <b>4× faster beats 5% more accurate</b>. Conversely, for an overnight batch job the advantage is near zero: there you can already fill the batch, and the GPU is long since compute-bound.</div>
+<p style="margin-top:10px"><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.html" style="color:#7b61ff">Engineering counterpart → super-individual D16 (Cost: sparse activation and the inference cost model)</a></p>
+</div>
+<div class="section">
+<div class="label">Takeaway + question</div>
+<div class="takeaway">💡 Latency ≈ NFE × time per pass; block diffusion cuts NFE, not FLOPs — it trades idle arithmetic for serial round trips.<br/>🤔 How many of the "performance optimizations" you have shipped were just turning N+1 round trips into one batch? That move has only now reached model decoding.</div>
+</div>
+</div>
+<!-- 4 -->
+<div class="card">
+<h2>Three-Way Trade-off: Likelihood, Controllability, Latency<span class="en">AR vs Diffusion</span></h2>
+<div class="tags"><span class="tag">comparison</span><span class="tag orange">honest limits</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Autoregression is like <b>single-leader strongly consistent writes</b>: clear order, cacheable, every step sees everything already committed before it — at the price of serial writes. Diffusion is like <b>multi-leader concurrent writes</b>: high throughput, but within one round the slots <b>cannot see what the others are writing this round</b>, so you can get a combination where every field looks fine alone and the whole is inconsistent.</p>
+</div>
+<div class="section">
+<div class="label">The problem it solves + how it works</div>
+<p>The fundamental tax on parallel decoding hides in that analogy: one forward pass gives you the <b>marginal</b> distribution p(x<sub>i</sub> | x<sub>t</sub>) at each masked position, so committing k positions at once quietly assumes <strong>those k positions are conditionally independent given the current context</strong>. But adjacent positions in language are strongly correlated — "New" and "York" could each be something else alone; only together is there one reading. The larger k, the further this assumption sits from the true joint. <strong>So "parallelism ↔ quality" is a real curve, not an implementation problem</strong>; adaptively controlling k with a confidence threshold is just picking an operating point on that curve.</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">where each axis actually stands</span><br/><br/>
+<span style="color:#cfd3df">likelihood</span>&nbsp;&nbsp;AR <span class="box g">exact chain rule</span>&nbsp;&nbsp;diffusion <span class="box o">ELBO lower bound only</span><br/>
+<span style="color:#cfd3df">bidirectional control</span>&nbsp;&nbsp;AR <span class="box o">needs special FIM training</span>&nbsp;&nbsp;diffusion <span class="box g">infilling is native</span><br/>
+<span style="color:#cfd3df">decoding latency</span>&nbsp;&nbsp;AR <span class="box r">NFE = token count</span>&nbsp;&nbsp;diffusion <span class="box g">NFE = blocks × steps</span><br/><br/>
+<span style="color:#8b92a8">vendor-published same-generation comparison (DiffusionGemma vs Gemma 4)</span><br/>
+MMLU Pro&nbsp;&nbsp;77.6 <span style="color:#5a6378">vs</span> 82.6&nbsp;&nbsp;&nbsp;&nbsp;AIME 2026&nbsp;&nbsp;69.1 <span style="color:#5a6378">vs</span> 88.3<br/>
+<span style="color:#ff8e8e;font-size:0.78rem">the quality gap is real — what this route buys today is latency, not capability</span>
+</div>
+<p style="margin-top:14px">Axis by axis. <b>Likelihood</b>: autoregression's chain-rule factorization log p(x) = Σ log p(x<sub>i</sub>|x<sub>&lt;i</sub>) is an identity, so it yields an exact value you can use for scoring, perplexity comparison and reranking; diffusion's order is random, so it only gives an expectation-over-orders <b>lower bound</b> (the ELBO), and <b>the two perplexities cannot be compared directly</b>. <b>Controllability</b>: diffusion natively supports bidirectional constraints — fill the middle given both ends, fixed-format slots, right-to-left completion — which autoregression manages only awkwardly via fill-in-the-middle training; LLaDA also reports it mitigates the <b>reversal curse</b> (learning "A is B" yet failing at "B is A"), exactly the injury one-directional training leaves behind. <b>Latency</b>: diffusion wins, at the cost of the fixed-length canvas and rebuilding the KV cache.</p>
+<p style="margin-top:8px">When <b>not</b> to use it, honestly: when you need an exact likelihood for scoring or model comparison; when you want peak accuracy on long reasoning chains (the numbers above are still a gap); and when you need <b>token-by-token streaming</b> — tokens inside a block are not committed left to right, so the "typewriter effect" UX contract must be redesigned. The mainstream judgment today is not replacement but <b>complementarity and convergence</b>: block diffusion is itself an interpolation between the two poles, and block size is the slider.</p>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForMaskedLM
+tok = AutoTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-uncased"</span>)
+mdl = AutoModelForMaskedLM.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-uncased"</span>).<span class="fn">eval</span>()
+
+<span class="cmt"># bidirectional infilling: prefix AND suffix given — AR cannot see the right side</span>
+M = tok.mask_token
+prompt = <span class="fn">f</span><span class="str">"Cache stampede is usually fixed with {M} {M} , at the cost of write latency ."</span>
+ids = <span class="fn">tok</span>(prompt, return_tensors=<span class="str">"pt"</span>).input_ids
+slots = (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">nonzero</span>().<span class="fn">flatten</span>().<span class="fn">tolist</span>()
+
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(slots)):           <span class="cmt"># commit one at a time → dodge the independence assumption</span>
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        p = <span class="fn">mdl</span>(input_ids=ids).logits.<span class="fn">softmax</span>(-<span class="str">1</span>)[<span class="str">0</span>]
+    left = [i <span class="kw">for</span> i <span class="kw">in</span> slots <span class="kw">if</span> ids[<span class="str">0</span>, i] == tok.mask_token_id]
+    <span class="kw">if</span> <span class="kw">not</span> left: <span class="kw">break</span>
+    best = <span class="fn">max</span>(left, key=<span class="kw">lambda</span> i: p[i].<span class="fn">max</span>().<span class="fn">item</span>())  <span class="cmt"># surest slot goes first</span>
+    ids[<span class="str">0</span>, best] = p[best].<span class="fn">argmax</span>()
+<span class="fn">print</span>(tok.<span class="fn">decode</span>(ids[<span class="str">0</span>], skip_special_tokens=<span class="kw">True</span>))
+<span class="cmt"># switch the loop to commit all slots in one round to see the cost of independence</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">"Diffusion language models will replace autoregression" — no evidence supports that today. The two routes are <b>converging</b>: block diffusion is an explicit interpolation, and <i>The Flexibility Trap</i>'s best recipe is literally "autoregressive order for training, parallel decoding for inference". The likelier future is not replacement but <b>block size becoming a tunable deployment parameter</b>.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: for tasks that mean "fill into a fixed template" (weekly-report slots, structured fields, the middle of a code skeleton), try a masked diffusion model instead of contorting a prompt to stop an autoregressive model from overrunning — bidirectional constraint is a native capability here, not something you have to wrestle out of the model.</div>
+<p style="margin-top:10px"><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.html" style="color:#7b61ff">Engineering counterpart → super-individual D16 (Cost: the latency / throughput / cost triangle)</a></p>
+</div>
+<div class="section">
+<div class="label">Takeaway + question</div>
+<div class="takeaway">💡 The fundamental tax on parallel decoding is "conditional independence within a step"; diffusion trades likelihood precision and reasoning quality for latency and bidirectional control.<br/>🤔 If block size were a tunable parameter, what signal would you tune it on at runtime — input length, task type, or whether a human is waiting?</div>
+</div>
+</div>
+<!-- resources -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>Further Reading<span class="en">Further Reading</span></h2>
+<div class="section">
+<ul>
+<li>Austin et al., <b>Structured Denoising Diffusion Models in Discrete State-Spaces</b> (D3PM), arXiv:2107.03006 — the founding work on discrete diffusion; its absorbing-state variant is the origin of today's masked diffusion</li>
+<li>Sahoo et al., <b>Simple and Effective Masked Diffusion Language Models</b> (MDLM), NeurIPS 2024, arXiv:2406.07524 — reduces the ELBO to a weighted MLM loss; the shortest path to understanding the training objective</li>
+<li>Nie et al., <b>Large Language Diffusion Models</b> (LLaDA), arXiv:2502.09992 — masked diffusion scaled to 8B and benchmarked against same-size LLaMA3, with a discussion of the reversal curse</li>
+<li>Arriola et al., <b>Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models</b> (BD3-LM), ICLR 2025 Oral, arXiv:2503.09573 — how block structure recovers both the KV cache and variable length</li>
+<li>Ni et al., <b>The Flexibility Trap: Rethinking the Value of Arbitrary Order in Diffusion Language Models</b>, ICML 2026 Outstanding Paper, arXiv:2601.15165 — why arbitrary order hurts reasoning, and the JustGRPO fix</li>
+<li>Google DeepMind, <b>DiffusionGemma</b> (2026-06, Apache 2.0 open weights) — the first open-weight text diffusion model; official model card and inference docs</li>
+</ul>
+</div>
+</div>
+<!-- deep questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>Deep Questions<span class="en">Deep Questions</span></h2>
+<div class="section">
+<details><summary>If BERT was always a "one-step diffusion model", why did nobody generate text with it in 2018?</summary><div>What was missing was not the intuition but three concrete things. One, the training objective: BERT fixes mask at 15%, while sampling must start from an all-mask canvas — the model never saw high mask ratios and collapses on step one; MDLM's random t plus 1/t weighting is precisely the fix. Two, the theoretical form: you need multi-step denoising written as a generative process with an ELBO, or you do not know how many slots to commit per step or which positions to pick — that waited for D3PM. Three, the engineering motive: autoregressive quality dominated everything back then, and decoding latency was not yet worth swapping out a whole paradigm — long outputs and the agent era promoted latency to a first-class concern.</div></details>
+<details><summary>Are card 2's "flexibility trap" and card 4's "independence tax" the same problem?</summary><div>No, they live on different axes. The independence tax is a spatial error <b>within one step</b>: committing k positions at once approximates the joint with marginals, and it vanishes as k drops to 1. The flexibility trap is a policy bias <b>across steps</b>: even committing exactly one position per step, with zero independence error, the "pick by confidence" ordering systematically defers high-entropy decision points and thereby prunes branches. JustGRPO is the evidence — it did not reduce parallelism, it only changed exploration order, and that alone bought the gain. The two can be mitigated independently and can coexist.</div></details>
+<details><summary>Why does "no exact likelihood" matter more than "a few points lower on benchmarks"?</summary><div>Because an exact likelihood is the foundation of many higher-level mechanisms, not just one metric. Reranking (generate n, pick by log p), the acceptance criterion in speculative decoding, confidence calibration and abstention, scored retrieval reranking — all need a comparable, exact "how likely is this text". Swap in an ELBO lower bound and those mechanisms either break or acquire a bias of unknown size — and the tightness of the bound itself varies with the text, so one threshold means different things on different inputs. A few benchmark points can be chased with more training; the absence of an exact, comparable probability is a paradigm-level gap.</div></details>
+<details><summary>Under what conditions does "4× faster but no FLOP savings" turn from advantage into drawback?</summary><div>When the GPU is already compute-bound. Autoregressive batch=1 decoding is classically memory-bound, with most arithmetic idle, so "compute more, travel less" is free money. But push the batch into the dozens or hundreds (offline batch jobs, high-concurrency serving) and weight movement is already amortized across requests, the GPU really is saturated, and the extra positions diffusion computes become real cost — throughput may actually fall. The corollary: the optimal block size depends on current load, which makes it look more like a <b>runtime parameter</b> than a model hyperparameter.</div></details>
+</div>
+</div>
+<footer>BigCat · AI &amp; ML · Day 57 · 2026-10-03</footer>
+</div>
+<script src="https://hub.cissychen.com/comments.js" defer></script>
+<script src="https://hub.cissychen.com/search.js" defer></script>
+<script src="https://hub.cissychen.com/index-button.js" defer></script>
+<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+</body>
+</html>
