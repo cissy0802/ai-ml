@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"/>
@@ -61,7 +62,7 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 <body>
 <div class="container">
 <header>
-<h1>AI/ML 详解：可言说表示与全局工作空间</h1>
+<h1 data-tts="793decc7a8ce5f7b">AI/ML 详解：可言说表示与全局工作空间</h1>
 <div class="meta">Day 58 · 2026-10-04</div>
 <div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：前沿</div>
 </header>
@@ -69,7 +70,7 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 <p style="color:#cfd3df">本期是 <a href="interpretability-day27.html">Day 27 可解释性</a> 的续篇：SAE 问「这里<b>编码</b>了什么」，本期的 J-lens 问「这里<b>准备说</b>什么」。与 <a href="cot-monitoring-day55.html">Day 55 CoT 监控</a> 互为一组——一个读写出来的推理，一个读没写出来的推理。</p>
 </div>
 <!-- 1 -->
-<div class="card">
+<div class="card" data-tts="c613336b95e30e52">
 <h2>雅可比透镜<span class="en">Jacobian Lens (J-lens)</span></h2>
 <div class="tags"><span class="tag">读出工具</span><span class="tag purple">线性化</span></div>
 <div class="section">
@@ -127,7 +128,7 @@ h = <span class="fn">hidden</span>(<span class="str">"The capital of France is"<
 </div>
 </div>
 <!-- 2 -->
-<div class="card">
+<div class="card" data-tts="5476b02b07c03164">
 <h2>J-space：低维的可言说子空间<span class="en">J-space</span></h2>
 <div class="tags"><span class="tag">表示几何</span><span class="tag purple">容量瓶颈</span></div>
 <div class="section">
@@ -175,7 +176,7 @@ top_pc = np.linalg.<span class="fn">svd</span>(acts - acts.<span class="fn">mean
 </div>
 </div>
 <!-- 3 -->
-<div class="card">
+<div class="card" data-tts="9119915255037c77">
 <h2>能说出口的，正是沉默推理所用的<span class="en">Verbalizable = Used</span></h2>
 <div class="tags"><span class="tag">因果干预</span><span class="tag orange">核心命题</span></div>
 <div class="section">
@@ -223,7 +224,7 @@ flips_J = flips_R = 0
 </div>
 </div>
 <!-- 4 -->
-<div class="card">
+<div class="card" data-tts="0c4cd8b5ca126a7a">
 <h2>与全局工作空间理论的对照<span class="en">Global Workspace Theory</span></h2>
 <div class="tags"><span class="tag">意识科学</span><span class="tag purple">跨学科</span><span class="tag orange">争议</span></div>
 <div class="section">
@@ -251,7 +252,7 @@ flips_J = flips_R = 0
     top = np.<span class="fn">argsort</span>(s)[-k:]                 <span class="cmt"># 容量限制：只有前 k 个参与竞争</span>
     out = np.<span class="fn">zeros_like</span>(s)
     act = 1 / (1 + np.<span class="fn">exp</span>(-gain * (s[top] - theta)))  <span class="cmt"># 陡峭 S 形 ≈ 阈值</span>
-    out[top] = np.<span class="fn">where</span>(act > 0.5, 1.0, 0.0)    <span class="cmt"># 越过阈值→整体广播，否则沉默</span>
+    out[top] = np.<span class="fn">where</span>(act &gt; 0.5, 1.0, 0.0)    <span class="cmt"># 越过阈值→整体广播，否则沉默</span>
     <span class="kw">return</span> out
 s = np.<span class="fn">array</span>([0.2, 0.55, 0.65, 0.9, 0.1, 0.58])  <span class="cmt"># 6 个候选概念的激活强度</span>
 <span class="fn">print</span>(<span class="str">"线性:"</span>, linear_access(s).<span class="fn">round</span>(2))
@@ -268,7 +269,7 @@ s = np.<span class="fn">array</span>([0.2, 0.55, 0.65, 0.9, 0.1, 0.58])  <span c
 </div>
 </div>
 <!-- 资源 -->
-<div class="card" style="border-left-color:#7b61ff">
+<div class="card" data-tts="c45ffa1eff361cec" style="border-left-color:#7b61ff">
 <h2>深入资源</h2>
 <div class="section">
 <ul>
@@ -281,7 +282,7 @@ s = np.<span class="fn">array</span>([0.2, 0.55, 0.65, 0.9, 0.1, 0.58])  <span c
 </div>
 </div>
 <!-- 思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
+<div class="card think" data-tts="b375cd491e0040d8" style="border-left-color:#7ed6a0">
 <h2>深入思考</h2>
 <details><summary>J-lens 和 SAE 都声称在读「模型在想什么」，它们会给出矛盾的答案吗？</summary><div>会，而且矛盾本身有信息量。SAE 从激活<b>重构</b>出发，问「这里存了哪些可分离的特征」，它会找到大量模型从不说出口的特征（语法、位置、风格）。J-lens 从<b>输出影响</b>出发，只看「会推向哪些词」。一个特征在 SAE 里很显著、J-lens 却读不到，说明它是本地计算状态；反过来 J-lens 读到、SAE 没有单独对应的特征，说明可言说概念可能是多个特征的组合。两者像数据库里「表里有什么」和「查询会返回什么」的区别。</div></details>
 <details><summary>「方差小却决定行为」对 AI 安全意味着什么？</summary><div>很多监控与压缩方法默认高方差方向最重要——PCA 降维、按激活幅度剪枝、按范数筛选特征。如果关键的、可言说的推理恰好住在低方差子空间，这些方法会<b>系统性地漏掉</b>最该看的东西。反过来，这也是好消息：要监控的空间维度小、容量有限，原则上比监控整个残差流更可行。安全设计需要按「对输出的因果影响」而不是「数值大小」来分配注意力。</div></details>
@@ -290,9 +291,9 @@ s = np.<span class="fn">array</span>([0.2, 0.55, 0.65, 0.9, 0.1, 0.58])  <span c
 </div>
 <footer>BigCat · AI &amp; ML · 2026 · Day 58</footer>
 </div>
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>
