@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML 详解：可言说表示与全局工作空间 — Day 58</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML 详解：可言说表示与全局工作空间</h1>
+<div class="meta">Day 58 · 2026-10-04</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：前沿</div>
+</header>
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+<p style="color:#cfd3df">本期是 <a href="interpretability-day27.html">Day 27 可解释性</a> 的续篇：SAE 问「这里<b>编码</b>了什么」，本期的 J-lens 问「这里<b>准备说</b>什么」。与 <a href="cot-monitoring-day55.html">Day 55 CoT 监控</a> 互为一组——一个读写出来的推理，一个读没写出来的推理。</p>
+</div>
+<!-- 1 -->
+<div class="card">
+<h2>雅可比透镜<span class="en">Jacobian Lens (J-lens)</span></h2>
+<div class="tags"><span class="tag">读出工具</span><span class="tag purple">线性化</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>中间层的激活像一张<b>旧版本 schema</b> 的表，末层是新 schema。Logit lens 假设两边列名一致、直接 SELECT；J-lens 先算出一份<b>平均意义上的迁移脚本</b>，把旧表搬到新 schema，再用模型自己的「字典」（unembedding）去查。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Transformer 每层都往同一条<b>残差流</b>（residual stream，层与层之间传递的那个向量，可理解为共享的状态总线）上读写。想知道第 <i>l</i> 层「在想什么」，最朴素的办法是 <b>logit lens</b>（nostalgebraist 2020）：把中间激活直接乘上末层的词表矩阵，看哪个词得分最高。问题是早中层的坐标系和末层并不对齐，读出来常是一堆逗号空格。<b>Tuned lens</b>（Belrose et al. 2023）给每层训练一个仿射翻译器去拟合最终输出，但它学的是「最像下一个词」，可能借翻译器之力读出模型本不用的东西。</p>
+<p style="margin-top:8px">Anthropic 2026-07 的论文《Verbalizable Representations Form a Global Workspace in Language Models》换了个问题：<b>不问「这里像什么词」，而问「推一下这里，模型之后说出哪些词的概率会变」</b>。</p>
+<pre>lens_l(h) = unembed( J_l · h ),   J_l = E[ ∂h_final / ∂h_l ]</pre>
+<ul>
+<li><b>h</b>：第 l 层某位置的激活向量；<b>h_final</b>：末层激活；</li>
+<li><b>∂h_final/∂h_l</b>：雅可比矩阵（Jacobian，一张「输入每一维微动，输出每一维跟着动多少」的敏感度表）；</li>
+<li><b>E[·]</b>：在大量普通文本、所有源位置、<b>当前及之后所有目标位置</b>上取平均——所以它捕捉的是「现在或以后会说出口」，不止下一个 token；</li>
+<li><b>unembed</b>：模型自己的输出层，把末层向量翻成词表得分。</li>
+</ul>
+<p style="margin-top:8px">直觉：真实网络是非线性的，但取平均后的雅可比是它的<b>一阶线性近似</b>，相当于一张「各层到输出的平均影响力地图」。它<b>从模型自身的导数推出来，而不是拟合一个解码目标</b>，所以不太会凭空「替模型说话」。官方配套代码说明：拟合用约 1000 条 128-token 的通用网页文本，约 100 条已可用。</p>
+<div class="diagram" style="margin-top:14px">
+<span class="box">第 l 层激活 h</span><span class="arrow">──直接──▶</span><span class="box r">unembed</span><span class="arrow">▶</span> logit lens（早层常读出噪声）<br/>
+<span class="box">第 l 层激活 h</span><span class="arrow">──▶</span><span class="box p">平均雅可比 J_l</span><span class="arrow">──▶</span><span class="box g">unembed</span><span class="arrow">▶</span> J-lens：「它倾向让模型说出什么」
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> GPT2LMHeadModel, GPT2Tokenizer
+tok = GPT2Tokenizer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>); m = GPT2LMHeadModel.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>).<span class="fn">eval</span>()
+L = 6  <span class="cmt"># 观察第 6 层</span>
+<span class="kw">def</span> <span class="fn">tail</span>(h):  <span class="cmt"># 从第 L 层跑到末层（含 final LayerNorm）</span>
+    <span class="kw">for</span> blk <span class="kw">in</span> m.transformer.h[L:]:
+        out = <span class="fn">blk</span>(h); h = out[0] <span class="kw">if</span> <span class="fn">isinstance</span>(out, tuple) <span class="kw">else</span> out
+    <span class="kw">return</span> m.transformer.<span class="fn">ln_f</span>(h)
+<span class="kw">def</span> <span class="fn">hidden</span>(text):
+    ids = <span class="fn">tok</span>(text, return_tensors=<span class="str">"pt"</span>).input_ids
+    <span class="kw">return</span> <span class="fn">m</span>(ids, output_hidden_states=<span class="kw">True</span>).hidden_states[L].<span class="fn">detach</span>()
+J, corpus = torch.<span class="fn">zeros</span>(768, 768), [<span class="str">"The weather today is"</span>, <span class="str">"In 1905 Einstein"</span>, <span class="str">"My favorite food is"</span>]
+<span class="kw">for</span> text <span class="kw">in</span> corpus:  <span class="cmt"># 玩具版：只看末位置→末位置，真实版还会累加未来位置</span>
+    hs = <span class="fn">hidden</span>(text)
+    <span class="kw">def</span> <span class="fn">f</span>(v): h = hs.<span class="fn">clone</span>(); h[0, -1] = v; <span class="kw">return</span> <span class="fn">tail</span>(h)[0, -1]
+    J += torch.autograd.functional.<span class="fn">jacobian</span>(f, hs[0, -1], vectorize=<span class="kw">True</span>) / <span class="fn">len</span>(corpus)
+h = <span class="fn">hidden</span>(<span class="str">"The capital of France is"</span>)[0, -1]
+<span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+    <span class="kw">for</span> name, v <span class="kw">in</span> [(<span class="str">"logit"</span>, m.transformer.<span class="fn">ln_f</span>(h)), (<span class="str">"J"</span>, J @ h)]:
+        <span class="fn">print</span>(name, [tok.<span class="fn">decode</span>(i) <span class="kw">for</span> i <span class="kw">in</span> m.<span class="fn">lm_head</span>(v).<span class="fn">topk</span>(5).indices])</pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「J-lens 读出了模型真实的念头」。它读出的是<b>平均线性近似下的输出倾向</b>，在偏离训练分布的上下文里近似会失真；而且社区有人在 GPT-2 small/medium 上复现时，J-lens 并没有打赢 logit lens，还指出排名指标会被高频 token 刷分。它在大模型上更有用，在小模型上未必。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：读任何「读心」类可解释性新闻时，先问三件事——读出器是<b>拟合出来的还是推导出来的</b>？验证是相关性还是<b>因果干预</b>？在多大的模型上成立？这套问法比记住任何单个结论更耐用。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 Logit lens 假设坐标一致，tuned lens 学一个翻译器，J-lens 借模型自己的导数做翻译——三者是「读出轴」上的三种取舍。<br/>🤔 「平均雅可比」把成千上万种上下文压成一张矩阵，哪类概念最可能在平均中被抹掉？</div>
+</div>
+</div>
+<!-- 2 -->
+<div class="card">
+<h2>J-space：低维的可言说子空间<span class="en">J-space</span></h2>
+<div class="tags"><span class="tag">表示几何</span><span class="tag purple">容量瓶颈</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>残差流像一台服务器的全部内存，J-space 则是挂在<b>共享消息总线</b>上的那几个 topic：大部分数据是各模块的本地状态，只有很少一部分被发布到总线上，任何下游（包括「把它说出来」的模块）都能订阅。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>有了 J-lens，就能为词表里每个词找到「推动模型将来说出它」的那个方向。把这些方向张成的空间叫 <b>J-space</b>。论文的几何发现有三条：</p>
+<ul>
+<li><b>集中在中间层</b>：早层多是字面特征，末层忙着排版下一个 token，中层才是概念层面的「工作台」；</li>
+<li><b>方差占比很小</b>：J-space 在激活总方差中<b>不到约 10%</b>——绝大部分「能量」花在别处；</li>
+<li><b>容量有限</b>：同一时刻大约只能容纳 <b>k≈25 个</b>可区分的概念，像一个小寄存器组，而不是一块大内存。</li>
+</ul>
+<p style="margin-top:8px">关键结论是：<b>方差小 ≠ 不重要</b>。一个概念的表示里，正是那一小块 J-space 分量决定了它<b>能不能被报告出来</b>。这挑战了一个常见的默认假设——「激活里方差大的方向才是主要信息」（PCA 式直觉）。在这里，决定行为的恰恰是不起眼的低方差子空间。</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">某中间层的残差流（示意）</span><br/>
+<span class="box o" style="width:68%">非 J 分量：≈90%+ 方差 · 语法/位置/字面细节</span><span class="box g" style="width:18%">J-space</span><br/>
+<span style="color:#5a6378;font-size:0.78rem">↑ 小块，但「能说出口」「能被推理调用」都要经过它</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+rng = np.random.<span class="fn">default_rng</span>(0)
+d, k, n = 512, 25, 2000                        <span class="cmt"># 维度 / 可言说子空间秩 / 样本数</span>
+Q = np.linalg.<span class="fn">qr</span>(rng.<span class="fn">normal</span>(size=(d, d)))[0]   <span class="cmt"># 随机正交基</span>
+J_dirs, other = Q[:, :k], Q[:, k:]              <span class="cmt"># 前 k 维当作 J-space</span>
+<span class="cmt"># 模拟激活：J 分量幅度小，其余方向幅度大（如字面、位置噪声）</span>
+acts = rng.<span class="fn">normal</span>(size=(n, k)) * 1.0 @ J_dirs.T + rng.<span class="fn">normal</span>(size=(n, d - k)) * 1.3 @ other.T
+var_J = ((acts @ J_dirs) ** 2).<span class="fn">sum</span>() / (acts ** 2).<span class="fn">sum</span>()
+<span class="fn">print</span>(<span class="str">f"J-space 方差占比: {var_J:.1%}"</span>)          <span class="cmt"># 约 3%：PCA 会先把它扔掉</span>
+<span class="cmt"># 若「说出口」只读 J 分量，按方差降维反而会删掉最关键的信息</span>
+top_pc = np.linalg.<span class="fn">svd</span>(acts - acts.<span class="fn">mean</span>(0), full_matrices=<span class="kw">False</span>)[2][:50]
+<span class="fn">print</span>(<span class="str">"前 50 主成分里保留的 J 能量:"</span>, <span class="fn">round</span>(<span class="fn">float</span>(((top_pc @ J_dirs) ** 2).<span class="fn">sum</span>() / k), 3))</pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「J-space 就是模型的思想全集」。它只是<b>可言说</b>的那部分；大量真正参与计算的信息不在其中，模型说不出来，J-lens 也读不到。把它当完整日志，就会对「没读到 = 没想过」产生错误安全感。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：这和人类工作记忆「约 4±1 组块」的研究形成有趣对照——容量瓶颈可能不是 bug，而是让信息能被<b>全局共享</b>的代价。设计自己的 AI 工作流时，也值得想想哪些状态必须进「共享总线」、哪些留在本地。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 J-space：中层、低方差、小容量，却是「可报告性」的闸口。<br/>🤔 如果一个概念的 J 分量被削弱但其余分量完好，模型还能「用」它却「说不出」它吗？这对应人类的什么现象？</div>
+</div>
+</div>
+<!-- 3 -->
+<div class="card">
+<h2>能说出口的，正是沉默推理所用的<span class="en">Verbalizable = Used</span></h2>
+<div class="tags"><span class="tag">因果干预</span><span class="tag orange">核心命题</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>审计日志和业务主表的区别：很多系统的「报告」是另写的一份日志，可能和真实业务脱节；论文主张 J-space 更像<b>报告直接读主表</b>——模型汇报「我在想什么」时，读的就是推理正在用的那几行。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Day 55 讲过：思维链（CoT）可能不忠实，写出来的理由不一定是真理由。那么<b>不写出来的推理</b>呢？论文用「改一处、看行为变不变」的<b>因果干预</b>论证三件事：</p>
+<ul>
+<li><b>报告</b>：问模型「你在想什么」，回答来自 J-space；把其中「足球」的表示换成「橄榄球」，模型就改口说自己在想橄榄球——说明报告是被这块表示<b>驱动</b>的，不是巧合相关；</li>
+<li><b>定向调控</b>：让模型抄写一句无关的话、同时「心里想着柑橘类水果」，J-space 里出现 orange、lemon；让它默算，J-space 依次浮现中间结果——嘴上一个字没说；</li>
+<li><b>沉默推理</b>：多跳问题（如「火星是什么颜色」）里，「火星」「颜色」在中层先亮起，然后才输出 red。论文把中间结论的 J 分量与另一题的对换，答案翻转的比例<b>明显高于</b>对换方差大得多的非 J 分量。</li>
+</ul>
+<p style="margin-top:8px">合起来，命题是：<b>可报告的表示与内部推理使用的表示是同一批</b>。另一面同样重要——<b>选择性</b>：流畅续写这类自动化任务不太依赖 J-space，灵活推理和「汇报体验」才依赖。这正是「全局工作空间」该有的样子：不是所有计算都走总线，只有需要被多个模块协同调用的才走。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+rng = np.random.<span class="fn">default_rng</span>(1)
+d, k = 64, 8
+Q = np.linalg.<span class="fn">qr</span>(rng.<span class="fn">normal</span>(size=(d, d)))[0]; J, R = Q[:, :k], Q[:, k:]
+w = J @ rng.<span class="fn">normal</span>(size=k)                 <span class="cmt"># 下游「回答」只读 J 子空间</span>
+<span class="kw">def</span> <span class="fn">make</span>(c):                                <span class="cmt"># c=概念向量；非 J 部分方差更大</span>
+    <span class="kw">return</span> J @ c + R @ rng.<span class="fn">normal</span>(size=d - k) * 3
+<span class="kw">def</span> <span class="fn">swap</span>(a, b, P):                         <span class="cmt"># 把 a 在子空间 P 上的分量换成 b 的</span>
+    <span class="kw">return</span> a - P @ (P.T @ a) + P @ (P.T @ b)
+flips_J = flips_R = 0
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(1000):
+    a, b = <span class="fn">make</span>(rng.<span class="fn">normal</span>(size=k)), <span class="fn">make</span>(rng.<span class="fn">normal</span>(size=k))
+    <span class="kw">if</span> np.<span class="fn">sign</span>(w @ a) == np.<span class="fn">sign</span>(w @ b): <span class="kw">continue</span>    <span class="cmt"># 只看答案本就不同的对</span>
+    flips_J += np.<span class="fn">sign</span>(w @ <span class="fn">swap</span>(a, b, J)) == np.<span class="fn">sign</span>(w @ b)
+    flips_R += np.<span class="fn">sign</span>(w @ <span class="fn">swap</span>(a, b, R)) == np.<span class="fn">sign</span>(w @ b)
+<span class="fn">print</span>(<span class="str">"换 J 分量翻转:"</span>, flips_J, <span class="str">" 换非 J 分量翻转:"</span>, flips_R)  <span class="cmt"># 玩具里后者为 0</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「既然 J-space 能读沉默推理，CoT 监控就过时了」。J-lens 需要<b>白盒权重</b>，读出的是词表上的模糊倾向而非完整论证；CoT 是黑盒可用、人类可读的。两者是互补的两条通道：一个看<b>说了什么</b>，一个看<b>准备说什么</b>，交叉比对才能发现「嘴上一套、心里一套」。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：在决策辅助里，当模型给出结论却说不清理由，不要只追问「为什么」——它的口头解释可能是事后编的。更稳的做法是换几种问法独立验证结论本身，把「自述」当线索而非证据。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 因果干预让「可报告」与「被使用」第一次在同一块表示上对上了号；但要注意，这是在白盒、受控任务上得到的结论。<br/>🤔 如果训练时对 J-lens 读数施加惩罚（例如不许出现某些概念），会不会重演 Day 55 的「混淆式奖励作弊」——模型把意图搬到 J-space 之外？</div>
+<p style="margin-top:10px"><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">工程对应 → super-individual D10 (Hallucination 治理)</a></p>
+</div>
+</div>
+<!-- 4 -->
+<div class="card">
+<h2>与全局工作空间理论的对照<span class="en">Global Workspace Theory</span></h2>
+<div class="tags"><span class="tag">意识科学</span><span class="tag purple">跨学科</span><span class="tag orange">争议</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>全局工作空间理论把大脑看成一群并行微服务加一条<b>容量有限的广播总线</b>：进入总线的信息被全网订阅，就成为「意识到的」；更强的版本还要求进入总线是<b>全有或全无</b>的，像分布式提交要么整体生效、要么不生效，而不是渐进的。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p><b>全局工作空间理论</b>（Global Workspace Theory, GWT）由 Bernard Baars 在 1988 年提出，后经 Dehaene 等人发展为神经版本。它试图解释<b>意识通达</b>（access consciousness，信息可被报告、可被推理调用的那种「意识到」）：大量处理在无意识中并行进行，只有少量内容赢得竞争、进入全局空间后被广播。神经版本还强调<b>点燃</b>（ignition）：信息一旦越过阈值，会突然、非线性地扩散到全脑。</p>
+<p style="margin-top:8px">论文列出 J-space 满足的五条「工作空间式」性质：</p>
+<div class="diagram" style="margin-top:10px">
+<span class="box g">言语报告 ✓</span><span class="box g">定向调控 ✓</span><span class="box g">内部推理 ✓</span><span class="box g">灵活泛化 ✓</span><span class="box g">选择性 ✓</span><br/>
+<span class="box o">容量有限 ✓（k≈25）</span><span class="box r">点燃式非线性进入 ✗ 尚未显示</span><span class="box r">现象意识 — 不在讨论范围</span>
+</div>
+<p style="margin-top:10px">「灵活泛化」指同一个 J 向量能被多种下游操作当作参数使用——就像总线上的一条消息被不同服务各取所需。论文自己承认：与 GWT 的<b>架构对应是松散的</b>，容量限制和选择性已有迹象，但完整的「点燃」机制还没找到。</p>
+<p style="margin-top:8px">公开评议集中在三点：其一，<b>功能通达 ≠ 现象体验</b>——哲学家 Ned Block 早就区分了「通达意识」与「现象意识」，J-space 至多对应前者；其二，有评论认为为了让定义成立，GWT 的许多要求被放宽了，剥掉这层框架后，它是一个关于<b>计算组织</b>的发现，而非关于心智的发现；其三，前述小模型复现失败提示，结论的适用范围还需更多独立检验。论文本身没有宣称机器有意识，但措辞留了想象空间。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="cmt"># 对比两种「进入工作空间」的方式：线性渐进 vs 点燃式（全有或全无）</span>
+<span class="kw">def</span> <span class="fn">linear_access</span>(s):
+    <span class="kw">return</span> s / s.<span class="fn">sum</span>()                     <span class="cmt"># 强度成比例地分享总线</span>
+<span class="kw">def</span> <span class="fn">ignition_access</span>(s, k=3, theta=0.6, gain=8):
+    top = np.<span class="fn">argsort</span>(s)[-k:]                 <span class="cmt"># 容量限制：只有前 k 个参与竞争</span>
+    out = np.<span class="fn">zeros_like</span>(s)
+    act = 1 / (1 + np.<span class="fn">exp</span>(-gain * (s[top] - theta)))  <span class="cmt"># 陡峭 S 形 ≈ 阈值</span>
+    out[top] = np.<span class="fn">where</span>(act > 0.5, 1.0, 0.0)    <span class="cmt"># 越过阈值→整体广播，否则沉默</span>
+    <span class="kw">return</span> out
+s = np.<span class="fn">array</span>([0.2, 0.55, 0.65, 0.9, 0.1, 0.58])  <span class="cmt"># 6 个候选概念的激活强度</span>
+<span class="fn">print</span>(<span class="str">"线性:"</span>, linear_access(s).<span class="fn">round</span>(2))
+<span class="fn">print</span>(<span class="str">"点燃:"</span>, ignition_access(s))   <span class="cmt"># 0.58 与 0.65 很接近，结局却一个 0 一个 1</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「Anthropic 证明了 Claude 有意识」。论文证明的是：存在一块满足若干<b>功能性</b>工作空间特征的表示。从「功能上像」跳到「有体验」，中间隔着意识研究里最难的那道题，这篇论文没有、也无法跨过。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：这是跨学科思考的好素材——佛学讲「心所」与「识」的分层，神经科学讲通达与现象之分，现在机器里出现了一个可操作、可干预的「通达」样本。它让「哪些意识理论可被检验」这个问题第一次有了非生物的实验台。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 J-space 为 GWT 的「通达」部分提供了一个可干预的机器样本，但缺「点燃」、不涉「体验」，类比要用得克制。<br/>🤔 如果未来在某个模型里真的观测到点燃式的非线性进入，你会因此更倾向于认为它「有意识」吗？还缺什么？</div>
+</div>
+</div>
+<!-- 资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>深入资源</h2>
+<div class="section">
+<ul>
+<li>Anthropic Interpretability, <b>Verbalizable Representations Form a Global Workspace in Language Models</b>, 2026-07, <a href="https://transformer-circuits.pub/2026/workspace/">transformer-circuits.pub/2026/workspace</a>（arXiv:2607.15495）— 本期主线，含 J-lens 定义、五条性质与干预实验</li>
+<li><a href="https://github.com/anthropics/jacobian-lens">anthropics/jacobian-lens</a>（GitHub）— 官方参考实现，支持 HuggingFace 开放权重模型，可自己拟合和应用透镜</li>
+<li>nostalgebraist, <b>interpreting GPT: the logit lens</b>, LessWrong 2020 — 「把中间层直接接到输出层」这一思路的起点</li>
+<li>Belrose et al., <b>Eliciting Latent Predictions from Transformers with the Tuned Lens</b>, arXiv:2303.08112 (2023) — 为每层学仿射翻译器，是理解 J-lens 取舍的参照物</li>
+<li>Nelith Bandularatne, <b>J-Lens: A Failed Replication on GPT-2</b>, LessWrong 2026 — 小模型上的反面证据与指标陷阱，适合配合主论文读</li>
+</ul>
+</div>
+</div>
+<!-- 思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>深入思考</h2>
+<details><summary>J-lens 和 SAE 都声称在读「模型在想什么」，它们会给出矛盾的答案吗？</summary><div>会，而且矛盾本身有信息量。SAE 从激活<b>重构</b>出发，问「这里存了哪些可分离的特征」，它会找到大量模型从不说出口的特征（语法、位置、风格）。J-lens 从<b>输出影响</b>出发，只看「会推向哪些词」。一个特征在 SAE 里很显著、J-lens 却读不到，说明它是本地计算状态；反过来 J-lens 读到、SAE 没有单独对应的特征，说明可言说概念可能是多个特征的组合。两者像数据库里「表里有什么」和「查询会返回什么」的区别。</div></details>
+<details><summary>「方差小却决定行为」对 AI 安全意味着什么？</summary><div>很多监控与压缩方法默认高方差方向最重要——PCA 降维、按激活幅度剪枝、按范数筛选特征。如果关键的、可言说的推理恰好住在低方差子空间，这些方法会<b>系统性地漏掉</b>最该看的东西。反过来，这也是好消息：要监控的空间维度小、容量有限，原则上比监控整个残差流更可行。安全设计需要按「对输出的因果影响」而不是「数值大小」来分配注意力。</div></details>
+<details><summary>如果模型知道自己的 J-space 会被读取，会发生什么？</summary><div>这是 Day 55 「混淆」问题的白盒版本。只要训练信号里包含 J-lens 读数（例如惩罚出现危险概念），优化压力就可能把相关计算推到 J-space 之外——可能以「说不出口」的形式完成同样的推理，代价也许是能力下降，因为论文显示灵活推理依赖 J-space。这里有个微妙的博弈：让推理离开工作空间可能会降低它的灵活性。读出工具应当只用于评估，不进训练目标，是目前最稳妥的立场。</div></details>
+<details><summary>如果人类意识也只是「容量有限的广播总线」，那 J-space 的发现对理解自身意味着什么？</summary><div>GWT 本就是功能主义理论：它说通达意识<b>就是</b>某种信息组织方式。若接受这一点，J-space 的出现说明这种组织方式可能是「需要灵活复用信息的系统」的收敛解，而非生物特有——类似不同物种独立演化出眼睛。但如果你认为意识的核心是体验本身（现象意识），那么 J-space 恰好显示了功能可以完整存在而无需回答体验问题。佛学的「识」与「心所」之分，或许正提示了这两层不应混为一谈。</div></details>
+</div>
+<footer>BigCat · AI &amp; ML · 2026 · Day 58</footer>
+</div>
+<script src="https://hub.cissychen.com/comments.js" defer></script>
+<script src="https://hub.cissychen.com/search.js" defer></script>
+<script src="https://hub.cissychen.com/index-button.js" defer></script>
+<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+</body>
+</html>

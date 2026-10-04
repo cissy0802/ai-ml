@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML Deep Dive: Verbalizable Representations &amp; the Global Workspace — Day 58</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML Deep Dive: Verbalizable Representations &amp; the Global Workspace</h1>
+<div class="meta">Day 58 · 2026-10-04</div>
+<div class="audience">For: experienced engineers outside AI · Level: Frontier</div>
+</header>
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+<p style="color:#cfd3df">This issue continues <a href="interpretability-day27.en.html">Day 27 Interpretability</a>: SAEs ask "what is <b>encoded</b> here?", today's J-lens asks "what is this <b>poised to say</b>?". It pairs with <a href="cot-monitoring-day55.en.html">Day 55 CoT Monitoring</a> — one reads the reasoning that gets written, the other reads the reasoning that doesn't.</p>
+</div>
+<!-- 1 -->
+<div class="card">
+<h2>Jacobian Lens<span class="en">J-lens</span></h2>
+<div class="tags"><span class="tag">Readout tool</span><span class="tag purple">Linearization</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>An intermediate-layer activation is like a table in an <b>old schema version</b>; the final layer is the new schema. The logit lens assumes the column names match and just runs SELECT; the J-lens first derives an <b>average migration script</b>, moves the old table into the new schema, then looks it up in the model's own "dictionary" (the unembedding).</p>
+</div>
+<div class="section">
+<div class="label">What problem it solves + how it works</div>
+<p>Every Transformer layer reads from and writes to the same <b>residual stream</b> (the vector passed between layers — think of it as a shared state bus). To see what layer <i>l</i> is "thinking", the naive approach is the <b>logit lens</b> (nostalgebraist 2020): multiply the intermediate activation directly by the final vocabulary matrix and see which words score highest. The problem: early and middle layers don't share the final layer's coordinate system, so the readout is often commas and spaces. The <b>tuned lens</b> (Belrose et al. 2023) trains an affine translator per layer to match the final output — but what it learns is "what looks most like the next token", so the translator itself may read out things the model doesn't actually use.</p>
+<p style="margin-top:8px">Anthropic's July 2026 paper <i>Verbalizable Representations Form a Global Workspace in Language Models</i> asks a different question: <b>not "what word does this resemble?" but "if I nudge this, which words become more likely for the model to say later?"</b></p>
+<pre>lens_l(h) = unembed( J_l · h ),   J_l = E[ ∂h_final / ∂h_l ]</pre>
+<ul>
+<li><b>h</b>: the activation at some position in layer l; <b>h_final</b>: the final-layer activation;</li>
+<li><b>∂h_final/∂h_l</b>: the Jacobian (a sensitivity table: "if each input dimension wiggles, how much does each output dimension move");</li>
+<li><b>E[·]</b>: averaged over lots of ordinary text, all source positions, and <b>the current and all future target positions</b> — so it captures "will say now or later", not just the next token;</li>
+<li><b>unembed</b>: the model's own output layer, turning a final-layer vector into vocabulary scores.</li>
+</ul>
+<p style="margin-top:8px">Intuition: the real network is nonlinear, but the averaged Jacobian is its <b>first-order linear approximation</b> — an "average influence map" from each layer to the output. It is <b>derived from the model's own derivatives rather than fitted to a decoding objective</b>, so it is less prone to "speaking for the model". The official companion code notes the lenses were fit on about 1000 sequences of 128 tokens of generic web text, and about 100 is already usable.</p>
+<div class="diagram" style="margin-top:14px">
+<span class="box">layer-l activation h</span><span class="arrow">──direct──▶</span><span class="box r">unembed</span><span class="arrow">▶</span> logit lens (early layers often read noise)<br/>
+<span class="box">layer-l activation h</span><span class="arrow">──▶</span><span class="box p">average Jacobian J_l</span><span class="arrow">──▶</span><span class="box g">unembed</span><span class="arrow">▶</span> J-lens: "what it disposes the model to say"
+</div>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">from</span> transformers <span class="kw">import</span> GPT2LMHeadModel, GPT2Tokenizer
+tok = GPT2Tokenizer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>); m = GPT2LMHeadModel.<span class="fn">from_pretrained</span>(<span class="str">"gpt2"</span>).<span class="fn">eval</span>()
+L = 6  <span class="cmt"># inspect layer 6</span>
+<span class="kw">def</span> <span class="fn">tail</span>(h):  <span class="cmt"># run from layer L to the end (incl. final LayerNorm)</span>
+    <span class="kw">for</span> blk <span class="kw">in</span> m.transformer.h[L:]:
+        out = <span class="fn">blk</span>(h); h = out[0] <span class="kw">if</span> <span class="fn">isinstance</span>(out, tuple) <span class="kw">else</span> out
+    <span class="kw">return</span> m.transformer.<span class="fn">ln_f</span>(h)
+<span class="kw">def</span> <span class="fn">hidden</span>(text):
+    ids = <span class="fn">tok</span>(text, return_tensors=<span class="str">"pt"</span>).input_ids
+    <span class="kw">return</span> <span class="fn">m</span>(ids, output_hidden_states=<span class="kw">True</span>).hidden_states[L].<span class="fn">detach</span>()
+J, corpus = torch.<span class="fn">zeros</span>(768, 768), [<span class="str">"The weather today is"</span>, <span class="str">"In 1905 Einstein"</span>, <span class="str">"My favorite food is"</span>]
+<span class="kw">for</span> text <span class="kw">in</span> corpus:  <span class="cmt"># toy: last position → last position only; the real lens also sums future positions</span>
+    hs = <span class="fn">hidden</span>(text)
+    <span class="kw">def</span> <span class="fn">f</span>(v): h = hs.<span class="fn">clone</span>(); h[0, -1] = v; <span class="kw">return</span> <span class="fn">tail</span>(h)[0, -1]
+    J += torch.autograd.functional.<span class="fn">jacobian</span>(f, hs[0, -1], vectorize=<span class="kw">True</span>) / <span class="fn">len</span>(corpus)
+h = <span class="fn">hidden</span>(<span class="str">"The capital of France is"</span>)[0, -1]
+<span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+    <span class="kw">for</span> name, v <span class="kw">in</span> [(<span class="str">"logit"</span>, m.transformer.<span class="fn">ln_f</span>(h)), (<span class="str">"J"</span>, J @ h)]:
+        <span class="fn">print</span>(name, [tok.<span class="fn">decode</span>(i) <span class="kw">for</span> i <span class="kw">in</span> m.<span class="fn">lm_head</span>(v).<span class="fn">topk</span>(5).indices])</pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">Misconception: "The J-lens reads the model's true thoughts." It reads <b>output dispositions under an averaged linear approximation</b>, which can distort in contexts far from the training distribution. And a community replication on GPT-2 small/medium found the J-lens did not beat the logit lens, noting that rank metrics can be gamed by high-frequency tokens. It is more useful on large models; on small ones, not necessarily.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: when reading any "mind-reading" interpretability news, ask three things first — was the readout <b>fitted or derived</b>? Is the evidence correlational or a <b>causal intervention</b>? At what model scale does it hold? This habit outlasts any single result.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + reflection</div>
+<div class="takeaway">💡 The logit lens assumes aligned coordinates, the tuned lens learns a translator, the J-lens translates with the model's own derivatives — three trade-offs on the "readout axis".<br/>🤔 The "average Jacobian" compresses thousands of contexts into one matrix. Which kinds of concepts are most likely to be washed out by the averaging?</div>
+</div>
+</div>
+<!-- 2 -->
+<div class="card">
+<h2>J-space: A Low-Dimensional Verbalizable Subspace<span class="en">J-space</span></h2>
+<div class="tags"><span class="tag">Representation geometry</span><span class="tag purple">Capacity bottleneck</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>The residual stream is a server's entire memory; J-space is the handful of topics on a <b>shared message bus</b>. Most data is each module's local state; only a small part is published to the bus, where any downstream consumer — including the module that "says it out loud" — can subscribe.</p>
+</div>
+<div class="section">
+<div class="label">What problem it solves + how it works</div>
+<p>With the J-lens, you can find, for every word in the vocabulary, the direction that "pushes the model to say it later". The space spanned by these directions is called <b>J-space</b>. The paper reports three geometric findings:</p>
+<ul>
+<li><b>Concentrated in middle layers</b>: early layers mostly hold surface features, late layers are busy formatting the next token; the middle layers are the concept-level "workbench";</li>
+<li><b>Small share of variance</b>: J-space accounts for <b>less than about 10%</b> of total activation variance — most of the "energy" is spent elsewhere;</li>
+<li><b>Limited capacity</b>: it holds roughly <b>k≈25</b> distinguishable concepts at once — a small register file, not a big memory.</li>
+</ul>
+<p style="margin-top:8px">The key point: <b>low variance ≠ unimportant</b>. Within a concept's representation, it is precisely that small J-space component that determines <b>whether it can be reported</b>. This challenges a common default — "the high-variance directions carry the main information" (the PCA intuition). Here, behavior is driven by an inconspicuous low-variance subspace.</p>
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Residual stream at a middle layer (schematic)</span><br/>
+<span class="box o" style="width:68%">Non-J component: ≈90%+ variance · syntax/position/surface detail</span><span class="box g" style="width:18%">J-space</span><br/>
+<span style="color:#5a6378;font-size:0.78rem">↑ small, but both "can be said" and "can be used by reasoning" go through it</span>
+</div>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+rng = np.random.<span class="fn">default_rng</span>(0)
+d, k, n = 512, 25, 2000                        <span class="cmt"># dims / verbalizable rank / samples</span>
+Q = np.linalg.<span class="fn">qr</span>(rng.<span class="fn">normal</span>(size=(d, d)))[0]   <span class="cmt"># random orthonormal basis</span>
+J_dirs, other = Q[:, :k], Q[:, k:]              <span class="cmt"># first k dims play the role of J-space</span>
+<span class="cmt"># simulated activations: small J component, larger elsewhere (surface, position noise)</span>
+acts = rng.<span class="fn">normal</span>(size=(n, k)) * 1.0 @ J_dirs.T + rng.<span class="fn">normal</span>(size=(n, d - k)) * 1.3 @ other.T
+var_J = ((acts @ J_dirs) ** 2).<span class="fn">sum</span>() / (acts ** 2).<span class="fn">sum</span>()
+<span class="fn">print</span>(<span class="str">f"J-space variance share: {var_J:.1%}"</span>)   <span class="cmt"># ~3%: PCA would drop it first</span>
+<span class="cmt"># if "saying it" reads only the J component, variance-based reduction deletes the key signal</span>
+top_pc = np.linalg.<span class="fn">svd</span>(acts - acts.<span class="fn">mean</span>(0), full_matrices=<span class="kw">False</span>)[2][:50]
+<span class="fn">print</span>(<span class="str">"J energy kept in top 50 PCs:"</span>, <span class="fn">round</span>(<span class="fn">float</span>(((top_pc @ J_dirs) ** 2).<span class="fn">sum</span>() / k), 3))</pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">Misconception: "J-space is the model's complete set of thoughts." It is only the <b>verbalizable</b> part; much of the information actually used in computation lives outside it — the model can't say it and the J-lens can't read it. Treat it as a complete log and you get a false sense of security that "not read = never thought".</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: this sits interestingly next to human working-memory research ("about 4±1 chunks") — a capacity bottleneck may be not a bug but the price of making information <b>globally shareable</b>. When designing your own AI workflows, it's worth asking which state must go on the "shared bus" and which can stay local.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + reflection</div>
+<div class="takeaway">💡 J-space: middle layers, low variance, small capacity — yet it is the gate of reportability.<br/>🤔 If a concept's J component is weakened while the rest stays intact, could the model still "use" it but not "say" it? What human phenomenon does that resemble?</div>
+</div>
+</div>
+<!-- 3 -->
+<div class="card">
+<h2>What Can Be Said Is What Silent Reasoning Uses<span class="en">Verbalizable = Used</span></h2>
+<div class="tags"><span class="tag">Causal intervention</span><span class="tag orange">Core claim</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Audit log vs. primary table: in many systems the "report" is a separately written log that can drift from the real business data. The paper argues J-space is more like <b>a report that reads the primary table directly</b> — when the model reports "what I'm thinking", it reads the very rows its reasoning is using.</p>
+</div>
+<div class="section">
+<div class="label">What problem it solves + how it works</div>
+<p>Day 55 showed that chain-of-thought (CoT) can be unfaithful: the written reasons are not necessarily the real ones. What about reasoning that <b>is never written</b>? The paper uses <b>causal interventions</b> — change one thing, see whether behavior changes — to argue three points:</p>
+<ul>
+<li><b>Report</b>: ask the model "what are you thinking about?" and the answer comes from J-space; swap the representation of "soccer" there for "rugby" and the model says it's thinking about rugby — the report is <b>driven</b> by this representation, not merely correlated with it;</li>
+<li><b>Directed modulation</b>: tell the model to copy an unrelated sentence while "thinking about citrus fruits", and orange and lemon appear in J-space; ask it to do arithmetic silently, and intermediate results surface in J-space in sequence — without a word spoken;</li>
+<li><b>Silent reasoning</b>: in a multi-hop question (e.g. "what color is Mars?"), "Mars" and "color" light up in the middle layers before the model outputs red. Swapping the J component of an intermediate with another problem's flips the answer <b>noticeably more often</b> than swapping the far higher-variance non-J component.</li>
+</ul>
+<p style="margin-top:8px">Taken together, the claim is: <b>the reportable representations and the representations used in internal reasoning are the same ones</b>. The other side matters just as much — <b>selectivity</b>: automatic tasks like fluent continuation barely rely on J-space, while flexible reasoning and "reporting experience" do. That is what a "global workspace" should look like: not all computation goes over the bus, only what multiple modules need to use together.</p>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+rng = np.random.<span class="fn">default_rng</span>(1)
+d, k = 64, 8
+Q = np.linalg.<span class="fn">qr</span>(rng.<span class="fn">normal</span>(size=(d, d)))[0]; J, R = Q[:, :k], Q[:, k:]
+w = J @ rng.<span class="fn">normal</span>(size=k)                 <span class="cmt"># the downstream "answer" reads only the J subspace</span>
+<span class="kw">def</span> <span class="fn">make</span>(c):                                <span class="cmt"># c = concept vector; non-J part has larger variance</span>
+    <span class="kw">return</span> J @ c + R @ rng.<span class="fn">normal</span>(size=d - k) * 3
+<span class="kw">def</span> <span class="fn">swap</span>(a, b, P):                         <span class="cmt"># replace a's component in subspace P with b's</span>
+    <span class="kw">return</span> a - P @ (P.T @ a) + P @ (P.T @ b)
+flips_J = flips_R = 0
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(1000):
+    a, b = <span class="fn">make</span>(rng.<span class="fn">normal</span>(size=k)), <span class="fn">make</span>(rng.<span class="fn">normal</span>(size=k))
+    <span class="kw">if</span> np.<span class="fn">sign</span>(w @ a) == np.<span class="fn">sign</span>(w @ b): <span class="kw">continue</span>    <span class="cmt"># only pairs whose answers differ</span>
+    flips_J += np.<span class="fn">sign</span>(w @ <span class="fn">swap</span>(a, b, J)) == np.<span class="fn">sign</span>(w @ b)
+    flips_R += np.<span class="fn">sign</span>(w @ <span class="fn">swap</span>(a, b, R)) == np.<span class="fn">sign</span>(w @ b)
+<span class="fn">print</span>(<span class="str">"flips via J swap:"</span>, flips_J, <span class="str">" flips via non-J swap:"</span>, flips_R)  <span class="cmt"># the latter is 0 in this toy</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">Misconception: "If J-space can read silent reasoning, CoT monitoring is obsolete." The J-lens needs <b>white-box weights</b> and reads fuzzy dispositions over the vocabulary, not a full argument; CoT is available black-box and human-readable. They are complementary channels — one shows <b>what was said</b>, the other <b>what is about to be said</b> — and cross-checking them is how you catch "saying one thing, thinking another".</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: in decision support, when a model gives a conclusion but can't explain it well, don't just keep asking "why?" — its verbal explanation may be constructed after the fact. More robust: verify the conclusion itself independently with several different framings, and treat self-reports as leads, not evidence.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + reflection</div>
+<div class="takeaway">💡 Causal interventions line up "reportable" and "used" on the same representation for the first time — but note this was shown white-box, on controlled tasks.<br/>🤔 If training penalized J-lens readouts (e.g. forbidding certain concepts), would it replay Day 55's "obfuscated reward hacking" — the model moving its intent outside J-space?</div>
+<p style="margin-top:10px"><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">Engineering counterpart → super-individual D10 (Hallucination Governance)</a></p>
+</div>
+</div>
+<!-- 4 -->
+<div class="card">
+<h2>Comparison with Global Workspace Theory<span class="en">Global Workspace Theory</span></h2>
+<div class="tags"><span class="tag">Consciousness science</span><span class="tag purple">Interdisciplinary</span><span class="tag orange">Contested</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Global Workspace Theory sees the brain as many parallel microservices plus a <b>capacity-limited broadcast bus</b>: information that gets onto the bus is subscribed to network-wide and becomes "conscious". Stronger versions also require entry to be <b>all-or-none</b>, like a distributed commit that either takes effect entirely or not at all, rather than gradually.</p>
+</div>
+<div class="section">
+<div class="label">What problem it solves + how it works</div>
+<p><b>Global Workspace Theory</b> (GWT) was proposed by Bernard Baars in 1988 and later developed into a neural version by Dehaene and others. It aims to explain <b>access consciousness</b> (the kind of "being aware" where information can be reported and used by reasoning): most processing runs unconsciously in parallel, and only a small amount wins the competition, enters the global space, and is broadcast. The neural version also emphasizes <b>ignition</b>: once information crosses a threshold, it spreads abruptly and nonlinearly across the brain.</p>
+<p style="margin-top:8px">The paper lists five "workspace-like" properties J-space satisfies:</p>
+<div class="diagram" style="margin-top:10px">
+<span class="box g">Verbal report ✓</span><span class="box g">Directed modulation ✓</span><span class="box g">Internal reasoning ✓</span><span class="box g">Flexible generalization ✓</span><span class="box g">Selectivity ✓</span><br/>
+<span class="box o">Limited capacity ✓ (k≈25)</span><span class="box r">Ignition-style nonlinear entry ✗ not yet shown</span><span class="box r">Phenomenal consciousness — out of scope</span>
+</div>
+<p style="margin-top:10px">"Flexible generalization" means the same J vector can serve as an argument to many different downstream operations — like one message on the bus that different services each consume in their own way. The paper itself acknowledges that the <b>architectural correspondence to GWT is loose</b>: capacity limits and selectivity show up, but the full "ignition" mechanism has not been found.</p>
+<p style="margin-top:8px">Public commentary centers on three points. First, <b>functional access ≠ phenomenal experience</b> — philosopher Ned Block long ago distinguished access consciousness from phenomenal consciousness, and J-space corresponds at most to the former. Second, some commentators argue that many GWT requirements were relaxed to make the definition fit; strip away that framing and it is a finding about <b>computational organization</b>, not about minds. Third, the small-model replication failure mentioned above suggests the scope of the result needs more independent testing. The paper does not claim machine consciousness, but its wording leaves room for imagination.</p>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="cmt"># compare two ways of "entering the workspace": linear/gradual vs ignition (all-or-none)</span>
+<span class="kw">def</span> <span class="fn">linear_access</span>(s):
+    <span class="kw">return</span> s / s.<span class="fn">sum</span>()                     <span class="cmt"># share the bus in proportion to strength</span>
+<span class="kw">def</span> <span class="fn">ignition_access</span>(s, k=3, theta=0.6, gain=8):
+    top = np.<span class="fn">argsort</span>(s)[-k:]                 <span class="cmt"># capacity limit: only the top k compete</span>
+    out = np.<span class="fn">zeros_like</span>(s)
+    act = 1 / (1 + np.<span class="fn">exp</span>(-gain * (s[top] - theta)))  <span class="cmt"># steep sigmoid ≈ threshold</span>
+    out[top] = np.<span class="fn">where</span>(act > 0.5, 1.0, 0.0)    <span class="cmt"># above threshold → full broadcast, else silence</span>
+    <span class="kw">return</span> out
+s = np.<span class="fn">array</span>([0.2, 0.55, 0.65, 0.9, 0.1, 0.58])  <span class="cmt"># activation strengths of 6 candidate concepts</span>
+<span class="fn">print</span>(<span class="str">"linear:"</span>, linear_access(s).<span class="fn">round</span>(2))
+<span class="fn">print</span>(<span class="str">"ignition:"</span>, ignition_access(s))   <span class="cmt"># 0.58 and 0.65 are close, yet one ends at 0, the other at 1</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">Misconception: "Anthropic proved Claude is conscious." What the paper shows is that there exists a representation satisfying several <b>functional</b> workspace properties. Jumping from "functionally similar" to "has experience" means crossing the hardest problem in consciousness research — which this paper does not, and cannot, do.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: great material for interdisciplinary thinking — Buddhism layers "mental factors" and "consciousness", neuroscience separates access from phenomenal; now a machine offers an operable, intervenable sample of "access". For the first time, the question "which theories of consciousness are testable?" has a non-biological test bench.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + reflection</div>
+<div class="takeaway">💡 J-space gives GWT's "access" part an intervenable machine sample — but it lacks "ignition" and says nothing about "experience"; use the analogy with restraint.<br/>🤔 If ignition-style nonlinear entry were someday observed in a model, would that make you more inclined to think it is "conscious"? What would still be missing?</div>
+</div>
+</div>
+<!-- Resources -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>Further Resources</h2>
+<div class="section">
+<ul>
+<li>Anthropic Interpretability, <b>Verbalizable Representations Form a Global Workspace in Language Models</b>, 2026-07, <a href="https://transformer-circuits.pub/2026/workspace/">transformer-circuits.pub/2026/workspace</a> (arXiv:2607.15495) — the main thread of this issue: J-lens definition, the five properties, and the intervention experiments</li>
+<li><a href="https://github.com/anthropics/jacobian-lens">anthropics/jacobian-lens</a> (GitHub) — official reference implementation for HuggingFace open-weight models; fit and apply lenses yourself</li>
+<li>nostalgebraist, <b>interpreting GPT: the logit lens</b>, LessWrong 2020 — the origin of "plug an intermediate layer straight into the output layer"</li>
+<li>Belrose et al., <b>Eliciting Latent Predictions from Transformers with the Tuned Lens</b>, arXiv:2303.08112 (2023) — learns an affine translator per layer; the reference point for understanding the J-lens trade-off</li>
+<li>Nelith Bandularatne, <b>J-Lens: A Failed Replication on GPT-2</b>, LessWrong 2026 — counter-evidence on small models and metric pitfalls; read alongside the main paper</li>
+</ul>
+</div>
+</div>
+<!-- Reflections -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>Deeper Reflections</h2>
+<details><summary>The J-lens and SAEs both claim to read "what the model is thinking". Can they give contradictory answers?</summary><div>Yes — and the contradiction is itself informative. SAEs start from <b>reconstructing</b> activations and ask "which separable features are stored here?"; they find many features the model never voices (syntax, position, style). The J-lens starts from <b>output influence</b> and only asks "which words does this push toward?". A feature that is prominent in an SAE but invisible to the J-lens is local computational state; conversely, something the J-lens reads but no single SAE feature captures suggests verbalizable concepts may be combinations of features. It's the database difference between "what's in the table" and "what the query returns".</div></details>
+<details><summary>What does "low variance yet behavior-determining" mean for AI safety?</summary><div>Many monitoring and compression methods assume high-variance directions matter most — PCA reduction, pruning by activation magnitude, filtering features by norm. If the critical, verbalizable reasoning lives in a low-variance subspace, these methods will <b>systematically miss</b> what most needs watching. The flip side is good news: the space to monitor is small and capacity-limited, which in principle is more tractable than monitoring the whole residual stream. Safety design should allocate attention by "causal influence on output", not "numerical size".</div></details>
+<details><summary>What happens if the model knows its J-space is being read?</summary><div>This is the white-box version of Day 55's obfuscation problem. As soon as the training signal includes J-lens readouts (e.g. penalizing dangerous concepts), optimization pressure may push the relevant computation outside J-space — completing the same reasoning in an "unsayable" form, perhaps at a cost in capability, since the paper shows flexible reasoning depends on J-space. There's a subtle game here: moving reasoning out of the workspace may make it less flexible. Using readout tools only for evaluation, never as a training target, is currently the safest stance.</div></details>
+<details><summary>If human consciousness is also just a "capacity-limited broadcast bus", what does J-space tell us about ourselves?</summary><div>GWT is a functionalist theory: it says access consciousness <b>is</b> a certain way of organizing information. If you accept that, the emergence of J-space suggests this organization may be a convergent solution for "any system that needs to reuse information flexibly" rather than something uniquely biological — like eyes evolving independently in different species. But if you think the core of consciousness is experience itself (phenomenal consciousness), J-space shows precisely that the function can exist in full without answering the question of experience. The Buddhist distinction between consciousness and mental factors may hint that these two layers should not be conflated.</div></details>
+</div>
+<footer>BigCat · AI &amp; ML · 2026 · Day 58</footer>
+</div>
+<script src="https://hub.cissychen.com/comments.js" defer></script>
+<script src="https://hub.cissychen.com/search.js" defer></script>
+<script src="https://hub.cissychen.com/index-button.js" defer></script>
+<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+</body>
+</html>
