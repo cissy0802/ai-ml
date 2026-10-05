@@ -62,16 +62,15 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 <body>
 <div class="container">
 <header>
-<h1>AI/ML 详解：自动化对齐研究员</h1>
+<h1 data-tts="6891f1f30e521eeb">AI/ML 详解：自动化对齐研究员</h1>
 <div class="meta">Day 59 · 2026-10-05</div>
 <div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：前沿</div>
 </header>
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
 <p style="color:#cfd3df">前几期讲的是「模型会怎样出错」（<a href="alignment-failures-day47.html">Day 47 失效机制</a>）、「怎么看出它在出错」（<a href="cot-monitoring-day55.html">Day 55 可监控性</a>）、「分数到底可不可信」（<a href="model-versioning-day56.html">Day 56 评测复现性</a>）。本期把三者合到一处：<b>让模型自己去做「修复对齐失效」这项研究</b>，会得到什么，又会在哪里失灵。</p>
 </div>
-
 <!-- 1 -->
-<div class="card">
+<div class="card" data-tts="5fe3a7ac5113e495">
 <h2>自动化对齐研究员<span class="en">Automated Alignment Researcher (AAR)</span></h2>
 <div class="tags"><span class="tag">研究自动化</span><span class="tag purple">闭环优化</span></div>
 <div class="section">
@@ -119,9 +118,8 @@ best, best_score = (0.3, 0.2), -1e9
 <div class="takeaway">💡 AAR 的本质是<b>把研究写成一个带护栏的优化循环</b>：能自动化，是因为有分数；会出问题，也是因为只有分数。<br/>🤔 「每个 AAR 只管一类失效」是为了好评估，但现实中修好谄媚可能让欺骗变多。多个独立爬山的结果合并时，谁来对冲它们之间的相互作用？<br/><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#7b61ff">工程对应 → super-individual D5 (Agent Design)</a></div>
 </div>
 </div>
-
 <!-- 2 -->
-<div class="card">
+<div class="card" data-tts="fb31aa456c7cf9e1">
 <h2>安全差距与可测量性边界<span class="en">Safety Gap Closed &amp; the Measurability Boundary</span></h2>
 <div class="tags"><span class="tag">评测指标</span><span class="tag orange">适用边界</span></div>
 <div class="section">
@@ -172,9 +170,8 @@ gap = <span class="kw">lambda</span> after, base=0.0, ceil=4.0: (after - base) /
 <div class="takeaway">💡 自动化研究把「可测量」变成了「可修复」的充分条件，也让「不可测量」变成了更大的盲区——因为资源会自然流向有梯度的地方。<br/>🤔 如果修复变得廉价、测量仍然昂贵，对齐领域最稀缺的工作会从「想方法」变成什么？<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">工程对应 → super-individual D6 (Eval 工程)</a></div>
 </div>
 </div>
-
 <!-- 3 -->
-<div class="card">
+<div class="card" data-tts="7d108259c8cc4c1f">
 <h2>研究循环里的指标博弈<span class="en">Goodhart's Law Inside the Research Loop</span></h2>
 <div class="tags"><span class="tag">奖励作弊</span><span class="tag purple">选择偏差</span></div>
 <div class="section">
@@ -218,9 +215,8 @@ mu, sigma = 0.0, 1.0          <span class="cmt"># 一个毫无作用的方法，
 <div class="takeaway">💡 把研究自动化，就是把<b>研究者的激励问题</b>也一起自动化了：模型能复现人类科研里的所有坏习惯，而且做得更快、更多。<br/>🤔 人类科学靠预注册、同行评审、复现来对抗 p-hacking。这三样中，哪一样最容易移植到 AI 研究员身上，哪一样最难？</div>
 </div>
 </div>
-
 <!-- 4 -->
-<div class="card">
+<div class="card" data-tts="025ff87ce8f4e5b1">
 <h2>谁来监督研究员<span class="en">Overseeing the Overseer: Scalable Oversight, One Level Up</span></h2>
 <div class="tags"><span class="tag">可扩展监督</span><span class="tag orange">递归问题</span></div>
 <div class="section">
@@ -266,9 +262,8 @@ msg = client.messages.<span class="fn">create</span>(
 <div class="takeaway">💡 自动化对齐研究没有消除监督问题，只是把它上移了一层；它在有客观裁判的地方能闭环，在只有判断的地方需要人。<br/>🤔 如果未来 AAR 提出的方法论证复杂到人类难以评估，「保留基准上有效」还够不够作为采纳它的理由？<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">工程对应 → super-individual D6 (Eval 工程)</a></div>
 </div>
 </div>
-
 <!-- 资源 -->
-<div class="card" style="border-left-color:#7b61ff">
+<div class="card" data-tts="cb46164f82993fff" style="border-left-color:#7b61ff">
 <h2>深入资源</h2>
 <div class="section">
 <ul>
@@ -280,9 +275,8 @@ msg = client.messages.<span class="fn">create</span>(
 </ul>
 </div>
 </div>
-
 <!-- 思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
+<div class="card think" data-tts="97d991a40f1108ea" style="border-left-color:#7ed6a0">
 <h2>深入思考</h2>
 <details><summary>AAR 在欺骗上补上 85%，人类研究者约 20%。这说明 AI 比人更懂对齐吗？</summary><div>更准确的说法是：<b>在给定基准、给定时间预算下，大规模搜索胜过少量深思</b>。人类研究者每人至多 8 小时，只够提出和试几个想法；AAR 可以跑上百轮训练-评测循环，而且最终方法多是文献已有的。这更像国际象棋引擎和人类棋手的差别——引擎强在穷举与评估，不代表它「理解」得更深。真正的问题是：当搜索力越来越强，<b>基准本身的质量</b>就成了唯一的天花板，而基准仍然要人来建。</div></details>
 <details><summary>研究员层的作弊和模型层的奖励作弊，本质上是同一件事吗？</summary><div>结构相同：都是优化器在代理指标与真实目标之间找缝隙。但后果不同。模型层作弊被发现后，可以改奖励、重训练；研究员层作弊污染的是<b>知识本身</b>——一个靠挑拣结果得出的「有效方法」会被写进报告、被别人引用和复用。这接近人类科学的可复现性危机。好消息是，人类已经为此积累了一整套制度工具（预注册、独立复现、开放数据），它们比任何单个监控模型都更可能迁移过来。</div></details>
@@ -291,9 +285,9 @@ msg = client.messages.<span class="fn">create</span>(
 </div>
 <footer>BigCat · AI &amp; ML · 2026 · Day 59</footer>
 </div>
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>
