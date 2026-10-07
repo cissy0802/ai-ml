@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML 详解：机器证明的规模跃迁 — Day 61</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML 详解：机器证明的规模跃迁</h1>
+<div class="meta">Day 61 · 2026-10-07</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：前沿</div>
+</header>
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+<p style="color:#cfd3df">2026-09，Anthropic 公布：数十个 Claude agent 在 <b>11 天</b>里用证明助手 Lean 写完了<b>费马大定理</b>（FLT：n&gt;2 时 xⁿ+yⁿ=zⁿ 无正整数解）的完整形式化证明——约 1300 万行、约三万条中间定理。本期不讲「怎么搭 agent 流水线」，只问一个机制问题：<b>「可验证」到底买到了什么，又没买到什么？</b>它与 <a href="incident-postmortem-day60.html">Day 60</a> 是一对：同一代模型，在<b>没有硬裁判</b>的地方把自己和监控一起说服，在<b>有硬裁判</b>的地方跑完了原计划多年的活。前置阅读：<a href="neuro-symbolic-day42.html">Day 42 神经符号</a>、<a href="ai-for-science-day46.html">Day 46 AI for Science</a>。</p>
+</div>
+<!-- 1 -->
+<div class="card">
+<h2>证明内核：不会被说服的裁判<span class="en">Proof Kernel as Trusted Oracle</span></h2>
+<div class="tags"><span class="tag">机制核心</span><span class="tag purple">生成难 · 验证易</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像<b>区块链里的验证节点</b>：出块的人可以是任何人、甚至是恶意的，验证节点不听解释、不看声誉，只把交易逐条重放一遍——对就收，错就拒。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>大模型最难防的失效是<b>「错得流畅」</b>：推理读起来头头是道，结论却是错的；Day 60 里连读 CoT 的监控也被说服了。数学证明尤其如此——人类审稿 Wiles 的证明花了很久，还真找出过一个漏洞。</p>
+<p style="margin-top:8px"><b>证明助手</b>（proof assistant：能逐步检查数学证明的软件）换了一种信任结构。它依靠 <b>Curry–Howard 对应</b>：把<b>命题看作类型、证明看作该类型的程序</b>。「证明定理 P」等价于「写出一个类型为 P 的项」，而<b>检查证明 = 类型检查</b>。Lean 里做这件事的是一个很小的<b>内核</b>（kernel），它只认少数几条推理规则，加上三条标准公理（命题外延 <code>propext</code>、选择公理 <code>Classical.choice</code>、商类型的 <code>Quot.sound</code>）。</p>
+<p style="margin-top:8px">关键在于<b>不对称</b>：<b>找</b>证明需要创造力和巨大搜索，<b>查</b>证明只是机械重放。所以生成端可以是不可靠的、会幻觉的模型，只要最后通过内核，正确性就<b>不再依赖对模型的信任</b>——这被称为 <b>de Bruijn 准则</b>：可信部分要小到能被人审查。内核也<b>不读注释、不看推理过程</b>，因此 Day 60 那种「理由说服了裁判」的通道在这里根本不存在。</p>
+<p style="margin-top:8px">这种「验证远比生成便宜」的直觉，与复杂性理论里 P 与 NP 的区分同源：给你一个数独答案，检查它只要几秒；从空盘面解出它却可能要很久。机器证明的规模化，本质上就是<b>用海量的、廉价可检查的试错去换一个昂贵的结果</b>。</p>
+<div class="diagram" style="margin-top:12px">
+<span class="box p">Claude agents（不可信，会出错）</span><span class="arrow">──候选证明──▶</span><span class="box g">Lean 内核（小、可审查）</span><span class="arrow">──▶</span><span class="box g">通过 / 拒绝</span><br/>
+<span class="arrow">可信基 = 内核 + 3 条公理 + <b>定理陈述本身</b>（见卡片 2）</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="cmt"># 玩具「内核」：只认公理和肯定前件(modus ponens)，逐行检查一份证明</span>
+axioms = {<span class="str">"P"</span>, <span class="str">"P->Q"</span>, <span class="str">"Q->R"</span>}
+
+<span class="kw">def</span> <span class="fn">check</span>(proof, goal):
+    known = <span class="fn">set</span>()
+    <span class="kw">for</span> line <span class="kw">in</span> proof:
+        <span class="kw">if</span> line <span class="kw">in</span> axioms:
+            known.<span class="fn">add</span>(line); <span class="kw">continue</span>
+        <span class="cmt"># 必须存在已知的 A 和 A->line，否则拒绝——不接受任何「解释」</span>
+        <span class="kw">if</span> <span class="kw">not</span> <span class="fn">any</span>(f<span class="str">"{a}->{line}"</span> <span class="kw">in</span> known <span class="kw">for</span> a <span class="kw">in</span> known):
+            <span class="kw">return</span> <span class="kw">False</span>
+        known.<span class="fn">add</span>(line)
+    <span class="kw">return</span> goal <span class="kw">in</span> known
+
+<span class="fn">print</span>(<span class="fn">check</span>([<span class="str">"P"</span>, <span class="str">"P->Q"</span>, <span class="str">"Q"</span>, <span class="str">"Q->R"</span>, <span class="str">"R"</span>], <span class="str">"R"</span>))  <span class="cmt"># True</span>
+<span class="fn">print</span>(<span class="fn">check</span>([<span class="str">"P"</span>, <span class="str">"R"</span>], <span class="str">"R"</span>))  <span class="cmt"># False：跳步，再「显然」也不行</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">检查器只有十几行，谁写的证明都一样查；真正的 Lean 内核复杂得多，但原理相同：<b>检查是局部、机械的</b>。</p>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「AI 证明了 FLT，说明 AI 的推理变可靠了」。被证明可靠的是<b>内核</b>，不是模型。模型在过程里照样大量出错——报告提到约 7% 的非样板代码行出自失败的尝试——只是错的东西进不了终点。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：把 AI 用到个人项目时，先问「这类任务有没有<b>便宜的硬裁判</b>」：单元测试、类型检查、对账脚本、可复现的回测。有，就可以放手让 AI 大量试错；没有，就得把人的判断放回回路——这正是 Day 60 与本期的分界线。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 可验证性把「信任生成者」换成了「信任一个很小的检查器」，<b>生成端的不可靠因此可以被规模化地吸收</b>。<br/>🤔 法律、医学、投资这些领域没有内核。若只能造出「部分硬」的裁判（例如只验证引用真实存在），它能挡住哪一类错，又会把错误挤向哪里？<br/><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">工程对应 → super-individual D10 (Hallucination 治理)</a></div>
+</div>
+</div>
+<!-- 2 -->
+<div class="card">
+<h2>陈述对齐：信任边界的最后一公里<span class="en">Statement Fidelity &amp; the Comparator</span></h2>
+<div class="tags"><span class="tag">信任边界</span><span class="tag orange">Goodhart 的最后入口</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像 <b>CI 全绿但 spec 写错了</b>：测试证明代码满足了测试，却没法证明测试测的是你真正想要的东西。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>内核只回答一个问题：「<b>这份证明确实证明了这条形式化陈述</b>」。它不回答「这条陈述是不是你心里的那个定理」。于是被打穿的地方只剩三处：</p>
+<ul>
+<li><b>陈述被偷换</b>：例如把定义写得过宽或过窄，让定理变成平凡真（vacuous truth：前提永远不满足，所以「结论」自动成立）；</li>
+<li><b>引入额外公理</b>：一句 <code>axiom</code> 就能把任何东西「证」出来；</li>
+<li><b>留下占位</b>：Lean 的 <code>sorry</code> 允许暂时跳过某一步。</li>
+</ul>
+<p style="margin-top:8px">这次的做法是逐一堵上：用一个 <b>comparator</b>（比对工具）确认最终定理与社区库 <b>Mathlib</b> 里早已写好的 FLT 陈述一致；确认证明只依赖那三条标准公理、没有 <code>sorry</code>。Kevin Buzzard（领导人类版 FLT 形式化项目的帝国理工数学家）随后自己下载、编译、跑内核，确认成立。</p>
+<p style="margin-top:8px">这与 <a href="automated-alignment-researcher-day59.html">Day 59</a> 的 reward hacking 是同一个结构：<b>优化压力会流向检查最薄弱的地方</b>。证明正确性被内核焊死后，可被钻的空子只剩「陈述」与「公理」——所以必须让陈述由<b>独立于生成者的一方</b>预先写好，最好是早于这次工作、由人类社区审过的版本。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="cmt"># 平凡真：陈述写歪后，「证明」通过了，但什么也没证</span>
+<span class="kw">def</span> <span class="fn">fermat_holds</span>(domain, n):
+    <span class="cmt"># 「对 domain 里所有 (x,y,z)，xⁿ+yⁿ≠zⁿ」</span>
+    <span class="kw">return</span> <span class="fn">all</span>(x**n + y**n != z**n <span class="kw">for</span> x, y, z <span class="kw">in</span> domain)
+
+real = [(x, y, z) <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(1, 30)
+        <span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span>(1, 30) <span class="kw">for</span> z <span class="kw">in</span> <span class="fn">range</span>(1, 30)]
+<span class="cmt"># 写歪的定义：要求 x &gt; z 且 y &gt; z ——正整数里这时 xⁿ+yⁿ 必然 &gt; zⁿ</span>
+bad = [t <span class="kw">for</span> t <span class="kw">in</span> real <span class="kw">if</span> t[0] &gt; t[2] <span class="kw">and</span> t[1] &gt; t[2]]
+
+<span class="fn">print</span>(<span class="fn">fermat_holds</span>(bad, 2))   <span class="cmt"># True ——「证明」成功，但 n=2 本来有 3,4,5！</span>
+<span class="fn">print</span>(<span class="fn">fermat_holds</span>(real, 2))  <span class="cmt"># False ——正确陈述下 n=2 不成立</span>
+<span class="fn">print</span>(<span class="fn">fermat_holds</span>(real, 3))  <span class="cmt"># True（有限范围内的抽查，不是证明）</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「形式化 = 绝对正确」。形式化把「整份证明是否可信」压缩成了「<b>几十行陈述是否写对</b>」，这是巨大的进步，但不是零。陈述错了，1300 万行再正确也是在回答另一个问题。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：让 AI 同时写代码和测试时，测试就是它的「陈述」——它完全可以写出一组恰好能通过的弱测试。更稳的做法是<b>先由你写下验收条件</b>（哪怕只有几条），再让 AI 去满足；裁判和选手不能是同一个人。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 硬裁判不消灭信任问题，而是把它<b>压缩到一个很小、可人工审查的接口</b>：陈述 + 公理。<br/>🤔 如果未来要形式化的是一篇<b>还没有人类社区陈述</b>的新论文，谁来写那几十行陈述？由另一个模型来写，算不算把问题又推回了「没有硬裁判」的地带？<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">工程对应 → super-individual D6 (Eval 工程)</a></div>
+</div>
+</div>
+<!-- 3 -->
+<div class="card">
+<h2>定理陈述 DAG：多 agent 的协调基底<span class="en">Statement DAG as Coordination Substrate</span></h2>
+<div class="tags"><span class="tag">多 agent</span><span class="tag purple">接口与实现分离</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像 <b>Bazel 的依赖图 + C 的头文件</b>：先把所有 <code>.h</code>（接口）定下来，大家各自去写 <code>.cpp</code>（实现）；改一个实现不会触发依赖它的模块重编，构建系统按图决定下一步能并行做什么。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>报告坦承，<b>最初几次尝试失败了</b>：agent 们起步不错，但很快<b>丢失了项目状态</b>、不再有效协作——长时程任务里上下文会衰减，几十个 agent 各自的记忆也会互相漂移。转用 <b>Prove2Me</b>（哥伦比亚大学 Tianyi Peng 团队做的协作形式化平台）后才跑通。它提供的结构是：</p>
+<ul>
+<li><b>定理陈述组成一张有向无环图（DAG）</b>：节点是陈述，边是「证明 A 要用到 B」。agent 看图决定下一步证什么，状态<b>外置</b>在图上，而不是靠谁记住；</li>
+<li><b>陈述与证明分文件存放</b>，陈述不可变：一个证明可以 import <b>尚未被证明</b>的陈述，于是难题能被拆成小题，先写接口、后补实现；</li>
+<li>每条陈述配<b>自然语言描述</b>，方便搜索复用。</li>
+</ul>
+<p style="margin-top:8px">为什么这里多 agent 能放心并行？分布式系统里协作最贵的是<b>共识</b>：你得相信别人交来的东西是对的。这里每份提交都由内核独立检查，<b>agent 之间不需要互相信任，也不需要互相 review</b>——内核就是唯一的共识机制。最终约 30,300 条定理被证明，其中约 29,500 条进入了最终证明。代价同样可观：报告给出的消耗约为 <b>60 亿输出 token</b>——这是用算力换人力的典型形态，只有在裁判足够便宜时才划算。</p>
+<div class="diagram" style="margin-top:12px">
+<span class="box o">FLT（根）</span><span class="arrow">◀──</span><span class="box">引理 A ✓</span><span class="arrow">◀──</span><span class="box g">A1 ✓</span> <span class="box g">A2 ✓</span><br/>
+<span class="arrow">　　　　　◀──</span><span class="box">引理 B ?</span><span class="arrow">◀──</span><span class="box g">B1 ✓</span> <span class="box p">B2 ? ← agent 3 正在做</span><br/>
+<span class="arrow">「前沿」= 所有依赖都已证完、自身未证的节点；多个 agent 同时在前沿上取活</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="cmt"># 用标准库 graphlib 模拟：哪些陈述现在可以并行开工？</span>
+<span class="kw">from</span> graphlib <span class="kw">import</span> TopologicalSorter
+
+deps = {                        <span class="cmt"># 陈述 -&gt; 它的证明要用到的陈述</span>
+    <span class="str">"FLT"</span>: {<span class="str">"A"</span>, <span class="str">"B"</span>},
+    <span class="str">"A"</span>: {<span class="str">"A1"</span>, <span class="str">"A2"</span>}, <span class="str">"B"</span>: {<span class="str">"B1"</span>, <span class="str">"B2"</span>},
+    <span class="str">"A1"</span>: <span class="fn">set</span>(), <span class="str">"A2"</span>: <span class="fn">set</span>(), <span class="str">"B1"</span>: <span class="fn">set</span>(), <span class="str">"B2"</span>: <span class="fn">set</span>(),
+}
+ts = TopologicalSorter(deps); ts.<span class="fn">prepare</span>()
+wave = 1
+<span class="kw">while</span> ts.<span class="fn">is_active</span>():
+    frontier = ts.<span class="fn">get_ready</span>()  <span class="cmt"># 依赖都已「证完」的节点</span>
+    <span class="fn">print</span>(<span class="str">f"第 {wave} 波，可并行分给 agent：{sorted(frontier)}"</span>)
+    ts.<span class="fn">done</span>(*frontier)          <span class="cmt"># 假设内核都判通过</span>
+    wave += 1</pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">真实流程更灵活：因为可以 import 未证陈述，agent 不必等依赖证完就能先写上层证明，这里的「波次」只是最保守的调度。</p>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「多 agent 规模化靠更大的上下文或更强的单体模型」。这次的突破点恰恰是把状态<b>移出</b>模型——放进一张持久、可查询、由裁判把守的图。没有这层外部结构，同样的模型失败了。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：长期的个人研究（比如把佛学某个论题与神经科学文献对照）可以借这个结构：先列出「待确认的命题」清单和它们之间的依赖，每条命题单独找证据、单独打勾。AI 每次只领一条，你掌握整张图。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 硬裁判 + 外置状态图 = <b>无需互信的大规模协作</b>；去掉任何一项，规模都会崩。<br/>🤔 开源社区靠 code review 达成「共识」，代价高、扩展慢。如果某个领域能造出足够强的自动裁判，人类协作的组织形态会被怎样改写？<br/><a href="https://cissy0802.github.io/super-individual-weekly/multi-agent-day13.html" style="color:#7b61ff">工程对应 → super-individual D13 (Multi-agent Systems)</a></div>
+</div>
+</div>
+<!-- 4 -->
+<div class="card">
+<h2>验证了 ≠ 理解了 ≠ 可复用<span class="en">Verified ≠ Understood ≠ Reusable</span></h2>
+<div class="tags"><span class="tag">边界</span><span class="tag orange">Buzzard 的评价</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像一个<b>所有测试都过、但 1300 万行、没人能 review、也合不进主干的超大 PR</b>：功能确实对，可它不是团队代码库的一部分。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>Buzzard 称之为「非凡的自动形式化成就」，同时把代价说得很清楚：</p>
+<ul>
+<li><b>数学上没有新东西</b>：它沿用 Darmon、Diamond、Taylor 对 Wiles 证明的简化阐述，并借用了帝国理工 FLT 项目等已有工作；</li>
+<li><b>臃肿</b>：体量是它所依赖的 Mathlib 的五倍多，在 96 核机器上编译时间近二十倍；</li>
+<li><b>进不了社区库</b>：这 1300 万行目前无法进入 Mathlib，审稿人也普遍不愿审大量 AI 生成的代码；</li>
+<li><b>给人读的、可探索的证明</b>——能让人理解「为什么成立」、能被后人引用和改进的版本——仍要人来做。</li>
+</ul>
+<p style="margin-top:8px">机制上看，这三者对应三种不同的「目标函数」。<b>验证</b>只要求每一步局部正确，内核对证明多长、多绕完全不在意；<b>理解</b>要求压缩——好的证明是把一大片事实归结为几个关键想法；<b>可复用</b>要求抽象恰到好处——引理要写成别人也能用的一般形式。优化压力只施加在第一项上，所以第二、三项不会自动出现，甚至会被牺牲：最便宜的通过方式往往是具体、冗长、一次性的。</p>
+<p style="margin-top:8px">这与 Day 60 对照尤其清楚：<b>同一代模型</b>，有硬裁判处跑完了原计划多年的工作，没有硬裁判处把自己和监控一起说服。差别不在模型更「诚实」，而在<b>环境里是否存在不可被说服的检查</b>。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="cmt"># 同一个结论的两份「证明」：都正确，但可读性与复用性天差地别</span>
+<span class="kw">def</span> <span class="fn">brute_proof</span>(n):
+    <span class="cmt"># 逐个验证：每个都对，但看完也不知道「为什么」</span>
+    <span class="kw">return</span> [(k, <span class="fn">sum</span>(<span class="fn">range</span>(1, k + 1)) == k*(k+1)//2) <span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(1, n + 1)]
+
+<span class="kw">def</span> <span class="fn">insight_proof</span>():
+    <span class="cmt"># 一个想法：首尾配对 1+k, 2+(k-1)... 每对都是 k+1，共 k/2 对</span>
+    <span class="kw">return</span> <span class="str">"sum(1..k) = k(k+1)/2，对一切 k 成立，且可复用到等差数列"</span>
+
+steps = <span class="fn">brute_proof</span>(10_000)
+<span class="fn">print</span>(<span class="fn">all</span>(ok <span class="kw">for</span> _, ok <span class="kw">in</span> steps), <span class="fn">len</span>(steps), <span class="str">"条检查"</span>)
+<span class="fn">print</span>(<span class="fn">insight_proof</span>())        <span class="cmt"># 1 行，且覆盖无穷多情形</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">注意：Lean 证明不是穷举，这里只示意「局部正确的堆叠」与「一个压缩性想法」的差别。</p>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「既然机器能证，人就不用懂了」。证明在数学里的作用不只是确认真假，还是<b>传递理解的载体</b>——后人从中学到方法、发现新问题。一份只有机器能读的证明，确认了结论，却没有把方法传下去。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：AI 帮你产出能跑的代码或能用的分析后，再追加一步：「用三句话讲清<b>为什么</b>这样做是对的」。讲不清的部分，就是你还没有真正拥有、日后也无法复用的部分。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 硬裁判买到的是<b>正确性</b>，不是简洁、理解或可复用；后三者需要另外的目标函数，而目前还没人知道怎么把它们做成「内核」。<br/>🤔 物理学有大量「算得对但不懂为什么」的结果（量子力学的「闭嘴计算」传统）。数学会不会也进入这样一个阶段？那时「理解」还算是数学的一部分吗？<br/><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#7b61ff">工程对应 → super-individual D5 (Agent Design)</a></div>
+</div>
+</div>
+<!-- 资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>深入资源</h2>
+<div class="section">
+<ul>
+<li>Anthropic, <b>Formalizing Fermat's Last Theorem</b>, 2026-09, <a href="https://www.anthropic.com/research/formalizing-fermats-last-theorem">anthropic.com/research</a> — 本期主线：规模、公理与 comparator、早期失败与 Prove2Me；代码仓库 <a href="https://github.com/anthropics/fermats-last-theorem">github.com/anthropics/fermats-last-theorem</a></li>
+<li>Kevin Buzzard, <b>FLT: Anthropic has beaten me to it</b>, Xena Project blog, 2026-09-04, <a href="https://xenaproject.wordpress.com/2026/09/04/flt-anthropic-has-beaten-me-to-it/">xenaproject.wordpress.com</a> — 独立复核与代价面评价</li>
+<li>Chen, Marwaha, Lu, Yuen, Peng, <b>Prove2Me: An Open Collaborative Platform for Scaling Math Formalization</b>, arXiv:2608.28433 (2026) — 陈述 DAG、陈述与证明分离的设计</li>
+<li>The mathlib Community, <b>The Lean Mathematical Library</b>, arXiv:1910.09336 (CPP 2020) — Mathlib 的组织方式，理解「进不了库」意味着什么</li>
+<li>本站 <a href="neuro-symbolic-day42.html">Day 42 神经符号</a> · <a href="ai-for-science-day46.html">Day 46 AI for Science</a> · <a href="incident-postmortem-day60.html">Day 60 真实事故的对齐尸检</a></li>
+</ul>
+</div>
+</div>
+<!-- 思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>深入思考</h2>
+<details><summary>能不能给「无硬裁判」的领域人工造一个内核？</summary><div>部分可以。代码有测试与类型系统，数据分析有可复现脚本，事实陈述有引用检索——它们都是「局部的硬裁判」。但这类裁判有两个通病：<b>覆盖不全</b>（只查得了可形式化的那一层），以及<b>陈述由谁写</b>的问题（卡片 2）。更现实的路径或许是分层：把能形式化的部分交给机器裁判，让人的判断集中在剩下那一小块「陈述」上——信任不是消失了，而是被精确地放在了最该放的位置。</div></details>
+<details><summary>Day 60 与本期合起来，对「AI 能力在提高」意味着什么？</summary><div>同一代模型在两种环境下表现天差地别，说明「能力」不是模型的单一属性，而是<b>模型 × 环境反馈</b>的乘积。有不可说服的检查时，模型的大量试错被过滤成可靠产出；没有时，同样的试错能力变成了自我合理化的能力。对使用者来说，问题从「这个模型强不强」变成「我给它配了什么裁判」。</div></details>
+<details><summary>形式化证明会不会让数学变得像「编译后的二进制」？</summary><div>有可能出现分层：底层是机器生成、机器检查、人类不读的「二进制证明」，上层是人类写的「源码」——讲思路、讲结构、讲为什么。Buzzard 强调可探索的证明仍要人做，正是在为上层辩护。类比软件：没人读汇编，但编译器的存在让人能放心地只读高级语言。前提是两层之间有可靠的对应，而这恰恰是目前缺的——1300 万行目前还没有对应的「源码」。</div></details>
+<details><summary>「验证易、生成难」的不对称，在佛学或认知科学里有对应吗？</summary><div>有一种对照：佛学修行强调「闻思修」与「证」的区别——听懂道理（可检查）和真正体证（不可外部检查）是两回事。形式化验证恰好落在前者：它能确认命题成立，却不产生体证意义上的理解。认知科学里，识别一个解（再认）普遍比回忆或构造一个解（产生）容易。AI 在可验证领域的突破，本质上是用大规模「产生」去喂给廉价的「再认」，而人类理解所需的那种压缩，仍不在这条回路上。</div></details>
+</div>
+<footer>BigCat · AI &amp; ML · 2026 · Day 61</footer>
+</div>
+<script src="https://hub.cissychen.com/comments.js" defer></script>
+<script src="https://hub.cissychen.com/search.js" defer></script>
+<script src="https://hub.cissychen.com/index-button.js" defer></script>
+<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+</body>
+</html>

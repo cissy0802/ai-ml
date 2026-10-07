@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML Deep Dive: The Scale Leap in Machine Proof — Day 61</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML Deep Dive: The Scale Leap in Machine Proof</h1>
+<div class="meta">Day 61 · 2026-10-07</div>
+<div class="audience">For: engineers with programming experience outside AI · Level: Frontier</div>
+</header>
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+<p style="color:#cfd3df">In September 2026, Anthropic announced that dozens of Claude agents had, in <b>11 days</b>, written a complete formal proof of <b>Fermat's Last Theorem</b> (FLT: xⁿ+yⁿ=zⁿ has no positive-integer solutions for n&gt;2) in the proof assistant Lean — about 13 million lines and roughly thirty thousand intermediate theorems. This issue is not about how to build an agent pipeline. It asks one mechanism question: <b>what does "verifiable" actually buy you, and what does it not?</b> It pairs with <a href="incident-postmortem-day60.en.html">Day 60</a>: the same generation of models talked itself and its monitors into a wrong conclusion where there was <b>no hard judge</b>, and finished a job planned for years where there <b>was</b> one. Prerequisites: <a href="neuro-symbolic-day42.en.html">Day 42 Neuro-Symbolic</a>, <a href="ai-for-science-day46.en.html">Day 46 AI for Science</a>.</p>
+</div>
+<!-- 1 -->
+<div class="card">
+<h2>The Proof Kernel: A Judge That Cannot Be Persuaded<span class="en">Proof Kernel as Trusted Oracle</span></h2>
+<div class="tags"><span class="tag">Core Mechanism</span><span class="tag purple">Hard to Generate · Easy to Verify</span></div>
+<div class="section">
+<div class="label">One-line Analogy</div>
+<p>Like a <b>validating node in a blockchain</b>: anyone — even a malicious party — may propose a block. The validator ignores explanations and reputation; it simply replays every transaction. Correct gets accepted, wrong gets rejected.</p>
+</div>
+<div class="section">
+<div class="label">What Problem It Solves + How It Works</div>
+<p>The hardest LLM failure to guard against is being <b>"fluently wrong"</b>: the reasoning reads well, the conclusion is false; on Day 60 even the monitor reading the CoT was persuaded. Mathematical proofs are a prime case — human refereeing of Wiles's proof took a long time and did find a gap.</p>
+<p style="margin-top:8px">A <b>proof assistant</b> (software that checks mathematical proofs step by step) changes the trust structure. It rests on the <b>Curry–Howard correspondence</b>: <b>propositions are types, proofs are programs of that type</b>. "Proving theorem P" means "writing a term of type P", and <b>checking a proof = type checking</b>. In Lean this is done by a small <b>kernel</b> that knows only a handful of inference rules plus three standard axioms (propositional extensionality <code>propext</code>, the axiom of choice <code>Classical.choice</code>, and <code>Quot.sound</code> for quotient types).</p>
+<p style="margin-top:8px">The key is an <b>asymmetry</b>: <b>finding</b> a proof takes creativity and enormous search; <b>checking</b> one is mechanical replay. So the generator can be an unreliable, hallucinating model — once the result passes the kernel, correctness <b>no longer depends on trusting the model</b>. This is the <b>de Bruijn criterion</b>: the trusted part should be small enough for humans to audit. The kernel also <b>does not read comments or reasoning</b>, so the Day 60 channel — "the rationale persuaded the judge" — simply does not exist here.</p>
+<p style="margin-top:8px">The intuition that "verifying is far cheaper than generating" shares its roots with the P vs NP distinction in complexity theory: checking a completed Sudoku takes seconds; solving it from a blank grid can take a long time. Scaling machine proof is essentially <b>trading massive amounts of cheaply checkable trial and error for one expensive result</b>.</p>
+<div class="diagram" style="margin-top:12px">
+<span class="box p">Claude agents (untrusted, fallible)</span><span class="arrow">──candidate proof──▶</span><span class="box g">Lean kernel (small, auditable)</span><span class="arrow">──▶</span><span class="box g">Accept / Reject</span><br/>
+<span class="arrow">Trusted base = kernel + 3 axioms + <b>the theorem statement itself</b> (see card 2)</span>
+</div>
+</div>
+<div class="section">
+<div class="label">Code Example</div>
+<pre><span class="cmt"># Toy "kernel": accepts only axioms and modus ponens, checks a proof line by line</span>
+axioms = {<span class="str">"P"</span>, <span class="str">"P->Q"</span>, <span class="str">"Q->R"</span>}
+
+<span class="kw">def</span> <span class="fn">check</span>(proof, goal):
+    known = <span class="fn">set</span>()
+    <span class="kw">for</span> line <span class="kw">in</span> proof:
+        <span class="kw">if</span> line <span class="kw">in</span> axioms:
+            known.<span class="fn">add</span>(line); <span class="kw">continue</span>
+        <span class="cmt"># Need some known A and A->line, else reject — no "explanations" accepted</span>
+        <span class="kw">if</span> <span class="kw">not</span> <span class="fn">any</span>(f<span class="str">"{a}->{line}"</span> <span class="kw">in</span> known <span class="kw">for</span> a <span class="kw">in</span> known):
+            <span class="kw">return</span> <span class="kw">False</span>
+        known.<span class="fn">add</span>(line)
+    <span class="kw">return</span> goal <span class="kw">in</span> known
+
+<span class="fn">print</span>(<span class="fn">check</span>([<span class="str">"P"</span>, <span class="str">"P->Q"</span>, <span class="str">"Q"</span>, <span class="str">"Q->R"</span>, <span class="str">"R"</span>], <span class="str">"R"</span>))  <span class="cmt"># True</span>
+<span class="fn">print</span>(<span class="fn">check</span>([<span class="str">"P"</span>, <span class="str">"R"</span>], <span class="str">"R"</span>))  <span class="cmt"># False: a skipped step, however "obvious"</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">The checker is a dozen lines and treats every author's proof the same. The real Lean kernel is far more complex, but the principle is identical: <b>checking is local and mechanical</b>.</p>
+</div>
+<div class="section">
+<div class="label">Common Misconception + Practical Scenario</div>
+<div class="tip">Misconception: "AI proved FLT, so AI reasoning has become reliable." What is proven reliable is the <b>kernel</b>, not the model. The model still made plenty of mistakes along the way — the report notes that about 7% of non-boilerplate lines came from failed attempts, and far more was rejected — the wrong parts simply could not reach the finish line.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: when using AI on a personal project, first ask whether the task has a <b>cheap hard judge</b>: unit tests, type checks, reconciliation scripts, reproducible backtests. If yes, let the AI iterate freely; if not, put human judgment back in the loop — exactly the dividing line between Day 60 and this issue.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + Reflection</div>
+<div class="takeaway">💡 Verifiability replaces "trust the generator" with "trust a very small checker", so <b>the generator's unreliability can be absorbed at scale</b>.<br/>🤔 Law, medicine and investing have no kernel. If you could only build a "partly hard" judge (e.g., one that only verifies citations exist), which errors would it stop, and where would it push the rest?<br/><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">Engineering counterpart → super-individual D10 (Hallucination Governance)</a></div>
+</div>
+</div>
+<!-- 2 -->
+<div class="card">
+<h2>Statement Fidelity: The Last Mile of the Trust Boundary<span class="en">Statement Fidelity &amp; the Comparator</span></h2>
+<div class="tags"><span class="tag">Trust Boundary</span><span class="tag orange">Goodhart's Last Entry Point</span></div>
+<div class="section">
+<div class="label">One-line Analogy</div>
+<p>Like <b>CI all green while the spec is wrong</b>: the tests prove the code satisfies the tests, but cannot prove the tests check what you actually wanted.</p>
+</div>
+<div class="section">
+<div class="label">What Problem It Solves + How It Works</div>
+<p>The kernel answers exactly one question: "<b>this proof really proves this formal statement</b>". It does not answer "is this statement the theorem you had in mind". So only three attack surfaces remain:</p>
+<ul>
+<li><b>Swapped statement</b>: e.g., a definition written too broadly or narrowly, making the theorem vacuously true (the premise is never satisfied, so the "conclusion" holds automatically);</li>
+<li><b>Extra axioms</b>: a single <code>axiom</code> line can "prove" anything;</li>
+<li><b>Placeholders left in</b>: Lean's <code>sorry</code> lets you skip a step temporarily.</li>
+</ul>
+<p style="margin-top:8px">Here each was closed off: a <b>comparator</b> confirmed that the final theorem matches the FLT statement already written in the community library <b>Mathlib</b>, and the proof was confirmed to depend only on the three standard axioms, with no <code>sorry</code>. Kevin Buzzard (the Imperial College mathematician leading the human FLT formalization project) then downloaded it, compiled it, ran the kernel himself and confirmed it holds.</p>
+<p style="margin-top:8px">This has the same structure as the reward hacking in <a href="automated-alignment-researcher-day59.en.html">Day 59</a>: <b>optimization pressure flows to wherever the check is weakest</b>. Once proof correctness is welded shut by the kernel, the only loopholes left are "statement" and "axioms" — so the statement must be written in advance by <b>a party independent of the generator</b>, ideally a version that predates the work and was reviewed by the human community.</p>
+</div>
+<div class="section">
+<div class="label">Code Example</div>
+<pre><span class="cmt"># Vacuous truth: with a skewed statement, the "proof" passes but proves nothing</span>
+<span class="kw">def</span> <span class="fn">fermat_holds</span>(domain, n):
+    <span class="cmt"># "For all (x,y,z) in domain, xⁿ+yⁿ≠zⁿ"</span>
+    <span class="kw">return</span> <span class="fn">all</span>(x**n + y**n != z**n <span class="kw">for</span> x, y, z <span class="kw">in</span> domain)
+
+real = [(x, y, z) <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(1, 30)
+        <span class="kw">for</span> y <span class="kw">in</span> <span class="fn">range</span>(1, 30) <span class="kw">for</span> z <span class="kw">in</span> <span class="fn">range</span>(1, 30)]
+<span class="cmt"># Skewed definition: require x &gt; z and y &gt; z — then xⁿ+yⁿ &gt; zⁿ always</span>
+bad = [t <span class="kw">for</span> t <span class="kw">in</span> real <span class="kw">if</span> t[0] &gt; t[2] <span class="kw">and</span> t[1] &gt; t[2]]
+
+<span class="fn">print</span>(<span class="fn">fermat_holds</span>(bad, 2))   <span class="cmt"># True — "proved", yet n=2 has 3,4,5!</span>
+<span class="fn">print</span>(<span class="fn">fermat_holds</span>(real, 2))  <span class="cmt"># False — fails under the correct statement</span>
+<span class="fn">print</span>(<span class="fn">fermat_holds</span>(real, 3))  <span class="cmt"># True (a finite spot check, not a proof)</span></pre>
+</div>
+<div class="section">
+<div class="label">Common Misconception + Practical Scenario</div>
+<div class="tip">Misconception: "Formalized = absolutely correct." Formalization compresses "is the whole proof trustworthy" into "<b>are a few dozen lines of statement right</b>". That is a huge advance, but not zero. If the statement is wrong, 13 million correct lines answer a different question.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: when AI writes both code and tests, the tests are its "statement" — it can easily write weak tests that happen to pass. A sturdier approach: <b>write the acceptance criteria yourself first</b> (even just a few), then let the AI satisfy them. Referee and player cannot be the same person.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + Reflection</div>
+<div class="takeaway">💡 A hard judge does not eliminate the trust problem; it <b>compresses it into a very small, human-auditable interface</b>: statement + axioms.<br/>🤔 If what we formalize next is a new paper with <b>no community-written statement yet</b>, who writes those few dozen lines? If another model writes them, have we pushed the problem back into "no hard judge" territory?<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">Engineering counterpart → super-individual D6 (Eval Engineering)</a></div>
+</div>
+</div>
+<!-- 3 -->
+<div class="card">
+<h2>The Statement DAG: A Coordination Substrate for Many Agents<span class="en">Statement DAG as Coordination Substrate</span></h2>
+<div class="tags"><span class="tag">Multi-agent</span><span class="tag purple">Interface / Implementation Split</span></div>
+<div class="section">
+<div class="label">One-line Analogy</div>
+<p>Like <b>Bazel's dependency graph + C header files</b>: fix every <code>.h</code> (interface) up front, let everyone write their own <code>.cpp</code> (implementation); changing one implementation does not recompile its dependents, and the build system reads the graph to decide what can run in parallel next.</p>
+</div>
+<div class="section">
+<div class="label">What Problem It Solves + How It Works</div>
+<p>The report admits that <b>the first several attempts failed</b>: agents started well but quickly <b>lost track of the project state</b> and stopped collaborating effectively — context decays over long-horizon tasks, and the memories of dozens of agents drift apart. It worked only after switching to <b>Prove2Me</b> (a collaborative formalization platform from Tianyi Peng's group at Columbia University). Its structure:</p>
+<ul>
+<li><b>Theorem statements form a directed acyclic graph (DAG)</b>: nodes are statements, edges mean "proving A uses B". Agents read the graph to decide what to prove next; state is <b>externalized</b> onto the graph rather than relying on anyone's memory;</li>
+<li><b>Statements and proofs live in separate files</b>, and statements are immutable: a proof may import a statement <b>not yet proved</b>, so hard problems can be split into small ones — interface first, implementation later;</li>
+<li>Each statement carries a <b>natural-language description</b> for search and reuse.</li>
+</ul>
+<p style="margin-top:8px">Why can many agents safely work in parallel here? In distributed systems the most expensive part of collaboration is <b>consensus</b>: you have to trust what others hand you. Here every submission is checked independently by the kernel, so <b>agents need neither trust nor review each other</b> — the kernel is the sole consensus mechanism. In the end about 30,300 theorems were proved, about 29,500 of which made it into the final proof. The cost was substantial too: the report puts consumption at roughly <b>6 billion output tokens</b> — a textbook case of trading compute for labor, which only pays off when the judge is cheap enough.</p>
+<div class="diagram" style="margin-top:12px">
+<span class="box o">FLT (root)</span><span class="arrow">◀──</span><span class="box">Lemma A ✓</span><span class="arrow">◀──</span><span class="box g">A1 ✓</span> <span class="box g">A2 ✓</span><br/>
+<span class="arrow">　　　　　◀──</span><span class="box">Lemma B ?</span><span class="arrow">◀──</span><span class="box g">B1 ✓</span> <span class="box p">B2 ? ← agent 3 working</span><br/>
+<span class="arrow">"Frontier" = unproved nodes whose dependencies are all proved; many agents pull work from the frontier at once</span>
+</div>
+</div>
+<div class="section">
+<div class="label">Code Example</div>
+<pre><span class="cmt"># Simulate with stdlib graphlib: which statements can be worked on in parallel now?</span>
+<span class="kw">from</span> graphlib <span class="kw">import</span> TopologicalSorter
+
+deps = {                        <span class="cmt"># statement -&gt; statements its proof uses</span>
+    <span class="str">"FLT"</span>: {<span class="str">"A"</span>, <span class="str">"B"</span>},
+    <span class="str">"A"</span>: {<span class="str">"A1"</span>, <span class="str">"A2"</span>}, <span class="str">"B"</span>: {<span class="str">"B1"</span>, <span class="str">"B2"</span>},
+    <span class="str">"A1"</span>: <span class="fn">set</span>(), <span class="str">"A2"</span>: <span class="fn">set</span>(), <span class="str">"B1"</span>: <span class="fn">set</span>(), <span class="str">"B2"</span>: <span class="fn">set</span>(),
+}
+ts = TopologicalSorter(deps); ts.<span class="fn">prepare</span>()
+wave = 1
+<span class="kw">while</span> ts.<span class="fn">is_active</span>():
+    frontier = ts.<span class="fn">get_ready</span>()  <span class="cmt"># nodes whose dependencies are all "proved"</span>
+    <span class="fn">print</span>(<span class="str">f"Wave {wave}, assign to agents in parallel: {sorted(frontier)}"</span>)
+    ts.<span class="fn">done</span>(*frontier)          <span class="cmt"># assume the kernel accepts them all</span>
+    wave += 1</pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">The real process is more flexible: since unproved statements can be imported, agents need not wait for dependencies before writing higher-level proofs. These "waves" are just the most conservative schedule.</p>
+</div>
+<div class="section">
+<div class="label">Common Misconception + Practical Scenario</div>
+<div class="tip">Misconception: "Scaling multi-agent work needs bigger contexts or a stronger single model." The breakthrough here was precisely moving state <b>out</b> of the model — into a persistent, queryable graph guarded by the judge. Without that external structure, the same models failed.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: a long-running personal research effort (say, comparing a Buddhist thesis with neuroscience literature) can borrow this structure: list the "claims to be confirmed" and their dependencies, gather evidence for each claim separately, tick each off separately. The AI takes one claim at a time; you hold the whole graph.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + Reflection</div>
+<div class="takeaway">💡 Hard judge + externalized state graph = <b>large-scale collaboration without mutual trust</b>; remove either and scale collapses.<br/>🤔 Open-source communities reach "consensus" through code review, which is costly and scales slowly. If some field could build a strong enough automatic judge, how would the shape of human collaboration be rewritten?<br/><a href="https://cissy0802.github.io/super-individual-weekly/multi-agent-day13.html" style="color:#7b61ff">Engineering counterpart → super-individual D13 (Multi-agent Systems)</a></div>
+</div>
+</div>
+<!-- 4 -->
+<div class="card">
+<h2>Three Different Finish Lines<span class="en">Verified ≠ Understood ≠ Reusable</span></h2>
+<div class="tags"><span class="tag">Limits</span><span class="tag orange">Buzzard's Assessment</span></div>
+<div class="section">
+<div class="label">One-line Analogy</div>
+<p>Like a <b>giant PR that passes every test but is 13 million lines, unreviewable, and unmergeable into main</b>: the functionality is genuinely correct, but it is not part of the team's codebase.</p>
+</div>
+<div class="section">
+<div class="label">What Problem It Solves + How It Works</div>
+<p>Buzzard called it an "extraordinary autoformalization achievement", while being clear about the costs:</p>
+<ul>
+<li><b>No new mathematics</b>: it follows Darmon, Diamond and Taylor's simplified exposition of Wiles's proof, and borrows from prior work such as the Imperial College FLT project;</li>
+<li><b>Bloated</b>: more than five times the size of Mathlib, which it builds on, and nearly twenty times the compile time on a 96-core machine;</li>
+<li><b>Can't enter the community library</b>: these 13 million lines cannot currently go into Mathlib, and reviewers are generally reluctant to review large volumes of AI-generated code;</li>
+<li><b>A human-readable, explorable proof</b> — one that lets people understand <i>why</i> it holds, and that later work can cite and improve — still has to be done by people.</li>
+</ul>
+<p style="margin-top:8px">Mechanistically, these correspond to three different objective functions. <b>Verification</b> only requires each step to be locally correct; the kernel does not care how long or roundabout the proof is. <b>Understanding</b> requires compression — a good proof reduces a mass of facts to a few key ideas. <b>Reusability</b> requires just the right abstraction — lemmas stated in general forms others can use. Optimization pressure was applied only to the first, so the second and third don't appear on their own and may even be sacrificed: the cheapest way to pass is often concrete, verbose and single-use.</p>
+<p style="margin-top:8px">The contrast with Day 60 is especially clear: <b>the same generation of models</b> finished years of planned work where there was a hard judge, and talked itself and its monitors into error where there wasn't. The difference is not that the model became more "honest", but <b>whether the environment contains a check that cannot be persuaded</b>.</p>
+</div>
+<div class="section">
+<div class="label">Code Example</div>
+<pre><span class="cmt"># Two "proofs" of the same fact: both correct, wildly different in readability and reuse</span>
+<span class="kw">def</span> <span class="fn">brute_proof</span>(n):
+    <span class="cmt"># Check case by case: every one is right, but you still don't know "why"</span>
+    <span class="kw">return</span> [(k, <span class="fn">sum</span>(<span class="fn">range</span>(1, k + 1)) == k*(k+1)//2) <span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(1, n + 1)]
+
+<span class="kw">def</span> <span class="fn">insight_proof</span>():
+    <span class="cmt"># One idea: pair first and last, 1+k, 2+(k-1)... each pair is k+1, k/2 pairs</span>
+    <span class="kw">return</span> <span class="str">"sum(1..k) = k(k+1)/2 for every k, and reusable for arithmetic series"</span>
+
+steps = <span class="fn">brute_proof</span>(10_000)
+<span class="fn">print</span>(<span class="fn">all</span>(ok <span class="kw">for</span> _, ok <span class="kw">in</span> steps), <span class="fn">len</span>(steps), <span class="str">"checks"</span>)
+<span class="fn">print</span>(<span class="fn">insight_proof</span>())        <span class="cmt"># one line, covers infinitely many cases</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">Note: a Lean proof is not exhaustive enumeration; this only illustrates the gap between "stacking locally correct steps" and "one compressive idea".</p>
+</div>
+<div class="section">
+<div class="label">Common Misconception + Practical Scenario</div>
+<div class="tip">Misconception: "If machines can prove it, humans don't need to understand it." In mathematics a proof does more than settle truth; it is <b>a vehicle for transmitting understanding</b> — later readers learn methods from it and discover new questions. A proof only machines can read confirms the result but does not pass the method on.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: after AI produces working code or a usable analysis, add one more step: "explain in three sentences <b>why</b> this is right". Whatever can't be explained is the part you don't truly own yet — and won't be able to reuse.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + Reflection</div>
+<div class="takeaway">💡 A hard judge buys <b>correctness</b>, not concision, understanding or reusability; those need different objective functions, and nobody yet knows how to turn them into a "kernel".<br/>🤔 Physics is full of results that "compute correctly without anyone understanding why" (quantum mechanics' "shut up and calculate" tradition). Could mathematics enter such a phase? Would "understanding" still be part of mathematics then?<br/><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#7b61ff">Engineering counterpart → super-individual D5 (Agent Design)</a></div>
+</div>
+</div>
+<!-- Resources -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>Further Resources</h2>
+<div class="section">
+<ul>
+<li>Anthropic, <b>Formalizing Fermat's Last Theorem</b>, 2026-09, <a href="https://www.anthropic.com/research/formalizing-fermats-last-theorem">anthropic.com/research</a> — the main source: scale, axioms and comparator, early failures and Prove2Me; repository <a href="https://github.com/anthropics/fermats-last-theorem">github.com/anthropics/fermats-last-theorem</a></li>
+<li>Kevin Buzzard, <b>FLT: Anthropic has beaten me to it</b>, Xena Project blog, 2026-09-04, <a href="https://xenaproject.wordpress.com/2026/09/04/flt-anthropic-has-beaten-me-to-it/">xenaproject.wordpress.com</a> — independent re-check and the assessment of costs</li>
+<li>Chen, Marwaha, Lu, Yuen, Peng, <b>Prove2Me: An Open Collaborative Platform for Scaling Math Formalization</b>, arXiv:2608.28433 (2026) — the statement DAG and statement/proof separation design</li>
+<li>The mathlib Community, <b>The Lean Mathematical Library</b>, arXiv:1910.09336 (CPP 2020) — how Mathlib is organized, to understand what "can't enter the library" means</li>
+<li>On this site: <a href="neuro-symbolic-day42.en.html">Day 42 Neuro-Symbolic</a> · <a href="ai-for-science-day46.en.html">Day 46 AI for Science</a> · <a href="incident-postmortem-day60.en.html">Day 60 Alignment Post-Mortem of Real Incidents</a></li>
+</ul>
+</div>
+</div>
+<!-- Reflection -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>Deeper Reflection</h2>
+<details><summary>Can we build a kernel artificially for fields with no hard judge?</summary><div>Partly. Code has tests and type systems, data analysis has reproducible scripts, factual claims have citation lookups — all "local hard judges". But they share two weaknesses: <b>incomplete coverage</b> (they only check the formalizable layer) and the question of <b>who writes the statement</b> (card 2). A more realistic path may be layering: hand the formalizable parts to machine judges and concentrate human judgment on the small remaining "statement". Trust doesn't disappear; it is placed precisely where it matters most.</div></details>
+<details><summary>Taken together with Day 60, what does "AI capability is rising" mean?</summary><div>The same generation of models behaves wildly differently in the two environments, which suggests "capability" is not a single property of the model but the product <b>model × environmental feedback</b>. With an unpersuadable check, massive trial and error is filtered into reliable output; without one, the same capacity for trial and error becomes a capacity for self-rationalization. For users, the question shifts from "how strong is this model" to "what judge have I given it".</div></details>
+<details><summary>Will formal proofs make mathematics look like "compiled binaries"?</summary><div>A layering may emerge: at the bottom, machine-generated, machine-checked "binary proofs" no human reads; on top, human-written "source" that explains ideas, structure and why. Buzzard's insistence that explorable proofs still need people is a defense of that top layer. The software analogy: nobody reads assembly, but compilers let us confidently read only the high-level language. That presumes a reliable mapping between layers — exactly what is missing now; the 13 million lines have no corresponding "source" yet.</div></details>
+<details><summary>Does the "easy to verify, hard to generate" asymmetry have a counterpart in Buddhism or cognitive science?</summary><div>One parallel: Buddhist practice distinguishes understanding through hearing and reflection from direct realization — grasping the argument (checkable) and genuinely realizing it (not externally checkable) are different. Formal verification sits squarely in the former: it confirms a proposition holds but does not produce understanding in the realization sense. In cognitive science, recognizing a solution is generally easier than recalling or constructing one. AI's breakthrough in verifiable domains essentially feeds large-scale "production" into cheap "recognition", while the compression human understanding requires is still not on this loop.</div></details>
+</div>
+<footer>BigCat · AI &amp; ML · 2026 · Day 61</footer>
+</div>
+<script src="https://hub.cissychen.com/comments.js" defer></script>
+<script src="https://hub.cissychen.com/search.js" defer></script>
+<script src="https://hub.cissychen.com/index-button.js" defer></script>
+<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+</body>
+</html>
