@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML 详解：可靠性的度量学 — Day 62</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML 详解：可靠性的度量学</h1>
+<div class="meta">Day 62 · 2026-10-14</div>
+<div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：进阶</div>
+</header>
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+<p style="color:#cfd3df">排行榜上的「成功率 65%」只回答了一个问题：<b>它做得到吗？</b>真正决定能不能把活交给 agent 的，是另一个问题：<b>它每次都做得到吗？</b>本期讲四个把「一次」和「每次」区分开的度量工具：pass^k、时长视界、风险率模型，以及尾部外推的不确定性。前置阅读：<a href="evaluation-benchmarks-day15.html">Day 15 评估与基准</a>、<a href="model-versioning-day56.html">Day 56 评测可复现性</a>。</p>
+</div>
+<!-- 1 -->
+<div class="card">
+<h2>pass@k 与 pass^k：「至少一次」vs「每一次」<span class="en">pass@k vs pass^k</span></h2>
+<div class="tags"><span class="tag">度量定义</span><span class="tag purple">任务异质性</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>pass@k 像<b>读多副本</b>：k 个副本里任一个返回就算成功；pass^k 像<b>串联调用链</b>：k 次调用必须全部成功，整条链才算可用。同一个组件，两种组合方式给出的可用性天差地别。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>代码生成领域早就有 <b>pass@k</b>（Codex 论文，Chen et al. 2021）：对同一题采样 k 次，<b>至少一次</b>通过单元测试就算解出。这符合「有测试兜底、可以挑最好一份」的场景。但客服、下单、改数据库这类 agent 任务<b>没有挑选的机会</b>——每个真实用户只给一次机会。τ-bench（Yao et al. 2024）因此提出 <b>pass^k</b>：同一任务独立跑 k 次，<b>全部成功</b>才算。论文报告，即便是 GPT-4o 也只完成不到 50% 的任务，retail 域的 pass^8 更跌到 25% 以下。</p>
+<p style="margin-top:8px">两者都用无偏估计：每题跑 n 次、成功 c 次，则</p>
+<ul>
+<li><b>pass@k = 1 − C(n−c, k) / C(n, k)</b>：从 n 次里抽 k 次、<b>一次都没成功</b>的概率取补；</li>
+<li><b>pass^k = C(c, k) / C(n, k)</b>：抽出的 k 次<b>恰好都落在成功里</b>的概率。</li>
+</ul>
+<p style="margin-top:8px">关键直觉在<b>任务异质性</b>。若每题成功率都是 p，pass^k 就是 p^k，随 k 指数下滑；但现实中更常见的是「有些题永远对、有些题几乎永远错」。pass^k 是<b>各题 p_i^k 的平均</b>，不是平均 p 的 k 次方——前者衰减得慢得多。所以 <b>pass^k 曲线的形状本身是诊断信号</b>：曲线快速下滑说明失败是随机的、每次重来都可能换个结果；曲线很快变平说明失败集中在固定的一批题上，重来多少次都没用。</p>
+<p style="margin-top:8px">这也说明了<b>重试为什么时灵时不灵</b>。若各次尝试独立，k 次里至少成功一次的概率是 1 − (1 − p)^k，重试收益随 k 迅速累积；但这个公式的前提恰恰是「失败随机」。失败集中在固定任务上时，重试只是在同一个盲区里反复撞墙。换句话说，pass@k 与 pass^k 之间的差距，等价于告诉你<b>有多少失败是「运气」、多少是「不会」</b>。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">from</span> math <span class="kw">import</span> comb
+
+<span class="kw">def</span> <span class="fn">pass_at_k</span>(n, c, k): <span class="kw">return</span> 1 - comb(n - c, k) / comb(n, k)  <span class="cmt"># 至少一次</span>
+<span class="kw">def</span> <span class="fn">pass_hat_k</span>(n, c, k): <span class="kw">return</span> comb(c, k) / comb(n, k)        <span class="cmt"># 每一次</span>
+
+<span class="cmt"># 10 道题，每题跑 n=8 次：6 道每次都对，4 道 8 次里只对 1 次</span>
+n, succ = 8, [8]*6 + [1]*4
+<span class="kw">for</span> k <span class="kw">in</span> (1, 4, 8):
+    at  = <span class="fn">sum</span>(pass_at_k(n, c, k) <span class="kw">for</span> c <span class="kw">in</span> succ) / <span class="fn">len</span>(succ)
+    hat = <span class="fn">sum</span>(pass_hat_k(n, c, k) <span class="kw">for</span> c <span class="kw">in</span> succ) / <span class="fn">len</span>(succ)
+    <span class="fn">print</span>(<span class="str">f"k={k}: pass@k={at:.2f}  pass^k={hat:.2f}"</span>)
+<span class="cmt"># k=1: 0.65 / 0.65   k=4: 0.80 / 0.60   k=8: 1.00 / 0.60</span>
+
+p = <span class="fn">sum</span>(succ) / (n * <span class="fn">len</span>(succ))
+<span class="fn">print</span>(<span class="str">f"若失败完全随机，同样 65% 的 pass^8 = {p**8:.3f}"</span>)  <span class="cmt"># 0.032</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">同样是 65% 的单次成功率：失败集中时 pass^8 = 0.60，失败随机时只有 0.03。<b>只报 pass@1 的榜单，把这两种系统看成同一个</b>。</p>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「pass@k 高说明多试几次就行」。这只有在<b>每次尝试相互独立、且有可靠的裁判挑出正确那份</b>时才成立。没有裁判时，k 次输出里哪份对你并不知道；失败若集中在固定的题上，也根本不独立。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：评估一个日常用的 AI 工作流（例如每周自动整理投资笔记）时，别只看「这次结果好不好」，把同一输入跑 5 次，看结果<b>是否每次都可接受</b>。5 次全对的流程才配得上「自动化」三个字。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 pass@k 衡量<b>能力上限</b>，pass^k 衡量<b>可托付程度</b>；两条曲线之间的缝隙，就是「会做」与「靠得住」的距离。<br/>🤔 人类员工的 pass^k 通常远高于 pass@1 所暗示的水平，因为人会察觉自己出错。这种「自我察觉」应该算进模型能力，还是算进外部裁判？<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">工程对应 → super-individual D6 (Eval 工程)</a></div>
+</div>
+</div>
+<!-- 2 -->
+<div class="card">
+<h2>时长视界：把可靠性折算成「能交多长的活」<span class="en">Task-Completion Time Horizon</span></h2>
+<div class="tags"><span class="tag">METR</span><span class="tag purple">logistic 斜率</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像延迟监控里的 <b>p50 和 p99</b>：同一个服务，按中位数看很快，按尾部看可能慢一个量级。时长视界的 50% 和 80% 就是可靠性的「中位数」与「尾部」。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>不同基准的成功率没法直接比较：SWE-bench 的 60% 和 τ-bench 的 60% 难度不同。METR（Kwa et al. 2025，arXiv:2503.14499）换了一个统一的尺子：<b>请人类专家做同一批任务并记录用时</b>，再问「模型在<b>多长</b>的任务上还有 50% 的成功率」。这个时长就是 <b>50% 时长视界</b>；把门槛提到 80%，得到 80% 时长视界。</p>
+<p style="margin-top:8px">做法是把成功率对<b>任务时长的对数</b>拟合一条 logistic 曲线：</p>
+<p style="margin-top:6px"><code>P(成功 | 时长 t) = σ(α − β·ln t)</code></p>
+<p style="margin-top:6px">σ 是把任意实数压到 0–1 之间的 S 形函数；<b>α</b> 决定曲线在哪个时长跨过 50%（即模型多强）；<b>β</b> 是曲线的陡峭程度——β 大，成功率在某个时长附近陡降；β 小，成功率随时长缓慢衰减。解出两个视界后有一个简洁的结论：</p>
+<p style="margin-top:6px"><code>h<sub>50</sub> / h<sub>80</sub> = 4<sup>1/β</sup></code></p>
+<p style="margin-top:6px">（4 来自 80%/20% 的赔率。）也就是说，<b>50% 与 80% 视界之比只取决于斜率 β，与模型多强无关</b>。β = 1 时比值是 4；β = 0.7 时就到了约 7 倍。早期论文中 Claude 3.7 Sonnet 的两个视界约为 59 分钟和 15 分钟，比值约 4。为什么用时长的<b>对数</b>？因为任务难度是乘法式增长的：从 1 分钟到 10 分钟，与从 1 小时到 10 小时，跨越的是同样的「数量级」。METR 也据此报告：前沿模型的 50% 视界自 2019 年以来大约每 7 个月翻一番。社区后续对更新模型的测算显示，这一比值并没有随能力提升而收窄，部分模型反而更大——曲线变得更平，长任务偶尔能做成，短任务却也偶尔失手。</p>
+<div class="diagram" style="margin-top:12px">
+成功率<br/>
+100% ┤■■■■■■■□□<br/>
+&nbsp;80% ┤········■■□□□······ ← h<sub>80</sub>（尾部）<br/>
+&nbsp;50% ┤··················■■■□□····· ← h<sub>50</sub>（中位）<br/>
+&nbsp;&nbsp;0% ┼────────────────────────────▶ ln(人类用时)<br/>
+<span class="arrow">β 越小（曲线越平），两条水平线之间的横向距离越大</span>
+</div>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> math
+
+<span class="kw">def</span> <span class="fn">horizon</span>(alpha, beta, q):
+    <span class="cmt"># 解 σ(α − β·ln t) = q  →  ln t = (α − logit(q)) / β</span>
+    logit = math.log(q / (1 - q))
+    <span class="kw">return</span> math.exp((alpha - logit) / beta)
+
+<span class="kw">for</span> beta <span class="kw">in</span> (1.0, 0.7):
+    alpha = beta * math.log(60)          <span class="cmt"># 让两条曲线的 h50 都是 60 分钟</span>
+    h50, h80 = horizon(alpha, beta, 0.5), horizon(alpha, beta, 0.8)
+    <span class="fn">print</span>(<span class="str">f"β={beta}: h50={h50:.0f}min  h80={h80:.1f}min  比值={h50/h80:.1f}x"</span>)
+<span class="cmt"># β=1.0: h50=60min  h80=15.0min  比值=4.0x</span>
+<span class="cmt"># β=0.7: h50=60min  h80=8.3min  比值=7.2x</span></pre>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「50% 视界翻倍，就能放心交两倍长的活」。50% 视界衡量的是<b>抛硬币水平</b>的能力边界；能放手的区间要看 80% 甚至更高，而它可能只有前者的几分之一。另外两个视界来自同一条拟合曲线，并非独立测量。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：给 AI 分活时，用「人类做这件事要多久」来粗估风险：几分钟的小任务可以放手，接近半天的任务要拆成若干步、每步人工过目。拆分的意义就是<b>把每一段都拉回高可靠区间</b>。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 时长视界把可靠性翻译成「能交多长的活」；<b>50% 与 80% 之间的距离由曲线斜率决定</b>，能力进步不会自动缩小它。<br/>🤔 用人类用时当难度尺子，暗含「人类觉得难的，模型也觉得难」。对于「人类几秒、模型常错」的任务（比如数清字母），这把尺子会怎样失真？<br/><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#7b61ff">工程对应 → super-individual D5 (Agent Design)</a></div>
+</div>
+</div>
+<!-- 3 -->
+<div class="card">
+<h2>风险率模型：失败是匀速发生的吗？<span class="en">Hazard Rate &amp; Weibull Survival</span></h2>
+<div class="tags"><span class="tag">生存分析</span><span class="tag orange">一个被撤回的模型</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像硬件可靠性里的<b>浴盆曲线</b>：新硬盘早期故障多，熬过「早夭期」之后反而稳定。问题是 agent 的失败更像「每分钟固定概率掉链子」，还是更像「开头最容易翻车」？</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>时长视界是经验拟合，没说<b>为什么</b>成功率随时长下降。Toby Ord 2025 年给出了最简单的机制假设（arXiv:2505.05115）：<b>风险率恒定</b>（hazard rate：在「已经撑到此刻」的条件下，下一分钟失败的概率）。若每分钟失败概率固定，任务就像 n 个串联步骤，成功率 = p^n，呈指数衰减——像放射性衰变，<b>50% 视界正好是 agent 的「半衰期」</b>。这个模型漂亮之处在于一个参数就能推出所有视界。</p>
+<p style="margin-top:8px">2026 年初，Gus Hamilton 用生存分析里更一般的 <b>Weibull 分布</b>重新拟合了 METR 数据：</p>
+<p style="margin-top:6px"><code>S(t) = exp(−(t/λ)<sup>k</sup>)</code></p>
+<p style="margin-top:6px">S(t) 是「撑过时长 t」的概率；<b>λ</b> 是时间尺度，对应模型强弱；<b>k</b> 是形状参数：k = 1 退化为恒定风险率，<b>k &lt; 1 表示风险率随任务推进而下降</b>，k &gt; 1 表示越做越容易出错。结果所有模型的 k 都显著小于 1，大致集中在 0.6 附近，而且<b>模型变强时 k 几乎不变</b>——进步主要体现在 λ 上。Ord 随后公开改变了看法，承认恒定风险率假设不成立。二手汇总还提到，人类基线的 k 更低（约 0.37），Hamilton 将其解读为<b>人类更会自我纠错</b>：熬过开头之后，后面越来越稳。</p>
+<p style="margin-top:8px">后果是不对称的：与同一 50% 视界的恒定风险率模型相比，k &lt; 1 意味着<b>超过视界的长任务比预想的好，短任务反而比预想的差</b>——风险集中在任务开头（理解需求、选错路径）。</p>
+<p style="margin-top:8px">k &lt; 1 还有一个与机制无关的统计来源，值得警惕：<b>筛选效应</b>。即便每类任务的风险率都恒定，只要把「容易的」和「困难的」任务混在一起，困难的那批会早早失败退出，活到后期的大多是容易的那批，于是<b>总体</b>风险率看起来在下降。生存分析里称之为异质性（frailty）效应。所以 k 小于 1 既可能意味着「模型越做越稳」，也可能只是「题目难度参差不齐」——要区分两者，需要在同一任务内部观察失败发生的时间点，而不只是看最终成败。</p>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> math
+
+<span class="kw">def</span> <span class="fn">survival</span>(t, h50, k):
+    lam = h50 / math.log(2) ** (1 / k)     <span class="cmt"># 让 S(h50) 恰好 = 50%</span>
+    <span class="kw">return</span> math.exp(-(t / lam) ** k)
+
+<span class="kw">for</span> k <span class="kw">in</span> (1.0, 0.6):                     <span class="cmt"># 恒定风险率 vs 递减风险率</span>
+    row = [<span class="str">f"{t}min:{survival(t, 60, k):.2f}"</span> <span class="kw">for</span> t <span class="kw">in</span> (5, 15, 240, 600)]
+    <span class="fn">print</span>(<span class="str">f"k={k}"</span>, <span class="str">"  "</span>.join(row))
+<span class="cmt"># k=1.0 5min:0.94  15min:0.84  240min:0.06  600min:0.00</span>
+<span class="cmt"># k=0.6 5min:0.86  15min:0.74  240min:0.20  600min:0.06</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">两条曲线 50% 视界都是 60 分钟。k = 0.6 时，5 分钟小任务的成功率从 94% 掉到 86%，10 小时任务却从几乎为零升到 6%。</p>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「Weibull 拟合得更好，所以它就是真相」。多一个参数的模型<b>总能拟合得至少一样好</b>，Ord 本人也强调这一点；让他改变看法的是 k 在所有模型上都显著小于 1。它是更好的描述，不是已证实的机制。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：k &lt; 1 提示风险集中在开头。和 AI 协作长任务时，把人的注意力<b>前置</b>：先审它对目标的复述与第一步计划，比在中途抽查更划算——这和带新人「头三天盯紧、之后放手」是同一个道理。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 恒定风险率给了一个优雅的「半衰期」，但数据显示 agent 的风险<b>随任务推进而下降</b>；形状参数 k 比视界本身更能刻画「怎么失败」。<br/>🤔 若 k 代表自我纠错能力，而模型变强时 k 几乎不动，那么「更强」和「更会纠错」也许是两种不同的进步。哪种训练信号可能直接改变 k？</div>
+</div>
+</div>
+<!-- 4 -->
+<div class="card">
+<h2>尾部外推与测量噪声：99% 是测不出来的<span class="en">Tail Extrapolation &amp; Evaluation Noise</span></h2>
+<div class="tags"><span class="tag">不确定性</span><span class="tag orange">模型选择 · 模拟器混杂</span></div>
+<div class="section">
+<div class="label">一句话类比</div>
+<p>像用几百个请求样本去估 <b>p99.99 延迟</b>：数据根本没覆盖那个区间，得出的数字主要反映你选的分布假设，而不是系统本身；如果压测工具自己也会抖，测出的尾部还混着工具的噪声。</p>
+</div>
+<div class="section">
+<div class="label">它解决什么问题 + 工作机制</div>
+<p>真正关心可靠性时，我们想知道的是 99% 甚至 99.9% 的视界——这才是「能无人值守」的区间。但基准里的任务数有限，<b>高可靠区间几乎没有数据点</b>，只能靠曲线外推。两个来源的误差在这里叠加：</p>
+<ul>
+<li><b>模型形式误差</b>：METR 默认的 log-logistic 曲线与 Weibull 曲线在 20%–80% 的中段几乎重合，Hamilton 指出它们<b>在尾部显著分叉</b>。下面的代码把两者校准到同一组 50%/80% 视界，到 99% 已经相差约 2 倍，到 99.9% 约 4 倍——而数据无法判定谁对。原因很朴素：要直接测出 99% 的成功率，得在那个时长附近积累数百个任务，误差才压得下去；而 1 次失败与 0 次失败之间，估计值就可能差出一大截。METR 2026 年的建模假设说明也列出了 Weibull 这种替代方案对视界估计的影响。</li>
+<li><b>环境噪声</b>：pass^k 假设每次失败都怪 agent，但 τ-bench 类评测里「用户」本身是 LLM 扮演的。τ²-bench（Barres et al. 2025，arXiv:2506.07982）检查了用户模拟器，发现 retail 与 airline 域的模拟器出错率约 40% 与 47%，其中约 12% 与 13% 是<b>足以让任务失败的严重错误</b>；约束更强的 telecom 域只有 16%（严重 6%）。这部分失败会被算进 agent 头上，并在 pass^k 里<b>按 k 次方放大</b>。</li>
+</ul>
+</div>
+<div class="section">
+<div class="label">代码示例</div>
+<pre><span class="kw">import</span> math
+h50 = 60.0; r = 6.6                        <span class="cmt"># 两模型共同的 h50=60min，h50/h80=6.6</span>
+inv_b = math.log(r) / math.log(4)          <span class="cmt"># log-logistic 的 1/β</span>
+k = math.log(math.log(2) / -math.log(0.8)) / math.log(r)  <span class="cmt"># Weibull 的 k（≈0.60）</span>
+<span class="kw">for</span> q <span class="kw">in</span> (0.8, 0.99, 0.999):
+    ll = h50 / (q / (1 - q)) ** inv_b
+    wb = h50 * (-math.log(q) / math.log(2)) ** (1 / k)
+    <span class="fn">print</span>(<span class="str">f"{q:.1%}: log-logistic={ll:.4f}min Weibull={wb:.4f}min 比={ll/wb:.1f}x"</span>)
+<span class="cmt"># 80.0%: 比=1.0x   99.0%: 比=2.2x   99.9%: 比=4.4x</span>
+
+p_agent, sim_crit = 0.90, 0.12             <span class="cmt"># agent 自身 90%，模拟器 12% 严重出错</span>
+<span class="kw">for</span> n <span class="kw">in</span> (1, 4, 8):
+    <span class="fn">print</span>(n, <span class="fn">round</span>(p_agent**n, 2), <span class="fn">round</span>((p_agent * (1 - sim_crit))**n, 2))
+<span class="cmt"># 1 0.9 0.79   4 0.66 0.39   8 0.43 0.15  ← 测到的 pass^8 只剩真实值约三分之一</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">第二段把模拟器错误简化为独立事件，只为示意「环境噪声在 pass^k 里会复利」。</p>
+</div>
+<div class="section">
+<div class="label">常见误区 + 实践场景</div>
+<div class="tip">误区：「报告给出了 99% 视界的点估计，就可以按它来规划」。尾部数字<b>主要由分布假设决定</b>，置信区间往往比点估计本身更有信息量；再加上测量环境的噪声，一个低 pass^k 可能有相当部分是裁判和陪练的问题。</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat 场景：判断一项 AI 能力「够不够格」接手某件事时，问三个问题：数据覆盖了我关心的可靠性区间吗？换个合理的曲线假设，结论会翻转吗？失败里有多少来自评测环境本身？三问都答得上，数字才可信。</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + 思考题</div>
+<div class="takeaway">💡 高可靠区间<b>测不出来、只能推出来</b>，而推法本身就是最大的不确定性；评测环境的噪声还会被 pass^k 成倍放大。<br/>🤔 如果 99% 视界注定只能外推，「agent 已经可以无人值守地做 X」这种说法，应该要求什么样的证据才算成立？<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">工程对应 → super-individual D6 (Eval 工程)</a></div>
+</div>
+</div>
+<!-- 资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>深入资源</h2>
+<div class="section">
+<ul>
+<li>Yao, Shinn, Razavi, Narasimhan, <b>τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains</b>, arXiv:2406.12045 (2024) — pass^k 的出处</li>
+<li>Barres, Dong, Ray, Si, Narasimhan, <b>τ²-Bench: Evaluating Conversational Agents in a Dual-Control Environment</b>, arXiv:2506.07982 (2025) — 用户模拟器错误率分析</li>
+<li>Kwa et al. (METR), <b>Measuring AI Ability to Complete Long Tasks</b>, arXiv:2503.14499 (2025) — 50%/80% 时长视界方法</li>
+<li>Toby Ord, <b>Is there a half-life for the success rates of AI agents?</b>, arXiv:2505.05115 (2025)；以及其 2026 年博文 <b>Hazard Rates for AI Agents Decline as a Task Goes On</b>（tobyord.com）——恒定风险率模型及其修正</li>
+<li>Chen et al., <b>Evaluating Large Language Models Trained on Code</b>, arXiv:2107.03374 (2021) — pass@k 无偏估计</li>
+</ul>
+</div>
+</div>
+<!-- 思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>深入思考</h2>
+<details><summary>pass^k 的衰减曲线和 Weibull 的 k，说的是同一件事吗？</summary><div>相关但不同。pass^k 看的是<b>同一任务重复跑</b>时的一致性，曲线变平说明失败集中在固定任务上，是「任务间异质性」；Weibull 的 k 看的是<b>同一次运行内部</b>风险随时间如何变化，是「过程内动态」。一个系统可以每次都在同一处翻车（pass^k 平、k 小），也可以每次随机翻车（pass^k 陡）。把两者放在一起，才能分清「它不会」和「它不稳」。</div></details>
+<details><summary>为什么分布式系统靠冗余能把 99% 堆到 99.999%，agent 却很难？</summary><div>冗余堆可用性的前提是<b>故障独立</b>：两台机器同时坏的概率是各自概率的乘积。agent 多次尝试的失败往往高度相关——同一模型、同一误解、同一盲区，正是卡片 1 里那批「永远错」的题。冗余要奏效，需要真正异构的副本（不同模型、不同提示、不同方法）加一个可靠的裁判，这又把问题推回 <a href="formal-proof-day61.html">Day 61</a> 的「有没有硬裁判」。</div></details>
+<details><summary>人类 k 更低、更会自我纠错，这种能力来自哪里？</summary><div>一种解释是元认知：人会在中途察觉「不对劲」并回退，所以熬过开头之后越做越稳。Hamilton 借用 Peto 悖论（体型巨大的鲸鱼并不因细胞多而更易患癌，因为演化出了更强的纠错机制）来类比。对模型而言，类似能力可能来自更好的自我验证与回溯；但如果 k 在代际间几乎不动，就说明单纯扩大规模没有自动带来这种能力。这也与佛学「正念」对念头的觉察有可对照之处：觉察本身就是一种纠错回路。</div></details>
+<details><summary>可靠性该由模型提供，还是由系统提供？</summary><div>分布式系统给的答案很明确：<b>用不可靠的组件搭可靠的系统</b>，靠的是检测、重试、回滚和隔离，而不是要求每块硬盘都不坏。agent 领域的度量学在逼近同一结论——单个模型的 99% 视界又短又测不准，可靠性更可能来自外部结构。但前提是故障可检测：硬盘坏了会报错，agent 错了却常常流畅地给出错误答案（<a href="incident-postmortem-day60.html">Day 60</a>）。检测能力因此成为整条链路的瓶颈。</div></details>
+</div>
+<footer>BigCat · AI &amp; ML · 2026 · Day 62</footer>
+</div>
+<script src="https://hub.cissychen.com/comments.js" defer></script>
+<script src="https://hub.cissychen.com/search.js" defer></script>
+<script src="https://hub.cissychen.com/index-button.js" defer></script>
+<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+</body>
+</html>

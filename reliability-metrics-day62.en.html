@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI/ML Deep Dive: The Metrology of Reliability — Day 62</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AI/ML Deep Dive: The Metrology of Reliability</h1>
+<div class="meta">Day 62 · 2026-10-14</div>
+<div class="audience">For: experienced engineers outside AI · Level: Intermediate</div>
+</header>
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+<p style="color:#cfd3df">A leaderboard "success rate of 65%" answers only one question: <b>can it do it?</b> Whether you can actually hand work to an agent depends on another: <b>does it do it every time?</b> This issue covers four measurement tools that separate "once" from "every time": pass^k, time horizons, hazard-rate models, and the uncertainty of tail extrapolation. Prerequisites: <a href="evaluation-benchmarks-day15.en.html">Day 15 Evaluation &amp; Benchmarks</a>, <a href="model-versioning-day56.en.html">Day 56 Evaluation Reproducibility</a>.</p>
+</div>
+<!-- 1 -->
+<div class="card">
+<h2>pass@k vs pass^k: "At Least Once" vs "Every Time"<span class="en">pass@k vs pass^k</span></h2>
+<div class="tags"><span class="tag">Metric definition</span><span class="tag purple">Task heterogeneity</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>pass@k is like <b>reading from replicas</b>: success if any one of k replicas responds. pass^k is like <b>a serial call chain</b>: all k calls must succeed for the chain to be available. Same component, two composition rules, wildly different availability.</p>
+</div>
+<div class="section">
+<div class="label">The problem it solves + how it works</div>
+<p>Code generation has long used <b>pass@k</b> (the Codex paper, Chen et al. 2021): sample k times on the same problem; it counts as solved if <b>at least one</b> sample passes the unit tests. That fits settings where tests let you pick the best output. But agent tasks such as customer service, placing orders or editing a database offer <b>no chance to pick</b>: each real user gets one shot. τ-bench (Yao et al. 2024) therefore proposed <b>pass^k</b>: run the same task k times independently, and it counts only if <b>all succeed</b>. The paper reports that even GPT-4o completes fewer than 50% of tasks, and pass^8 in the retail domain falls below 25%.</p>
+<p style="margin-top:8px">Both use unbiased estimators. With n runs per task and c successes:</p>
+<ul>
+<li><b>pass@k = 1 − C(n−c, k) / C(n, k)</b>: the complement of drawing k runs from n with <b>no success at all</b>;</li>
+<li><b>pass^k = C(c, k) / C(n, k)</b>: the probability that the k runs drawn <b>all land among the successes</b>.</li>
+</ul>
+<p style="margin-top:8px">The key intuition is <b>task heterogeneity</b>. If every task had success rate p, pass^k would be p^k and fall exponentially with k. In practice it is more common that "some tasks are always right, some are almost always wrong". pass^k is <b>the average of each task's p_i^k</b>, not the average p raised to the k — and the former decays far more slowly. So <b>the shape of the pass^k curve is itself a diagnostic</b>: a steep drop means failures are random and a fresh attempt may turn out differently; a curve that quickly flattens means failures concentrate on a fixed set of tasks, and no number of retries helps.</p>
+<p style="margin-top:8px">This also explains <b>why retries sometimes work and sometimes don't</b>. If attempts are independent, the chance of at least one success in k is 1 − (1 − p)^k, and retry gains accumulate fast; but that formula assumes failures are random. When failures concentrate on fixed tasks, retrying just hits the same blind spot again. Put differently, the gap between pass@k and pass^k tells you <b>how much failure is "bad luck" and how much is "can't do it"</b>.</p>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">from</span> math <span class="kw">import</span> comb
+
+<span class="kw">def</span> <span class="fn">pass_at_k</span>(n, c, k): <span class="kw">return</span> 1 - comb(n - c, k) / comb(n, k)  <span class="cmt"># at least once</span>
+<span class="kw">def</span> <span class="fn">pass_hat_k</span>(n, c, k): <span class="kw">return</span> comb(c, k) / comb(n, k)        <span class="cmt"># every time</span>
+
+<span class="cmt"># 10 tasks, n=8 runs each: 6 always succeed, 4 succeed only 1 of 8 times</span>
+n, succ = 8, [8]*6 + [1]*4
+<span class="kw">for</span> k <span class="kw">in</span> (1, 4, 8):
+    at  = <span class="fn">sum</span>(pass_at_k(n, c, k) <span class="kw">for</span> c <span class="kw">in</span> succ) / <span class="fn">len</span>(succ)
+    hat = <span class="fn">sum</span>(pass_hat_k(n, c, k) <span class="kw">for</span> c <span class="kw">in</span> succ) / <span class="fn">len</span>(succ)
+    <span class="fn">print</span>(<span class="str">f"k={k}: pass@k={at:.2f}  pass^k={hat:.2f}"</span>)
+<span class="cmt"># k=1: 0.65 / 0.65   k=4: 0.80 / 0.60   k=8: 1.00 / 0.60</span>
+
+p = <span class="fn">sum</span>(succ) / (n * <span class="fn">len</span>(succ))
+<span class="fn">print</span>(<span class="str">f"If failures were fully random, the same 65% gives pass^8 = {p**8:.3f}"</span>)  <span class="cmt"># 0.032</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">Same 65% single-shot success rate: with concentrated failures pass^8 = 0.60; with random failures, only 0.03. <b>A leaderboard that reports only pass@1 treats these two systems as identical</b>.</p>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">Misconception: "High pass@k means just try a few more times." That holds only if <b>attempts are independent and a reliable judge picks the correct one</b>. Without a judge you don't know which of k outputs is right; and if failures concentrate on fixed tasks, they aren't independent at all.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: when evaluating an everyday AI workflow (say, a weekly auto-summary of investment notes), don't just ask "was this result good?" Run the same input 5 times and see whether <b>every result is acceptable</b>. Only a flow that is right 5 out of 5 deserves the word "automated".</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + reflection</div>
+<div class="takeaway">💡 pass@k measures <b>capability ceiling</b>; pass^k measures <b>how far it can be trusted</b>. The gap between the two curves is the distance between "can do" and "can be relied on".<br/>🤔 Human workers' pass^k is usually much higher than their pass@1 would suggest, because people notice their own mistakes. Should that "self-awareness" count as model capability, or as an external judge?<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">Engineering counterpart → super-individual D6 (Eval Engineering)</a></div>
+</div>
+</div>
+<!-- 2 -->
+<div class="card">
+<h2>Time Horizon: Converting Reliability into "How Long a Job You Can Hand Off"<span class="en">Task-Completion Time Horizon</span></h2>
+<div class="tags"><span class="tag">METR</span><span class="tag purple">Logistic slope</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Like <b>p50 and p99</b> in latency monitoring: the same service looks fast at the median and may be an order of magnitude slower at the tail. The 50% and 80% time horizons are the "median" and "tail" of reliability.</p>
+</div>
+<div class="section">
+<div class="label">The problem it solves + how it works</div>
+<p>Success rates across benchmarks aren't comparable: 60% on SWE-bench and 60% on τ-bench mean different difficulty. METR (Kwa et al. 2025, arXiv:2503.14499) introduced a common ruler: <b>have human experts do the same tasks and record their time</b>, then ask "on tasks <b>how long</b> does the model still succeed 50% of the time?" That length is the <b>50% time horizon</b>; raise the bar to 80% and you get the 80% time horizon.</p>
+<p style="margin-top:8px">The method fits a logistic curve of success against the <b>log of task length</b>:</p>
+<p style="margin-top:6px"><code>P(success | length t) = σ(α − β·ln t)</code></p>
+<p style="margin-top:6px">σ is the S-shaped function squashing any real number into 0–1; <b>α</b> sets where the curve crosses 50% (how strong the model is); <b>β</b> is the steepness — large β means success drops sharply around some length, small β means it decays slowly with length. Solving for the two horizons gives a neat result:</p>
+<p style="margin-top:6px"><code>h<sub>50</sub> / h<sub>80</sub> = 4<sup>1/β</sup></code></p>
+<p style="margin-top:6px">(The 4 comes from the 80/20 odds.) That is, <b>the ratio of 50% to 80% horizons depends only on the slope β, not on how strong the model is</b>. At β = 1 the ratio is 4; at β = 0.7 it is about 7. In the early paper, Claude 3.7 Sonnet's two horizons were about 59 and 15 minutes, a ratio of about 4. Why the <b>log</b> of length? Because difficulty grows multiplicatively: going from 1 minute to 10 minutes spans the same "order of magnitude" as going from 1 hour to 10 hours. On this basis METR reports that the 50% horizon of frontier models has doubled roughly every 7 months since 2019. Later community estimates for newer models show the ratio has not narrowed as capability rose, and is larger for some models — the curve has flattened: long tasks occasionally succeed, but short tasks occasionally fail too.</p>
+<div class="diagram" style="margin-top:12px">
+success<br/>
+100% ┤■■■■■■■□□<br/>
+&nbsp;80% ┤········■■□□□······ ← h<sub>80</sub> (tail)<br/>
+&nbsp;50% ┤··················■■■□□····· ← h<sub>50</sub> (median)<br/>
+&nbsp;&nbsp;0% ┼────────────────────────────▶ ln(human time)<br/>
+<span class="arrow">the smaller β (flatter curve), the wider the horizontal gap between the two lines</span>
+</div>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> math
+
+<span class="kw">def</span> <span class="fn">horizon</span>(alpha, beta, q):
+    <span class="cmt"># solve σ(α − β·ln t) = q  →  ln t = (α − logit(q)) / β</span>
+    logit = math.log(q / (1 - q))
+    <span class="kw">return</span> math.exp((alpha - logit) / beta)
+
+<span class="kw">for</span> beta <span class="kw">in</span> (1.0, 0.7):
+    alpha = beta * math.log(60)          <span class="cmt"># both curves have h50 = 60 minutes</span>
+    h50, h80 = horizon(alpha, beta, 0.5), horizon(alpha, beta, 0.8)
+    <span class="fn">print</span>(<span class="str">f"β={beta}: h50={h50:.0f}min  h80={h80:.1f}min  ratio={h50/h80:.1f}x"</span>)
+<span class="cmt"># β=1.0: h50=60min  h80=15.0min  ratio=4.0x</span>
+<span class="cmt"># β=0.7: h50=60min  h80=8.3min  ratio=7.2x</span></pre>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">Misconception: "If the 50% horizon doubles, I can safely hand off jobs twice as long." The 50% horizon measures the capability frontier at <b>coin-flip level</b>; the range where you can let go is at 80% or higher, which may be only a fraction of it. Also, the two horizons come from the same fitted curve and are not independent measurements.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: when delegating to AI, estimate risk by "how long would this take a human": few-minute tasks can be handed off; tasks approaching half a day should be split into steps, each reviewed by you. The point of splitting is to <b>pull each segment back into the high-reliability range</b>.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + reflection</div>
+<div class="takeaway">💡 The time horizon translates reliability into "how long a job you can hand off"; <b>the gap between 50% and 80% is set by the slope</b>, and capability gains don't automatically shrink it.<br/>🤔 Using human time as the difficulty ruler assumes "what's hard for humans is hard for models". For tasks that take humans seconds but models often fail (like counting letters), how does this ruler distort?<br/><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#7b61ff">Engineering counterpart → super-individual D5 (Agent Design)</a></div>
+</div>
+</div>
+<!-- 3 -->
+<div class="card">
+<h2>Hazard-Rate Models: Do Failures Happen at a Constant Pace?<span class="en">Hazard Rate &amp; Weibull Survival</span></h2>
+<div class="tags"><span class="tag">Survival analysis</span><span class="tag orange">A retracted model</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Like the <b>bathtub curve</b> in hardware reliability: new disks fail often early, and once past "infant mortality" they become stable. The question is whether agent failure looks more like "a fixed chance of slipping each minute" or "most likely to crash at the start".</p>
+</div>
+<div class="section">
+<div class="label">The problem it solves + how it works</div>
+<p>The time horizon is an empirical fit; it doesn't say <b>why</b> success falls with length. In 2025 Toby Ord proposed the simplest mechanistic hypothesis (arXiv:2505.05115): a <b>constant hazard rate</b> (the probability of failing in the next minute, given you've made it this far). With a fixed per-minute failure probability, a task is like n serial steps, success = p^n, an exponential decay — like radioactive decay, <b>the 50% horizon is exactly the agent's "half-life"</b>. The appeal is that one parameter yields every horizon.</p>
+<p style="margin-top:8px">In early 2026, Gus Hamilton refit METR's data with the more general <b>Weibull distribution</b> from survival analysis:</p>
+<p style="margin-top:6px"><code>S(t) = exp(−(t/λ)<sup>k</sup>)</code></p>
+<p style="margin-top:6px">S(t) is the probability of surviving to length t; <b>λ</b> is the time scale, tracking model strength; <b>k</b> is the shape parameter: k = 1 reduces to constant hazard, <b>k &lt; 1 means the hazard falls as the task proceeds</b>, k &gt; 1 means errors become more likely over time. Every model's k came out significantly below 1, clustering around 0.6, and <b>k barely changed as models improved</b> — progress showed up mainly in λ. Ord then publicly changed his view, conceding the constant-hazard assumption doesn't hold. Secondary summaries also report a lower k for the human baseline (about 0.37), which Hamilton reads as <b>humans being better at self-correction</b>: once past the start, they get steadier.</p>
+<p style="margin-top:8px">The consequence is asymmetric: compared with a constant-hazard model with the same 50% horizon, k &lt; 1 means <b>long tasks beyond the horizon go better than expected, while short tasks go worse</b> — the risk concentrates at the start of a task (understanding the requirement, picking the wrong path).</p>
+<p style="margin-top:8px">k &lt; 1 also has a purely statistical source worth being wary of: <b>selection</b>. Even if every task type has a constant hazard, mixing "easy" and "hard" tasks means the hard ones drop out early and the survivors are mostly easy ones, so the <b>aggregate</b> hazard appears to fall. Survival analysis calls this the heterogeneity (frailty) effect. So k below 1 may mean "the model gets steadier as it goes", or merely "task difficulty is uneven" — telling them apart requires observing when failures occur within a task, not just the final outcome.</p>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> math
+
+<span class="kw">def</span> <span class="fn">survival</span>(t, h50, k):
+    lam = h50 / math.log(2) ** (1 / k)     <span class="cmt"># makes S(h50) exactly 50%</span>
+    <span class="kw">return</span> math.exp(-(t / lam) ** k)
+
+<span class="kw">for</span> k <span class="kw">in</span> (1.0, 0.6):                     <span class="cmt"># constant vs decreasing hazard</span>
+    row = [<span class="str">f"{t}min:{survival(t, 60, k):.2f}"</span> <span class="kw">for</span> t <span class="kw">in</span> (5, 15, 240, 600)]
+    <span class="fn">print</span>(<span class="str">f"k={k}"</span>, <span class="str">"  "</span>.join(row))
+<span class="cmt"># k=1.0 5min:0.94  15min:0.84  240min:0.06  600min:0.00</span>
+<span class="cmt"># k=0.6 5min:0.86  15min:0.74  240min:0.20  600min:0.06</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">Both curves have a 60-minute 50% horizon. At k = 0.6, success on a 5-minute task drops from 94% to 86%, while a 10-hour task rises from nearly zero to 6%.</p>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">Misconception: "Weibull fits better, so it's the truth." A model with one more parameter <b>always fits at least as well</b>, as Ord himself stressed; what changed his mind was k being significantly below 1 across all models. It is a better description, not a proven mechanism.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: k &lt; 1 suggests risk concentrates at the start. When collaborating with AI on a long task, <b>front-load</b> your attention: reviewing its restatement of the goal and its first-step plan pays off more than spot checks midway — the same logic as onboarding a new hire: watch closely for the first three days, then let go.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + reflection</div>
+<div class="takeaway">💡 Constant hazard gave an elegant "half-life", but data show agent risk <b>falls as the task proceeds</b>; the shape parameter k captures "how it fails" better than the horizon itself.<br/>🤔 If k reflects self-correction, and k barely moves as models get stronger, then "stronger" and "better at self-correcting" may be two different kinds of progress. What training signal might change k directly?</div>
+</div>
+</div>
+<!-- 4 -->
+<div class="card">
+<h2>Tail Extrapolation &amp; Measurement Noise: 99% Can't Be Measured<span class="en">Tail Extrapolation &amp; Evaluation Noise</span></h2>
+<div class="tags"><span class="tag">Uncertainty</span><span class="tag orange">Model choice · Simulator confounding</span></div>
+<div class="section">
+<div class="label">One-line analogy</div>
+<p>Like estimating <b>p99.99 latency</b> from a few hundred request samples: the data never reach that range, so the number mostly reflects the distribution you assumed, not the system; and if the load-testing tool itself jitters, the measured tail is mixed with the tool's noise.</p>
+</div>
+<div class="section">
+<div class="label">The problem it solves + how it works</div>
+<p>When reliability really matters, we want the 99% or even 99.9% horizon — the range where something can run unattended. But benchmarks have a limited number of tasks, so <b>the high-reliability range has almost no data points</b>; it can only be reached by extrapolating the curve. Two sources of error stack up here:</p>
+<ul>
+<li><b>Model-form error</b>: METR's default log-logistic curve and a Weibull curve nearly coincide in the 20%–80% middle, and Hamilton notes they <b>diverge markedly in the tails</b>. The code below calibrates both to the same 50%/80% horizons; by 99% they already differ by about 2×, by 99.9% about 4× — and the data cannot say which is right. The reason is simple: to measure a 99% success rate directly you need hundreds of tasks near that length to get the error down, and the gap between 1 failure and 0 failures can swing the estimate a lot. METR's 2026 note on modelling assumptions also lists the Weibull alternative and its effect on horizon estimates.</li>
+<li><b>Environment noise</b>: pass^k assumes every failure is the agent's fault, but in τ-bench-style evals the "user" is itself played by an LLM. τ²-bench (Barres et al. 2025, arXiv:2506.07982) audited its user simulator and found error rates of about 40% and 47% in the retail and airline domains, of which about 12% and 13% were <b>critical errors severe enough to fail the task</b>; the more tightly constrained telecom domain had only 16% (6% critical). Those failures get charged to the agent, and in pass^k they are <b>amplified to the k-th power</b>.</li>
+</ul>
+</div>
+<div class="section">
+<div class="label">Code example</div>
+<pre><span class="kw">import</span> math
+h50 = 60.0; r = 6.6                        <span class="cmt"># both models: h50=60min, h50/h80=6.6</span>
+inv_b = math.log(r) / math.log(4)          <span class="cmt"># 1/β for log-logistic</span>
+k = math.log(math.log(2) / -math.log(0.8)) / math.log(r)  <span class="cmt"># Weibull k (≈0.60)</span>
+<span class="kw">for</span> q <span class="kw">in</span> (0.8, 0.99, 0.999):
+    ll = h50 / (q / (1 - q)) ** inv_b
+    wb = h50 * (-math.log(q) / math.log(2)) ** (1 / k)
+    <span class="fn">print</span>(<span class="str">f"{q:.1%}: log-logistic={ll:.4f}min Weibull={wb:.4f}min ratio={ll/wb:.1f}x"</span>)
+<span class="cmt"># 80.0%: ratio=1.0x   99.0%: ratio=2.2x   99.9%: ratio=4.4x</span>
+
+p_agent, sim_crit = 0.90, 0.12             <span class="cmt"># agent itself 90%, simulator 12% critical errors</span>
+<span class="kw">for</span> n <span class="kw">in</span> (1, 4, 8):
+    <span class="fn">print</span>(n, <span class="fn">round</span>(p_agent**n, 2), <span class="fn">round</span>((p_agent * (1 - sim_crit))**n, 2))
+<span class="cmt"># 1 0.9 0.79   4 0.66 0.39   8 0.43 0.15  ← measured pass^8 is ~1/3 of the true value</span></pre>
+<p style="margin-top:6px;font-size:0.88rem;color:#8b92a8">The second part simplifies simulator errors as independent events, only to illustrate that "environment noise compounds in pass^k".</p>
+</div>
+<div class="section">
+<div class="label">Common misconception + practical scenario</div>
+<div class="tip">Misconception: "The report gives a point estimate of the 99% horizon, so I can plan with it." Tail numbers are <b>mostly determined by the distributional assumption</b>; the confidence interval is often more informative than the point estimate. Add measurement-environment noise, and a low pass^k may be substantially the fault of the judge and the sparring partner.</div>
+<div class="exercise" style="margin-top:8px">📌 BigCat scenario: when deciding whether an AI capability is "good enough" to take over something, ask three questions: Does the data cover the reliability range I care about? Would a different reasonable curve assumption flip the conclusion? How much of the failure comes from the eval environment itself? Only when all three have answers is the number credible.</div>
+</div>
+<div class="section">
+<div class="label">Takeaway + reflection</div>
+<div class="takeaway">💡 The high-reliability range <b>can't be measured, only extrapolated</b>, and the extrapolation method is itself the biggest uncertainty; eval-environment noise is then multiplied by pass^k.<br/>🤔 If the 99% horizon can only ever be extrapolated, what evidence should a claim like "agents can now do X unattended" require to stand?<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">Engineering counterpart → super-individual D6 (Eval Engineering)</a></div>
+</div>
+</div>
+<!-- Resources -->
+<div class="card" style="border-left-color:#7b61ff">
+<h2>Further Resources</h2>
+<div class="section">
+<ul>
+<li>Yao, Shinn, Razavi, Narasimhan, <b>τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains</b>, arXiv:2406.12045 (2024) — origin of pass^k</li>
+<li>Barres, Dong, Ray, Si, Narasimhan, <b>τ²-Bench: Evaluating Conversational Agents in a Dual-Control Environment</b>, arXiv:2506.07982 (2025) — user-simulator error analysis</li>
+<li>Kwa et al. (METR), <b>Measuring AI Ability to Complete Long Tasks</b>, arXiv:2503.14499 (2025) — the 50%/80% time-horizon method</li>
+<li>Toby Ord, <b>Is there a half-life for the success rates of AI agents?</b>, arXiv:2505.05115 (2025); and his 2026 post <b>Hazard Rates for AI Agents Decline as a Task Goes On</b> (tobyord.com) — the constant-hazard model and its revision</li>
+<li>Chen et al., <b>Evaluating Large Language Models Trained on Code</b>, arXiv:2107.03374 (2021) — the unbiased pass@k estimator</li>
+</ul>
+</div>
+</div>
+<!-- Reflections -->
+<div class="card think" style="border-left-color:#7ed6a0">
+<h2>Deeper Reflections</h2>
+<details><summary>Do the pass^k decay curve and Weibull's k say the same thing?</summary><div>Related but different. pass^k looks at consistency when <b>the same task is rerun</b>; a flattening curve means failures concentrate on fixed tasks — "between-task heterogeneity". Weibull's k looks at how risk changes <b>within a single run</b> over time — "within-run dynamics". A system can crash at the same spot every time (flat pass^k, small k), or crash at random (steep pass^k). Only together do they separate "it can't" from "it's unsteady".</div></details>
+<details><summary>Why can distributed systems stack redundancy from 99% to 99.999%, while agents struggle?</summary><div>Redundancy stacks availability only if <b>failures are independent</b>: the chance two machines fail together is the product of their individual chances. Repeated agent attempts tend to fail in highly correlated ways — same model, same misunderstanding, same blind spot, exactly the "always wrong" tasks from card 1. For redundancy to work you need genuinely heterogeneous replicas (different models, prompts, methods) plus a reliable judge, which pushes the problem back to <a href="formal-proof-day61.en.html">Day 61</a>'s "is there a hard judge?"</div></details>
+<details><summary>Humans have lower k and self-correct better — where does that ability come from?</summary><div>One explanation is metacognition: people notice "something's off" midway and back up, so after surviving the start they get steadier. Hamilton borrows Peto's paradox (huge whales don't get more cancer despite having far more cells, because they evolved stronger error-correction) as an analogy. For models, a similar ability might come from better self-verification and backtracking; but if k barely moves across generations, scaling alone hasn't brought it automatically. There is also a parallel with Buddhist mindfulness and its awareness of arising thoughts: awareness itself is an error-correction loop.</div></details>
+<details><summary>Should reliability come from the model or from the system?</summary><div>Distributed systems answer clearly: <b>build reliable systems from unreliable components</b>, via detection, retries, rollback and isolation — not by demanding that no disk ever fails. The metrology of agents is converging on the same conclusion: a single model's 99% horizon is short and poorly measured, so reliability more likely comes from external structure. The precondition is that faults be detectable: a broken disk reports an error, but a wrong agent often fluently delivers a wrong answer (<a href="incident-postmortem-day60.en.html">Day 60</a>). Detection thus becomes the bottleneck of the whole chain.</div></details>
+</div>
+<footer>BigCat · AI &amp; ML · 2026 · Day 62</footer>
+</div>
+<script src="https://hub.cissychen.com/comments.js" defer></script>
+<script src="https://hub.cissychen.com/search.js" defer></script>
+<script src="https://hub.cissychen.com/index-button.js" defer></script>
+<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+</body>
+</html>
