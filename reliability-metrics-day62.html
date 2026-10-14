@@ -62,7 +62,7 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 <body>
 <div class="container">
 <header>
-<h1>AI/ML 详解：可靠性的度量学</h1>
+<h1 data-tts="98ab63f5644d0c16">AI/ML 详解：可靠性的度量学</h1>
 <div class="meta">Day 62 · 2026-10-14</div>
 <div class="audience">面向：有编程经验的非 AI 方向工程师 · 难度：进阶</div>
 </header>
@@ -70,7 +70,7 @@ footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
 <p style="color:#cfd3df">排行榜上的「成功率 65%」只回答了一个问题：<b>它做得到吗？</b>真正决定能不能把活交给 agent 的，是另一个问题：<b>它每次都做得到吗？</b>本期讲四个把「一次」和「每次」区分开的度量工具：pass^k、时长视界、风险率模型，以及尾部外推的不确定性。前置阅读：<a href="evaluation-benchmarks-day15.html">Day 15 评估与基准</a>、<a href="model-versioning-day56.html">Day 56 评测可复现性</a>。</p>
 </div>
 <!-- 1 -->
-<div class="card">
+<div class="card" data-tts="28d9099b87f02697">
 <h2>pass@k 与 pass^k：「至少一次」vs「每一次」<span class="en">pass@k vs pass^k</span></h2>
 <div class="tags"><span class="tag">度量定义</span><span class="tag purple">任务异质性</span></div>
 <div class="section">
@@ -118,7 +118,7 @@ p = <span class="fn">sum</span>(succ) / (n * <span class="fn">len</span>(succ))
 </div>
 </div>
 <!-- 2 -->
-<div class="card">
+<div class="card" data-tts="c991fed5aae420c5">
 <h2>时长视界：把可靠性折算成「能交多长的活」<span class="en">Task-Completion Time Horizon</span></h2>
 <div class="tags"><span class="tag">METR</span><span class="tag purple">logistic 斜率</span></div>
 <div class="section">
@@ -136,9 +136,9 @@ p = <span class="fn">sum</span>(succ) / (n * <span class="fn">len</span>(succ))
 <div class="diagram" style="margin-top:12px">
 成功率<br/>
 100% ┤■■■■■■■□□<br/>
-&nbsp;80% ┤········■■□□□······ ← h<sub>80</sub>（尾部）<br/>
-&nbsp;50% ┤··················■■■□□····· ← h<sub>50</sub>（中位）<br/>
-&nbsp;&nbsp;0% ┼────────────────────────────▶ ln(人类用时)<br/>
+ 80% ┤········■■□□□······ ← h<sub>80</sub>（尾部）<br/>
+ 50% ┤··················■■■□□····· ← h<sub>50</sub>（中位）<br/>
+  0% ┼────────────────────────────▶ ln(人类用时)<br/>
 <span class="arrow">β 越小（曲线越平），两条水平线之间的横向距离越大</span>
 </div>
 </div>
@@ -169,7 +169,7 @@ p = <span class="fn">sum</span>(succ) / (n * <span class="fn">len</span>(succ))
 </div>
 </div>
 <!-- 3 -->
-<div class="card">
+<div class="card" data-tts="02d3ac475771d12d">
 <h2>风险率模型：失败是匀速发生的吗？<span class="en">Hazard Rate &amp; Weibull Survival</span></h2>
 <div class="tags"><span class="tag">生存分析</span><span class="tag orange">一个被撤回的模型</span></div>
 <div class="section">
@@ -211,7 +211,7 @@ p = <span class="fn">sum</span>(succ) / (n * <span class="fn">len</span>(succ))
 </div>
 </div>
 <!-- 4 -->
-<div class="card">
+<div class="card" data-tts="e6a5c2e4d594fdc0">
 <h2>尾部外推与测量噪声：99% 是测不出来的<span class="en">Tail Extrapolation &amp; Evaluation Noise</span></h2>
 <div class="tags"><span class="tag">不确定性</span><span class="tag orange">模型选择 · 模拟器混杂</span></div>
 <div class="section">
@@ -255,7 +255,7 @@ p_agent, sim_crit = 0.90, 0.12             <span class="cmt"># agent 自身 90%�
 </div>
 </div>
 <!-- 资源 -->
-<div class="card" style="border-left-color:#7b61ff">
+<div class="card" data-tts="497ce363adc9d6b4" style="border-left-color:#7b61ff">
 <h2>深入资源</h2>
 <div class="section">
 <ul>
@@ -268,7 +268,7 @@ p_agent, sim_crit = 0.90, 0.12             <span class="cmt"># agent 自身 90%�
 </div>
 </div>
 <!-- 思考 -->
-<div class="card think" style="border-left-color:#7ed6a0">
+<div class="card think" data-tts="5da2b0818452a81e" style="border-left-color:#7ed6a0">
 <h2>深入思考</h2>
 <details><summary>pass^k 的衰减曲线和 Weibull 的 k，说的是同一件事吗？</summary><div>相关但不同。pass^k 看的是<b>同一任务重复跑</b>时的一致性，曲线变平说明失败集中在固定任务上，是「任务间异质性」；Weibull 的 k 看的是<b>同一次运行内部</b>风险随时间如何变化，是「过程内动态」。一个系统可以每次都在同一处翻车（pass^k 平、k 小），也可以每次随机翻车（pass^k 陡）。把两者放在一起，才能分清「它不会」和「它不稳」。</div></details>
 <details><summary>为什么分布式系统靠冗余能把 99% 堆到 99.999%，agent 却很难？</summary><div>冗余堆可用性的前提是<b>故障独立</b>：两台机器同时坏的概率是各自概率的乘积。agent 多次尝试的失败往往高度相关——同一模型、同一误解、同一盲区，正是卡片 1 里那批「永远错」的题。冗余要奏效，需要真正异构的副本（不同模型、不同提示、不同方法）加一个可靠的裁判，这又把问题推回 <a href="formal-proof-day61.html">Day 61</a> 的「有没有硬裁判」。</div></details>
@@ -277,9 +277,9 @@ p_agent, sim_crit = 0.90, 0.12             <span class="cmt"># agent 自身 90%�
 </div>
 <footer>BigCat · AI &amp; ML · 2026 · Day 62</footer>
 </div>
-<script src="https://hub.cissychen.com/comments.js" defer></script>
-<script src="https://hub.cissychen.com/search.js" defer></script>
-<script src="https://hub.cissychen.com/index-button.js" defer></script>
-<script src="https://hub.cissychen.com/i18n-tts.js" defer></script>
+<script defer="" src="https://hub.cissychen.com/comments.js"></script>
+<script defer="" src="https://hub.cissychen.com/search.js"></script>
+<script defer="" src="https://hub.cissychen.com/index-button.js"></script>
+<script defer="" src="https://hub.cissychen.com/i18n-tts.js"></script>
 </body>
 </html>
