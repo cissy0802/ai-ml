@@ -32,3 +32,42 @@ TOPICS.md 是本仓选题的**唯一真相源**。以下三条每次运行都适
 ```
 
 这样 CI 的 inject-comments 不会再对新页面追加自动提交。
+
+## 4. 文末两节：越界 · 十条要点（2026-10-17 起）
+
+页面结构（云端 routine prompt 里的写作规范照旧）之外，**2026-10-17 起每期中英两页都加下面两节**，与 routine prompt 有冲突时以本节为准。位置：**最后一个概念 card 之后、「深入资源」card 之前**（顺序：概念 card… → 越界 → 十条要点 → 深入资源 → 深入思考）。两节都照本仓收尾节的样式包成 `<div class="card">` + `<h2>`。
+
+1. **越界 · 跨学科的联想**（2026-10-17 起，必写，3–5 条）：写本期某个 AI/ML 想法和另一个领域的什么东西是同一个结构，一两句说清像在哪、不像在哪。**每条约 60–90 字**，只有展开的那 1 条可到约 120 字。优先挂读者的深度兴趣：意识、佛学、量子力学、神经科学、东西方哲学、心理学、生物进化、复杂性科学、分布式系统；旁支领导力、投资、商业。**别挂回 AI/ML 本身**（另一种模型、另一篇 ML 论文都不算越界）。提到的具体研究、人物、年份必须真实准确，拿不准就换一条。
+   - **不与节内内容重复**：每个概念 card 里的「一句话类比」是讲解用的工程类比，「深入思考」里也常有跨领域的问答；越界框收拢成 3–5 条，**不复述这两处已经写过的类比**，要换一个领域或换一层结构。
+   - 本期引用的论文/作者自己点名借用的东西（如论文作者自己借用的类比）属于正文；**我们自己联想到的只进越界**，读者要分得清哪些是原文说的、哪些是我们加的。
+   ```html
+   <div class="card" style="border-left-color:#a48cff">
+   <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+   <div class="crossx"><ul>
+   <li><b>学科 · 概念/人物</b>：像在哪、不像在哪，一两句。</li>
+   </ul></div>
+   </div>
+   ```
+   英文页 h2 写 `Crossovers`（不带 span）。
+2. **十条要点**（2026-10-17 起，必写，**正好 10 条**）：读者拿它直接记笔记。每条一句完整的话，约 20–45 字，**单独抄出去也能看懂**：写出概念名、方法名，不用「它」「这个指标」这类要靠上下文的代词。**人名不必每条都当主语开头**：全组里主角（论文作者、机构）的名字出现两三次就够，其余各条直接写观点、机制或事实。覆盖各概念 card 最值得记的定义、机制和误区，可含越界里的一两条；顺序跟正文走。**只总结正文已经写过的东西**，不加新信息，不放引语。注意它和每个 card 末尾的 `.takeaway`（单数，单节小结）是两回事：类名是 `takeaways`，别混用。
+   ```html
+   <div class="card">
+   <h2>十条要点<span class="en">Ten takeaways</span></h2>
+   <ol class="takeaways">
+   <li>…</li>
+   </ol>
+   </div>
+   ```
+   英文页 h2 写 `Ten takeaways`（不带 span）。
+3. **CSS**：上一期页面的 `<style>` 里若还没有下面这段，照抄上期样式后**把它追加到 `<style>` 末尾、`@media` 之前**（中英两页都要）：
+   ```css
+   .crossx ul{list-style:none;margin:6px 0 0;padding:0}
+   .crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+   .crossx b{color:#a48cff}
+   .takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+   .takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+   .takeaways li:first-child{border-top:none}
+   .takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
+   ```
+4. **篇幅**：越界约 400 字、十条要点约 350 字。`.maxchars`（中文页汉字上限）已为这两节从 5000 上调到 5750（2026-10-17）；概念 card 的篇幅不跟着涨。
+5. **闸门**：`publish.sh` 对从未提交过的新页（中英都查）卡：`<ol class="takeaways">` 正好 10 个 `<li>`，`<div class="crossx">` 3–5 个 `<li>`。不过就补齐/删减再 publish。
