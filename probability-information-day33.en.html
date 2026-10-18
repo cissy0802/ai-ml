@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -285,6 +292,34 @@ print(mutual_info_regression(x.reshape(-1,1), y)[0])  <span class="cmt"># ≈ 1.
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 ELBO turns the intractable evidence into an optimizable lower bound: log p(x) = ELBO + KL; maximizing ELBO simultaneously approximates the true posterior. It = reconstruction − KL regularizer, the shared foundation of VAEs / variational inference / diffusion.<br>🤔 Inside ELBO the reconstruction and KL terms tug against each other: raise the KL weight and the latent space gets tidier but reconstruction blurs (β-VAE tunes exactly this weight). Is this "fidelity vs regularity" trade-off structurally the same tension as "consistency vs availability" (CAP) you know well?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Buddhism · Dependent origination</b>: mutual information measures how far a joint distribution strays from independence; dependent origination says all things arise in dependence on others and lack self-nature, as if a true I(X;Y)=0 were rare. The difference: mutual information is a computable statistical dependence, while dependent origination concerns dependence in existence itself, with nothing to measure.</li>
+    <li><b>Quantum mechanics · Entanglement entropy</b>: von Neumann entropy S=−Tr(ρ log ρ) is the quantum version of Shannon entropy. The difference: an entangled pure state has zero entropy as a whole while each half has positive entropy, so conditional entropy can be negative; classically, a whole never has less entropy than any of its parts.</li>
+    <li><b>Psychology · Hick's law</b>: Hick (1952) and Hyman (1953) found choice reaction time rises linearly with the information in the options, log₂N, as if deciding means paying for entropy. The difference: practice and stimulus-response compatibility can change the slope; the brain is not a fixed-rate channel.</li>
+    <li><b>Investing · The Kelly criterion</b>: in 1956 at Bell Labs, Kelly showed that in a horse-race model, inside information raises a gambler's optimal growth rate by exactly the mutual information between tip and outcome; betting with wrong probabilities Q costs KL(P‖Q) in growth rate, so the coding penalty becomes real money. The difference: it assumes endlessly repeated bets and only log wealth matters; in practice people often bet half-Kelly.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Shannon's entropy is the expected surprise −log p(x): uncertainty, average information, and the theoretical floor for lossless compression.</li>
+    <li>Information is measured with a logarithm because probabilities of independent events multiply while their information should add.</li>
+    <li>Entropy is a neutral measure: high entropy just means unpredictable and information-dense, and an LLM's sampling temperature tunes the output distribution's entropy.</li>
+    <li>Cross-entropy = true entropy + KL divergence, so minimizing cross-entropy loss is essentially minimizing KL(P‖Q).</li>
+    <li>KL divergence is asymmetric and violates the triangle inequality, so it is not a distance; use JS divergence or Wasserstein distance for a symmetric measure.</li>
+    <li>Forward KL tends to cover every mode and blur, while reverse KL tends to lock onto one mode and miss the other peaks.</li>
+    <li>A correlation of 0 only rules out a linear relationship; only zero mutual information means two variables are truly independent.</li>
+    <li>Mutual information is the KL divergence of the joint p(x,y) from the independence assumption p(x)p(y), and contrastive learning's InfoNCE maximizes a lower bound on mutual information.</li>
+    <li>The ELBO is always a lower bound on the evidence log p(x), with the gap equal to KL(q‖true posterior); maximizing the ELBO also pulls q toward the true posterior.</li>
+    <li>Kingma and Welling's 2013 VAE splits the ELBO into a reconstruction term minus a KL regularizer, and their tug-of-war makes samples smooth but slightly blurry.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

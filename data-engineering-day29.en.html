@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -281,6 +288,32 @@ client = Anthropic()
   </div>
 </div>
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Evolution · Genetic drift</b>: In a small population each generation is a sample of the last, so rare alleles get lost by chance and diversity keeps narrowing. Model collapse has the same shape: each generation learns only from the previous one's output, and the long tail goes first. The difference: drift is purely random, while a model also favors high-probability, common phrasing, so it narrows faster and in a direction.</li>
+<li><b>Neuroscience · Memory replay during sleep</b>: During sleep the hippocampus replays and recombines the day's experiences to consolidate them into the cortex, a bit like the brain making its own synthetic data. The complementary learning systems theory of McClelland and colleagues (1995) holds that new experience must be interleaved with old memories or it overwrites them. The difference: replay stays anchored to real experience, which is exactly the rule that synthetic data must be mixed with real data.</li>
+<li><b>Psychology · The illusory truth effect</b>: Hasher and colleagues found in 1977 that the more often people hear a statement, the more likely they are to judge it true; repetition gets mistaken for weight of evidence. The sentence repeated over sixty thousand times in C4 is the same kind of overexposure for a model. The difference: repetition persuades people into beliefs, while it pushes models into verbatim memorization.</li>
+<li><b>Investing · Diversification and correlation</b>: Markowitz's 1952 portfolio theory says the benefit of diversifying comes from low correlation between assets, not from the number of holdings. An article reposted a thousand times is like a thousand highly correlated positions: large on paper, one effective sample in practice. Deduplication is counting the corpus's effective number of holdings.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>The ceiling on model capability is set more and more by data rather than parameter count, and training data passes through four steps: synthesis, curation, deduplication and quality filtering.</li>
+<li>Self-Instruct has a strong model bootstrap many instruction examples from a few human-written seed tasks, filters out invalid and duplicate ones, then fine-tunes on the rest.</li>
+<li>phi-1 trained a 1.3B-parameter model on textbook-quality data synthesized by GPT-3.5 and reached 50.6% pass@1 on HumanEval.</li>
+<li>Training recursively on synthetic data risks model collapse, where the distribution narrows and tail details vanish, so synthetic data should be mixed with real data.</li>
+<li>FineWeb's methodological contribution is training a small model after each curation stage to measure its gain, turning data cleaning into a falsifiable experiment.</li>
+<li>Decontamination removes benchmark test items that leaked into training data; otherwise high scores show memorized answers, not reasoning.</li>
+<li>Near-duplicate removal uses MinHash signatures to estimate Jaccard similarity between documents and LSH buckets to avoid O(n²) pairwise comparison.</li>
+<li>Lee et al. (2021) showed that deduplication cuts verbatim memorization to about one tenth and reaches equal or better accuracy in fewer steps.</li>
+<li>Under data constraints, deliberately repeating data for about 4 epochs is nearly lossless, so deduplication should target accidental redundancy, not all repetition.</li>
+<li>Quality filtering typically has an LLM label a small sample and a light classifier score the full corpus, but over-filtering loses diversity and bakes in value judgments.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -299,6 +306,34 @@ ctx, a = <span class="fn">attention</span>(torch.<span class="fn">randn</span>(<
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Attention = score → softmax → weighted sum, letting the decoder dynamically look back at all source info, killing the fixed bottleneck and directly birthing the Transformer.<br>🤔 If attention is so powerful, why did it take 3 years (2014→2017) before anyone dared delete the RNN entirely? Where might the resistance lie? (Hint: parallelization, inductive bias, compute)</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · gated working memory in prefrontal cortex and basal ganglia</b>: In O'Reilly and Frank's 2006 PBWM model, prefrontal cortex holds information steady while the basal ganglia act as a gate, deciding when to let new information in and when to clear it, the same division of labor as LSTM's input and forget gates. The difference: the brain's gate is learned slowly through dopamine reward signals, not computed by backpropagation.</li>
+    <li><b>Buddhism · seeds and perfuming in Yogacara</b>: Yogacara holds that every experience "perfumes" seeds into the storehouse consciousness (alaya-vijnana), which carries them forward until conditions make them manifest, much like a cell state that passes through by default and is read and written through gates. Unlike LSTM, there is no automatic forget gate: seeds are transformed through practice, not erased by the next word.</li>
+    <li><b>Psychology · Treisman's attenuation model</b>: Broadbent (1958) saw attention as an on/off filter that blocks unselected input; Treisman revised it to attenuation, where unattended input is merely weakened and may still be processed. Soft attention's softmax weights attenuate rather than switch. Unlike human attention, softmax has no capacity limit; it only redistributes weight.</li>
+    <li><b>Philosophy · Husserl's retention</b>: In his analysis of time-consciousness, Husserl argued that every present moment still holds the just-past, fading gradually, much as an RNN's hidden state carries the past into the now. The difference: retention is the structure of consciousness itself, not a compression of the past into a fixed-length vector.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Plain RNNs fail at long-range dependencies because backpropagation multiplies weight matrices dozens or hundreds of times, so gradients vanish or explode exponentially.</li>
+    <li>LSTM (Hochreiter and Schmidhuber, 1997) keeps memory on a cell-state conveyor belt updated by addition, sidestepping the decay caused by repeated multiplication.</li>
+    <li>The LSTM forget, input, and output gates are learned sigmoid switches that decide what to erase, what to write, and what to read out.</li>
+    <li>LSTM cannot remember forever: in practice its effective memory spans tens to a couple hundred steps, and truly long context needs attention.</li>
+    <li>GRU interpolates "(1−z) parts old state plus z parts new" with a single update gate and drops the separate cell state, using about a quarter fewer parameters than LSTM.</li>
+    <li>Neither GRU nor LSTM wins universally, so compare them by experiment; both fight vanishing gradients with a near-identity pass-through path.</li>
+    <li>Seq2Seq (Sutskever et al., 2014) has an encoder compress a whole sentence into one fixed-length vector that a decoder unrolls word by word, establishing the encoder-decoder skeleton.</li>
+    <li>The Seq2Seq bottleneck is structural: sentences of any length are squeezed into the same-size vector, so simply enlarging the dimension treats symptoms, not the cause.</li>
+    <li>Bahdanau attention (2014) has the decoder score every source word at each step, apply softmax, and take a weighted sum to build a context vector specific to that step.</li>
+    <li>Attention predates the Transformer by three years; the Transformer's radical move was deleting recurrence and keeping only attention.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

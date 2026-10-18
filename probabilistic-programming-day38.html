@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -274,6 +281,32 @@ pm.<span class="fn">summary</span>(idata)  <span class="cmt"># 输出均值、94
 </div>
 </div>
 <!-- 深入资源 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · Friston 的自由能原理</b>：Friston 主张大脑在不断最小化「变分自由能」，而它恰好就是负的 ELBO：感知等于调整内部的近似分布 q 去贴近外界成因。数学同构；不像在哪：VI 是工程师选定的算法，大脑是否真这样算仍是待检验的假说。</li>
+<li><b>量子力学 · 贝尔定理</b>：偶然与认知不确定性的分野，在物理里吵了几十年。爱因斯坦希望量子随机只是「还没找到的隐变量」，即认知不确定性；贝尔 1964 年的定理与后来的实验表明，局域隐变量解释不成立，测量结果的随机性更像不可消除的偶然不确定性。不像在哪：模型的 aleatoric 只是「这组特征下的噪声」，换更细的特征可能就消失，量子随机没有这条退路。</li>
+<li><b>生物进化 · 突变与选择</b>：Metropolis-Hastings 的「随机提议 + 按比值接受」很像突变加选择，种群在适应度地形上游走。不像在哪：选择几乎只往高处爬，MCMC 却必须按概率接受「往低处走」，否则只会找到一个峰，画不出整个分布。</li>
+<li><b>投资 · Galton 的称牛实验</b>：1907 年 Galton 发现，近 800 名赶集者对一头牛体重的猜测取中位数，误差不到 1%。Deep Ensembles 也靠平均独立误差；不像在哪：集成更看重彼此的分歧，把分歧当作「此处没把握」的信号，正如分析师预测分散度本身就是风险读数。</li>
+</ul></div>
+</div>
+
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>贝叶斯方法不输出单个点估计，而是输出后验分布，把「有多确定」一并交给使用者。</li>
+<li>贝叶斯推断的难点在归一化常数 p(D)：它是对所有参数的积分，高维下算不出来。</li>
+<li>MCMC 每步只看新旧位置的密度比值，分母被约掉，用停留频率近似后验分布。</li>
+<li>NUTS 由 Hoffman 与 Gelman 在 2011 年提出，自动决定 HMC 何时停步，是 PyMC 和 Stan 的默认采样器。</li>
+<li>MCMC 结果必须看 R-hat 与 ESS 诊断，链卡在一个峰里或样本高度自相关都会骗人。</li>
+<li>变分推断把采样换成优化：用简单分布 q 拟合后验，最大化由「拟合数据」和「靠近先验」组成的 ELBO。</li>
+<li>重参数化技巧把采样改写成「均值 + 标准差 × 噪声」，让梯度穿过随机性，也是 VAE 与扩散模型的共同积木。</li>
+<li>以 KL(q‖p) 为目标的变分推断会系统性低估不确定性，给出的置信区间往往过窄。</li>
+<li>偶然不确定性来自数据噪声、加数据也消不掉；认知不确定性来自模型没见过，可靠加数据降低。</li>
+<li>Softmax 的 0.99 不是校准过的置信度；认知不确定性要靠 MC Dropout 或 Deep Ensembles 的模型分歧来拿。</li>
+</ol>
+</div>
+
 <div class="card" data-tts="8929ff64f5e93864" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>
 <div class="section">

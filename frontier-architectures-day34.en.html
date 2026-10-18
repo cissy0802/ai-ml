@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -312,6 +319,34 @@ pos_interpolated = pos * scale     <span class="cmt"># model only needs to "know
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Long context isn't one technique; it's an ensemble of "efficient attention + KV compression + position extrapolation" — fail any one wall and the length won't hold.<br>🤔 Across the three walls: MoE solves "parameter-capacity cost," SSM solves "sequence-compute cost," and long context solves "sequence-length cost." If you could bet on only one line in your product, how would you choose based on your business's "sequence characteristics"?<br><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.en.html" style="color:#7b61ff">Engineering counterpart → super-individual D16 (Cost: the cost &amp; latency ledger of long context)</a></div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · sparse coding and the energy budget</b>: Peter Lennie estimated in 2003 that energy costs let only about 1% of cortical neurons fire substantially at any one moment. Huge capacity, few units computing at once: the same structure as MoE. The difference: cortical specialization partly maps onto functional areas, while MoE experts do not map onto human domains.</li>
+    <li><b>Buddhism · seeds and perfuming in Yogācāra</b>: the Yogācāra school holds that every action "perfumes" the storehouse consciousness (ālaya-vijñāna) and leaves a seed, and seeds give rise to later actions. The past survives not as a record but as compressed tendencies, much like an SSM's h<sub>t</sub> = A·h<sub>t-1</sub> + B·x<sub>t</sub>. Unlike a hidden state, the store has no fixed size, and practice aims to transform it, not to predict the next moment better.</li>
+    <li><b>Neuroscience · rescaling grid cells</b>: grid cells in the entorhinal cortex encode position with periodic firing at several spatial frequencies, the same idea as RoPE encoding position with rotations at several frequencies. Barry and colleagues found in 2007 that when a rat's familiar enclosure is stretched, the grids stretch with it, which is position interpolation's "relabel the ruler, keep the ruler". The difference: as the animal grows used to the new space the grids drift back to their original scale, whereas a model fixes the new scale through fine-tuning.</li>
+    <li><b>Psychology · dual-process theory (Kahneman)</b>: most thinking flows through fast, effortless System 1, and slow, effortful System 2 is called in only at a few key moments for exact checking. A hybrid architecture likewise pairs many Mamba layers with a few attention layers. Unlike a person, who decides by context when to engage System 2, the hybrid model's attention layers sit at positions fixed before training.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>The standard Transformer has two built-in ailments: attention grows as O(n²) with sequence length, and dense computation activates every parameter for every token.</li>
+    <li>Mixture of Experts (MoE) uses a router to pick only the top-k experts for each token, decoupling parameter capacity from compute cost.</li>
+    <li>The hard part of MoE is load balancing; Shazeer et al. (2017) added an auxiliary balancing loss to stop tokens piling onto a few star experts.</li>
+    <li>MoE experts divide work in a learned, token-level latent space, not along human domains like math or code.</li>
+    <li>Mixtral 8×7B has about 47B total parameters but activates about 13B per token: memory scales like 47B, speed like 13B.</li>
+    <li>A state space model (SSM) compresses history into a fixed-size hidden state, trains in parallel as a convolution, and updates in O(1) per step at inference.</li>
+    <li>An SSM's fixed state is lossy, so it trails attention on needle-in-a-haystack and exact-copy tasks that need to look back at specific tokens.</li>
+    <li>Mamba makes B, C and the step size Δ depend on the input for selective memory, then keeps GPU efficiency with a hardware-aware parallel scan.</li>
+    <li>Pure Mamba has not replaced the Transformer; the mainstream choice is a hybrid of many Mamba layers with a few attention layers.</li>
+    <li>Long context means clearing three walls at once (O(n²) compute, KV cache memory, position extrapolation), and fitting 1M tokens is not the same as using them well.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

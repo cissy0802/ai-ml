@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -256,6 +263,30 @@ ids = enc.<span class="fn">encode</span>(<span class="str">"你好🌍"</span>)
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 字节回退保证"永不 OOV"，代价是字符被切碎——模型的世界里没有"字母"，只有 token 和字节。<br/>🤔 既然模型看不见字符，那它能流利拼写、能写正确代码，靠的到底是什么？（提示：海量数据里"字符级模式"被间接编码进了 token 共现统计）</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>复杂性科学 · 路径依赖（W. Brian Arthur，1989）</b>：早期的小优势靠收益递增被放大，最后锁定一种技术。BPE 也是这样，前几轮合并出的 token 决定后面能拼出什么，走过就回不去。不像在于，BPE 只在训练时锁定，词表冻结后不再自我强化。</li>
+<li><b>发展心理学 · 婴儿的统计学习（Saffran、Aslin、Newport，1996）</b>：8 个月大的婴儿只听两分钟没有停顿的人造语流，就能靠音节间的转移概率切出「词」，看的是谁和谁绑得紧，和 WordPiece 的打分思路相近。不像的是，婴儿切出词后会去挂意义，WordPiece 停在统计。</li>
+<li><b>神经科学 · 突触修剪（Peter Huttenlocher）</b>：Huttenlocher 对人类皮层的突触计数显示，幼儿期突触先长到过量，再修掉少用的连接。Unigram 也是先建大候选集再裁剪。不像在于，修剪看局部用得多不多，Unigram 每轮都按全局似然重新算账。</li>
+<li><b>生物进化 · 遗传密码的阅读框</b>：DNA 三个碱基一组读成密码子，起点错一位，后面整段都读成错的氨基酸，这就是移码突变；token 切在汉字的 UTF-8 字节中间，也是阅读框错了位。不像在于，UTF-8 的首字节和续字节写法不同，解码器能自己找回字符边界，乱码只停在局部；DNA 没有这种标记，一次移码会一路错到下一个终止密码子。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>词级词表会无限膨胀并撞上 OOV，字符级又让序列太长，子词 tokenization 取两者中间点。</li>
+<li>BPE 从单字符起步，反复把最高频的相邻对合并成新 token，训练产物是一张有序的 merge 规则表。</li>
+<li>BPE 纯按频率切词，和语法、词根无关，换一份语料，同一个词的切法就可能变得很怪。</li>
+<li>WordPiece 沿用贪心合并，但按 freq(ab)/(freq(a)×freq(b)) 打分，用点互信息思想偏好绑定紧的片段。</li>
+<li>WordPiece 的 ## 前缀标记词内续接的子词，是无损还原原文的关键，删掉它空格就会错位。</li>
+<li>SentencePiece 是框架而非算法，把空格当 ▁ 直接处理原始文本，内部可选 BPE 或 Unigram。</li>
+<li>Kudo 2018 提出的 Unigram 自顶向下：先建大候选集，再用 EM 每轮删掉对总似然贡献最小的子词。</li>
+<li>字节级 BPE 把 256 个字节放进基础词表，从此永不 OOV，代价是 token 可能切在一个汉字的 UTF-8 字节中间。</li>
+<li>模型只看 token 和字节，没有「字符」这一表示层，所以数 strawberry 里有几个 r 这类任务常出错。</li>
+<li>词表变大能缩短序列、缓解非英语的分词税，但 embedding 矩阵随词表大小线性增长，罕见 token 也学不透。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="92465d1213bf70ac" style="border-left-color:#7b61ff">

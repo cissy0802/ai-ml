@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -250,6 +257,31 @@ action = vla.<span class="fn">predict_action</span>(**inputs, unnorm_key=<span c
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 串起今天四块拼图：文本、图像、音频、视频、动作——<b>全部被编码成 token，喂进同一个自回归引擎</b>。多模态的本质就是"万物皆 token"。<br/>🤔 如果连机器人动作都能当 token 预测，那"思考"和"行动"在计算上还有本质区别吗？这对 agent 设计意味着什么？</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · Mriganka Sur 的「改线雪貂」</b>：Sur 团队把新生雪貂的视觉输入改接到听觉皮层，2000 年在 Nature 报告：这块听觉皮层长出了视觉皮层才有的方位选择性柱状结构，动物还能靠它「看」。皮层像 attention 一样不挑模态，喂什么序列就学什么结构。不像在于：皮层吃的是连续的放电信号，没有先离散成 token 这一步，也就没有词表粒度带来的精度损失。</li>
+<li><b>心理学 · 变化盲视（Rensink、O'Regan、Clark，1997）</b>：两张图交替闪烁，中间插一下空白，人常常找很久都看不出明显的改动。人看世界本来就是稀疏采样，靠预期补全，和视频抽帧同一个逻辑。不像的是：人眼的采样跟着注意力和预测走，等间隔 1fps 是盲抽，不知道哪一帧更值得看。</li>
+<li><b>心理学 · Paivio 的双重编码理论（1971）</b>：Allan Paivio 认为人脑有言语和表象两套独立的编码系统，靠「指称连接」互相唤起，所以配图的具体词更好记。CLIP 也有两座塔，却把两套编码硬压进同一个空间；Paivio 的两套系统保持分立，只在需要时互相调用。</li>
+<li><b>佛学 · 六识与「意识遍缘」</b>：前五识各守一境，眼识只缘色、耳识只缘声；第六意识却能缘五尘和法尘，把各路感官汇到一处。这和视觉、音频各自编码、最后都交给 LLM 推理的分工很像。不像在于：佛学的意识本身也是缘起、无常的一环，并没有一个统一的中央处理器坐在后面。</li>
+<li><b>量子力学 · 普朗克的能量子（1900）</b>：普朗克为解释黑体辐射，假设能量只能一份一份地交换，连续的量第一次被切成离散单位。把像素、声波、动作切成 token 是同一个动作。不像的是：能量子是自然本身的颗粒度，token 的大小是工程师选的，选粗了就读不清小字。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>CLIP 用约 4 亿图文对做对比学习，把图像和文本训进同一个向量空间，擅长匹配，不会生成句子。</li>
+<li>LLaVA 式生成 VLM 用视觉编码器加投影层，把图像翻译成视觉 token，和文字 token 一起送进 LLM。</li>
+<li>VLM 把图像压成几百个 patch token，擅长语义理解，读小字、精确计数和表格数字时容易出错。</li>
+<li>Whisper 是端到端 seq2seq 语音识别：波形转 log-Mel 频谱，编码器编码，解码器自回归吐出文字 token。</li>
+<li>Whisper 靠 68 万小时弱监督数据练出鲁棒性，但作为生成模型，在长音频和静音段会重复或编造文字。</li>
+<li>视频理解的瓶颈是帧太多：相邻帧高度冗余，要靠稀疏抽帧、token merging 和 Q-Former 压缩控制 token 量。</li>
+<li>给视频塞更多帧不等于理解更好，超出窗口预算后注意力被稀释，关键在抽对帧。</li>
+<li>RT-2 把 7 自由度机器人动作离散成 token，和文本共用词表，从而借用互联网图文里的常识。</li>
+<li>多模态的统一暗线是万物皆 token，代价是离散化丢精度、高带宽模态的 token 爆炸和跨模态对齐难题。</li>
+<li>人眼看世界也是稀疏采样，变化盲视说明大脑靠预期补全，这和视频抽帧的取舍同构。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="e09d9f60a3435ab9" style="border-left-color:#7b61ff">

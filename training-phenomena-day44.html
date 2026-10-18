@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -237,6 +244,33 @@ token_acc   = p                       <span class="cmt"># 连续指标：按 tok
 <div class="takeaway">💡 「悬崖」常常是你的尺子刻出来的，不是世界的形状——换一把尺子，悬崖可能变成缓坡。<br/>🤔 你日常用的哪些 pass/fail 指标，正在把平滑的进步伪装成停滞或突变？</div>
 </div>
 </div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 睡眠与洞察</b>：Wagner 等 2004 年在 Nature 报告，一项数字任务里藏着一条捷径规则，睡过一觉的人发现它的比例是清醒组的两倍多。像 grokking：先熟练地按步骤做，再压缩出规则。不像在：大脑靠海马体与新皮层两套系统离线重放，grokking 是同一张网络在线慢慢清理。</li>
+<li><b>神经科学 · 突触修剪</b>：Huttenlocher 1979 年的计数显示，人类额叶皮层的突触密度在幼儿期达峰，之后被大量修剪。先过量连接、再删繁就简，和「过参数化 + weight decay」是同一个结构。不像在：修剪按用进废退挑着删，weight decay 对所有权重一视同仁地收缩。</li>
+<li><b>生物进化 · 间断平衡</b>：Eldredge 与 Gould 1972 年提出，物种长期停滞、在短时间内快速成种，和涌现曲线一样是「平台 + 跳变」。批评者问的也是 Schaeffer 式的问题：地质尺度上的「瞬间」可能有几万年，突变感部分来自化石记录的分辨率。</li>
+<li><b>西方哲学 · 连堆悖论</b>：一粒沙不成堆，再加一粒也不成，那堆从哪一粒开始？「是不是堆」是二值谓词，套在连续的沙粒数上，就逼出一条找不到的边界；exact match 也是二值谓词。不像在：悖论难在边界太模糊，假悬崖的问题是边界太陡。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Grokking：训练准确率早已 100%，验证准确率长期趴在随机水平，再训几个数量级的步数后突然跳到近 100%。</li>
+<li>网络先到达容易达成的记忆解（大范数的查找表），weight decay 再缓慢把权重推向小范数、能泛化的解。</li>
+<li>Nanda 等 2023 年逆向出 grokking 背后的傅里叶式电路，证明泛化电路是逐渐长出来的，只是宏观指标看着像突变。</li>
+<li>没有 weight decay，模型会停在记忆解、永远不 grok；验证准确率不涨也不一定该停训。</li>
+<li>双下降：测试误差在插值阈值（模型容量刚好够把训练误差压到 0）冲到峰值，越过阈值后随容量增大再次下降。</li>
+<li>过参数化后，多余的自由度让 SGD 的隐式正则化挑出低范数解；该避开的是「刚好够」的容量，不是大模型。</li>
+<li>部分下游能力（如多位数算术、思维链推理）在小模型上停在随机水平，跨过某个规模阈值才突然出现。</li>
+<li>涌现的一种解释：复杂能力需要多个子电路同时就位，各自成功率平滑上升，合取（AND）却放大成悬崖。</li>
+<li>Schaeffer 等 2023 年指出，exact match 这类离散指标会把平滑的提升量成假悬崖，换连续指标曲线就变平滑。</li>
+<li>涌现之争未定：部分是度量产物，部分可能是真实相变；预训练 loss 可预测不等于下游能力可预测。</li>
+</ol>
+</div>
+
 <!-- 深入资源 -->
 <div class="card" data-tts="61f78470487f7cfc" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

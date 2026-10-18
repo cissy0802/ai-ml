@@ -53,6 +53,13 @@ table.fm th{background:rgba(123,97,255,0.12);color:#a48cff;font-weight:600}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -280,6 +287,34 @@ y_fair = fair.<span class="fn">predict</span>(X_te, sensitive_features=A_te)
 <div class="takeaway">💡 公平不是能"达成"的状态，而是一组需<b>显式选择</b>的取舍：选定义、认代价、画因果、担后果。回避取舍的"绝对公平"，是最不负责任的公平。<br/>🤔 你用 AI 辅助决策时，有没有把某个"统计相关"误当成"合理依据"？画一张因果图，哪些箭头其实该被阻断？</div>
 </div>
 </div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>经济学 · 阿罗不可能定理</b>：阿罗 1951 年证明，没有一种群体投票规则能同时满足几条看似都合理的条件，和公平不可能定理同属「每条都对、合起来无解」。不像在：阿罗的冲突来自偏好排序本身，公平的冲突要以群体基础比率不同为前提，比率相等时三条便可兼得。</li>
+<li><b>心理学 · 信号检测论</b>：Green 与 Swets 1966 年把感知判断拆成「辨别力」和「判断标准」，命中率与虚报率只能靠挪标准互换。分组阈值就是给每个群体各挪一次标准；不同在于心理学研究一个观察者，这里是一把尺量多群人。</li>
+<li><b>政治哲学 · 罗尔斯「无知之幕」</b>：罗尔斯 1971 年让人在不知自己身份时选规则，反事实公平同样在问「换个身份，结果还一样吗」。不像在：无知之幕抹掉全部身份去定制度，反事实公平只改敏感属性，还要沿因果图连带改写它的后果。</li>
+<li><b>管理学 · 古德哈特定律</b>：古德哈特 1975 年指出，指标一旦成了调控目标就不再可靠。把人口均等差硬压到 0 是同一个陷阱；不同在于经济里钻空子的是有意图的人，这里是优化器盲目找到了捷径。</li>
+</ul></div>
+</div>
+
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>机器学习的偏见有历史、代表性、测量、聚合、学习评估等多个独立注入点，各自需要不同修法。</li>
+<li>测量偏见来自代理标签：用「被捕」代替「犯罪」，执法强度的不均就直接变成模型偏见。</li>
+<li>删掉性别、种族等敏感列几乎无效，模型会从邮编、名字、消费等代理变量里把它们重建出来。</li>
+<li>人口均等只要求各群体正预测率相等而不看真值；机会均等要求各群体真阳率和假阳率都相等。</li>
+<li>均等机会是机会均等的放松版，只要求真阳率相等，适合「漏掉合格者」是主要伤害的场景。</li>
+<li>公平指标是诊断工具而非目标函数，孤立地把某个指标优化到 0，往往在别处制造新的不公。</li>
+<li>Kleinberg 等与 Chouldechova 证明：基础比率不同且模型不完美时，校准、假阳率均衡、真阳率均衡最多满足两条。</li>
+<li>COMPAS 之争里 ProPublica 要假阳率均衡、Northpointe 守校准，按不可能定理双方都对却无法兼得。</li>
+<li>去偏可放在预处理、训练中、后处理三处；Hardt 等 2016 年证明分组阈值可精确达成机会均等。</li>
+<li>反事实公平问「改掉敏感属性并更新其下游变量，决策变不变」，结论高度依赖所画的因果图。</li>
+</ol>
+</div>
+
 <!-- 深入资源 -->
 <div class="card" data-tts="f583cdfc2caac8a9" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

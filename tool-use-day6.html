@@ -51,6 +51,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -400,6 +407,30 @@ result = run_code_safely(unsafe_code)
 <details><summary>4. 沙箱有 30 秒超时，但模型生成的代码经常需要 5 分钟（训练个小模型、爬大量数据）。怎么设计"长任务沙箱"既保证隔离又支持长时运行？</summary><div>(a) <b>任务异步化</b>——沙箱不再是同步 RPC，改成"submit → 拿 task_id → 后台跑 → 完成后回调"，模型看到的是 job submitted；(b) <b>分级超时</b>——快任务（CPU 30s）走默认沙箱，长任务（计算 1h）走另一类 high-cost 沙箱，模型/路由决定走哪条；(c) <b>检查点机制</b>——长任务定期把中间状态持久化，超时被 kill 后下次可以续跑；(d) <b>资源配额</b>——按用户限制总 sandbox-minute，避免一个 Agent 把 quota 吃光；(e) <b>UX 上让用户知道</b>——前端展示"任务运行中"和预估剩余时间，必要时让用户 cancel。这跟 Slurm/CI/Lambda async invocation 解决"长任务隔离"的思路完全一样——超时是 SLO 而不是技术天花板。E2B、Modal 的 Pro 版都支持小时级沙箱。</div></details>
 <details><summary>5. Sandbox 看似只是工程问题，背后却折射出 Agent 时代的根本设计哲学：<b>不信任模型</b>。这一假设和传统软件开发哲学有何不同？对系统架构有什么连锁影响？</summary><div>传统软件假设：代码是开发者写的、经过 code review、CI 测试过，runtime 可以信任。Agent 时代：代码是 LLM 当场生成的、没有 review、无法 reproducible 测试，runtime <b>必须假设它会犯错或被利用</b>。连锁影响：(a) <b>权限设计颠倒</b>——传统系统给应用尽可能多权限以避免功能受限，Agent 系统反过来——最小权限优先，按需 escalate；(b) <b>状态不持久</b>——传统服务的好性能依赖长连接缓存，Agent 沙箱每次 fresh 避免状态污染，性能换安全；(c) <b>审计成为一等公民</b>——传统 log 是 best-effort，Agent log 是<b>合规证据</b>，每个 tool call、每个 sandbox 启停都要可追溯；(d) <b>Human-in-the-loop 重新流行</b>——20 年前我们在工业控制系统强调人工确认，Agent 时代又回来了。这种"零信任"设计哲学和 cloud-native security、SaaS 多租户、零信任网络一脉相承——本质都是"不可信代码运行在可信基础设施上"。理解这一点，Agent 工程就不再是写 prompt，而是设计一整套受控执行体系。</div></details>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 基底神经节的动作选择</b>：Redgrave 等人 1999 年提出，基底神经节是大脑的中央选择器：皮层同时提出多个候选动作，它平时全面抑制，只放行胜出的那个。Function Calling 里模型只“申请执行”、宿主代码决定放行，同样把提议和放行分开。不像的是，大脑的闸门靠学习调成，Agent 的白名单是人手写死的。</li>
+<li><b>生物进化 · 遗传密码的通用性</b>：几乎所有生物共用一套密码子表，基因搬进别的物种照样能被读出，水平基因转移因此可行；MCP 让一个 server 被任意 host 读懂，也靠共享读法。不像的是，Crick 称它为“冻结的偶然”，早已改不动，MCP 还在演进。</li>
+<li><b>心理学 · 希克定律与考虑集</b>：Hick 1952 年发现，选项越多，反应时随选项数的对数增长。人的对策是先圈一个小“考虑集”再细挑，正是工具检索先召回 top-k 那一步。不像的是，人多付的是时间，模型多付的是选错率和 token。</li>
+<li><b>佛学 · 守护根门</b>：戒学讲守护根门：不指望念头生起就是善的，而在感官接触外境处设防。沙箱也不赌模型意图良善，只限定它碰得到什么。不像的是，修行最终要转化心本身，沙箱从不指望模型变好。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Function Calling 让模型按 JSON Schema 输出 tool_call，你的代码执行后把结果拼回对话再请求一次。</li>
+<li>开了 Function Calling 模型也未必调工具，还可能幻觉出不存在的工具，执行层要做白名单校验。</li>
+<li>受约束解码能保证 JSON 格式合法，但格式合法不等于语义正确，参数仍要做业务校验。</li>
+<li>MCP 由 Anthropic 在 2024 年提出，借鉴 LSP 用 JSON-RPC 解耦，把 N×M 个适配器变成 N+M。</li>
+<li>MCP 的三类能力：Tools 由模型调用，Resources 由应用注入上下文，Prompts 由用户触发。</li>
+<li>Function Calling 是模型与应用之间的契约，MCP 是应用与工具之间的契约，两者正交互补。</li>
+<li>工具选择策略把工具库当作检索语料，每次只把最相关的 5–10 个工具喂给模型。</li>
+<li>工具检索里召回率比精确率更重要：漏掉正确工具，模型就无从纠偏，宁可多召回几个。</li>
+<li>Docker 默认配置不等于安全沙箱，面向不可信代码要叠加 seccomp、gVisor 或 Firecracker microVM。</li>
+<li>Agent 时代的设计前提是不信任模型：最小权限、每任务新沙箱、审计日志和人工确认一起上。</li>
+</ol>
 </div>
 <footer>BigCat · AI &amp; ML · Day 6 · 2026-05-24</footer>
 </div>

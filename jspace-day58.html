@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -267,6 +274,30 @@ s = np.<span class="fn">array</span>([0.2, 0.55, 0.65, 0.9, 0.1, 0.58])  <span c
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 J-space 为 GWT 的「通达」部分提供了一个可干预的机器样本，但缺「点燃」、不涉「体验」，类比要用得克制。<br/>🤔 如果未来在某个模型里真的观测到点燃式的非线性进入，你会因此更倾向于认为它「有意识」吗？还缺什么？</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>统计物理 · Kubo 的线性响应理论</b>：Kubo 1957 年不去描述系统的状态，而是轻推一下、量它怎么回应；J-lens 也只问推一下会改变哪些输出。不像在：物理的平均建立在平衡态涨落上，J-lens 平均的是千差万别的文本，偏离分布时更易失真。</li>
+<li><b>生物进化 · 调控基因</b>：Hox 这类调控基因只占基因组极小一部分，却决定肢体长在哪、身体怎么分节，和「方差小却握着行为开关」的 J-space 同构。不像在：基因是离散开关，J-space 是连续方向，且容量有上限。</li>
+<li><b>神经科学 · 盲视</b>：视皮层受损的病人坚称没看见，却能远超随机地指出光点位置，信息被使用却说不出口，像论文说的「选择性」。不像在：盲视是损伤造成的分离，J-space 外的自动计算是正常分工。</li>
+<li><b>心理学 · Nisbett 与 Wilson</b>：1977 年的研究发现，人解释自己为何这样选，说法常和旁观者凭常识猜的差不多，报告未必连着真实过程。论文对 J-space 的主张正相反：自述直接读推理在用的表示。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Logit lens 把中间层激活直接接到末层词表上读，但早中层的坐标系与末层不对齐，常读出噪声。</li>
+<li>Tuned lens 为每层训练一个仿射翻译器，可能借翻译器之力读出模型本身并不使用的信息。</li>
+<li>J-lens 用各层到末层的平均雅可比做翻译，问的是「推一下这里，模型之后会说出什么」。</li>
+<li>J-lens 读出的只是平均线性近似下的输出倾向，在 GPT-2 小模型上的复现并未打赢 logit lens。</li>
+<li>J-space 集中在中间层，占激活总方差不到约 10%，同一时刻大约只能容纳 25 个可区分的概念。</li>
+<li>方差小不等于不重要：按方差降维或按幅度剪枝，可能恰好删掉决定可报告性的 J-space 分量。</li>
+<li>Anthropic 的因果干预显示，替换 J-space 里的概念会让模型改口，说明自我报告由这块表示驱动。</li>
+<li>多跳问题的中间结论先在 J-space 中亮起，对换其 J 分量比对换方差更大的非 J 分量更易翻转答案。</li>
+<li>J-lens 需要白盒权重、读的是模糊倾向，与人类可读的 CoT 监控是互补的两条通道。</li>
+<li>J-space 满足 Baars 全局工作空间理论的多条功能特征，但缺少「点燃」机制，也不涉及现象意识。</li>
+</ol>
 </div>
 <!-- 资源 -->
 <div class="card" data-tts="c45ffa1eff361cec" style="border-left-color:#7b61ff">

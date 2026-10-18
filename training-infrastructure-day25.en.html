@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -330,6 +337,31 @@ model = <span class="fn">FSDP</span>(
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Tensor parallel splits a <b>single operator</b>; Megatron's trick is making the split boundary avoid the nonlinearity, compressing each layer's sync to once. 3D parallel = placing the three parallelisms by bandwidth tier.<br>🤔 "Put the heaviest-comm parallelism at the highest-bandwidth tier" — is this the same first principle as your storage/cache tiering (hot data in RAM, cold data on disk)?</div>
   </div>
+</div>
+
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Hippocampal indexing theory (Teyler &amp; DiScenna, 1986)</b>: the pieces of a memory live scattered across the cortex, and the hippocampus stores only an "index" that pulls them back together at recall time, much like ZeRO-3 keeping a 1/N shard and all-gathering on demand. The difference: all-gather returns bit-identical parameters, while recall is reconstruction, and every reassembly can drift.</li>
+<li><b>Complexity science · Near-decomposability (Herbert Simon, 1962)</b>: in "The Architecture of Complexity," Simon argued that evolved complex systems are mostly hierarchical, with strong, fast interactions inside subsystems and weak, slow ones between them, which is what makes them stable and able to evolve piece by piece. 3D parallelism has exactly this shape: comm-heavy tensor parallel stays inside the NVLink box, pipeline parallel spans nodes, data parallel spans clusters. The difference: Simon's hierarchies grow on their own, while engineers fit the computation onto a bandwidth hierarchy that already exists.</li>
+<li><b>Buddhism · The five aggregates and non-self</b>: the "self" is a temporary coming-together of the five aggregates, with no single place that holds the whole of it. Under ZeRO every GPU believes it has the full model, yet none stores it, and the complete parameters exist only in the instant of an all-gather. The difference: beneath the shards sit definite weights, whereas non-self denies even that underlying ground.</li>
+<li><b>Management · Brooks's law (Fred Brooks, 1975)</b>: The Mythical Man-Month says adding people to a late project makes it later, because communication paths grow as n(n-1)/2, the same root cause as "more GPUs is not linear speedup." The difference: ring all-reduce keeps each GPU's traffic roughly flat as the cluster grows, so GPUs coordinate far better than people.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Large-model training is bottlenecked by memory and communication, not compute: mixed precision costs about 16 bytes per parameter, so a 70B model needs just over 1TB.</li>
+<li>Distributed training has three orthogonal axes: data parallel splits the batch, pipeline parallel splits layers, tensor parallel splits a single layer's matrices; combined, they are 3D parallelism.</li>
+<li>More GPUs is not linear speedup: gradient-sync and other communication overhead grows with GPU count, and 512 GPUs may reach only about 74% scaling efficiency.</li>
+<li>Of the 16 bytes per parameter, 12 are Adam optimizer state (fp32 master weights, momentum, variance), the fattest part and the first to shard.</li>
+<li>ZeRO replaces data parallel's redundant replicas with shards that are all-gathered on demand; ZeRO-1/2/3 successively shard optimizer state, gradients and parameters.</li>
+<li>Higher ZeRO stages mean heavier communication, so pick the lowest stage that fits the model rather than defaulting to ZeRO-3.</li>
+<li>FSDP is PyTorch's native ZeRO-3: sharded at rest, gathered for use, freed afterward, with next-layer prefetch hiding communication behind compute.</li>
+<li>Because FSDP parameters are sharded, checkpointing must go through FSDP's state_dict API to gather them, never assuming a GPU holds the full parameters.</li>
+<li>Megatron-LM splits the MLP's A by columns and B by rows so GeLU runs locally on each GPU, leaving one all-reduce per layer's forward pass.</li>
+<li>The 3D parallel placement rule puts the heaviest communication on the fastest tier: tensor parallel inside NVLink, pipeline parallel across nodes, data parallel across clusters.</li>
+</ol>
 </div>
 
 <!-- engineering cross-reference -->

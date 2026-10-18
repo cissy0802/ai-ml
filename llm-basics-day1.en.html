@@ -43,6 +43,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -383,6 +390,35 @@ ids_b = tok(<span class="str">"man bites dog"</span>, return_tensors=<span class
     <details><summary>Three bottlenecks for long context — positional encoding, attention complexity, KV cache memory. Which gets cracked first, and why?</summary><div>My bet: KV cache memory. It's the most direct engineering pressure with the most active mitigation paths: (1) GQA/MQA sharing KV across heads; (2) KV quantization compressing fp16 to int8/int4; (3) PagedAttention (vLLM) treating KV like virtual-memory paging; (4) sliding-window or recurrent designs dropping distant KV entries. Attention complexity needs an algorithmic breakthrough (Mamba-class), and the precision cost makes full replacement hard. Positional extrapolation is fundamentally a generalization problem, the hardest of all. Priority: memory (engineering) > complexity (algorithm + hardware) > extrapolation (theory). Lesson: when assessing bottlenecks, the existence of a clear engineering path is a powerful heuristic — pure algorithmic or theoretical problems usually move slowest.</div></details>
     <details><summary>For video frame sequences or code AST trees, is 1D RoPE still sufficient? What hidden assumption about "position" does this expose?</summary><div>No. Video is a time × space × channel 3D structure; an AST is a tree. 1D positional encoding assumes "positions are linearly comparable," which loses dimensional information for these structures. Retrofits: (1) video uses 2D/3D RoPE with independent rotations per axis — Sora uses spatiotemporal joint encoding; (2) AST and graph use Graph Positional Encoding (graph Laplacian eigenvectors, shortest-path distance). Hidden assumption exposed: when we say "position," we really mean "coordinates in some metric space." Text happens to be a 1D time series, so 1D is enough; once data has richer structure, "position" must be redefined. That's a core difficulty in multimodal models — unifying positional encoding so image patches, video frames, text tokens, and audio segments live in one comparable space.</div></details>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+  <li><b>Buddhism · Dependent origination and emptiness</b>: the same token gets a different hidden state in "dog bites man" and "man bites dog"; its meaning arises from context and has no self-nature apart from it. The difference: the model still starts from a fixed embedding table, so every word carries a small static seed.</li>
+  <li><b>Psychology · Treisman's attenuation theory</b>: in the 1960s Anne Treisman revised Broadbent's filter model, arguing that unattended input is turned down rather than cut off. Softmax weights work the same way: every Key takes part, just with different weight. The difference: human attention has a capacity limit, while self-attention rereads the whole text at every layer.</li>
+  <li><b>Psychology · Chunking</b>: Chase and Simon (1973) found that chess masters remember common board patterns as single chunks, which is why they recall positions at a glance. BPE does the same thing by merging frequent adjacent pairs into one unit and shortening the sequence. The difference: a master can always break a chunk back into pieces, but the model sees a token as an opaque integer it cannot open, which is why it miscounts the r's in strawberry.</li>
+  <li><b>Neuroscience · Grid cells (the Mosers, 2005)</b>: grid cells in the entorhinal cortex form modules with different spacings, and periodic signals at several scales together mark a location, the same structure as sinusoidal positional encoding building a position vector from sin/cos at many frequencies. The difference: grid cells encode 2D space and recalibrate when the environment changes.</li>
+  <li><b>Evolution · Jacob's tinkerer</b>: in 1977 François Jacob argued that evolution works like a tinkerer, not an engineer, patching what already exists. A residual connection has each layer add an increment to the existing representation instead of rebuilding it. The difference: evolution has no gradient to follow; every patch is trial and error.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+  <li>The Transformer replaces the step-by-step loop of RNNs with self-attention, so training runs fully in parallel and long-range dependencies are not forgotten.</li>
+  <li>The Transformer is only a skeleton: the original paper used an encoder-decoder for translation, GPT keeps only the decoder, and BERT keeps only the encoder.</li>
+  <li>Autoregressive generation emits one token at a time, so inference is serial again and its optimizations, such as the KV cache, focus on cutting per-step cost.</li>
+  <li>The attention formula is softmax(Q·Kᵀ/√d)·V: query-key similarity becomes the weights for a weighted sum of values.</li>
+  <li>Attention weights are computed from the input and reassigned for every new sentence, which is what separates attention from a fixed weighted average.</li>
+  <li>Dividing by √d keeps dot products from growing with dimension, which would otherwise push softmax toward one-hot and make gradients vanish.</li>
+  <li>Multi-head attention runs several independent query channels at once, and different heads learn different roles such as syntax, semantics and coreference.</li>
+  <li>BPE tokenization starts from single characters and repeatedly merges the most frequent adjacent pair, keeping common words whole and splitting rare ones into subwords.</li>
+  <li>A model sees token IDs rather than letters, which is why early GPT miscounted the r's in strawberry; the same content usually costs more tokens in Chinese than in English.</li>
+  <li>Self-attention ignores order, so positional encoding adds it back; RoPE turns position into a rotation angle so dot products naturally encode relative distance.</li>
+  </ol>
 </div>
 
 <a href="index.en.html" class="back">← Back to home</a>

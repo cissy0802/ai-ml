@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -269,6 +276,35 @@ msg = client.messages.<span class="fn">create</span>(
 <div class="takeaway">💡 LLM-as-Judge 让评估规模化成为可能，但它不是真理探测器——它是一个有已知偏差、需要持续校准的<strong>探针</strong>。<br/>🤔 你的监控系统会监控自己吗？同理：当你用 AI 评估 AI，谁来评估那个评估者？这条链在哪里触底？</div>
 </div>
 </div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>免疫学 · Burnet 的克隆选择学说（1957）</b>：免疫系统先随机造出海量抗体，再由抗原挑出能结合的那几个，正是 pass@k「大量采样、测试筛选」的结构。不像的是，被选中的细胞会扩增并留下记忆，pass@k 挑完就忘。</li>
+<li><b>心理学 · 首因效应（Solomon Asch，1946）</b>：同一串性格词，先说「聪明」还是先说「嫉妒」，印象截然不同，像裁判偏爱先出现的答案。不像在于，人看过就回不去，只能分组轮换；LLM 裁判没有记忆，可以同题干净地交换重问。</li>
+<li><b>生物进化 · Zahavi 的累赘原理（1975）</b>：孔雀尾巴可信，因为它昂贵，造假养不起；「写得长 = 下了功夫」在人类那里也曾是昂贵信号。冗长偏差的病根是，长度对 LLM 几乎免费，信号已不诚实，裁判还按旧规则读它。</li>
+<li><b>投资与经济 · 古德哈特定律（Charles Goodhart，1975）</b>：这位英国央行顾问发现，统计规律一旦被当成调控目标就会失灵，后人概括为「指标变成目标，就不再是好指标」。把裁判分当 KPI、全行业刷同一个榜，都是它的翻版。不同在于，钻空子的从千百万人换成了一个梯度下降优化器，更勤快，也更不懂分寸。</li>
+<li><b>哲学 · 明希豪森三难（Hans Albert，1968）</b>：论证追问到底只剩三条路：无穷后退、循环论证、武断停下。「谁来评估评估者」正落在这里，人工抽检就是有意选的停点。不像的是，哲学视之为困境，工程只当它是一笔预算。</li>
+</ul></div>
+</div>
+
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Hendrycks 等人的 MMLU 把 57 个学科的多选题汇成一个分数，衡量模型的世界知识。</li>
+<li>MMLU 比较各选项的对数似然来判分，把开放生成降维成可自动判分的分类。</li>
+<li>污染是公开基准的软肋：题目漏进训练数据，模型从「会做」变成「背过」。</li>
+<li>MMLU 高只说明会检索知识、会应试，不代表推理深度或开放生成能力。</li>
+<li>HumanEval 用 164 道带隐藏单元测试的 Python 题评代码，跑过测试才算对。</li>
+<li>Codex 论文的 pass@k 无偏估计先采样 n 个解再用组合公式算，比直接重试 k 次方差小。</li>
+<li>有自动验证器时，pass@k 比 pass@1 更能反映模型的实际可用性。</li>
+<li>MT-Bench 分数依赖所用裁判模型和 prompt，只适合同一设置下的相对比较。</li>
+<li>Zheng 等人发现 GPT-4 裁判与人类一致率超 80%，但有位置、冗长、自我增强偏差。</li>
+<li>LLM 裁判要交换顺序跑两遍并定期人工抽检，否则模型会学会讨好裁判。</li>
+</ol>
+</div>
+
 <!-- 深入资源 -->
 <div class="card" data-tts="aba1a37c1cd1ad99" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

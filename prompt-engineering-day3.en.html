@@ -43,6 +43,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -407,6 +414,31 @@ answers = []
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Philosophy · Wittgenstein on rule-following</b>: In <i>Philosophical Investigations</i> §185, a pupil told to "add 2" goes past 1000 and writes 1004, 1008. A finite set of examples never pins down a rule on its own. Few-shot prompting sits in exactly that spot: three examples permit endless generalizations, and the model lands on the right one because pre-training gave it a shared "form of life." The difference: Wittgenstein's point is that no fact ever finally fixes the rule, while in engineering the training distribution settles it for us in practice.</li>
+<li><b>Psychology · Vygotsky's private speech</b>: Vygotsky (<i>Thinking and Speech</i>, 1934) saw children talk themselves through hard problems, putting their thinking into words to steer it, much as CoT writes reasoning out and then builds on it. The difference: a child's private speech gradually turns into silent inner speech, while a model must write the reasoning out again on every call to get the extra compute.</li>
+<li><b>Philosophy of mind · The extended mind (Clark &amp; Chalmers, 1998)</b>: Otto, who has memory loss, finds his way with a notebook that functions as part of his memory; ReAct's tool calls and observations likewise extend cognition beyond the model. The difference: Otto's notebook is always at hand, while the model rereads its entire history every turn, so the further the mind extends, the heavier the context gets.</li>
+<li><b>Political philosophy · Condorcet's jury theorem (1785)</b>: If each voter is right slightly more than half the time and votes independently, the majority's accuracy approaches 1 as the group grows. That is the mathematical floor under self-consistency voting. The difference: samples from one model are far from independent, so shared biases fail together, and the theorem's key premise is weakened.</li>
+<li><b>Neuroscience · Population coding in motor cortex (Georgopoulos et al., 1986)</b>: Single neurons in a monkey's motor cortex are only broadly tuned to direction, yet the vector sum of a large population's "votes" predicts the arm's movement accurately. The likeness: both get stability from many noisy individuals. The difference: the population vector is a weighted average over continuous directions, while self-consistency takes the mode of discrete answers, which is why voting breaks down once the answer space is open-ended.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Zero-shot prompting describes the task in plain language; few-shot adds a few input-output examples to the prompt. Neither changes the model's weights.</li>
+<li>Few-shot prompting is in-context learning: the model continues the pattern it sees and forgets it on the next call, so it is not training.</li>
+<li>Few-shot examples need quality over quantity: 3 to 5 examples that cover edge cases often beat 20 near-identical ones.</li>
+<li>The order of few-shot examples affects the output; the model often treats the last example as the strongest signal, so put the closest match last.</li>
+<li>Examples fix an output format more reliably than a string of "don't explain" rules, because models imitate examples better than they obey prohibitions.</li>
+<li>Chain-of-Thought prompting (Wei et al., 2022) has the model write intermediate reasoning before the answer; the extra tokens act as extra compute.</li>
+<li>The reasoning that Chain-of-Thought writes out is not the model's actual internal computation; steps can look plausible yet be disconnected from the final answer.</li>
+<li>ReAct (Yao et al., 2022) interleaves Thought, Action and Observation in a loop so the model can fetch live data with tools; it underpins most agent frameworks.</li>
+<li>In ReAct, an outer runtime parses the output, runs the tool and feeds the result back into the prompt, so bugs often sit in parsing and tool descriptions.</li>
+<li>Self-Consistency samples several Chain-of-Thought paths at temperature above 0 and takes a majority vote; it only works for tasks with a single clear answer.</li>
+</ol>
+</div>
 <a class="back" href="index.en.html">← Back to home</a>
 
 <footer>BigCat · AI &amp; ML · Day 3 · 2026</footer>

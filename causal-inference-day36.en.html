@@ -54,6 +54,13 @@ table.po .miss{color:#ff8e8e}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -282,6 +289,33 @@ m = smf.<span class="fn">ols</span>(<span class="str">"y ~ treat + post + treat:
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 DiD "subtracts twice" to peel off fixed between-group differences and the shared time trend — but all its credibility rests on "parallel trends," an assumption you can never prove, only support.<br>🤔 For the change you want to attribute, is there a control that "didn't undergo the change but would have fluctuated in sync"? Without it, how do you know the post-change movement wasn't just the market trend?</div>
   </div>
+</div>
+
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+  <li><b>Western philosophy · Hume's two definitions of cause</b>: In his 1748 <i>Enquiry Concerning Human Understanding</i>, Hume says we only ever observe "constant conjunction," never causation itself; then he adds a second definition: if the first object had not been, the second never would have existed. The first is correlation, the second is a counterfactual, and Rubin and Pearl essentially gave those two sentences their math. The difference: Hume reduced our sense of cause to a habit of mind, while the potential outcomes framework treats it as a quantity you can estimate.</li>
+  <li><b>Quantum mechanics · Bohr's complementarity</b>: In the double-slit experiment, measuring which slit the particle took erases the interference pattern; you cannot have both pieces of information, just as you only ever see Y(1) or Y(0). The difference: Rubin assumes the unobserved potential outcome really exists and is merely missing, while in quantum mechanics whether an unmeasured quantity has a definite value at all is itself in question.</li>
+  <li><b>Neuroscience · optogenetics</b>: fMRI only shows that a region lights up alongside a behavior; in 2005 Boyden, Deisseroth and colleagues used light-gated ion channels to switch specific neurons on and off, moving neuroscience from observing correlation to intervening. The difference: light stimulation can also disturb nearby circuits and trigger compensation, so the intervention itself may not be clean, which is exactly the worry behind the exclusion restriction.</li>
+  <li><b>Psychology · identical twin studies</b>: Identical twins share their genes, so twins raised apart look like two parallel universes of one person, and behavioral genetics uses them to separate genes from environment. The difference: twins are not randomly assigned to families, and adoptive homes tend to resemble one another, which is where selection bias hides.</li>
+  <li><b>Buddhism · dependent origination</b>: "When this exists, that comes to be; when this is absent, that is absent." Every event arises from many conditions, much like an outcome with several parents in a DAG, where controlling one condition only cuts one path. The difference: causal graphs must be acyclic, while the twelve links of dependent origination are drawn as a wheel, effects feeding back into causes.</li>
+  </ul></div>
+</div>
+
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+  <li>Correlation answers the observational question P(Y|X), causation answers the interventional question P(Y|do(X)), and confounders account for the whole gap.</li>
+  <li>A confounder opens a backdoor path X&larr;Z&rarr;Y; controlling Z through stratification, regression or matching blocks it and leaves only X&rarr;Y.</li>
+  <li>No sample size fixes confounding bias; big data only estimates a biased conclusion more precisely.</li>
+  <li>Rubin's potential outcomes framework shows each unit reveals only Y(1) or Y(0), so causal inference is at heart a missing-data problem.</li>
+  <li>Randomization makes treatment assignment independent of potential outcomes, which turns the difference in group means into an unbiased estimate of the ATE.</li>
+  <li>An instrumental variable must satisfy relevance, exclusion and independence, and the last two cannot be tested with data, only argued from domain knowledge.</li>
+  <li>A weak instrument inflates the bias and variance of two-stage least squares, so check that the first-stage F statistic exceeds 10 before trusting it.</li>
+  <li>Difference-in-differences subtracts the control group's before-after change from the treated group's, removing fixed group gaps and the shared time trend.</li>
+  <li>Difference-in-differences rests entirely on the parallel trends assumption, which pre-treatment data can support but never prove.</li>
+  <li>Hume's second definition of cause in 1748 was already a counterfactual, and the potential outcomes framework can be read as giving it the math.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -254,6 +261,33 @@ obs = env.<span class="fn">reset</span>()                       <span class="cmt
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 智能不只在脑中的符号，更在与世界的<b>闭环交互</b>里——这是这四个概念共同指向的方向。<br/>🤔 你的 AI 工作流是「读写文档的纯函数」，还是有真实反馈闭环的「具身」系统？缺的是哪个环节？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 海马体回放</b>：Wilson 与 McNaughton 1994 年发现，大鼠睡眠时海马体会把白天跑过的路线按原顺序重新放电一遍，像在梦里复习。不像在于：回放主要重演真实经历，Dreamer 的梦是模型自己往前推演的新轨迹。</li>
+<li><b>佛学 · 顽空</b>：表示坍缩把一切输入映射成同一个常数，loss 归零却毫无信息，很像禅家呵斥的「顽空」：把空误解成什么都没有。不像的是，佛学的空不抹掉万物差别（真空妙有），JEPA 只能靠 EMA 这类工程手段把差别保住。</li>
+<li><b>量子力学 · 测量即扰动</b>：do(X) 的前提是能把「看」和「动」分开：看公鸡不碰它，干预才切断成因。量子测量把这条界线抹掉了，测量一般会改变被测系统的状态，因果推断默认的那个不扰动的旁观者在微观世界并不存在。</li>
+<li><b>心理学 · Held 与 Hein 的小猫转盘（1963）</b>：两只小猫同在转盘里，一只自己走，一只坐吊篮被带着转，看到的画面几乎一样，只有自己走的那只学会了靠视觉引导动作。不像在于：PaLM-E 显示网络图文仍能正迁移，被动数据对机器并非无用。</li>
+<li><b>认知科学 × 佛学 · Varela 等《具身心智》（1991）</b>：Varela、Thompson 与 Rosch 借佛教正念传统，主张认知是身体与环境在互动中「生成」出来的（enaction），和具身智能一样把智能放进感知—行动回路。不像在哪：他们反对在脑内表征一个预先给定的世界，世界模型路线恰恰要建内部表征。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>世界模型让 agent 学会预测「这样动、世界会怎么变」，在想象里试错，绕开强化学习样本效率低的软肋。</li>
+<li>Ha 与 Schmidhuber 2018 年的世界模型由三件套组成：VAE 编码器 V、RNN 预测器 M 和极小的控制器 C。</li>
+<li>DreamerV3 用同一套超参数通吃 150 多个任务，并首次不靠人类示范在 Minecraft 里从零挖到钻石。</li>
+<li>评价世界模型要看潜空间动态预测准不准、能否支持规划，而不是生成的画面逼不逼真。</li>
+<li>JEPA 在抽象表示空间里预测目标的 embedding，不逐像素重建，把算力留给可预测的结构。</li>
+<li>I-JEPA 用 EMA 目标编码器加 stop-gradient 的不对称设计防止表示坍缩，坍缩时 loss 极低而表示毫无用处。</li>
+<li>观察 P(Y|X) 不等于干预 P(Y|do(X))：让公鸡闭嘴挡不住日出，因为两者都由地球自转这个共因决定。</li>
+<li>因果表示学习（Schölkopf 等 2021）要从像素中挖出高层因果变量，并满足独立因果机制（ICM）原则。</li>
+<li>具身智能主张智能源于身体与物理世界的感知—行动闭环，Moravec 悖论说明感知运动技能才是真正的硬骨头。</li>
+<li>PaLM-E 把图像、状态和文字拼成「多模态句子」喂进语言模型，网络图文知识能正迁移到机器人推理。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="5b6e2e99b6e32522" style="border-left-color:#7b61ff">

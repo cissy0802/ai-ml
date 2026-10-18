@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -253,6 +260,30 @@ p_agent, sim_crit = 0.90, 0.12             <span class="cmt"># agent itself 90%,
 <div class="label">Takeaway + reflection</div>
 <div class="takeaway">💡 The high-reliability range <b>can't be measured, only extrapolated</b>, and the extrapolation method is itself the biggest uncertainty; eval-environment noise is then multiplied by pass^k.<br/>🤔 If the 99% horizon can only ever be extrapolated, what evidence should a claim like "agents can now do X unattended" require to stand?<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">Engineering counterpart → super-individual D6 (Eval Engineering)</a></div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Investing · Volatility drag</b>: Returns compound by multiplication, so +50% then &minus;50% leaves you at 75%, and the arithmetic mean overstates the outcome; pass^k is a multiplicative chain too, and the average success rate misleads in the same way. Where it differs: the same convexity points the other way here. In investing, dispersion hurts compounding; uneven per-task success rates actually push pass^k above the "every task has the average p" case.</li>
+<li><b>Ecology · Survivorship curve types</b>: Raymond Pearl sorted species' survivorship curves into three types; Type III, oysters and fish fry, means mass early death and long lives for the survivors, exactly the shape of Weibull k&lt;1. Where it differs: fry die from outside predators, while an agent's "infant mortality" usually comes from misreading the request.</li>
+<li><b>Psychology · Noise audits</b>: In <i>Noise</i> (2021), Kahneman and colleagues separate bias from noise by handing the same cases to judges repeatedly and measuring how far verdicts scatter; pass^k is a noise audit for a model. Where it differs: a noise audit needs no correct answer, only the spread between judgments, whereas pass^k requires a grader to call right and wrong.</li>
+<li><b>Western philosophy · Hume's problem of induction</b>: Inferring the unobserved from the observed rests on an assumption that nature is uniform, not on the data; extrapolating a 99% horizon likewise depends on which curve you choose. Where it differs: Hume held that no amount of observation proves an induction, while tail estimates really do tighten once enough tasks are collected in that range.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>pass@k measures succeeding at least once in k attempts, which fits settings with unit tests to pick the best of several outputs.</li>
+<li>pass^k, introduced by τ-bench, requires all k runs of the same task to succeed and measures how far an agent can be trusted.</li>
+<li>pass^k averages each task's success rate raised to the k: concentrated failures flatten the curve and make retries useless, random failures make it plunge.</li>
+<li>At the same 65% single-try success rate, pass^8 is about 0.60 when failures are concentrated but only about 0.03 when they are random.</li>
+<li>METR's time horizon uses how long human experts take as the yardstick and asks at what task length a model still succeeds 50% or 80% of the time.</li>
+<li>The ratio of the 50% to the 80% time horizon depends only on the logistic slope β, so capability gains do not automatically shrink the gap.</li>
+<li>Toby Ord's constant-hazard model makes success decay exponentially with task length, turning the 50% horizon into an agent's "half-life".</li>
+<li>Weibull fits give agents a shape parameter k of about 0.6, meaning risk is front-loaded, and k barely moves as models get stronger.</li>
+<li>Mixing easy and hard tasks can also make the overall hazard appear to fall, so a Weibull k below 1 need not mean the agent grows steadier.</li>
+<li>The 99% horizon can only be extrapolated and hinges mostly on the chosen curve; user-simulator errors are further amplified to the k-th power in pass^k.</li>
+</ol>
 </div>
 <!-- Resources -->
 <div class="card" style="border-left-color:#7b61ff">

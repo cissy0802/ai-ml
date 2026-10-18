@@ -44,6 +44,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -360,6 +367,31 @@ top5 = [r.document[<span class="str">"text"</span>] <span class="kw">for</span> 
 <details><summary>4. 跟 Day 2 的 RLHF 关系——Reranker 的训练数据从哪来，有没有类似的反馈循环？</summary><div>Reranker 通常用对比学习：每条训练样本是 (query, positive_doc, negative_doc) 三元组，目标让模型给正例打高分、负例打低分。数据来源三种：(a) 人工标注的 query-doc 对（成本高但质量好）；(b) MS-MARCO 等公开数据集（通用但领域偏移）；(c) 线上点击日志当弱监督——用户点过的视作正例，曝光未点的视作负例。这就跟 RLHF 形成了"反馈闭环"——线上用户行为成为下一版 reranker 的训练信号。但有 selection bias：用户只能点曝光过的，没曝光的好文档永远不会被发现。解决方法叫 counterfactual learning to rank，引入随机曝光 + IPS 加权来打破偏差。</div></details>
 <details><summary>5. 如果一个查询本身就模糊（如"那个东西怎么办"），reranker 还能救场吗？</summary><div>救不了多少。Reranker 的输入是 (query, doc) 配对，query 本身信息量低时，无论用多精细的模型都无法"想出用户真正想问什么"。这类查询的正确处理在更上游：(a) 多轮对话——先让 LLM 反问澄清，"你说的'那个'指的是上次提的复利还是房贷？"；(b) 用户画像 + 会话历史——把过去 5 轮的话题拼进 query 再 embed；(c) Query expansion——用 LLM 把模糊问题改写成 3-5 个具体版本，每个都做检索后取并集。本质是"信息论极限"——查询里没有的信息，下游再聪明也补不出来；架构上要把澄清/扩展放在 reranker 之前。</div></details>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>心理学 · 编码特异性原则（Tulving &amp; Thomson，1973）</b>：线索和记忆存入时的编码方式越吻合，越容易想起来；查询改写正是把用户的问法改得像文档被 embed 时的样子。不像在于：人脑存入时就带着情境，向量库只记语义，时间和场合全丢了。</li>
+<li><b>神经科学 · 果蝇嗅觉的「哈希」（Dasgupta、Stevens、Navlakha，2017）</b>：果蝇把约 50 类气味受体信号投射到约 2000 个 Kenyon 细胞，只留最活跃的约 5% 当标签，相似气味得到相似标签，解的正是近似最近邻问题。不同的是，它先升维再稀疏化，向量检索通常是在固定维度里建图找邻居。</li>
+<li><b>复杂性科学 · 小世界里的寻路（Milgram 1967；Kleinberg 2000）</b>：Milgram 让人把信转给「更可能认识收信人」的熟人，靠局部贪心一跳跳逼近目标；Kleinberg 证明，只有长程连接按特定距离规律分布，贪心才找得到短路径，HNSW 的分层图做的是同一件事。不像在于：Milgram 的大多数信没送到，HNSW 则靠候选列表回溯，把漏掉近邻的概率压低。</li>
+<li><b>心理学 · 系统 1 与系统 2（Kahneman）</b>：快而粗的直觉先给出候选，慢而费力的审慎再来核对，这和 bi-encoder 召回、cross-encoder 精排是同一种分工。不像的是，人的系统 2 常常偷懒、直接给直觉背书；reranker 对每一条候选都老老实实重新打分。</li>
+<li><b>哲学 · 维特根斯坦的「家族相似」</b>：一个词的各种用法没有共同本质，只有交错重叠的相似，embedding 也只给出远近，不给定义。不像在于：维特根斯坦说意义在于使用、在语言游戏的行动里，embedding 只看统计共现，所以分不清赞美 X 和骂 X。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Embedding 把文本映射成高维向量，语义越近的句子坐标越近，用余弦相似度衡量语义相似度。</li>
+<li>Embedding 编码的是统计上常一起出现的语义模式而不是理解，会把赞美 X 和骂 X 判为相似。</li>
+<li>Embedding 适合找相似、不适合找区别，版本对比要靠 diff 片段、更细的切块或 metadata 硬过滤。</li>
+<li>向量数据库用 HNSW 等近似最近邻索引把千万级查询压到毫秒级，代价是不保证 100% 召回真正的 top-K。</li>
+<li>十万条以内的文档用 pgvector、FAISS 或 Chroma 这类嵌入式方案就够，不必一上来就用 Pinecone、Milvus。</li>
+<li>朴素 RAG 答错多半是没召回到正确文档，所以要在切块、查询改写、混合检索和 metadata 过滤上下功夫。</li>
+<li>召回不准的瓶颈多在切块和查询改写，盲目换更大的 embedding 模型就像换更快的 CPU 去治数据库慢查询。</li>
+<li>盲目加大 top-K 会带来噪音、lost in the middle 和更高成本，应保持小 K，再用重排序提高精度。</li>
+<li>重排序用 cross-encoder 把查询和文档拼在一起打分，比 bi-encoder 准，但只负担得起召回后的几十条候选。</li>
+<li>果蝇嗅觉回路用稀疏投影给相似气味打相似标签，和向量检索解的是同一类近似最近邻问题。</li>
+</ol>
 </div>
 <a class="back" href="index.html">← 返回首页</a>
 <footer>BigCat · AI &amp; ML · Day 4 · 2026-05-21</footer>

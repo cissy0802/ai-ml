@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -308,6 +315,34 @@ JURY = [<span class="str">"claude-opus-4-8"</span>, <span class="str">"gpt-judge
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Canceling judge bias relies on "cross-failure-domain diversity voting + calibration," not a single stronger judge; diversity &gt; count.<br>🤔 The "AI scores" you trust—are they calibrated confidence, or just numbers with no scale? Could you cross-validate with a different-family model next time?<br>📎 Engineering counterpart → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6: Eval Engineering</a></div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience &middot; Why you can't tickle yourself</b>: Blakemore, Wolpert and Frith (1998) showed the brain uses a copy of the motor command to predict the sensory result of its own actions, so it recognizes and dampens self-generated signals. An LLM judge also spots its own text by its stylistic signature, but in the opposite direction: the brain discounts the self-signal, the judge rewards it.</li>
+    <li><b>Evolution &middot; The Irish potato famine</b>: In the 1840s Ireland relied heavily on a single potato variety, the Lumper, and late blight took it down almost all at once. Monoculture is correlated error: same resistance, same blind spot. The difference: crop diversity arises naturally through mutation, while judge diversity has to be chosen deliberately across model families.</li>
+    <li><b>Psychology &middot; The Dunning-Kruger effect</b>: Kruger and Dunning (1999) argued that people lacking a skill often also lack the metacognition to spot their own errors, a "double curse." That is the GV-Gap collapsing: past the edge of competence, writing and reviewing fail together. The difference: the effect's statistical robustness is still debated, while the GV-Gap can be measured directly on gold-labeled samples.</li>
+    <li><b>Buddhism &middot; Manas, the grasping mind</b>: Yogacara describes a seventh consciousness that ceaselessly takes the storehouse consciousness to be a "self," so every judgment passes through the filter of self-attachment. Self-preference looks like that attachment: familiar style is mistaken for good style. The difference: there is no subject behind the model, only a recognizable word distribution, which rather confirms that "self" is just a pattern.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Zheng et al. (2023) measured three biases in LLM judges: position bias, verbosity bias and self-enhancement bias.</li>
+    <li>Position bias means simply swapping the order of the same two answers can flip the judge's verdict.</li>
+    <li>Judge biases come from next-token prediction mistaking correlations in the data, like "listed first" or "longer," for causes of quality.</li>
+    <li>Order symmetrization is the first fix: run both orders and count a verdict only when the two agree.</li>
+    <li>Switching to 1-10 scores does not remove bias: verbosity bias persists and scores bunch up around 7 to 9.</li>
+    <li>Panickssery et al. (2024) found that the better a model recognizes its own text, the more it favors its own outputs.</li>
+    <li>When the generator and the judge share a lineage, their blind spots overlap and self-review becomes a rubber stamp.</li>
+    <li>The generation-verification gap (GV-Gap) measures how much better a model reviews than it writes, and underpins Best-of-N and self-refine.</li>
+    <li>On problems beyond a model's ability the GV-Gap shrinks to zero or below, and self-verification is close to a coin flip.</li>
+    <li>A jury of small models from different families (PoLL) tracks human judgment better and costs less than one big judge; diversity beats headcount.</li>
+  </ol>
 </div>
 
 <!-- Further reading -->

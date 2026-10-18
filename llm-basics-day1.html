@@ -44,6 +44,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -342,6 +349,33 @@ ids_b = tok(<span class="str">"man bites dog"</span>, return_tensors=<span class
 <details><summary>长上下文的三个瓶颈：位置编码、Attention 复杂度、KV Cache 内存——你赌哪个最先被突破？为什么？</summary><div>个人押注 KV Cache 内存——因为这是最直接的工程瓶颈，已经有大量优化路径在落地：(1) GQA/MQA 共享 KV；(2) KV quantization 把 fp16 压成 int8/int4；(3) PagedAttention（vLLM）让 KV 像虚拟内存分页；(4) Sliding Window/Recurrent 抛弃远距离 KV。Attention 复杂度需要算法突破（Mamba 类），代价是精度——不容易完全替代。位置编码外推本质是泛化问题，最难。优先级排序：内存（工程）&gt; 复杂度（算法+硬件）&gt; 外推（理论）。这告诉你：判断瓶颈优先级时，"是否有清晰工程路径"是关键启发——纯算法/理论问题往往最慢。</div></details>
 <details><summary>给"视频帧序列"或"代码 AST 树"设计位置编码，1D RoPE 还够用吗？这暴露"位置"概念的什么深层假设？</summary><div>不够。视频是时间×空间×通道的 3D 结构，AST 是树结构——1D 位置编码假设"位置是线性可比的"，在这些结构上会丢失维度信息。改造方向：(1) 视频用 2D/3D RoPE（每个维度独立旋转），如 Sora 用了时空联合编码；(2) AST/图用 Graph Positional Encoding（基于图拉普拉斯特征向量、最短路径距离）。深层假设暴露：我们说"位置"时，其实是在说"在某个度量空间里的坐标"——文本碰巧是 1D 时间序列，所以 1D 够用。一旦数据有更丰富的结构，"位置"就必须重新定义。这是为什么多模态模型的核心难点之一是"统一位置编码"——把图像 patch、视频帧、文本 token、音频片段映射到同一个可比较的空间。</div></details>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>佛学 · 缘起与无自性</b>：同一个 token 在「dog bites man」和「man bites dog」里得到不同的隐藏状态，词义靠上下文因缘而成，没有离开语境的「自性」。不像的是，模型仍从一张固定的 embedding 表出发，每个词都带着一粒静态的种子。</li>
+<li><b>心理学 · Treisman 的衰减理论</b>：1960 年代 Anne Treisman 修正 Broadbent 的「过滤器」模型：没被注意的信息不是被切断，只是被调低音量。softmax 权重也是这样，所有 Key 都参与，只是轻重不同。不像在于，人的注意受容量限制，自注意力每层都能重新把全文看一遍。</li>
+<li><b>心理学 · 组块（chunking）</b>：Chase 与 Simon 1973 年发现，国际象棋高手把常见棋形记成一整块，所以过目不忘。BPE 合并高频相邻对，做的是同一件事：常见的组合压成一个单位，序列变短。不像的是，高手随时能把组块拆回单个棋子，模型拿到的 token 是不透明的整数，拆不开，于是数不清 strawberry 里的 r。</li>
+<li><b>神经科学 · 网格细胞（Moser 夫妇，2005）</b>：内嗅皮层的网格细胞分成多个间距不同的模块，几种尺度的周期信号叠在一起标出位置，和 Sinusoidal 位置编码用多种频率的 sin/cos 合成一个位置向量同构。不像的是，网格细胞编码的是二维空间，还会随环境重新校准。</li>
+<li><b>生物进化 · Jacob 的「修补匠」</b>：François Jacob 1977 年说进化不是工程师，而是在已有结构上修修补补。残差连接让每一层只往原有表示上加一个增量，而不是推倒重写。不像的是，进化没有梯度指路，每次修补都是试错。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Transformer 用自注意力取代 RNN 的逐步循环，训练可以全并行，长距离依赖也不容易遗忘。</li>
+<li>Transformer 只是骨架：原论文为翻译做 Encoder-Decoder，GPT 只取 Decoder，BERT 只取 Encoder。</li>
+<li>自回归生成时 LLM 逐个出 token，推理又退回串行，所以推理优化靠 KV Cache 等手段压缩单步开销。</li>
+<li>Attention 的公式是 softmax(Q·Kᵀ/√d)·V：用 Query 与 Key 的相似度做权重，对 Value 加权求和。</li>
+<li>Attention 的权重由输入动态算出，每来一句新话就重新分配，这是它不同于固定加权平均的地方。</li>
+<li>Attention 里除以 √d，是为了防止点积随维度变大，使 softmax 退化成 one-hot、梯度消失。</li>
+<li>Multi-Head Attention 同时开多个独立查询通道，不同 head 会学出句法、语义、指代等不同分工。</li>
+<li>BPE 分词从单字符出发，反复合并最高频的相邻字符对，常见词整词保留，生僻词拆成子词。</li>
+<li>模型只看 token ID 看不到字母，所以早期 GPT 数不清 strawberry 里有几个 r；同样内容中文通常比英文更费 token。</li>
+<li>自注意力本身不分先后，位置编码补上顺序；RoPE 把位置变成旋转角度，让点积自然编码相对距离。</li>
+</ol>
 </div>
 <a class="back" href="index.html">← 回到首页</a>
 <footer>BigCat · AI &amp; ML · Day 1</footer>

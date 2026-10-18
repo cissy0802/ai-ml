@@ -52,6 +52,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -261,6 +268,32 @@ policy_loss = -torch.<span class="fn">min</span>(unclipped, clipped).<span class
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 PPO = 用一个 clip 把策略更新关进信任域，以极简实现换来稳定，成为 RLHF / LLM 对齐的工业标准。<br/>🤔 RLHF 用 PPO 优化"人类偏好奖励"，但奖励模型本身是学出来的、不完美的。当模型学会<strong>钻奖励模型的空子</strong>（reward hacking）时，clip 和 KL 惩罚够用吗？<br/><a href="https://cissy0802.github.io/super-individual-weekly/prompt-injection-day20.html" style="display:inline-block;margin-top:8px;color:#a48cff;font-weight:500">工程对应 → super-individual D20：对齐与 Prompt Injection（钻空子的攻防实战）</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · Schultz 的多巴胺实验</b>：1997 年 Schultz、Dayan 与 Montague 指出，猴子中脑多巴胺神经元的放电很像 TD error：意外的果汁让它猛放电；学会「亮灯就有果汁」后，放电提前到亮灯那一刻；预期的果汁没来，放电跌到基线以下。像在都编码「现实减预期」；不像在多巴胺还对新奇和显著事物起反应，不是一个干净的标量。</li>
+<li><b>心理学 · 享乐适应</b>：Brickman 与 Campbell 1971 年提出「享乐跑步机」：快乐跟着「比期待好多少」走，加薪的满足很快被新基线吃掉。这和优势函数 A = Q − V 同构，只看相对基线的增量。不像在 Critic 的基线是为了降方差，人的基线上移却让人难以满足。</li>
+<li><b>东方哲学 · 王阳明「知行合一」</b>：Actor 管行、Critic 管知，代码里两者却共用一个身体，只在最后分出两个头。王阳明说知与行本是一个功夫，和共享底层很像。不像在 Actor-Critic 终究拆成两个头、各算各的损失，王阳明恰恰反对把知和行拆开。</li>
+<li><b>生物进化 · Fisher 的几何模型</b>：Fisher 1930 年论证，突变效应越大，碰巧改善适应度的概率越低，极小的突变才接近一半机会变好。这正是 PPO 限制步长的理由：离已经不错的位置越远，越可能变差。不像在进化没有 clip 夹住步子，大突变照常出现，只是多半被淘汰。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>强化学习没有标准答案，只有事后反馈，目标是最大化折扣后的长期累积奖励。</li>
+<li>折扣因子 γ 是未来奖励的贴现率，γ 越小 agent 越短视，数学上和现金流折现相同。</li>
+<li>Q-Learning 用 Bellman 自举更新，把终点的延迟奖励一步步传播回前面每个状态-动作对。</li>
+<li>Q-Learning 是 off-policy：用 ε-greedy 探索，学的却是贪心最优策略；Mnih 等人 2013 年的 DQN 用神经网络替代 Q 表。</li>
+<li>Q 表只适合离散、小规模的状态空间，围棋这类巨大空间和连续动作都会让表格爆炸。</li>
+<li>策略梯度直接调策略网络的参数，按回报加权推高好动作的概率，代价是高方差和低样本效率。</li>
+<li>Actor-Critic 用 Critic 估的状态价值 V(s) 做基线，把回报换成优势 A，降低方差又不引入偏差。</li>
+<li>Actor 和 Critic 同时学习、互相提供目标，Critic 不准时两者可能一起发散，这是 RL 比监督学习脆弱的根源。</li>
+<li>PPO（Schulman 等 2017）把新旧策略的概率比裁剪在 1±ε 内，只用一阶梯度就实现信任域式的稳定更新。</li>
+<li>RLHF 用 PPO 加 KL 惩罚优化 LLM，但 PPO 的 clip 只是启发式，没有 TRPO 那样的单调改进保证。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="f3bc8a52b34f581b" style="border-left-color:#7b61ff">

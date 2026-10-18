@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -274,6 +281,33 @@ model.<span class="fn">eval</span>()    <span class="cmt"># 评估模式：Dropo
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 过拟合 = 死记硬背。L2 给大权重收税逼其平滑，Dropout 用 Chaos Monkey 逼其冗余——目标都是泛化而非记忆。<br/>🤔 Dropout、L2、SGD 的噪声，本质都是「<b>故意往训练里加干扰</b>」却让模型更强。为什么「适度的混乱」反而是泛化的朋友？这对「过度优化必有代价」有什么启示？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 克里克的质疑（1989）</b>：反向传播要求误差沿同一组权重原路倒流，Francis Crick 1989 年在 Nature 撰文指出，真实神经元很难做这种精确回传。大脑同样要把功劳和过错分到每个突触，像在问题相同；不像在算账方式，大脑只能靠局部可得的信号。</li>
+<li><b>进化生物学 · 适应度景观（Sewall Wright，1932）</b>：Wright 把基因组合画成起伏的地形，种群往高峰爬，正是 loss 曲面倒过来。不像的是，进化不算梯度，靠整个种群盲目试探；地形还会随环境变形，训练集的 loss 曲面却不会自己变。</li>
+<li><b>佛学 · 缘起</b>：反向传播把一次误差拆成每个参数各自的一份责任，有点像缘起观：结果由众多条件和合而成，找不到唯一的元凶。不像在于，链式法则能给每个条件算出精确份额，缘起要提醒的却是别把结果钉在某个固定的「我」上。</li>
+<li><b>神经科学 · 突触稳态假说（Tononi 与 Cirelli，2003）</b>：两人提出，清醒时的学习让突触普遍增强，睡眠则把突触整体按比例调弱，保住信噪比、腾出学习余地，像大脑版的权重衰减。不像的是，权重衰减每一步都在做，这个假说至今仍有争议。</li>
+<li><b>复杂性科学 · 李雅普诺夫指数</b>：混沌系统里，微小扰动每一步被放大或缩小，长期命运取决于一串雅可比矩阵连乘的增长率；梯度消失与爆炸是同一笔账，只是沿网络层数而不是时间展开。不同在于，混沌是要研究的现象，深度网络却要靠激活函数、初始化和残差连接，把这个增长率压在不增不减的临界附近。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>反向传播用链式法则沿计算图反向遍历一次，就算出全部参数的梯度，成本约等于一次前向传播。</li>
+<li>反向传播只负责算梯度，怎么用梯度更新参数是优化器的事，调试 loss 不降时别把两者混为一谈。</li>
+<li>梯度下降沿梯度的反方向更新参数，学习率决定每步迈多大，是训练时的第一旋钮。</li>
+<li>SGD 用小批量数据估计梯度，省下大量算力，梯度里的噪声还能帮模型跳出尖锐的局部最优。</li>
+<li>Adam 同时追踪梯度及其平方的指数移动平均，给每个参数自适应步长，但全局学习率仍要人来设。</li>
+<li>没有激活函数，多层线性变换会坍缩成一层，深度网络的「深」就成了假的。</li>
+<li>Sigmoid 导数最大只有 0.25，深层连乘导致梯度消失；ReLU 正区导数恒为 1，梯度能畅通回传。</li>
+<li>过拟合是模型背下了训练样本连同噪声；L2 正则对大权重罚款，逼模型学出更平滑的函数。</li>
+<li>Dropout 训练时随机置零部分神经元、推理时关闭，逼网络学冗余特征，评估前必须调用 model.eval()。</li>
+<li>睡眠中突触整体调弱的突触稳态假说，可以看作大脑版的权重衰减。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="14b891956ccc39a7" style="border-left-color:#7b61ff">

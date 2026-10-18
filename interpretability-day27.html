@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -257,6 +264,31 @@ probe = LogisticRegression(max_iter=1000).<span class="fn">fit</span>(np.<span c
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 探针是只读抽头：用「线性可分」当门槛，量化「某层有没有现成编码某信息」——轻、快，但只测相关、不测因果。<br/>🤔 「信息存在」和「信息被使用」的鸿沟，在你熟悉的系统（日志里有字段 ≠ 业务逻辑读了它）里是不是也天天发生？<br/><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">工程对应 → super-individual D10：Hallucination 治理</a></div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 光遗传学</b>：探针像插电极旁听放电，activation patching 像 2005 年 Boyden、Deisseroth 等人发展的光遗传学：用光开关某类神经元，看行为变不变，把相关推到因果。不像在：大脑没法把另一次「干净」运行的状态原样移植进来，只能开或关。</li>
+<li><b>神经科学 · 「詹妮弗·安妮斯顿神经元」</b>：2005 年 Quiroga 等人发现，癫痫病人的单个神经元对同一人的不同照片乃至名字都放电，像 SAE 的单义特征。不像在：那是少数记录点里碰上的，也没人能把它钳高来改写念头。</li>
+<li><b>量子力学 · 叠加态</b>：名字相同，结构只像一半：都是多个成分线性相加进同一个向量。不像在：量子态的基彼此严格正交、测量即坍缩；模型的特征比维度多，只能近似正交，靠稀疏少撞车，读出时有串扰却没有坍缩。</li>
+<li><b>生物进化 · 基因多效性</b>：一个基因影响好几种性状，和一个神经元对 DNA、阿拉伯文、法语都亮起同形：有限零件反复复用。不像在：多效性是演化史随手叠出来的，superposition 是容量压力下对稀疏特征的有损压缩。</li>
+<li><b>复杂性科学 · Anderson「多者异也」</b>：物理学家 P. W. Anderson 1972 年在《More Is Different》里说，能拆成零件，不等于能从零件重建整体，正对应「画出一张回路图≠读懂模型」。不像在：模型的零件和连线全摆在那里，难点是数量和叠加，而非冒出新规律。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>机制可解释性把训练好的网络当作没有源码的程序来反汇编，还原内部的计算电路。</li>
+<li>注意力头和 MLP 都把结果加回残差流，线性可加让每个组件的贡献能单独拆出来看。</li>
+<li>归纳头找到当前 token 上次出现处并复制其后一个 token，是 in-context learning 的核心机制之一。</li>
+<li>模型的自我解释（CoT、self-report）可能是事后编的合理化，不能当作真实计算路径的审计证据。</li>
+<li>特征多于维度又很少共现时，网络会把它们叠加进同一批神经元，这种 superposition 让神经元多义难读。</li>
+<li>稀疏自编码器用重建误差加 L1 惩罚，把激活解包成超宽、几乎全零的单义特征；λ 越大越稀疏、重建越差。</li>
+<li>Anthropic 把 Claude 3 Sonnet 的「金门大桥特征」钳到 10 倍最大值，模型便自认是那座桥：特征可被因果操控。</li>
+<li>Activation patching 把干净输入的某个激活移植进损坏输入的前向，输出恢复越多，该组件越因果关键。</li>
+<li>2025 年的归因图研究发现 Claude 写诗会先想好韵脚再倒推句子，这种提前规划 self-report 看不到。</li>
+<li>线性探针读得出某信息只证明它存在，不证明模型用了它：探针测相关，patching 才测因果。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="8ce33458fb307ec4" style="border-left-color:#7b61ff">

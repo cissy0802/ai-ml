@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -298,6 +305,31 @@ model = <span class="fn">FSDP</span>(
 <div class="takeaway">💡 张量并行切的是<b>单个算子</b>，Megatron 的巧思是让切分边界避开非线性，把每层同步压到一次；3D 并行 = 按带宽层级摆放三种并行。<br/>🤔 "把通信最重的并行放在带宽最高的层级"——这条原则和你做存储/缓存分层（热数据上内存、冷数据下磁盘）是不是同一个第一性原理？</div>
 </div>
 </div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 海马索引理论（Teyler &amp; DiScenna，1986）</b>：这个理论认为，一段记忆的各个成分分散存在皮层各处，海马只存一张「索引」，回忆时按索引把碎片重新拼起来，和 ZeRO-3 平时只存 1/N 分片、用时 all-gather 很像。不像在于：all-gather 拼回来的参数逐位不差，大脑的回忆却是重构，每拼一次都可能走样。</li>
+<li><b>复杂性科学 · 近可分解性（Herbert Simon，1962）</b>：Simon 在《复杂性的架构》里说，演化出来的复杂系统大多是层级的：子系统内部交互强而快，子系统之间弱而慢，所以整体才稳、才能分块演化。3D 并行恰好是这个结构：通信最重的张量并行关在机内 NVLink，流水线并行跨节点，数据并行跨集群。不像的是，Simon 的层级是系统自己长出来的，3D 并行是工程师照着现成的带宽层级把计算塞进去。</li>
+<li><b>佛学 · 五蕴与无我</b>：佛学说「我」是色受想行识五蕴暂时和合的显现，找不到一处单独持有整个「我」；ZeRO 下每张卡都以为自己拿着完整模型，其实没有哪张卡存全，完整参数只在 all-gather 的一刹那出现。不像在于：分片底下仍有确定的权重，无我连这层底子也不承认。</li>
+<li><b>管理学 · 布鲁克斯定律（Fred Brooks，1975）</b>：《人月神话》说给延期的项目加人只会更晚，因为人与人之间的沟通线按 n(n-1)/2 增长，和「加卡不等于线性加速」是同一个病根。不像的是，ring all-reduce 让每张卡的通信量基本不随卡数增长，GPU 比人好协调得多。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>大模型训练的瓶颈首先是显存和通信而不是算力：混合精度下每个参数约占 16 字节，70B 模型要 1TB 出头。</li>
+<li>分布式训练有三个正交的切分轴：数据并行切 batch，流水线并行切层，张量并行切单层矩阵，组合起来叫 3D 并行。</li>
+<li>加卡不等于线性加速：梯度同步等通信开销随卡数增长，512 卡可能只有约 74% 的扩展效率。</li>
+<li>每参数 16 字节里有 12 字节是 Adam 优化器状态（fp32 参数副本、动量、方差），是最该先切的部分。</li>
+<li>ZeRO 把数据并行里的冗余副本切成分片、用时 all-gather 拼回，ZeRO-1/2/3 依次切优化器状态、梯度和参数。</li>
+<li>ZeRO 的 stage 越高通信越重，应选能装下模型的最低 stage，而不是无脑开 ZeRO-3。</li>
+<li>FSDP 是 PyTorch 原生版的 ZeRO-3：平时分片、用时聚合、用完释放，并预取下一层，把通信藏在计算背后。</li>
+<li>FSDP 下参数是分片的，存档要用 FSDP 的 state_dict 接口先聚合，不能假设本卡持有完整参数。</li>
+<li>Megatron-LM 把 MLP 的 A 按列切、B 按行切，让 GeLU 在各卡本地算完，整层前向只需一次 all-reduce。</li>
+<li>3D 并行的放置原则是通信越重放在带宽越高的层级：张量并行留在机内 NVLink，流水线并行跨节点，数据并行跨集群。</li>
+</ol>
+</div>
+
 <!-- 工程 cross-reference -->
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">

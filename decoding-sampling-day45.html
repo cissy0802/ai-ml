@@ -52,6 +52,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -269,6 +276,32 @@ out = big.<span class="fn">generate</span>(
 <div class="takeaway">💡 推测解码 = 解码版的投机执行：小模型猜、大模型并行验、拒绝采样保证输出分布一字不改。免费的午餐（几乎）。<br/>🤔 推测解码用「便宜的猜测 + 可证明的验证」换速度。你的工作流里，哪些环节可以「先乐观执行，再廉价验证」，而不是「小心翼翼逐步确认」？</div>
 </div>
 </div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>投资 · 凯恩斯的选美比赛</b>：凯恩斯在《通论》（1936）里把股市比作猜「大家觉得谁最美」的比赛。beam search 也在押最安全的共识词，于是平庸重复。不像在：押共识能赢比赛，写文章只会无聊。</li>
+<li><b>生物进化 · 艾根的错误阈值</b>：Eigen 1971 年的准种模型指出，复制错误率越过阈值，遗传信息就整体崩溃。温度也是这样：少许变异带来多样，过头就成胡话。不像在：进化有自然选择事后淘汰坏突变，采样抽出的 token 直接写进去，没人回头筛。</li>
+<li><b>神经科学 · 传出副本</b>：大脑发出动作时会预测随之而来的感觉并把它减掉，所以人很难给自己挠痒（Blakemore 等 1998）。对比解码也是减掉可预见的部分。不像在：大脑减自己的预测，对比解码减另一个更弱的模型。</li>
+<li><b>意识 · 受控幻觉</b>：Anil Seth 在《Being You》（2021）里把知觉说成大脑先猜、再由感官误差纠偏的「受控幻觉」。推测解码也是先猜后验。不像在：大脑里猜的是聪明的高层，这里猜的是笨的小模型。</li>
+</ul></div>
+</div>
+
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>解码是从模型输出的整张词表概率分布里挑出下一个 token 的那一步。</li>
+<li>Greedy 每步取概率最高的 token；beam search 保留 k 条累积对数概率最高的路径，k=1 时就是 greedy。</li>
+<li>Holtzman 等人 2019 年发现，开放式生成里追求最高概率序列反而会得到枯燥重复的文本。</li>
+<li>Temperature 把 logit 除以 T 来锐化或压平分布，它不给模型增加任何知识，只重新分配已有的概率。</li>
+<li>Top-k 固定保留 k 个候选，top-p 保留累积概率达到 p 的最小集合，min-p 只留不低于「最高概率 × 比例」的 token。</li>
+<li>Top-p、min-p 和对比解码的合理性约束共享同一精神：模型越确定候选越少，越犹豫候选越多。</li>
+<li>对比解码用专家模型的对数概率减去业余模型的对数概率，抵消大小模型共有的重复和套话。</li>
+<li>对比解码必须先用合理性约束圈定专家认可的候选，否则会奖励业余模型极度厌恶的乱码。</li>
+<li>推测解码让小模型先起草一串 token、大模型一次并行验证，靠拒绝采样保证输出分布与大模型完全一致。</li>
+<li>温度、截断和对比解码都在改写模型说什么，只有推测解码是不改变输出分布的纯加速。</li>
+</ol>
+</div>
+
 <!-- 深入资源 -->
 <div class="card" data-tts="50b025b017e64144" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -311,6 +318,35 @@ Flow Matching (ODE line):　　<span class="box r">noise</span> <span style="col
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Flow Matching unifies generation as <b>"learning a velocity field that transports noise to data,"</b> and shows diffusion is just one way to walk — trading the simplest straight-line path for faster sampling.<br>🤔 For all four models, the loss ultimately collapses to one MSE regression, differing only in "what / which path to regress." When a pile of seemingly distinct methods turn out to be special cases of one framework, what does that suggest about telling real signal from hype?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Business · Goodhart's law</b>: In 1975 the economist Charles Goodhart observed that once a measure becomes a target, it stops being a good measure. Mode collapse is exactly that: the generator treats "fool the discriminator" as the goal and farms it with one cheap trick. The difference is that the discriminator keeps evolving and eventually punishes the trick, while a company KPI often stays frozen for years.</li>
+    <li><b>Neuroscience · Friston's free energy principle</b>: Karl Friston argues that the brain constantly minimizes "variational free energy", which is mathematically the VAE's negative ELBO: explain the sensory input well (reconstruction) without straying far from the prior (KL). Unlike a VAE, the brain can also act on the world to reduce surprise (active inference); a VAE can only passively compress what it is shown.</li>
+    <li><b>Physics · Maxwell's demon</b>: In 1867 Maxwell imagined a tiny demon sorting molecules one by one so that a disordered gas becomes ordered, as if running entropy backwards. Reverse diffusion likewise winds noise back into structure step by step. The difference: Landauer showed in 1961 that the demon pays a thermodynamic price to record and erase information; the denoiser breaks no law, and its price is the data and compute swallowed during training.</li>
+    <li><b>Buddhism · gradual versus sudden awakening</b>: In the Platform Sutra, Shenxiu's verse urges wiping the mirror diligently so no dust gathers, which is diffusion's hundreds of small denoising steps; Huineng answers that there was never a thing to begin with, awakening in a single moment, closer to the one-step dream of GANs and flow matching. Generative models have in fact moved that way: first gradual practice for stability, then straightened paths and fewer steps. Unlike Zen, though, diffusion does not return to an original face; it conjures an image that never existed.</li>
+    <li><b>Evolutionary biology · Waddington's epigenetic landscape</b>: In 1957 the developmental biologist Waddington pictured cell differentiation as a ball rolling down branching valleys: the same starting point ends in different valley floors, different cell types. Flow matching's velocity field likewise guides an undifferentiated cloud of noise toward specific samples. Unlike the ball, which faces chance at each fork, the flow-matching ODE is deterministic: the endpoint is fixed entirely by the starting noise.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Discriminative models judge existing data; generative models must create new samples that never existed yet look real, a far harder task.</li>
+    <li>GANs, VAEs, diffusion and flow matching are four answers to one problem: moving simple Gaussian noise into complex real data.</li>
+    <li>The 2014 GAN of Goodfellow and colleagues replaces a hand-crafted loss with a learnable discriminator, letting the data define what looks real.</li>
+    <li>GAN training solves a dynamic minimax game, and its signature failure is mode collapse: the generator fools the discriminator with one repeated sample.</li>
+    <li>A VAE encodes each input as a Gaussian cloud rather than a point, using reconstruction loss plus KL divergence (the ELBO) to fill the latent space evenly.</li>
+    <li>The reparameterization trick rewrites sampling as z = μ + σ·ε, moving randomness outside so gradients can flow through and train the encoder.</li>
+    <li>VAEs were not retired: Stable Diffusion runs diffusion inside a VAE's compressed low-dimensional latent space, saving enormous compute.</li>
+    <li>Diffusion models (DDPM) split generation into hundreds of denoising steps with a simple noise-prediction MSE loss: very stable to train, slow to sample.</li>
+    <li>Flow matching learns a velocity field that carries noise to data along straight lines; diffusion is one special, curved-path case, and sampling needs only a few steps.</li>
+    <li>VAEs, diffusion and flow matching all turn random generation into deterministic regression with known answers, which is why they train more stably than GANs.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

@@ -55,6 +55,13 @@ table.po .miss{color:#ff8e8e}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -254,6 +261,31 @@ m = smf.<span class="fn">ols</span>(<span class="str">"y ~ treat + post + treat:
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 DiD 用"减两次"剥掉固定组间差和共同时间趋势，但它的全部可信度押在"平行趋势"这条无法证明、只能旁证的假设上。<br/>🤔 你想归因的某个改变里，有没有一个"没经历这个改变、但本会同步波动"的对照？没有它，你怎么知道改变后的变化不只是大盘趋势？</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>西方哲学 · 休谟的两个因果定义</b>：休谟在 1748 年的《人类理解研究》里说，我们看到的只是「恒常相随」，看不到因果本身；接着又给出第二个定义：要是前者不曾存在，后者就不会存在。前一句是相关，后一句就是反事实，Rubin 和 Pearl 等于给这两句话配上了数学。不像的是，休谟把因果感归结为心理习惯，潜在结果框架却把它当成可以估计的量。</li>
+<li><b>量子力学 · 玻尔的互补性</b>：双缝实验里一旦测了粒子走哪条缝，干涉条纹就消失，两种信息不能同时拿到，正如 Y(1) 和 Y(0) 只能看到一个。不像在于：Rubin 假定没观测到的潜在结果确实存在、只是缺失；量子力学里，没测量的量是否早有确定值本身就成问题。</li>
+<li><b>神经科学 · 光遗传学</b>：fMRI 只能看到某脑区亮起和行为相关；2005 年 Boyden、Deisseroth 等人用光控离子通道直接开关特定神经元，神经科学从看相关走到了做干预。不像的是，光刺激也会扰动邻近回路、引发代偿，干预本身未必干净，这正是排他性要担心的事。</li>
+<li><b>心理学 · 同卵双胞胎研究</b>：同卵双胞胎基因相同，分开抚养时像同一个人的两条平行宇宙，行为遗传学借此拆分基因和环境的作用。不像的是，双胞胎并非被随机分到家庭，收养家庭往往彼此相似，选择偏差就藏在这里。</li>
+<li><b>佛学 · 缘起</b>：「此有故彼有，此无故彼无」，一事由众缘和合而生，像 DAG 里一个结果有多个上游，控制住一个缘只是剪断一条路。不像在于：因果图要求无环，十二因缘却被画成一个轮，前因后果首尾相接、互为条件。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>相关回答观察问题 P(Y|X)，因果回答干预问题 P(Y|do(X))，两者的差距来自混杂变量。</li>
+<li>混杂变量打开后门路径 X←Z→Y，用分层、回归或匹配控制住 Z，才能堵住后门、只留下 X→Y。</li>
+<li>样本量再大也修不了混杂偏差，大数据只会把一个有偏的结论估得更精确。</li>
+<li>Rubin 的潜在结果框架指出，每个个体只能观测到 Y(1) 或 Y(0) 之一，因果推断本质上是缺失数据问题。</li>
+<li>随机化让「是否接受处理」独立于潜在结果，组间均值差才成为平均处理效应 ATE 的无偏估计。</li>
+<li>工具变量要同时满足相关性、排他性、独立性三个条件，后两条无法用数据检验，只能靠领域论证。</li>
+<li>弱工具会让两阶段最小二乘的偏差和方差剧增，使用前要检查第一阶段 F 统计量是否大于 10。</li>
+<li>双重差分用处理组前后差减去对照组前后差，同时消掉组间固定差异和共同的时间趋势。</li>
+<li>双重差分的可信度全押在平行趋势假设上，只能用处理前多期数据旁证，无法直接证明。</li>
+<li>休谟 1748 年给出的第二个因果定义就是反事实，潜在结果框架可以看作给它配上了数学。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="0e64dae5c319fa98" style="border-left-color:#7b61ff">

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -314,6 +321,35 @@ ans, p_true = <span class="fn">answer_with_self_eval</span>(<span class="str">"W
   </div>
 </div>
 
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+  <li><b>Neuroscience · Gazzaniga's "left-brain interpreter"</b>: when a split-brain patient's right hemisphere sees an instruction and the body obeys, the verbal left hemisphere has no idea why, yet instantly produces a fluent reason and believes it. Same structure as hallucination: the system that speaks has no "I don't know" exit, so it fills the gap with a smooth story. The difference: the patient confabulates because information was cut off; the model confabulates because of its training objective and scoring rules.</li>
+  <li><b>Evolution · Error management theory</b>: Haselton and Buss (2000) argued that when two kinds of error carry unequal costs, selection favors systematically making the cheaper one. Benchmarks score a wrong guess and a blank both as zero, so guessing becomes the cheap error and the bias is rational. The difference: evolution's costs are real; a scoring rule's costs are man-made and can be changed.</li>
+  <li><b>Psychology · Metacognition and the feeling of knowing</b>: people often sense "it's on the tip of my tongue" or "I never learned this," and psychologists call this the feeling of knowing; it predicts recall surprisingly well. P(IK) is the same kind of forecast about one's own knowledge. The difference: in humans it is a felt experience; in a model it is just a readable probability.</li>
+  <li><b>Investing · Tetlock's studies of expert forecasting</b>: tracking expert predictions over many years, Tetlock found that confident, TV-friendly "hedgehogs" tend to be worse calibrated, yet audiences prefer them. Same shape as RLHF: the audience rewards confidence, so confidence decouples from accuracy. The difference: forecasters can be settled up later with Brier scores; a model in a single chat rarely gets audited that way.</li>
+  <li><b>Eastern philosophy · Confucius on knowing</b>: "To know what you know and to know what you do not know, that is knowledge." Over two thousand years ago, marking the edge of one's own knowledge was counted as knowledge itself, which is exactly what calibration wants. The difference: Confucius meant self-cultivation and sincerity; a model's honesty about its limits has to be forced out from outside by scoring rules and probes.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+  <li>LLM hallucination is not an occasional bug but a statistical consequence of the next-token prediction objective.</li>
+  <li>Kalai et al. (2025) showed that even with error-free training data, rare low-frequency facts keep an irreducible error floor.</li>
+  <li>Most benchmarks give zero points to both wrong answers and abstentions, so guessing pays and models become confident test-takers.</li>
+  <li>Calibration means confidence matches accuracy: of the questions a model rates 70% sure, about 70% are actually right.</li>
+  <li>Good calibration is not high accuracy; ECE measures whether confidence is trustworthy, not whether answers are correct.</li>
+  <li>Temperature scaling (Guo et al., 2017) divides logits by a learned temperature T, fixing confidence values without changing the answer.</li>
+  <li>Pretrained base models are fairly well calibrated, while RLHF makes them clearly overconfident, as the GPT-4 Technical Report shows.</li>
+  <li>Human raters prefer confident, fluent answers, so RLHF causes mode collapse that decouples confident tone from reliable content.</li>
+  <li>Kadavath et al. (2022) found that large models "mostly know what they know," with P(True) and P(IK) self-evaluation reasonably calibrated.</li>
+  <li>P(True) self-evaluation also fails on rare facts and long reasoning, so it works only as a cheap first filter that triggers retrieval or human review.</li>
+  </ol>
+</div>
 
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">

@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -275,6 +282,33 @@ ans, p_true = <span class="fn">answer_with_self_eval</span>(<span class="str">"�
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 模型"Mostly 知道自己不知道"——不确定性信号本就存在，默认生成流程把它丢了；显式自评就是把它捡回来。<br/>🤔 如果模型内部有"我不知道"的信号却默认不说，那责任在模型，还是在<b>只奖励"给出答案"</b>的我们？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · Gazzaniga 的「左脑解释器」</b>：裂脑病人的右脑看到指令、身体照做，左脑语言区不知道原因，却当场编出一个通顺的理由，而且本人深信不疑。结构和幻觉一样：负责说话的系统没有「我不知道」这个出口，只好用流畅的故事填空。不像在哪：病人的虚构来自信息被切断，模型的虚构来自训练目标和评分规则本身。</li>
+<li><b>生物进化 · 错误管理理论</b>：Haselton 与 Buss 2000 年提出，两类错误代价不对称时，自然选择会偏爱「系统性地犯便宜的那类错」。benchmark 让蒙错和留白同样得 0 分，蒙就成了便宜的错，偏差是理性产物。不像在哪：进化的代价是真实的，评分规则的代价是人定的，能改。</li>
+<li><b>心理学 · 元认知与「知道感」</b>：人常有「答案就在嘴边」或「这个我肯定没学过」的直觉，心理学称为知道感（feeling of knowing），它预测回忆成败相当准，P(IK) 是同一种对自身知识的预判。不像在哪：人的知道感是主观体验，模型的只是一个可读出的概率。</li>
+<li><b>投资 · Tetlock 的专家预测研究</b>：Tetlock 长年追踪专家预测，发现上电视、语气笃定的「刺猬型」专家校准往往更差，而受众偏偏更爱听他们。和 RLHF 同构：受众奖励自信，自信就和准确脱钩。不像在哪：预测者能被 Brier 分数事后清算，单次对话里的模型很少被这样对账。</li>
+<li><b>东方哲学 · 孔子「知之为知之，不知为不知」</b>：两千多年前把「标出自己知识的边界」本身算作一种知，正是校准想要的东西。不像在哪：孔子讲的是修身与诚，模型的「不知为不知」得靠评分规则和探针从外部逼出来。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>LLM 的幻觉不是偶发 bug，而是 next-token 预测这一训练目标的统计必然。</li>
+<li>Kalai 等人 2025 年指出：即使训练语料完全无误，冷门低频事实的错误率仍有不可消除的下界。</li>
+<li>多数 benchmark 让答错和留白同样得 0 分，蒙一个的期望得分更高，于是模型被训练成自信的应试者。</li>
+<li>校准指置信度和实际正确率对得上：说 70% 把握的题里，约 70% 确实答对。</li>
+<li>校准好不等于准确率高，ECE 衡量的是置信度可不可信，而不是答案对不对。</li>
+<li>温度缩放（Guo 等人 2017）把 logits 除以一个学到的温度 T，只修正置信度数值，不改答案本身。</li>
+<li>预训练 base model 校准相当好，RLHF 之后模型明显过度自信，GPT-4 技术报告有对比图。</li>
+<li>人类标注者偏爱自信流畅的回答，RLHF 因而发生 mode collapse，语气的确定性和内容的可靠性脱钩。</li>
+<li>Kadavath 等人 2022 年发现大模型「Mostly 知道自己不知道」，P(True) 和 P(IK) 自评校准尚可。</li>
+<li>P(True) 自评在冷门和长推理题上同样会失灵，只适合当低分触发检索或人工复核的第一道过滤网。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="eae2f5cb2f51729f" style="border-left-color:#7b61ff">

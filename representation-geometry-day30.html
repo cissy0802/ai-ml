@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -279,6 +286,31 @@ small = <span class="fn">embed</span>(<span class="str">"分布式系统的最�
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 Matryoshka 把"精度 vs 成本"从<b>训练期的二选一</b>变成了<b>推理期的滑块</b>:一个向量,按预算自由截取。关键是它<b>训练时就强制信息分层</b>,不是事后硬切。<br/>🤔 "重要信息排前面"这个归纳偏置,除了 embedding,还能用在哪?(模型权重?数据传输?注意力?)<br/><a href="https://cissy0802.github.io/super-individual-weekly/rag-day11.html" style="color:#7b61ff">工程对应 → super-individual D11: RAG 实战工程</a></div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 概念空间里的网格编码</b>：Constantinescu、O'Reilly 与 Behrens 2016 年在《Science》报告，人在一个两维的抽象「鸟形」概念空间里做判断时，脑中出现类似网格细胞的六重对称信号，像大脑也给概念铺了一张坐标图，「关系=方向」有了生物版本。不像在于：那张图只有两维、是实验者设计的，词向量的几百维没有人画过。</li>
+<li><b>生物进化 · 性状替代（character displacement）</b>：Brown 与 Wilson 1956 年提出，近缘物种同域共存时，性状会被竞争推开，加拉帕戈斯地雀的喙是经典例子。负样本的「互斥张力」就是这种推开。不像的是：自然界只推开真正争资源的近邻，InfoNCE 对同 batch 的所有句子一律推开。</li>
+<li><b>统计物理 · 玻尔兹曼分布的温度</b>：exp(sim/τ) 的形状就是玻尔兹曼分布，τ 扮演温度：低温时概率几乎全压在最低能态，对应只盯最像的那个候选；高温时各态被平均访问。不像在于：物理温度是可测的状态量，τ 只是人挑的旋钮。</li>
+<li><b>投资 · 危机中相关性趋于 1 与风险平价</b>：恐慌时各类资产一起跌，看似分散的组合其实挤在同一个风险方向上，和各向异性下余弦相似度集体虚高同构；风险平价（risk parity）把各资产的风险贡献拉平，像白化。不像在于：白化拉平可能损伤语义，投资里拉平本身就是目的。</li>
+<li><b>心理学 · Navon 的全局优先</b>：Navon 1977 年用小字母拼成的大字母做实验，发现人先认出整体、再看细节，即「先见森林后见树」。Matryoshka 的前缀也是先粗后细。不像在于：知觉的先后是加工时间上的顺序，MRL 的先后是维度上的排布，由损失函数逼出来。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>词向量把语义编码在几何关系里：意思相近的词向量相近，系统性关系表现为平行且等长的位移向量。</li>
+<li>Word2Vec 用 Skip-gram 从中心词预测上下文，「国王−男人+女人≈王后」只在高频、规整的关系上稳定。</li>
+<li>静态词向量给每个词一个固定向量，BERT/GPT 给随上下文变化的向量，两者是分工不同而非过时。</li>
+<li>对比学习用关系当监督：拉近正样本、推开负样本，SimCSE 用两次不同 dropout 自造正样本对。</li>
+<li>InfoNCE 损失本质是 N 选 1 的 softmax 分类，温度 τ 越小，对难负样本的惩罚越重、边界越锐利。</li>
+<li>没有负样本时模型会把所有输入映射到同一点，即表示坍缩；对比学习里 batch 越大，负样本越多，信号越强。</li>
+<li>直接取 BERT 最后一层做句向量会出现各向异性：向量挤在窄圆锥里，不相关句子的余弦相似度也有 0.7 以上。</li>
+<li>BERT-whitening 先去均值、再去相关并缩放，无需重训就让相似度恢复区分力，但可能抹掉有语义的高方差方向。</li>
+<li>Matryoshka 表示学习对一组嵌套前缀各算损失再求和，逼着最关键的信息排进向量最前面的维度。</li>
+<li>只有经 MRL 训练的模型才能截前几维做粗排、全维做精排，截断后的向量必须重新归一化。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="01adaf3042dc7f43" style="border-left-color:#7b61ff">

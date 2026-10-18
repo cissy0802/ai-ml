@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -256,6 +263,32 @@ emb = model()           <span class="cmt"># (N, 128) 每个节点一个向量</s
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 图嵌入把"结构相似"翻译成"向量相近"。node2vec 靠随机游走（直推、查表）；GraphSAGE 学聚合函数（归纳、能处理新节点）——动态图选后者。<br/>🤔 node2vec 用 p、q 控制 BFS/DFS 偏好，等于在问"节点的身份由它的<b>邻居社区</b>定义，还是由它的<b>结构角色</b>定义"？这两种相似性，哪种更接近你心中"两个人很像"的含义？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 侧抑制</b>：视网膜里相邻神经元也互相"传消息"，传的却是抑制：邻居越亮，我越压低自己，于是边缘被锐化，Hartline 最早在鲎的复眼上系统测到这一机制。GNN 的求和与平均是兴奋式聚合，所以越传越糊；大脑用"减去邻居"保住差异，是对抗过度平滑的另一条思路。</li>
+<li><b>佛学 · 因陀罗网</b>：华严宗讲帝释天宫的网上每颗宝珠都映出其余所有宝珠，一中含摄一切。消息传递跑 K 层后，每个节点的表示里也映着 K 跳邻域。不像在哪：因陀罗网珠珠相含又各自分明，GNN 层数一多，各节点的面目反被抹平。</li>
+<li><b>社会学 · Granovetter 弱连接</b>：Granovetter 1973 年发现，人找工作的关键消息多来自泛泛之交而非密友，因为弱连接跨越了不同圈子。GAT 学注意力像在给关系分强弱；不同的是，注意力容易偏向和自己相似的邻居，反而可能忽略弱连接带来的新信息。</li>
+<li><b>发育生物学 · 位置信息</b>：胚胎细胞没有一张"成体查找表"，而是读周围形态发生素的浓度，按同一套规则决定自己长成什么，Wolpert 1969 年称之为位置信息。这和 GraphSAGE 存"怎么算"而非"算好的"同构；不像在哪：发育规则由演化定下，聚合函数靠训练学出。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>图数据的核心信息藏在连接里：图没有固定顺序，各节点的邻居数量也不一样。</li>
+<li>消息传递神经网络（MPNN，Gilmer 等 2017）把各种 GNN 统一成消息、聚合、更新三步。</li>
+<li>消息传递的聚合函数必须对顺序不敏感，求和、平均、取最大都满足这个要求。</li>
+<li>GNN 层数堆太多会过度平滑，所有节点表示趋同，所以实践中通常只用 2–4 层。</li>
+<li>GCN（Kipf &amp; Welling 2016）是加自环、按双方度数对称归一化的邻居平均，再接线性变换。</li>
+<li>GCN 的边权重完全由度数固定，不随训练改变，也不区分邻居的重要性。</li>
+<li>GAT 用 softmax 归一化的注意力系数给每个邻居动态加权，并用多头注意力稳定训练。</li>
+<li>GAT 并非总比 GCN 强：在同质性强的图上，GCN 又快又好，GAT 反而可能过拟合。</li>
+<li>node2vec 在图上随机游走生成节点序列再套 word2vec，用参数 p、q 调节偏向 BFS 还是 DFS。</li>
+<li>node2vec 是直推式、来新节点就得重训；GraphSAGE 学的是聚合函数，属于归纳式，能现场给新节点算向量。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="335260d22cd8578f" style="border-left-color:#7b61ff">

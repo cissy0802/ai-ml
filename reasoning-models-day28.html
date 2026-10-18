@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -274,6 +281,32 @@ best = <span class="fn">self_consistency</span>(<span class="str">"一支笔 3 �
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 Best-of-N 用"采样冗余 + 选优"把随机性变成优势——但它放大的是共识，对系统性错误无能为力。<br/>🤔 投票放大共识不放大真相——在群体决策、科学共识里，这个陷阱你还在哪些地方见过？<br/><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#a48cff">工程对应 → super-individual D5: Agent Design</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>心理学 · 维果茨基的「自我言语」</b>：维果茨基（1934）观察到，孩子解难题时会自言自语，外显的话帮着组织思考，之后才内化成无声的内部言语；CoT 也是把思考写出来撑起推理。不像在于：内部言语会压缩跳跃，模型藏起来的思考仍是完整 token。</li>
+<li><b>投资 · Annie Duke 的「结果论」（resulting）</b>：前职业扑克手 Duke 在《对赌》（2018）里提醒，别只凭结果好坏评判决策。ORM 只看结果、PRM 逐步打分，正是这个转向。不像在于：牌局有运气噪声，数学推理里每步对错直接决定结果。</li>
+<li><b>社会选择理论 · 孔多塞陪审团定理（1785）</b>：每个投票者正确率都过半且彼此独立时，多数票随人数增加趋近正确。self-consistency 就是这个定理；它的软肋也一样：同一个模型的 N 次采样远不独立，系统性错误会被一起投出来。</li>
+<li><b>生物进化 · 盲目变异与选择性保留</b>：Donald Campbell 1960 年把创造性思维描述为达尔文式过程：盲目产生变体，再筛选保留。Best-of-N 正是「采样变异 + 验证器选择」。不像在于：它只跑一代，落选者什么也不遗传；o1 在链内回溯，才有一点积累。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>推理模型把部分算力从训练时挪到每次请求的运行时，「想更久」成了做大模型之外的第二条 scaling 路径。</li>
+<li>OpenAI 的 o1 用强化学习教模型学会怎么想，奖励来自数学、代码这类可自动验证领域的最终答案。</li>
+<li>DeepSeek-R1 证明，不靠人工标注推理过程、纯强化学习就能自发涌现反思、验证和回溯。</li>
+<li>总结、改写、查事实这类无需多步推演的任务，用推理模型只是更慢更贵；判断标准是这题要不要打草稿。</li>
+<li>思维链（CoT）把单次前向固定的计算深度摊到 token 序列长度上，相当于给模型一块草稿区。</li>
+<li>模型写出的思维链可能是事后合理化：步骤通顺既不保证答案对，也不代表模型真的这么想。</li>
+<li>结果奖励模型（ORM）只看最终答案，过程奖励模型（PRM）逐步打分；OpenAI 2023 年实证过程监督在 MATH 上更优。</li>
+<li>验证往往比生成容易，但模型自查有盲区，独立验证器或跑代码、代入验算等外部信号更可靠。</li>
+<li>Best-of-N 并行采样多个候选再由验证器选优，self-consistency 是其特例：对最终答案多数投票。</li>
+<li>多数投票放大的是共识而非真相：模型系统性犯错时，N 再大也会一致地错，因为采样并不独立。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="ad6d5a9c38cb7779" style="border-left-color:#7b61ff">

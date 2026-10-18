@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -253,6 +260,30 @@ p_agent, sim_crit = 0.90, 0.12             <span class="cmt"># agent 自身 90%�
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 高可靠区间<b>测不出来、只能推出来</b>，而推法本身就是最大的不确定性；评测环境的噪声还会被 pass^k 成倍放大。<br/>🤔 如果 99% 视界注定只能外推，「agent 已经可以无人值守地做 X」这种说法，应该要求什么样的证据才算成立？<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">工程对应 → super-individual D6 (Eval 工程)</a></div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>投资 · 波动拖累</b>：复利是乘法，先涨 50% 再跌 50% 只剩 75%，算术平均收益会高估最终结果；pass^k 同样是乘法链，只看平均成功率会看错。不像在哪：同一个凸性在这里方向相反，投资里离散伤害复利，而各题成功率参差反而让 pass^k 比「人人都是平均 p」时更高。</li>
+<li><b>生态学 · 三型存活曲线</b>：Raymond Pearl 把物种的存活曲线分成三型，第 III 型是牡蛎、鱼苗那样大量早夭、熬过去的就活得很久，正是 Weibull k&lt;1 的形状。不像在哪：鱼苗死于外部捕食，agent 的「早夭」多半是自己读错了需求。</li>
+<li><b>心理学 · 噪声审计</b>：卡尼曼等人在《噪声》（2021）里区分偏差与噪声，让同一批案子反复交给判断者，看结论散得多开；pass^k 就是给模型做的噪声审计。不像在哪：噪声审计不需要知道正确答案，只看判断彼此差多少；pass^k 必须有裁判判对错。</li>
+<li><b>西方哲学 · 休谟的归纳问题</b>：从已观察到的推断没观察到的，靠的是「自然齐一」这个假设而非数据本身；99% 视界的外推也一样，结论取决于选哪条曲线。不像在哪：休谟认为再多观察也证明不了归纳，而尾部估计只要在那个区间攒够任务，误差就真能压下来。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>pass@k 衡量 k 次尝试里至少成功一次，适合有单元测试兜底、可以挑最好一份的场景。</li>
+<li>τ-bench 提出的 pass^k 要求同一任务 k 次全部成功，衡量的是 agent 可托付的程度。</li>
+<li>pass^k 是各题成功率 k 次方的平均：失败集中在固定题上时曲线变平、重试无用，失败随机时曲线陡降。</li>
+<li>同样 65% 的单次成功率，失败集中时 pass^8 约 0.60，失败随机时只有约 0.03。</li>
+<li>METR 的时长视界用人类专家完成任务的用时当尺子，问模型在多长的任务上还有 50% 或 80% 成功率。</li>
+<li>50% 与 80% 时长视界之比只由 logistic 曲线的斜率 β 决定，能力进步不会自动缩小这段距离。</li>
+<li>Toby Ord 的恒定风险率模型让成功率随时长指数衰减，50% 视界就是 agent 的「半衰期」。</li>
+<li>Weibull 拟合显示 agent 的形状参数 k 约 0.6，风险集中在任务开头，而且模型变强时 k 几乎不变。</li>
+<li>难易任务混在一起也会让总体风险率看似下降，所以 Weibull 的 k 小于 1 未必说明模型越做越稳。</li>
+<li>99% 视界只能靠外推，结论主要取决于选哪条分布曲线；用户模拟器的错误还会在 pass^k 里按 k 次方放大。</li>
+</ol>
 </div>
 <!-- 资源 -->
 <div class="card" data-tts="497ce363adc9d6b4" style="border-left-color:#7b61ff">

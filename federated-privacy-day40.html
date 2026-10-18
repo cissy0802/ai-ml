@@ -54,6 +54,13 @@ table.cmp th{background:rgba(123,97,255,0.12);color:#a48cff;font-weight:600}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -290,6 +297,30 @@ node_sums = [(a + b) % P <span class="kw">for</span> a, b <span class="kw">in</s
 </table>
 <p style="margin-top:12px;color:#cfd3df;font-size:0.95rem">典型组合：<b>联邦学习</b>定框架（数据不出门）→ <b>安全聚合 / MPC</b> 让服务器看不到单个梯度 → <b>差分隐私</b>给模型加噪防个体反推 → 必要时对最敏感片段加 <b>HE</b>。一句话：<b>FL 管位置，MPC/HE 管过程，DP 管结果</b>。</p>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>复杂性科学 · 高尔顿的「众人之声」</b>：1907 年高尔顿统计约 800 张猜牛体重的票，中位数 1207 磅，离实际的 1198 磅不到 1%。FedAvg 也是把各方的估计平均成一个更好的估计；不同在于群体智慧要求各人误差彼此独立，联邦里 Non-IID 客户端的偏差常常同向，平均也抵消不掉。</li>
+<li><b>心理学 · 随机化回答技术</b>：Warner 1965 年为敏感问卷设计，受访者先私下掷硬币决定答哪个版本，调查者看不出个人真相，却能从总体比例反推真实分布。这正是「在本地加噪」的差分隐私的前身；不像在它当时没有 ε 这种可组合、可记账的定义。</li>
+<li><b>量子力学 · 盲量子计算</b>：2009 年 Broadbent、Fitzsimons、Kashefi 提出，只会制备单个量子比特的客户端，可以把计算委托给量子服务器而不泄露输入和算法。和同态加密同是「替你算却看不见」；不同在于保密来自物理原理而非格难题假设，代价是双方要多轮交互。</li>
+<li><b>佛学 · 缘起性空</b>：秘密分享里每一份都是纯随机数，「5」不在任何一份里，只在份额按协议合起来时才出现，很像缘起说的「无自性、依因缘而有」。不像在于：MPC 的输入在拆分前确实是个实打实的数，佛学说的空连这个原点也不承认。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>联邦学习把计算搬到数据所在处，原始数据留在设备上，只把模型更新传回服务器。</li>
+<li>McMahan 等人的 FedAvg 按样本数加权平均各客户端的本地权重，本质是一次加权 reduce，瓶颈在通信而非算力。</li>
+<li>「数据不出门」不等于安全：梯度反演攻击能从上传的梯度近似重建出训练样本。</li>
+<li>差分隐私要求加不加某一条记录，算法输出的概率分布几乎不变，差距被 e^ε 这个倍数夹住。</li>
+<li>ε 越小隐私越强、噪声越大、精度越低，而且多次查询的 ε 会累加，必须像预算一样记账。</li>
+<li>DP-SGD 先裁剪每个样本的梯度再加高斯噪声，并用 moments accountant 累计训练全程的隐私损耗。</li>
+<li>同态加密让服务器直接在密文上计算，Gentry 2009 年靠 bootstrapping 重置噪声，构造出首个全同态方案。</li>
+<li>全同态加密比明文计算慢成千上万倍，实践中只用在最敏感的一小段，机器学习推理多用支持近似实数的 CKKS。</li>
+<li>安全多方计算用秘密分享让各方合算结果而不暴露输入，但它只保护计算过程，输出本身仍可能泄密。</li>
+<li>生产系统通常组合使用：联邦学习管数据位置，安全聚合、MPC 和同态加密管计算过程，差分隐私管结果。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="57ce4fa861f7fafc" style="border-left-color:#7b61ff">

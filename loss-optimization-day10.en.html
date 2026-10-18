@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -366,6 +373,34 @@ CLIP_VALUE = <span class="str">1.0</span>   <span class="cmt"># GPT-3/Llama defa
     <div class="label">Takeaway + reflection</div>
     <div class="takeaway">💡 Gradient clipping = the training process's circuit breaker. <b>Direction preserved, length reined in</b> — near-zero cost, saves days of compute when needed.<br>🤔 "Cheap safety net for rare extreme events" — where does this thinking show up in your system designs? Why do some people object ("ugly," "inelegant"), and under what premises does their objection hold?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" target="_blank">Engineering counterpart → super-individual D12 (Fine-tuning in practice)</a></div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Investing · The Kelly criterion (John Kelly, 1956)</b>: Kelly, at Bell Labs, showed that if you split your bets according to your own probability estimates, the long-run log growth rate of your bankroll is exactly the negative cross-entropy; every bit of KL divergence from the true odds is growth you lose, and going all-in on a wrong outcome is log 0, which is ruin. The difference: a gambler may sit a round out, while a model must assign probability to every token.</li>
+    <li><b>Neuroscience · Divisive normalization</b>: a visual cortex neuron's output is often divided by the summed activity of its neighbors, so the same stimulus draws a weaker response against a busy background. That is the same move as AdamW dividing the gradient by √v. Where it differs: the brain divides by neighbors at the same moment, AdamW by the same parameter's own past gradients.</li>
+    <li><b>Psychology · The law of small numbers (Tversky and Kahneman, 1971)</b>: people treat statistics from a handful of samples as reliable. Warmup guards against the same error: in the first few steps √v rests on only a few gradients, and dividing by it produces absurdly large steps. The difference: people overtrust out of intuitive bias, AdamW just follows its formula, so the schedule has to be cautious on its behalf.</li>
+    <li><b>Evolutionary biology · Fisher's geometric model (R. A. Fisher, 1930)</b>: Fisher argued that for a well-adapted organism, a small random mutation has about even odds of helping, while a large one almost always hurts, because any big step near an optimum tends to overshoot it. Gradient clipping caps step length for the same reason. Unlike mutations, though, the clipped gradient keeps its direction intact rather than pointing at random.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Because the target distribution in LLM training is one-hot, cross-entropy collapses to a single term: the negative log of the probability given to the correct token.</li>
+    <li>The negative log makes cross-entropy gentle on confident correct answers and brutal on confident wrong ones.</li>
+    <li>Minimizing cross-entropy pulls the model's distribution toward the true one, so training an LLM is mathematically training an optimal text compressor.</li>
+    <li>With softmax, the cross-entropy gradient on the logits is simply prediction minus truth, with none of the vanishing factor MSE introduces.</li>
+    <li>Loss and perplexity are only comparable within the same tokenizer; comparing models needs downstream benchmarks.</li>
+    <li>Loshchilov and Hutter's AdamW combines three pieces: momentum, a per-parameter step size adapted from gradient history, and weight decay decoupled from the gradient.</li>
+    <li>Folding weight decay into the gradient lets Adam's √v scaling weaken it; AdamW moves it outside the gradient.</li>
+    <li>AdamW's optimizer state is twice the parameter count, which is why large-model training shards it across GPUs with ZeRO or FSDP.</li>
+    <li>Warmup lets Adam's second moment gather enough samples and decay enables late fine-tuning; what matters is having both, not cosine versus linear.</li>
+    <li>Global-norm gradient clipping only shrinks oversized gradients proportionally without changing direction, with 1.0 as the default threshold in LLM training.</li>
+  </ol>
 </div>
 
 <!-- Further reading -->

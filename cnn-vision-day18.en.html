@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -288,6 +295,34 @@ probs = out.logits_per_image.<span class="fn">softmax</span>(dim=1)  <span class
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 CLIP's lever is <strong>using natural language as the supervision signal</strong>: no more hand-labeling fixed classes—let massive "image + caption" pairs teach the model. The essence of zero-shot is quietly swapping classification for retrieval.<br>🤔 "Replace finely-labeled small data with weaker but massive supervision (web image-text)"—does this idea also hold for building your own knowledge and judgment?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · Hubel and Wiesel's receptive fields</b>: from 1959 the pair recorded from cat visual cortex and found "simple cells" that fire only for an edge of a particular orientation in one small patch of the visual field, with higher cells combining them; the work won the 1981 Nobel Prize. A convolution's local receptive field and layer-by-layer composition share that structure. The difference: the brain has no strict weight sharing, since every neuron grows its own synapses, and it is full of top-down feedback connections.</li>
+    <li><b>Evolution · Jacob's "tinkering" (François Jacob, 1977)</b>: evolution does not design from scratch like an engineer; it patches what already exists. A residual block likewise keeps its input x by default and only adds a small change F(x). Unlike evolution, which can never return to the starting point, a residual block whose F(x) learns to be 0 falls cleanly back to the identity.</li>
+    <li><b>Western philosophy · Kant's a priori forms of intuition</b>: for Kant, space is a form the mind brings to experience, not something learned from it. A CNN writes locality and translation invariance straight into its architecture, like an innate form of space, while ViT is closer to the empiricist blank slate and learns spatial relations from data. Where it breaks: Kant's forms cannot be given up, a CNN's prior is just a design choice, and ViT still keeps position encodings.</li>
+    <li><b>Linguistics and philosophy · Saussure on difference</b>: Saussure's <i>Course in General Linguistics</i> (1916) argues that a sign's meaning comes not from the sign itself but from its differences from other signs. Contrastive learning works the same way: a vector's position is fixed by what it should sit near and what it should push away. The difference: Saussure's sign system is closed inside language, while CLIP anchors words to images.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Convolution combines local connectivity with weight sharing, so the parameter count is independent of image size and translation invariance comes built in.</li>
+    <li>A CNN's kernel weights are learned automatically by backpropagation; humans only choose the kernels' size and number.</li>
+    <li>Stacking convolutional layers widens the receptive field step by step, so features compose from edges and textures up to whole objects.</li>
+    <li>Degradation in deep networks means even training error rises, which is different from overfitting, where training is good and testing is poor.</li>
+    <li>He et al.'s 2015 ResNet has layers learn the residual F(x) = H(x) − x, so at worst a block falls back to the identity mapping.</li>
+    <li>The +x of a residual connection opens a gradient highway straight to shallow layers, and every Transformer block uses it today.</li>
+    <li>ViT cuts an image into 16×16 patches as tokens, adds position encodings and a [CLS] token, and feeds them to a standard Transformer.</li>
+    <li>Data scale is ViT's watershed: it trails CNNs at medium scale but overtakes them with hundreds of millions of pretraining images, as fewer priors become an advantage.</li>
+    <li>CLIP trains contrastively on 400 million web image-text pairs, raising the diagonal of an N×N similarity matrix and lowering the mismatches.</li>
+    <li>CLIP's zero-shot classification is really image-text retrieval: classes can be added at will, but it is strong at matching and weak at counting and spatial reasoning.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

@@ -44,6 +44,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -346,6 +353,31 @@ trainer.train()                            <span class="cmt"># 跑完，效果�
 <details><summary>DPO 之后出现 IPO、KTO、ORPO 等变体——未来的对齐方法可能从什么角度突破？（提示：现在所有方法都假设"成对偏好"——如果没有呢？）</summary><div>三个可能方向：(1) 摆脱成对——KTO 已经做到只用"好/坏"单点标签，未来可能用更稀疏的"通过/失败"信号或纯粹的环境奖励；(2) 多目标对齐——当前方法把"有用、安全、诚实"压成一个标量分数，未来需要 Pareto 多目标优化；(3) 自我对齐——让模型自己批判自己（Self-Rewarding LLM），打破"标注员瓶颈"。更激进的思路：与其在 post-training 修，不如在 pre-training 阶段就用价值观加权数据（Anthropic 的 "pretraining with values"）。共同趋势：把"对齐"从一个 fine-tuning 后处理步骤，变成贯穿整个训练 pipeline 的范式。</div></details>
 </div>
 </div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 预测编码</b>：Rao 与 Ballard 1999 年提出，视觉皮层不断预测下一刻的输入，只把预测误差往上传，用误差修正内部模型。和预训练「猜下一个 token、用误差调参」是同一个结构。不像在：大脑预测是为了指导身体行动，模型只预测文本本身。</li>
+<li><b>生物进化 · 外适应</b>：Gould 与 Vrba 1982 年命名的现象，羽毛先为保温演化，后来被借去飞行。预训练为猜词练出的能力，被 SFT 少量样本「征用」成对话能力，很像这种功能挪用。不像在：进化没有设计者，微调却是人有意挑选的方向。</li>
+<li><b>心理学 · 比较判断法则</b>：Thurstone 1927 年指出，人给事物打绝对分很飘，两两比较「哪个更好」却稳定得多。RLHF 不让标注员写标准答案、只让他们二选一，用的正是这条心理规律。不像在：Thurstone 量的是感觉强度，奖励模型要从比较里还原出对整段话的综合偏好。</li>
+<li><b>东方哲学 · 从心所欲不逾矩</b>：孔子自述七十岁才达到的境界，在规矩之内自由行事。KL 惩罚和 DPO 的 beta 让模型追求高分，却不许离参考模型太远，结构相同。不像在：孔子的矩已内化为本心，模型的约束始终是外加的惩罚项。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>预训练只做一件事：给定前文预测下一个 token，用海量语料把语言和常识学成共享底座。</li>
+<li>预训练模型「懂」事实靠的是统计共现，所以会自信地说出听起来对、其实错的幻觉。</li>
+<li>只做过预训练的 base 模型是续写引擎，不会按指令对话。</li>
+<li>Chinchilla（2022）指出同算力下小模型多喂数据更优，但推理成本让业界转向过训练小模型。</li>
+<li>有监督微调（SFT）沿用预测下一个 token 的损失，变的只是数据：高质量的指令-回答对。</li>
+<li>SFT 主要教风格、格式和口吻，不适合教新知识；会变的事实应交给 RAG。</li>
+<li>LIMA 的观点是能力在预训练中已经学会，SFT 只需约 1000 条多样的精品样本去激活。</li>
+<li>RLHF 把难写的标准答案换成容易做的二选一：先训奖励模型，再用 PPO 优化主模型。</li>
+<li>RLHF 的 KL 惩罚把模型拴在 SFT 模型附近，防止奖励黑客；RLHF 让模型更讨喜，未必更聪明。</li>
+<li>DPO 用偏好对上的一个分类式损失替代奖励模型和 PPO，更便宜更稳定，但只能离线学习。</li>
+</ol>
+</div>
+
 <a class="back" href="index.html">← 返回首页</a>
 <footer>BigCat · AI &amp; ML · 2026</footer>
 </div>

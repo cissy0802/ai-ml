@@ -53,6 +53,13 @@ table.cmp th{background:rgba(123,97,255,0.12);color:#a48cff;font-family:"SF Mono
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -280,6 +287,31 @@ resp = client.messages.<span class="fn">create</span>(
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 ICL 是小样本学习的「终极形态」：学习从「训练阶段」彻底移进了「<strong>推理的那一次前向传播</strong>」，零权重更新、即用即弃。从迁移学习到 ICL，「学习」一路向运行时（runtime）迁移——这条线索本身就是过去十年 ML 的缩影。<br/>🤔 既然示例标签错了也不太影响，那 few-shot「学习」到底有几分是「学」，几分是「检索 + 定位」？<br/><a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-day1.html" style="color:#7b61ff">工程对应 → super-individual D1: Prompt Engineering（few-shot 示例怎么挑、怎么排序、几个最优）</a></div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 互补学习系统</b>：McClelland 等人 1995 年提出：海马体一次记住新经历，新皮层慢慢抽取统计规律，正像「ICL 快、权重慢」。不像在：海马体会在睡眠中回放、把经历巩固进皮层；ICL 学到的推理一结束就蒸发，什么也沉淀不进权重。</li>
+<li><b>心理学 · Harlow 的学习定势</b>：Harlow 1949 年让猴子连做几百个辨别题，后来新题几乎一次就会，他称之为「学会学习」，正是 MAML 外循环。不像在：猴子学到的是「赢留输换」的策略，MAML 学到的只是一个参数起点。</li>
+<li><b>生物进化 · 鲍德温效应</b>：Baldwin 1896 年指出，自然选择会青睐「一生中学得快」的能力：进化是外循环，个体学习是内循环。不像在：进化没有梯度，只靠盲目变异和筛选，一代代逼近好起点。</li>
+<li><b>心理学 · Rosch 的原型理论</b>：Rosch 在 1970 年代发现，人判断类别围绕最典型的成员：知更鸟比企鹅更像鸟，和原型网络的质心同一直觉。不像在：人的原型有典型性梯度，质心只看远近。</li>
+<li><b>西方哲学 · 柏拉图《美诺篇》</b>：苏格拉底只靠提问，让没学过几何的奴隶男孩解出正方形倍积题，柏拉图说学习即回忆。标签打乱仍有效的 ICL 也是在唤起而非教。不像在：模型的「前世」是看得见的预训练语料。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>迁移学习冻结预训练网络的底层通用特征，只重训顶层，几百张图就能训出像样的分类器。</li>
+<li>新任务和预训练数据差异越大，越该解冻更多层、用更小学习率做全网微调。</li>
+<li>元学习即「学会学习」：MAML（Finn et al. 2017）优化的不是终点，而是能快速适应新任务的起点。</li>
+<li>MAML 用双层优化：内循环在支持集上走几步得到 θ'，外循环用 θ' 在查询集上的损失回头更新起点 θ。</li>
+<li>MAML 的外循环要算「梯度的梯度」，计算和显存开销大，实践中常用 FOMAML、Reptile 这类一阶近似。</li>
+<li>原型网络（Snell et al. 2017）把每类支持样本的嵌入均值当原型，新样本归给最近原型，零梯度更新。</li>
+<li>在很多小样本基准上，简单的度量法持平甚至超过 MAML：数据稀缺时，好的嵌入空间胜过花哨的优化技巧。</li>
+<li>上下文学习（ICL）只靠 prompt 里几个示例完成新任务，权重不变，「学习」发生在一次前向传播内。</li>
+<li>Min et al. 2022 发现打乱示例标签性能几乎不掉：示例主要传递格式和标签空间，用来定位已有能力。</li>
+<li>从迁移学习到 ICL，适应新任务的成本一路从训练时推到推理时，代价是越来越依赖强大的预训练底座。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="f0bc4fa434923724" style="border-left-color:#7b61ff">

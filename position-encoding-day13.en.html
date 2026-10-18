@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -313,6 +320,31 @@ bias = <span class="fn">alibi_bias</span>(seq_len=8, n_heads=4)
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Buddhism · Dependent origination and emptiness</b>: After the RoPE dot product, absolute position cancels and only the relative distance between two tokens survives, much like the idea that a thing has meaning only through its relations. The difference: RoPE still computes an absolute angle for every token and merely cancels it at comparison time, whereas dependent origination says there was never an independent "position" to begin with.</li>
+<li><b>Quantum mechanics · Global phase is unobservable</b>: Multiply a whole wavefunction by the same phase and no measurement changes; only relative phase (interference) is observable. Rotate Q and K together by the same extra angle and the dot product is unchanged too. Unlike physics, this is a design choice rather than a law, and RoPE uses a different frequency for each pair of dimensions.</li>
+<li><b>Neuroscience · Phase precession of place cells (O'Keefe and Recce, 1993)</b>: As a rat crosses a place field, the cell fires at progressively earlier phases of the hippocampal theta rhythm, so location is written as a phase angle against an oscillation, the same move RoPE makes by writing position as a rotation angle. Unlike RoPE, the brain's phase also depends on running speed, while RoPE's angle depends only on the token index.</li>
+<li><b>Psychology · Temporal discounting</b>: ALiBi subtracts m per step of distance, so after softmax the weight decays exponentially with distance, like exponential discounting in economics. Yet people and animals discount hyperbolically, and Kurth-Nelson and Redish (2009) showed that a population of exponential discounters with different rates adds up to hyperbolic behavior. ALiBi's per-head slopes are a similar multi-timescale mix, though concatenating and projecting head outputs does not guarantee a hyperbolic curve.</li>
+<li><b>Developmental biology · Wolpert's French flag model (1969)</b>: Embryonic cells read the concentration of a morphogen and use thresholds to become blue, white or red, in effect reading an absolute coordinate, the same structure as a learned absolute position table. The difference: as an embryo grows, its pattern must rescale proportionally (the scaling problem), while a fixed-length table simply has no coordinate for one extra position.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Pure attention is permutation-invariant, so shuffling the tokens changes nothing and a Transformer must inject position separately.</li>
+<li>Sinusoidal positional encoding gives each position a parameter-free, multi-frequency fingerprint of sines and cosines added to the token embedding.</li>
+<li>With sinusoidal encoding, PE(pos+k) is a linear transform of PE(pos), and any position can be computed, yet extrapolation is mediocre in practice.</li>
+<li>Learned absolute position embedding, used by BERT and GPT-2, is a lookup table with max_len rows and cannot extrapolate past max_len at all.</li>
+<li>RoPE (Su Jianlin et al., 2021) rotates Q and K by position, so absolute position cancels in the dot product and only relative distance remains.</li>
+<li>RoPE changes only Q and K, leaving token embeddings free for meaning, and its per-dimension frequencies give multi-resolution relative position.</li>
+<li>Native RoPE cannot extrapolate indefinitely either; YaRN and similar methods rescale low frequencies, keep high ones, and extend context with light fine-tuning.</li>
+<li>ALiBi (Press et al., 2022) drops position vectors and subtracts a per-head slope times distance directly from the attention scores.</li>
+<li>ALiBi's recency bias makes extrapolation strong but hurts precise long-range retrieval, which is why mainstream models still choose RoPE.</li>
+<li>The arc of positional encoding runs from position as data added to the input to position as structure built into attention geometry and biases.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

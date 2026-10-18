@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -275,6 +282,33 @@ d = a.<span class="fn">astype</span>(<span class="fn">float</span>) - b.<span cl
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 一个分数要能被相信，得同时过三关：测的是对的东西（效度）、没被污染（干净）、差距超过噪声（显著）。<br/>🤔 你手上正在依赖的那个「模型 A 更好」的判断，如果补上误差棒，还剩下多少？<br/>📎 工程对应 → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6：Eval 工程</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>西方哲学 · 克里普克的严格指示词</b>：《命名与必然性》（1970 年讲座）说专名在一切可能世界都指同一对象。「o3」在预览和发售时却指向不同系统，更像可改写的摹状词。不像在：专名靠历史因果链锚定，模型名的锚厂商随时能挪。</li>
+<li><b>佛学 · 那先的车喻</b>：《那先比丘经》里，那先问弥兰王「车」是轮、是轴还是辕，结论是「车」只是部件聚合上的假名。模型名同样是挂在权重、system prompt、路由这串可变部件上的假名。不像在：佛学说找不到不变的本体，工程上却能找到，锁定 checkpoint hash 就有了不变的指称。</li>
+<li><b>生物分类 · 模式标本</b>：动物命名法让每个物种名绑定一件馆藏模式标本，名字由实物兜底而非靠描述，正是 checkpoint hash 的角色。不像在：物种仍在演化，标本只钉住名字；权重快照钉住的是实验对象本身。</li>
+<li><b>量子力学 · 玻尔的互补性</b>：玻尔坚持量子「现象」必须连同整套实验装置一起描述。「分数属于模型 × scaffold × harness」是同一结构。不像在：量子测量对装置的依赖是原理性的；评测的依赖只是没写进报告，配置记全就能复现。</li>
+<li><b>心理学 · 研究者自由度</b>：Simmons 等人 2011 年指出，剔除哪些样本、报哪个指标、何时停收数据，这些小选择叠起来足以大幅抬高假阳性率。评测的五道闸门和 k 是同一种分岔路，解药都是全部写明。不像在：心理学的分岔常被拿来追显著性，评测的分岔多半只是没人报告。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>模型名是可变指针而非不可变引用，底下的权重、system prompt、推理预算和路由都可能变。</li>
+<li>ARC Prize 验证的 o3 预览版在 ARC-AGI-1 上得 87.5%，2025 年发售的 o3 只有约 41%–53%。</li>
+<li>可复现的实验要记录响应返回的实际 model id 和运行指纹，不能只记请求的模型名。</li>
+<li>Agent 基准分数属于模型、scaffold、采样预算和评分协议的联合系统，排行榜却只标模型名。</li>
+<li>pass@k = 1 − (1 − p)^k 随尝试次数单调上升，只报分数不报 k 等于藏起一个可调自变量。</li>
+<li>Claude 3.7 Sonnet 在 SWE-bench Verified 上标准配置 62.3%、自定义 scaffold 70.3%，同模型差 8 个点。</li>
+<li>基准是数据集加评分协议：prompt 模板、few-shot、打分方式、答案抽取规则任一项变化都会改分数。</li>
+<li>比较选项 log 概率时，原始求和偏爱短选项，按 token 数归一偏爱长选项，同一个 MMLU 因此有两个分数。</li>
+<li>构念效度问基准是否在测你以为的能力；GSM1k 和 SWE-Bench+ 显示污染与弱判定都会抬高分数。</li>
+<li>评测分数是带误差的估计量：500 题、70% 正确率时 95% 置信区间约 ±4 个点，差 1 分通常不显著。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="c7bde4f244848f0d" style="border-left-color:#7b61ff">

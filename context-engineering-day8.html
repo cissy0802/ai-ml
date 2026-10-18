@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -277,6 +284,30 @@ resp = client.messages.<span class="fn">create</span>(
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 Context 是工作集，Memory 才是持久存储——把两者混为一谈是 AI 应用最常见的架构错误。<br/>🤔 如果把"和 AI 共事一年"看作设计一个有状态系统，你的"数据 schema"长什么样？哪些字段需要持久化，哪些只是 session state？</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>意识研究 · Baars 的全局工作空间</b>：Baars 1988 年把意识比作容量很小的舞台，台上内容广播给所有无意识模块；context window 也是这样稀缺的「被看见」之处。不像的是：意识靠内容竞争上台，context 由工程师在外面挑。</li>
+<li><b>心理学 · Bartlett 的重构记忆</b>：Bartlett 1932 年让被试接力复述《幽灵之战》，陌生细节越传越少，情节滑向英国人熟悉的套路。这就是「总结的总结」的漂移。不像的是，系统能存档原文，人脑没有原件可查。</li>
+<li><b>神经科学 · 互补学习系统</b>：McClelland 等人 1995 年提出，海马体快速记下具体经历，新皮层慢慢抽出规律，睡眠重放把前者交给后者。memory 从 episodic 原始对话提炼 semantic 事实，是同一个结构。差别在于，大脑巩固会改写皮层连接本身，LLM 的 memory 只是外挂笔记，权重一点没动。</li>
+<li><b>佛学 · 唯识的「熏习」</b>：唯识说念头和行为如香熏衣，在阿赖耶识留下种子，日后遇缘生起相应的见解。错误 memory 被持久化后持续左右回答，正是一颗坏种子。不像的是：系统可一键删除，转化种子却要靠长期的新熏习。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Context window 是模型的工作集而不是数据库，要放对的内容而不是更多内容。</li>
+<li>Attention 计算随长度平方增长，KV cache 随长度线性增长，窗口大小是硬件成本问题。</li>
+<li>Liu et al. 2023 发现 Lost in the Middle：放在长上下文中间的信息召回率最低。</li>
+<li>长窗口替代不了 RAG，塞满上下文又贵又慢，RAG 加短上下文通常更好。</li>
+<li>Prompt caching 要求前缀逐 token 一致，所以不变内容必须放在最前面。</li>
+<li>Anthropic 缓存写入贵 25%、命中便宜 90%，只该缓存真正不变的前缀。</li>
+<li>上下文压缩分滑动窗口、摘要、分层摘要、检索四类，保真度和成本依次升高。</li>
+<li>压缩是有损编码：原话偏好、数字、代码和 ID 要逐字保留，总结的总结会失真。</li>
+<li>LLM 本身无状态，memory 系统按提取、存储、检索、注入四步把事实送回上下文。</li>
+<li>Memory 最大的风险是错误事实被持久化，污染之后所有回答，需要置信度和审计。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="1f83564d0cd2a7e3" style="border-left-color:#7b61ff">

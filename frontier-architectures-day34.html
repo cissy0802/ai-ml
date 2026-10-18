@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -281,6 +288,34 @@ pos_interpolated = pos * scale     <span class="cmt"># 模型只需"认识"它�
 <div class="takeaway">💡 长上下文不是单一技术，是「高效注意力 + KV 压缩 + 位置外推」的合奏——任何一道墙没翻过，长度都撑不起来。<br/>🤔 三道墙里，MoE 解决的是「参数容量成本」、SSM 解决的是「序列计算成本」、长上下文解决的是「序列长度成本」。如果你只能在自己的产品里押注一条路线，你怎么根据业务的「序列特征」来选？<br/><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.html" style="color:#7b61ff">工程对应 → super-individual D16 (Cost：长上下文的成本与延迟账)</a></div>
 </div>
 </div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 稀疏编码与能量预算</b>：Peter Lennie 2003 年估算，受能耗所限，皮层同一时刻只有约 1% 的神经元能大量放电；容量大、同时在算的少，和 MoE 同构。不像在于：皮层分工部分对应功能区，MoE 专家的分工却不对应人类领域。</li>
+<li><b>佛学 · 唯识的种子与熏习</b>：唯识宗说每个行为都「熏」进阿赖耶识留下种子，种子再生起后来的行为；过去不以原貌保存，只以压缩过的倾向延续，正像 SSM 的 h<sub>t</sub> = A·h<sub>t-1</sub> + B·x<sub>t</sub>。不像的是，种子没有固定容量，修行要的是转化这个状态，不是更准地预测下一刻。</li>
+<li><b>神经科学 · 网格细胞的重标度</b>：内嗅皮层的网格细胞用几种不同空间频率的周期性放电编码位置，和 RoPE 用多种频率的旋转角编码位置是同一思路。Barry 等人 2007 年发现，把大鼠熟悉的围栏拉长，网格也跟着被拉伸，正是位置插值的「重标刻度、不换尺子」。不像在于：动物熟悉新环境后网格会退回原尺度，模型则靠微调把新刻度固定下来。</li>
+<li><b>心理学 · 双系统理论（Kahneman）</b>：思维大部分时间靠快而省力的系统 1 流过去，少数关键时刻才调用慢而费力的系统 2 精确核对；混合架构同样是大量 Mamba 层配少量注意力层。不像的是，人按情境决定何时启用系统 2，混合架构里注意力层的位置在训练前就写死了。</li>
+</ul></div>
+</div>
+
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>标准 Transformer 有两个先天病：注意力随序列长度呈 O(n²) 增长，以及每个 token 激活全部参数的稠密计算。</li>
+<li>混合专家（MoE）用路由器为每个 token 只挑 top-k 个专家，把参数容量和计算成本解耦。</li>
+<li>MoE 的关键难点是负载均衡，Shazeer 等人 2017 年用辅助均衡损失防止 token 涌向少数明星专家。</li>
+<li>MoE 专家的分工是在 token 粒度的隐空间里学出来的，不对应数学、代码这类人类领域。</li>
+<li>Mixtral 8×7B 总参数约 47B、每 token 只激活约 13B：显存按 47B 算，推理速度按 13B 算。</li>
+<li>状态空间模型（SSM）把历史压进固定大小的隐状态，训练时可展开成卷积并行，推理时逐步 O(1) 更新。</li>
+<li>SSM 的固定状态是有损压缩，在大海捞针、精确复制这类要回看具体 token 的任务上弱于注意力。</li>
+<li>Mamba 让 B、C 和步长 Δ 随输入变化获得选择性记忆，再用硬件感知的并行扫描保住 GPU 效率。</li>
+<li>纯 Mamba 并未取代 Transformer，主流做法是少量注意力层加大量 Mamba 层的混合架构。</li>
+<li>长上下文要同时翻过算力 O(n²)、KV cache 显存和位置外推三道墙，且能装下 1M 不等于用得好 1M。</li>
+</ol>
+</div>
+
 <!-- 深入资源 -->
 <div class="card" data-tts="ebd000308d8b81e5" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -266,6 +273,30 @@ s = np.<span class="fn">array</span>([0.2, 0.55, 0.65, 0.9, 0.1, 0.58])  <span c
 <div class="label">Takeaway + reflection</div>
 <div class="takeaway">💡 J-space gives GWT's "access" part an intervenable machine sample — but it lacks "ignition" and says nothing about "experience"; use the analogy with restraint.<br/>🤔 If ignition-style nonlinear entry were someday observed in a model, would that make you more inclined to think it is "conscious"? What would still be missing?</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Statistical physics · Kubo's linear response theory</b>: Kubo's 1957 move was to stop describing what state a system is in and instead nudge it and measure how it responds, characterizing it by an averaged sensitivity. J-lens likewise ignores what an activation "looks like" and asks only which outputs shift when you push it. Where it differs: physics averages over equilibrium fluctuations, while J-lens averages over wildly varied text contexts, so the approximation breaks more easily off-distribution.</li>
+<li><b>Evolutionary biology · Regulatory genes</b>: Hox-type regulatory genes are a tiny fraction of the genome yet decide where limbs grow and how the body segments, the same shape as a low-variance J-space holding the switches for behavior. Where it differs: genes are discrete switches, J-space is continuous directions, and it has a hard cap on how many concepts it holds at once.</li>
+<li><b>Neuroscience · Blindsight</b>: Patients with damage to primary visual cortex insist they see nothing, yet point to a flash of light far better than chance: information used but not reportable. That mirrors the paper's "selectivity": not all computation passes through the workspace. Where it differs: blindsight is a dissociation caused by injury, whereas automatic computation outside J-space is the normal division of labor.</li>
+<li><b>Psychology · Nisbett and Wilson</b>: Their classic 1977 study found that when people explain why they chose something, their accounts often match what bystanders guess from common sense; the report draws on a theory, not necessarily on the actual process. The paper claims the opposite for J-space: self-reports read the very representations reasoning uses. Side by side, they show that whether a report is wired to the process must be tested, in people and models alike.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>The logit lens reads intermediate activations straight through the final vocabulary matrix, but early and middle layers use a different coordinate system, so it often reads out noise.</li>
+<li>The tuned lens trains an affine translator per layer, and the translator can surface information the model itself never uses.</li>
+<li>J-lens translates with the average Jacobian from each layer to the final layer, asking "if I push here, what will the model go on to say?"</li>
+<li>J-lens reads only output tendencies under an averaged linear approximation, and a replication on small GPT-2 models did not beat the logit lens.</li>
+<li>J-space concentrates in middle layers, holds under roughly 10% of activation variance, and fits only about 25 distinguishable concepts at once.</li>
+<li>Low variance does not mean unimportant: variance-based reduction or magnitude pruning can delete exactly the J-space components that make concepts reportable.</li>
+<li>Anthropic's causal interventions show that swapping a concept inside J-space makes the model change its self-report, so the report is driven by that representation.</li>
+<li>In multi-hop questions the intermediate conclusion lights up in J-space first, and swapping its J component flips answers far more often than swapping the larger-variance non-J part.</li>
+<li>J-lens needs white-box weights and reads fuzzy tendencies, making it a complementary channel to human-readable CoT monitoring.</li>
+<li>J-space meets several functional criteria of Baars's Global Workspace Theory but lacks an ignition mechanism and says nothing about phenomenal consciousness.</li>
+</ol>
 </div>
 <!-- Resources -->
 <div class="card" style="border-left-color:#7b61ff">

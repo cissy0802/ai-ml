@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -288,6 +295,32 @@ slots = (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 并行解码的根本税是"同一步内条件独立"；扩散用似然精度和推理质量，换到了延迟和双向可控性。<br/>🤔 如果块大小是个可调参数，你会按什么信号在线调它——输入长度、任务类型，还是用户在不在等？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 盲点的知觉填充</b>：视网膜盲点没有感光细胞，大脑却用周围的颜色纹理把它补上，像双向填 [MASK]。不像在于：大脑一次填完、不报置信度，掩码扩散要多轮定稿。</li>
+<li><b>生物进化 · Waddington 的表观遗传景观（1957）</b>：细胞分化像小球滚下分岔山谷，越往下可选的命运越少；去噪也是从全 mask 的高地被上下文夹进一条沟。不像在于：发育先遇到分岔点，置信度优先解码却把分岔点留到最后，走到时沟已替它选好。</li>
+<li><b>投资 · 高斯 copula 与 2008 年</b>：David X. Li 2000 年的模型让每笔贷款的违约率单看都合理，却低估了一起违约的相关性；一步定稿 k 个槽位拿边缘分布冒充联合分布，是同一个错。不像的是文本可以重采样。</li>
+<li><b>量子力学 · 纠缠与边缘分布</b>：纠缠粒子各自测量都像纯随机，关联只在联合态里；"纽""约"两槽也是单看多解、合看一解。不像在于：语言的关联是经典的，逐个定稿就能还原；量子关联违反贝尔不等式。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>掩码扩散语言模型先铺一张全是 [MASK] 的定长画布，再多轮并行定稿，让文本逐步显影。</li>
+<li>离散扩散的噪声是遗忘而非高斯抖动：前向过程按比例把 token 换成吸收态 [MASK]。</li>
+<li>和 GPT 最本质的差别是去掉 causal mask，双向 Transformer 一次前向预测所有 mask 位置。</li>
+<li>MDLM 把扩散 ELBO 化简成 1/t 加权的 masked LM 损失，相当于训练能承受任意 mask 比例的 BERT。</li>
+<li>置信度优先解码把高熵的推理决策点拖到最后，分支早被上下文剪掉，这就是灵活性陷阱。</li>
+<li>JustGRPO 训练时强制左到右探索、推理时保留并行解码，说明更大的假设空间配贪心顺序反而更差。</li>
+<li>块扩散让块间自回归、块内并行去噪，救回 KV cache 和可变长度，块大小是连续旋钮。</li>
+<li>解码延迟约等于 NFE 乘单次前向耗时；块扩散砍的是 NFE 不是 FLOPs，用闲置算力换串行往返。</li>
+<li>一步并行定稿 k 个位置隐含条件独立假设，k 越大质量越偏，并行度与质量是一条真实曲线。</li>
+<li>扩散语言模型只有似然的 ELBO 下界，困惑度不能和自回归直接比；目前买到的是延迟而非能力。</li>
+</ol>
 </div>
 <!-- 资源 -->
 <div class="card" data-tts="51b8ddb92b5d3834" style="border-left-color:#7b61ff">

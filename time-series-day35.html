@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -252,6 +259,33 @@ point_forecast, _ = tfm.<span class="fn">forecast</span>(
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 时序基础模型 = 把「预测下一段数值」变成「预测下一个 token」，用预训练换 zero-shot 通用性。<br/>🤔 当一个领域出现「预训练 + zero-shot」的基础模型，原有的专用方法会被淘汰，还是退守到「数据少/要解释」的细分场景？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 预测编码</b>：Rao 与 Ballard 1999 年提出，视觉皮层的高层不断向下发送预测，低层只把「预测误差」往上传——和卡尔曼「先预测、再用观测与预测之差修正」是同一个循环。像在都只靠误差更新；不像在大脑是多层级联、非线性的，经典卡尔曼只有一层线性状态。</li>
+<li><b>佛学 · 无常</b>：平稳性假设等于赌「变化的规律本身不变」，差分只是把变化挪到增量上，规律仍被当成恒常。无常说得更彻底：连规律本身也在流转——这恰是结构性突变让模型失灵的那一处。</li>
+<li><b>生物进化 · 间断平衡</b>：Eldredge 与 Gould 1972 年提出，物种长期停滞、偶尔在短时间内剧变；Prophet 撒一批候选拐点再用稀疏先验压掉大多数，也是「大多时候平稳、少数时刻转折」的世界观。不像在 Prophet 的拐点只改趋势斜率，进化的剧变改的是形态本身。</li>
+<li><b>心理学 · 锚定与调整</b>：Tversky 与 Kahneman 1974 年描述，人以初始值为锚、再朝新信息调整，且常常调得不够——像一个 α 偏小的指数平滑。不像在指数平滑的 α 是从数据里拟出来的，人的调整幅度却被锚本身绑住。</li>
+<li><b>投资 · 随机游走</b>：ARIMA(0,1,0) 就是随机游走，最优预测是「明天等于今天」；Malkiel 1973 年的《漫步华尔街》认为股价近似如此。像在差分之后只剩噪声；不像在市场参与者会对预测本身作出反应，而传感器读数不会。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>ARIMA(p,d,q) 用前 p 个观测（AR）和前 q 个预测误差（MA）做线性外推，d 次差分负责去趋势。</li>
+<li>经典统计模型要求序列平稳，即均值和方差不随时间漂移，否则固定参数拟合的是不存在的平均态。</li>
+<li>ARIMA 是线性、短记忆模型，难以处理多重季节、节假日和非线性突变，过度差分还会引入伪相关。</li>
+<li>指数平滑让历史观测的权重按 (1−α) 指数衰减，Holt-Winters 再分别平滑水平、趋势、季节三个分量。</li>
+<li>平滑系数 α 大则对噪声过敏、α 小则反应迟钝，这是 bias-variance 权衡，没有万能值。</li>
+<li>卡尔曼滤波在预测与更新之间循环，卡尔曼增益按两边方差自动决定多信新观测还是多信旧预测。</li>
+<li>Taylor 与 Letham 的 Prophet 把序列拆成趋势、季节、节假日和噪声的加性组件，每个组件都能单独画出、手调。</li>
+<li>Prophet 撒候选拐点再用正则化压掉大多数；季节波幅随基数增长时，应从加性季节切换为乘性季节。</li>
+<li>Google 的 TimesFM 是 decoder-only Transformer，把序列切成 patch 当 token 预测，能对新序列零样本出预测。</li>
+<li>时序基础模型赢在海量异构序列和免调参；数据少、要解释、要快时，ARIMA 和 Prophet 仍是首选。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="9aa6e030848e4741" style="border-left-color:#7b61ff">

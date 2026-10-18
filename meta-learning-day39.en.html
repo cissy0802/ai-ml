@@ -52,6 +52,13 @@ table.cmp th{background:rgba(123,97,255,0.12);color:#a48cff;font-family:"SF Mono
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -309,6 +316,31 @@ resp = client.messages.<span class="fn">create</span>(
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Complementary learning systems</b>: McClelland and colleagues proposed in 1995 that the hippocampus records a new experience in one shot while the neocortex slowly extracts statistical structure, much like fast ICL versus slow weights. The difference: the hippocampus replays experiences during sleep and consolidates them into cortex, while whatever ICL learns evaporates when inference ends and never settles into the weights.</li>
+<li><b>Psychology · Harlow's learning sets</b>: In 1949 Harlow gave monkeys hundreds of discrimination problems; eventually they solved new ones almost in one trial, which he called learning to learn. That is MAML's outer loop. The difference: the monkeys acquired a win-stay, lose-shift strategy, while MAML acquires only a starting point in parameter space.</li>
+<li><b>Evolution · The Baldwin effect</b>: Baldwin argued in 1896 that natural selection favors the capacity to learn quickly within a lifetime: evolution is the outer loop, individual learning the inner loop. The difference: evolution has no gradient, only blind variation and selection, inching toward a good starting point over generations.</li>
+<li><b>Psychology · Rosch's prototype theory</b>: In the 1970s Rosch showed that people judge categories around their most typical member: a robin seems more like a bird than a penguin, the same intuition as a Prototypical Network's centroid. The difference: human prototypes carry graded typicality, while a centroid knows only distance.</li>
+<li><b>Western philosophy · Plato's Meno</b>: Socrates, by questions alone, leads an untutored slave boy to double the area of a square, and Plato concludes that learning is recollection. ICL that still works with shuffled labels also evokes rather than teaches. The difference: the model's past life is a pretraining corpus we can inspect.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Transfer learning freezes the lower layers of a pretrained network, which hold general features, and retrains only the top, so a few hundred labeled images can yield a decent classifier.</li>
+<li>The further a new task drifts from the pretraining data, the more layers you should unfreeze and fine-tune with a smaller learning rate.</li>
+<li>Meta-learning means learning to learn: MAML (Finn et al. 2017) optimizes not the endpoint of one task but a starting point that adapts quickly to new tasks.</li>
+<li>MAML uses bi-level optimization: the inner loop takes a few steps on the support set to get θ', and the outer loop uses the loss of θ' on the query set to update the starting point θ.</li>
+<li>MAML's outer loop needs a gradient of a gradient, which is costly in compute and memory, so practitioners often use first-order approximations such as FOMAML and Reptile.</li>
+<li>Prototypical Networks (Snell et al. 2017) average each class's support embeddings into a prototype and assign a new sample to the nearest one, adapting to new classes with zero gradient updates.</li>
+<li>On many few-shot benchmarks, simple metric-based methods match or beat MAML: when data is scarce, a good embedding space beats fancy optimization tricks.</li>
+<li>In-context learning (ICL) performs a new task from a few examples in the prompt with the weights untouched; the learning happens inside a single forward pass.</li>
+<li>Min et al. 2022 found that shuffling demonstration labels barely hurts accuracy: demonstrations mainly convey format and label space, locating abilities the model already has.</li>
+<li>From transfer learning to ICL, the cost of adapting to a new task moves steadily from training time to inference time, at the price of relying ever more on a strong pretrained base.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading</h2>

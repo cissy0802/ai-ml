@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -297,6 +304,32 @@ policy_loss = -torch.<span class="fn">min</span>(unclipped, clipped).<span class
 </div>
 
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Schultz's dopamine experiments</b>: In 1997 Schultz, Dayan and Montague showed that midbrain dopamine neurons in monkeys fire much like a TD error: unexpected juice triggers a burst; once the monkey learns that a light predicts juice, the burst moves to the light; when expected juice fails to arrive, firing dips below baseline. Alike in encoding "reality minus expectation"; unlike in that dopamine also responds to novelty and salience, so it is no clean scalar.</li>
+<li><b>Psychology · Hedonic adaptation</b>: Brickman and Campbell's 1971 "hedonic treadmill" says happiness tracks how much better things are than expected, so the glow of a raise is soon eaten by a new baseline. Same shape as the advantage A = Q − V. Unlike: the Critic's baseline exists to cut variance, while a rising human baseline makes contentment elusive.</li>
+<li><b>Eastern philosophy · Wang Yangming's unity of knowing and acting</b>: The Actor acts and the Critic judges, yet in code they share one body and split only at two final heads. Wang Yangming held that knowing and acting are one effort, much like the shared trunk. Unlike: Actor-Critic still ends in two heads with separate losses, exactly the split Wang rejected.</li>
+<li><b>Evolution · Fisher's geometric model</b>: In 1930 Fisher argued that the larger a mutation's effect, the less likely it is to improve fitness; only tiny mutations approach even odds. That is the case for PPO's step limit: the farther you move from a decent spot, the likelier you get worse. Unlike: evolution has no clip, so large mutations still occur and are mostly weeded out.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Reinforcement learning has no answer key, only after-the-fact feedback, and aims to maximize discounted long-term cumulative reward.</li>
+<li>The discount factor γ is a discount rate on future reward; a smaller γ makes the agent more short-sighted, the same math as discounted cash flow.</li>
+<li>Q-Learning's Bellman bootstrapping update propagates a delayed reward at the goal back to every earlier state-action pair.</li>
+<li>Q-Learning is off-policy: it explores with ε-greedy but learns the greedy optimal policy; Mnih et al.'s 2013 DQN replaced the Q-table with a neural network.</li>
+<li>A Q-table only works for small, discrete state spaces; Go-sized spaces and continuous actions make the table explode.</li>
+<li>Policy gradient tunes the policy network directly, pushing up good actions in proportion to return, at the cost of high variance and low sample efficiency.</li>
+<li>Actor-Critic uses the Critic's state value V(s) as a baseline, replacing return with advantage A to cut variance without adding bias.</li>
+<li>The Actor and Critic learn at once and set each other's targets, so an inaccurate Critic can make both diverge, which is why RL is more fragile than supervised learning.</li>
+<li>PPO (Schulman et al. 2017) clips the new-to-old policy probability ratio to 1±ε, getting trust-region-style stable updates with first-order gradients only.</li>
+<li>RLHF optimizes an LLM with PPO plus a KL penalty, but PPO's clip is a heuristic without TRPO's monotonic-improvement guarantee.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en"></span></h2>

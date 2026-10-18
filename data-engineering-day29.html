@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -249,6 +256,32 @@ client = Anthropic()
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 质量过滤的工程套路是「LLM 标少量、轻分类器跑全量」；它的根本张力是信噪比 vs 多样性，没有免费的「越干净越好」。<br/>🤔 当「高质量」由一个分类器定义，而这个分类器又由人类偏好训练时——我们到底在过滤噪声，还是在悄悄给模型灌输某种世界观？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>生物进化 · 遗传漂变</b>：小种群每一代只从上一代「抽样」繁殖，稀有等位基因会靠运气一点点丢光，多样性越传越窄；模型坍缩是同一结构，每代只学上一代的输出，长尾先消失。不像在：漂变是纯随机丢失，模型还偏爱高概率的常见表达，收窄得更快、更有方向。</li>
+<li><b>神经科学 · 睡眠中的记忆重放</b>：海马体在睡眠时重放、重组白天的经历，借此把记忆巩固进皮层，这像大脑自己给自己造合成数据。McClelland 等人 1995 年的互补学习系统理论指出，新经验要和旧记忆交错学习，否则会冲掉旧知识。不像在：重放始终锚定真实经历，恰好对应「合成数据必须混真实数据」这条纪律。</li>
+<li><b>心理学 · 虚幻真相效应</b>：Hasher 等人 1977 年发现，一句话听得越多，人越倾向于判断它为真，重复频率被误当成证据分量。C4 里重复六万多次的那句话对模型也是这种过度曝光。不像在：人被重复说服的是信念，模型被重复塑造的是逐字背诵。</li>
+<li><b>投资 · 分散化与相关性</b>：Markowitz 1952 年的组合理论说，分散的好处来自资产之间相关性低，而不是持仓个数多。同一篇文章被转载一千次，就像买了一千份高度相关的仓位，名义上数量大，有效样本只有一份。去重就是在算语料的「有效持仓数」。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>模型能力的天花板越来越多由数据决定而非参数量，训练数据要经过合成、策展、去重、质量过滤四道工序。</li>
+<li>Self-Instruct 让强模型照少量人写的种子任务自举出大量指令样本，过滤掉无效和重复后再拿去微调。</li>
+<li>phi-1 用 GPT-3.5 合成的教科书质量数据训练 13 亿参数小模型，在 HumanEval 上做到 50.6% pass@1。</li>
+<li>递归地用合成数据训练会引发模型坍缩：分布变窄、尾部细节丢失，所以合成数据要和真实数据混合使用。</li>
+<li>FineWeb 的方法论贡献是每加一个策展阶段就训小模型量化增益，把数据清洗变成可证伪的实验。</li>
+<li>去污染要删掉混进训练集的 benchmark 测试题，否则高分只证明模型背过答案，而不是会推理。</li>
+<li>近似去重用 MinHash 签名估计两篇文档的 Jaccard 相似度，再用 LSH 分桶，避开 O(n²) 的两两比对。</li>
+<li>Lee 等人 2021 年证明，去重让模型逐字背诵原文的概率降到约十分之一，还能用更少步数达到同等效果。</li>
+<li>数据受限时有意重复约 4 个 epoch 几乎无损，去重该删的是意外冗余，而不是一切重复。</li>
+<li>质量过滤的套路是 LLM 标少量样本、轻量分类器跑全量，但过度过滤会损失多样性并固化某种价值判断。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="1f31f47ce2dd9df0" style="border-left-color:#7b61ff">

@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -314,6 +321,32 @@ err = (w - <span class="fn">dequantize</span>(w_q, s)).<span class="fn">abs</spa
   </div>
 </div>
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Histogram equalization in a fly's eye (Simon Laughlin, 1981)</b>: Laughlin found that a blowfly visual neuron's response curve closely matches the cumulative distribution of contrasts in natural scenes, so the most common contrasts get the most response levels. NF4 packs its 4-bit levels densely where a normal distribution is most likely: the same move of spending scarce levels according to the distribution. The difference: the neuron keeps re-tuning its curve to the environment, while NF4's grid is fixed in advance.</li>
+<li><b>Evolutionary biology · The evo-devo toolkit (Sean Carroll)</b>: In <i>Endless Forms Most Beautiful</i> (2005), Carroll argues that animals share a deeply conserved set of developmental genes, and most diversity of form comes from small edits to regulatory switches, much like a frozen base plus a low-rank patch. Unlike LoRA, nobody picks the rank, and mutations can rewrite the base itself.</li>
+<li><b>Philosophy · Tacit knowledge (Michael Polanyi, 1966)</b>: Polanyi held that we know more than we can tell, and that what masters pass to apprentices is mostly unspoken judgment; dark knowledge likewise lives outside the hard answer. The difference: soft labels write dark knowledge down as a list of probabilities, whereas tacit knowledge is exactly what cannot be written down.</li>
+<li><b>Investing · Sampling replication in index funds</b>: To track an index of thousands of stocks, a fund often holds only a carefully chosen subset and still keeps tracking error in check, much as the lottery ticket's small subnetwork carries the full network's performance. Unlike the fund, which must rebalance regularly, a pruned and fine-tuned subnetwork stays fixed once deployed.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Model compression has four orthogonal, stackable techniques: distillation shrinks the model, pruning deletes weights, LoRA trains only a delta, and quantization lowers precision.</li>
+<li>Hinton's 2015 knowledge distillation has a small model imitate a large model's full probability distribution; the tiny probabilities on wrong classes are the "dark knowledge."</li>
+<li>Distillation softens the softmax with a temperature T: higher T flattens the distribution and exposes class similarity, but too high drowns the real signal.</li>
+<li>A distilled student has a capacity floor; too small and it cannot fit the soft distribution, so students are usually 1/2 to 1/10 the teacher's size.</li>
+<li>Pruning exploits over-parameterization by removing low-magnitude weights, usually in a loop of prune a little, fine-tune to recover, prune again.</li>
+<li>Frankle and Carbin's 2018 lottery ticket hypothesis says a large randomly initialized network already contains a winning subnetwork that trains well on its own.</li>
+<li>Unstructured pruning compresses more but rarely speeds things up; structured pruning removes whole rows or columns and actually runs faster on ordinary GPUs.</li>
+<li>LoRA assumes the fine-tuning weight update is low-rank and approximates it with two thin matrices B×A, cutting trainable parameters by about 250x.</li>
+<li>QLoRA quantizes the frozen base to 4-bit NF4 and trains only a high-precision adapter, so a single 48GB GPU can fine-tune a 65B model.</li>
+<li>Quantization maps floats linearly onto integer levels; INT8 is nearly lossless, and the quality cliff usually appears only below 3 bits.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

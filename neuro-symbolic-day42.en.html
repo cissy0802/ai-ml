@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -298,6 +305,35 @@ examples = [(1, 5), (2, 8), (3, 11)]   <span class="cmt"># spec = a set of I/O p
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Program synthesis = neural net "searches the vast program space smartly," symbolic execution "verifies exactly," library learning "compounds results into reusable assets"—all three together are the full picture.<br>🤔 Is DreamCoder's "library grows stronger, search gets faster" the same phenomenon as your "toolbox gets handier" as you code? Is human "experience accumulation" also a kind of library learning?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Buddhism · Dignāga on perception and inference</b>: Dignāga accepted only two valid means of knowing: perception, which is direct and free of concepts, and inference, which works through concepts and reasoning. That is the same split as perception-to-neural, reasoning-to-symbolic. The mismatch: perception in his sense attaches no labels, while a neural network's output is a label.</li>
+    <li><b>Philosophy · Kant's sensibility and understanding</b>: In the Critique of Pure Reason (1781), intuition supplies the material and concepts organize it; without both there is no knowledge. Neuro-symbolic AI hands the two halves to two systems. Unlike Kant's categories, which are a priori and universal, DeepProbLog's rules are hand-written by engineers and swapped per task.</li>
+    <li><b>Neuroscience · Arbitrating habit and planning (Daw, Niv &amp; Dayan, 2005)</b>: They proposed that a model-free habit system in the dorsolateral striatum and a model-based planning system in prefrontal cortex run in parallel, and control goes to whichever is less uncertain. That goes one step past neuro-symbolic layering: the brain shifts gears by confidence, while today's hybrids mostly have the division of labor fixed in advance by engineers. And in the brain, both systems run on neurons.</li>
+    <li><b>Quantum mechanics · Phase rotation in the complex plane</b>: RotatE models a relation as multiplication by unit-modulus complex numbers, the same math as unitary evolution turning a quantum state's phase without changing its magnitude. A symmetric relation is a 180-degree turn; do it twice and you are back. Unlike quantum states, embeddings have no superposition, interference or measurement; the complex numbers just record angles.</li>
+    <li><b>Evolution · Jacob's tinkerer (1977)</b>: François Jacob argued that evolution does not design from scratch like an engineer but refits and recombines parts already on hand. DreamCoder's library learning likewise builds new functions on old ones and speeds up as it goes. The difference: evolution has no step that distills clean abstractions, so reused parts often carry historical baggage.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Neuro-symbolic AI is not one model but an architectural principle: perception goes to learnable neural nets, verification to provable symbolic systems.</li>
+    <li>Pure neural nets reason unreliably over many steps and cannot verify outputs; pure symbolic systems cannot learn perception.</li>
+    <li>Kautz's taxonomy lays neuro-symbolic designs on a coupling spectrum: looser means more verifiable, tighter means more end-to-end learnable.</li>
+    <li>An LLM calling a calculator or solver is the simplest loosely coupled neuro-symbolic system, and the most widely deployed form today.</li>
+    <li>Knowledge graph embeddings turn entities and relations into vectors, so link prediction becomes a nearest-neighbor search in vector space.</li>
+    <li>TransE models a relation as a translation h+r≈t and cannot express symmetric relations; RotatE fixes this with rotations in complex space.</li>
+    <li>Link prediction yields a confidence ranking, not a verdict on facts, so production systems need thresholds plus human or symbolic checks.</li>
+    <li>DeepProbLog's neural predicates feed gradients into a logic program, learning single digits from weak labels like the sum of two images.</li>
+    <li>Relaxing discrete logic into continuous probability buys learnability at the cost of provability, approximation error and scalability.</li>
+    <li>DreamCoder's wake-sleep loop lets its function library and neural search reinforce each other, yielding readable, reusable programs.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

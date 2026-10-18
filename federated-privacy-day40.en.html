@@ -53,6 +53,13 @@ table.cmp th{background:rgba(123,97,255,0.12);color:#a48cff;font-weight:600}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -320,6 +327,31 @@ node_sums = [(a + b) % P <span class="kw">for</span> a, b <span class="kw">in</s
     </table>
     <p style="margin-top:12px;color:#cfd3df;font-size:0.95rem">Typical stack: <b>Federated learning</b> sets the frame (data stays put) → <b>Secure Aggregation / MPC</b> hides single gradients from the server → <b>Differential privacy</b> noises the model against individual re-inference → add <b>HE</b> for the most sensitive slivers if needed. In one line: <b>FL guards location, MPC/HE guard process, DP guards result</b>.</p>
   </div>
+</div>
+
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Complexity science · Galton's "Vox Populi"</b>: In 1907 Galton tallied about 800 guesses of an ox's weight; the median, 1,207 lb, was within 1% of the true 1,198 lb. FedAvg likewise averages many estimates into a better one. The difference: crowd wisdom needs independent errors, while non-IID clients are often biased in the same direction, so averaging cannot cancel them out.</li>
+    <li><b>Psychology · Randomized response</b>: Warner's 1965 survey technique has respondents secretly flip a coin to decide which version of a sensitive question to answer, so no single answer reveals the truth, yet the population rate can be recovered. It is the ancestor of local differential privacy; what it lacked was a composable, accountable definition like ε.</li>
+    <li><b>Quantum mechanics · Blind quantum computation</b>: In 2009 Broadbent, Fitzsimons and Kashefi showed that a client able only to prepare single qubits can delegate a computation to a quantum server without revealing its input or algorithm. Same shape as homomorphic encryption, "compute for me without seeing"; but secrecy comes from physics, not a lattice hardness assumption, at the cost of many rounds of interaction.</li>
+    <li><b>Buddhism · Dependent origination and emptiness</b>: In secret sharing every share is pure randomness; the "5" lives in no single share and appears only when the shares are combined by protocol, much like the teaching that things lack inherent existence and arise from conditions. The difference: an MPC input really was a definite number before splitting, while Buddhist emptiness denies even that starting point.</li>
+  </ul></div>
+</div>
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Federated learning moves computation to where the data lives: raw data stays on devices and only model updates go back to the server.</li>
+    <li>FedAvg, from McMahan et al., averages client weights in proportion to their sample counts; it is a weighted reduce, bottlenecked by communication rather than compute.</li>
+    <li>"Data never leaves the device" is not the same as safe: gradient inversion attacks can approximately reconstruct training samples from uploaded gradients.</li>
+    <li>Differential privacy requires that adding or removing one record barely changes an algorithm's output distribution, bounded by a factor of e^ε.</li>
+    <li>A smaller ε means stronger privacy, more noise and lower accuracy, and ε adds up across queries, so it must be accounted for like a budget.</li>
+    <li>DP-SGD clips each example's gradient, adds Gaussian noise, and uses the moments accountant to track total privacy loss over training.</li>
+    <li>Homomorphic encryption lets a server compute directly on ciphertexts; Gentry's 2009 bootstrapping, which resets accumulated noise, gave the first fully homomorphic scheme.</li>
+    <li>Fully homomorphic encryption is thousands of times slower than plaintext, so it is reserved for the most sensitive slice, and ML inference usually uses approximate-arithmetic CKKS.</li>
+    <li>Secure multi-party computation uses secret sharing to compute a joint result without exposing inputs, but it protects only the process, not the output.</li>
+    <li>Production systems combine the tools: federated learning guards data location, secure aggregation, MPC and HE guard the process, and differential privacy guards the result.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

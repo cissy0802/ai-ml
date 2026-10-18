@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -312,6 +319,31 @@ small = <span class="fn">embed</span>(<span class="str">"eventual consistency in
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · grid codes for concepts</b>: Constantinescu, O'Reilly and Behrens reported in <i>Science</i> in 2016 that when people reason in a two-dimensional abstract "bird shape" space, the brain shows a six-fold, grid-cell-like signal. The brain seems to lay concepts on a coordinate map too, a biological version of "relation = direction." The difference: that map has two dimensions and was designed by the experimenters; nobody drew the hundreds of dimensions of a word embedding.</li>
+<li><b>Evolution · character displacement</b>: Brown and Wilson (1956) described how closely related species living side by side get pushed apart in their traits by competition; the beaks of Galapagos finches are the textbook case. Negative samples exert the same push. Unlike nature, which pushes apart only neighbors that actually compete, InfoNCE pushes away every other sentence in the batch.</li>
+<li><b>Statistical physics · Boltzmann temperature</b>: exp(sim/τ) is literally a Boltzmann distribution, with τ as temperature. When it is cold, almost all probability sits in the lowest-energy state, i.e. on the closest candidate; when it is hot, states are visited evenly. The difference: physical temperature is a measurable state, τ is just a knob someone picked.</li>
+<li><b>Investing · correlations go to one, and risk parity</b>: in a panic, every asset falls together, and a portfolio that looked diversified turns out to sit along one risk direction, the same shape as anisotropy inflating every cosine score. Risk parity equalizes each asset's risk contribution, much like whitening. The difference: whitening can damage meaning, while in investing equalizing is the goal.</li>
+<li><b>Psychology · Navon's global precedence</b>: in 1977 Navon showed people large letters built from small letters and found they recognize the whole before the parts, the "forest before trees" effect. Matryoshka prefixes also go coarse to fine. The difference: perception orders things in processing time, MRL orders them across dimensions, and a loss function forces that order.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Word embeddings encode meaning in geometry: similar words sit close together, and systematic relations appear as parallel, equal-length offset vectors.</li>
+<li>Word2Vec's Skip-gram predicts context words from a center word, and "king - man + woman ≈ queen" holds only for frequent, regular relations.</li>
+<li>Static word vectors give each word one fixed vector while BERT and GPT give context-dependent ones; the two do different jobs, and static vectors are not obsolete.</li>
+<li>Contrastive learning uses relations as supervision, pulling positives together and pushing negatives apart; SimCSE builds positive pairs from two different dropout passes.</li>
+<li>The InfoNCE loss is a pick-one-of-N softmax classification; a smaller temperature τ penalizes hard negatives more and sharpens boundaries.</li>
+<li>Without negatives a model can map every input to one point, which is representation collapse; in contrastive learning a bigger batch means more negatives and a stronger signal.</li>
+<li>Raw BERT last-layer sentence vectors are anisotropic: they crowd into a narrow cone, so even unrelated sentences score cosine similarity above 0.7.</li>
+<li>BERT-whitening centers the vectors, then decorrelates and rescales them, restoring discriminative similarity without retraining, though it can flatten meaningful high-variance directions.</li>
+<li>Matryoshka Representation Learning sums the loss over a set of nested prefixes, forcing the most important information into the first dimensions.</li>
+<li>Only MRL-trained models can be truncated for coarse retrieval and used at full size for reranking, and truncated vectors must be re-normalized.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -319,6 +326,32 @@ q = <span class="str">"how to keep data consistent"</span>
   </div>
 </div>
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Cognitive psychology · Phonemic restoration (Richard Warren, 1970)</b>: when a cough masks one sound in a sentence, listeners "hear" the missing sound based on what comes <b>after</b> it, without noticing they filled it in. That is the brain doing MLM. The difference: the brain fills in on the fly and can only wait for a short stretch of later context; BERT gets the whole sentence at once and never has to wait.</li>
+<li><b>Western philosophy · Frege's context principle (1884)</b>: in <i>The Foundations of Arithmetic</i>, Frege urged never to ask for the meaning of a word in isolation, only in the context of a sentence. BERT giving "apple" different vectors in different sentences is that principle turned into engineering. Unlike Frege, though, BERT cares about statistical co-occurrence, not truth.</li>
+<li><b>Neuroscience · Hebbian learning (Donald Hebb, 1949)</b>: neurons that fire together strengthen their connection, so things that keep showing up together get pulled closer, the same move contrastive learning makes with similar sentence pairs. The difference: Hebb's rule only pulls together; contrastive learning also needs negatives to push unrelated items apart, or every vector collapses to one point.</li>
+<li><b>Psychology · Tversky's feature model of similarity (1977)</b>: Tversky rejected similarity as distance in a space and modeled it as feature-by-feature matching, finding that similarity is asymmetric: people rate "North Korea is like China" as more apt than the reverse. ColBERT's MaxSim also finds the best match token by token, and S(q,d) is not S(d,q). Unlike Tversky, though, MaxSim only rewards matches; it never subtracts the features the document has that the query lacks.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>BERT (Devlin et al., 2018) is an encoder-only architecture with no causal mask, so every token sees context on both sides.</li>
+<li>Masked language modeling (MLM) hides 15% of the words at random and makes the model fill the blanks from bidirectional context.</li>
+<li>Decoders generate while encoders understand and encode; the two divide the work rather than one replacing the other.</li>
+<li>RoBERTa keeps BERT's architecture unchanged and beats it with a better training recipe alone, showing BERT was undertrained.</li>
+<li>RoBERTa's recipe drops NSP, switches to dynamic masking, and grows the training data from 16GB to about 160GB.</li>
+<li>Before claiming a new architecture is better, make sure the baseline was trained to saturation, or the comparison means little.</li>
+<li>Raw BERT vectors compared by cosine, without contrastive fine-tuning, score worse on sentence similarity than averaged GloVe vectors.</li>
+<li>Sentence-BERT uses a weight-sharing Siamese network plus contrastive fine-tuning so each sentence is encoded alone into a cosine-comparable vector.</li>
+<li>ColBERT stores one vector per token and scores with MaxSim, nearly matching cross-encoder accuracy at the cost of a much larger index.</li>
+<li>The core trade-off in retrieval architecture is early versus late interaction: earlier is more accurate, later is faster and precomputable.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -304,6 +311,32 @@ labels, dists = index.<span class="fn">knn_query</span>(q, k=5)  <span class="cm
   </div>
 </div>
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Complementary learning systems (McClelland, McNaughton, O'Reilly, 1995)</b>: The theory holds that the brain runs two memory systems. The hippocampus records specific episodes quickly and sparsely, word for word; the neocortex slowly learns overlapping distributed representations that generalize. That is the same split as BM25 for exactness and dense retrieval for meaning. The difference: the brain gradually consolidates hippocampal memories into cortex during sleep, while the two retrieval paths stay side by side forever and only merge at query time.</li>
+<li><b>Buddhism · "Rely on the meaning, not the words"</b>: One of the four reliances in Buddhist teaching says to read for the sense, not the letter. Dense retrieval is its engineering form, recognizing the same idea under different wording. Unlike it, BM25 survives because for model numbers and error codes the literal string is the meaning, and Buddhism never claimed meaning could be captured by any representation.</li>
+<li><b>Psychology · Tip-of-the-tongue (Brown and McNeill, 1966)</b>: You know exactly what you mean, may even recall the first letter and the syllable count, yet the word will not come: meaning is reachable, form is not. Dense retrieval covers the mirror case, finding documents through meaning when the surface words do not line up.</li>
+<li><b>Economics · Arrow's impossibility theorem (Kenneth Arrow, 1951)</b>: No rule for merging several rankings into one can satisfy a handful of seemingly minimal fairness conditions all at once. RRF is a positional vote over rankings, so it cannot escape the theorem either. The difference is the question asked: Arrow asked whether a perfect rule exists; retrieval only asks which rule works well enough in practice, and RRF wins on evidence, not axioms.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>BM25 is the default relevance scoring function in Elasticsearch and Lucene, built on top of an inverted index.</li>
+<li>BM25 rewards rare terms through IDF and uses term-frequency saturation and length normalization so common words and long documents cannot game the score.</li>
+<li>For exact matches such as product models, names, and error codes, BM25 is still more accurate and cheaper than vector search.</li>
+<li>Dense retrieval uses a bi-encoder to embed queries and documents separately, so document vectors can be precomputed offline.</li>
+<li>Dense retrievers are trained with contrastive learning: matching question-passage pairs are pulled together, other passages in the batch pushed apart.</li>
+<li>Karpukhin et al.'s DPR (2020) beat BM25 on open-domain QA by 9 to 19 points in top-20 retrieval accuracy.</li>
+<li>Dense retrieval struggles out of domain, on exact matches, and on rare long-tail entities, which is exactly where BM25 is strong.</li>
+<li>Hybrid search should not simply add BM25 and cosine scores; RRF fuses by rank alone, usually with k = 60, and needs almost no tuning.</li>
+<li>HNSW does approximate nearest-neighbor search on a layered small-world graph in roughly O(log n), with ef_search trading recall for latency.</li>
+<li>In complementary learning systems theory, a fast exact hippocampus and a slow generalizing neocortex mirror the division of labor between BM25 and dense retrieval.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

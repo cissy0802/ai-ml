@@ -52,6 +52,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -246,6 +253,32 @@ clf.<span class="fn">fit</span>(X, y)
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 SVM 教给我们两个永恒的思想：「最大间隔」= 留余量才鲁棒；「核技巧」= 换个空间看，难题变简单。这两条远比 SVM 本身活得更久。<br/>🤔 「升维让不可分变可分」——这个在你别的领域（数据建模、问题拆解、跨学科思考）里有没有对应的直觉：换一个表示空间，纠缠的问题忽然解开？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · McCulloch–Pitts 神经元</b>：1943 年两人把神经元写成「输入加权求和、过阈值就放电」，和逻辑回归是同一副骨架；Sigmoid 则像把硬阈值换成平滑的放电率曲线。不像在于：真神经元靠脉冲的时序传递信息，树突本身还在做非线性计算，远不止一个加权和。</li>
+<li><b>量子力学 · 费米–狄拉克分布</b>：电子占据某个能级的概率是 1/(e<sup>(E−μ)/kT</sup>+1)，正是 Sigmoid 的形状，能量相当于负的打分，温度决定曲线多陡。不像：物理里温度和化学势由系统给定，逻辑回归的权重却要从数据里学出来。</li>
+<li><b>投资 · 马科维茨组合理论</b>：1952 年的核心结论是分散投资只在资产相关性低时才降风险，买一篮子同涨同跌的股票等于没分散。随机森林的随机抽样和随机特征，压的正是树与树之间的相关性。不像：组合还要权衡收益配权重，森林里每棵树一票等权。</li>
+<li><b>心理学 · 罗施的原型理论</b>：Eleanor Rosch 在 1970 年代发现，人判断「是不是鸟」靠的是和典型样本（如知更鸟）比相似度。SVM 恰好反过来：类别由最难分的边界样本（支持向量）界定，典型样本全删掉，边界也纹丝不动。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>线性回归假设结果是特征的加权和，用均方误差（MSE）衡量预测错得多严重。</li>
+<li>最小二乘法有闭式解 w = (XᵀX)⁻¹Xᵀy，不用迭代，勒让德 1805 年就在用。</li>
+<li>线性回归只对参数线性，喂入 x²、log(x) 等非线性特征就能拟合曲线，代价是要人手动设计特征。</li>
+<li>逻辑回归在加权和外套一个 Sigmoid，把打分压成 0 到 1 的概率，本质是线性地预测对数几率。</li>
+<li>逻辑回归用交叉熵而不用 MSE 训练，因为交叉熵让损失保持凸，且等价于最大似然估计。</li>
+<li>逻辑回归输出 0.9 是置信度而不是准确率，0.5 的分类阈值也该按误报与漏报的代价调整。</li>
+<li>决策树贪心地挑让基尼不纯度下降最多的切分，完全可读，但方差极高、深树容易过拟合。</li>
+<li>Breiman 2001 年的随机森林用自助采样和随机特征子集让树彼此去相关，投票后方差大幅下降。</li>
+<li>SVM 最大化分类间隔，边界只由贴着边界的少数支持向量决定，因此在高维小样本下特别稳。</li>
+<li>核技巧只算样本间的相似度就隐式升维；RBF 核的 γ 越大，边界越弯、越容易过拟合。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="5949d0f10bb4f8ec" style="border-left-color:#7b61ff">

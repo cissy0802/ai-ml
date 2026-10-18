@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -279,6 +286,33 @@ point_forecast, _ = tfm.<span class="fn">forecast</span>(
   </div>
 </div>
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Predictive coding</b>: In Rao and Ballard's 1999 model, higher visual areas keep sending predictions down while lower areas pass only the prediction error up, the same predict-then-correct loop the Kalman filter runs. The match: both update on error alone. The gap: the cortex is a deep, nonlinear hierarchy, while the classic Kalman filter has one linear state layer.</li>
+<li><b>Buddhism · Impermanence</b>: Assuming stationarity is a bet that the rules of change never change. Differencing just moves the change into the increments and still treats the rules as fixed. Impermanence goes further and says the rules themselves flow, which is exactly where a structural break makes the model fail.</li>
+<li><b>Evolution · Punctuated equilibrium</b>: Eldredge and Gould (1972) argued that species sit in long stasis broken by brief bursts of change. Prophet scatters candidate changepoints and lets a sparse prior zero most of them out, the same "mostly steady, rarely turning" worldview. The gap: a Prophet changepoint only bends the trend's slope, while evolution's bursts reshape form itself.</li>
+<li><b>Psychology · Anchoring and adjustment</b>: Tversky and Kahneman (1974) described people starting from an initial value and adjusting toward new information, usually not far enough. That is exponential smoothing with too small an α. The gap: smoothing fits α from data, while a person's adjustment stays captive to the anchor.</li>
+<li><b>Investing · Random walk</b>: ARIMA(0,1,0) is a random walk whose best forecast is "tomorrow equals today", and Malkiel's 1973 <i>A Random Walk Down Wall Street</i> says stock prices behave roughly that way. The match: after differencing only noise is left. The gap: market participants react to forecasts, while a sensor reading never does.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>ARIMA(p,d,q) extrapolates linearly from the last p observations (AR) and the last q forecast errors (MA), with d rounds of differencing to remove trend.</li>
+<li>Classic statistical models need a stationary series, with mean and variance that don't drift; otherwise fixed parameters fit an average state that doesn't exist.</li>
+<li>ARIMA is a linear, short-memory model that struggles with multiple seasonalities, holidays and nonlinear shifts, and overdifferencing creates spurious correlation.</li>
+<li>Exponential smoothing lets the weight on past observations decay by (1−α); Holt-Winters smooths level, trend and season as three separate components.</li>
+<li>A large smoothing factor α overreacts to noise and a small one reacts too slowly; it is a bias-variance trade-off with no universal value.</li>
+<li>The Kalman filter loops between predict and update, and the Kalman gain uses both variances to decide how far to trust the new observation over the old prediction.</li>
+<li>Taylor and Letham's Prophet splits a series into additive trend, seasonal, holiday and noise components, each of which can be plotted and tuned on its own.</li>
+<li>Prophet scatters candidate changepoints and regularizes most of them away; when seasonal swings grow with the level, switch from additive to multiplicative seasonality.</li>
+<li>Google's TimesFM is a decoder-only Transformer that slices a series into patches, predicts them like tokens, and forecasts unseen series zero-shot.</li>
+<li>Time-series foundation models win on huge, varied collections of series with no tuning; with little data or a need for explanation or speed, ARIMA and Prophet still come first.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

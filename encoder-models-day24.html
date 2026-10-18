@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -287,6 +294,32 @@ q = <span class="str">"how to keep data consistent"</span>
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 检索架构的本质是<b>"交互的早晚 vs 可预计算性"</b>的权衡:交互越早越准、越晚越快,ColBERT 把交互推到最后且做轻,卡在甜点上。<br/>🤔 "早交互=准、晚交互=快"这条轴,在你熟悉的系统(数据库 join 策略、缓存预计算)里是不是也成立?同一个权衡换了层皮反复出现,说明了什么?<br/><a href="https://cissy0802.github.io/super-individual-weekly/rag-day11.html" style="color:#7b61ff">工程对应 → super-individual D11: RAG 实战工程（re-rank 选型）</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>认知心理学 · 音位恢复效应（Richard Warren，1970）</b>：句中一个音被咳嗽声盖掉，听者会按<b>后文</b>「听见」缺的音，自己却察觉不到是补出来的，这就是大脑在做 MLM。不像在于：大脑边听边补，只能等一小段后文；BERT 一次拿到整句，不存在「等」。</li>
+<li><b>西方哲学 · 弗雷格的语境原则（1884）</b>：弗雷格在《算术基础》里主张，不要孤立地问一个词的意义，只在句子语境里问。BERT 给同一个「苹果」不同向量，就是把这条原则做成了工程。不像的是，弗雷格关心句子的真假，BERT 只学统计上的共现。</li>
+<li><b>神经科学 · 赫布学习（Donald Hebb，1949）</b>：一起放电的神经元连接变强，经常同时出现的东西被「拉近」，和对比学习把相似句对拉近同一路数。不像在于：赫布规则只管拉近，对比学习还必须有负样本把不相干的推远，否则所有向量会塌到一处。</li>
+<li><b>心理学 · Tversky 的相似性特征模型（1977）</b>：Tversky 反对把相似看成空间里的距离，改用特征逐项比对，并发现相似是不对称的：人们觉得「朝鲜像中国」比「中国像朝鲜」更顺。ColBERT 的 MaxSim 也是逐个 token 找最佳匹配，而且 S(q,d) 不等于 S(d,q)。不像的是，Tversky 还会扣掉双方各自独有的特征，MaxSim 只奖励命中，不惩罚文档里多出来的内容。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>BERT（Devlin 等，2018）是 encoder-only 架构，去掉因果掩码，每个 token 同时看到左右两侧上下文。</li>
+<li>掩码语言建模 MLM 随机遮住 15% 的词，逼模型靠双向上下文做完形填空。</li>
+<li>Decoder 负责生成，Encoder 负责理解和编码，两者是分工，不是新旧替代。</li>
+<li>RoBERTa 架构与 BERT 完全相同，只改训练配方就全面超越原版，说明 BERT 被训练不足。</li>
+<li>RoBERTa 的配方改动包括删掉 NSP、改用动态掩码、把数据从 16GB 加到约 160GB。</li>
+<li>宣称新架构更强之前，先确认对照的 baseline 已经训练充分，否则比较不可信。</li>
+<li>未经对比微调的 BERT 向量直接算余弦，句子相似度效果甚至不如平均 GloVe 词向量。</li>
+<li>Sentence-BERT 用共享权重的孪生网络加对比式微调，让每句话独立编码成可直接比余弦的向量。</li>
+<li>ColBERT 给每个 token 存一个向量并用 MaxSim 打分，精度接近 cross-encoder，代价是索引大得多。</li>
+<li>检索架构的核心权衡是交互早晚与可预计算性：交互越早越准，越晚越快。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="e269d864245f827a" style="border-left-color:#7b61ff">

@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -332,6 +339,32 @@ CLIP_VALUE = <span class="str">1.0</span>   <span class="cmt"># GPT-3/Llama 默�
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 Gradient clipping = 训练过程的熔断器。<b>方向不变只缩长度</b>，几乎零成本但能挽救几天算力。<br/>🤔 "用极低成本的安全网防御罕见极端情况" —— 你的系统设计里哪些地方有同款思想？为什么有人会反对加这种安全网（"丑陋""不优雅"），他们的论点在什么前提下成立？<br/>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" target="_blank">工程对应 → super-individual D12（Fine-tuning 实战）</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>投资 · 凯利公式（John Kelly，1956）</b>：Kelly 证明，按自己估计的概率分配赌注时，资金的长期对数增长率就是负的交叉熵；估计偏离真实概率多少，增长就按 KL 散度少多少，全押在错的结果上就是 log 0，破产。不像的是，赌徒可以不下注，模型必须给每个 token 都分概率。</li>
+<li><b>神经科学 · 除法归一化（divisive normalization）</b>：神经元的输出常被除以周围一群神经元的总活动，背景越强反应越弱，和 AdamW 用 √v 除梯度是同一个动作。不像在于：大脑除的是此刻的邻居，AdamW 除的是同一参数自己的过去。</li>
+<li><b>心理学 · 小数定律（Tversky 与 Kahneman，1971）</b>：人会把几个样本的统计当成可靠结论。Warmup 防的是同一个错：头几步的 √v 只来自寥寥几个梯度，拿它当分母就会迈出离谱的大步。不同在于，人是直觉偏差，AdamW 只是照公式算，只能由调度表替它谨慎。</li>
+<li><b>生物进化 · 费希尔几何模型（R. A. Fisher，1930）</b>：已适应得不错的物种，随机小突变约一半机会变好，大突变几乎总是变坏，因为最优点附近的大步容易越过头。梯度裁剪限步长是同一个道理。不像的是，突变方向是随机的，裁剪后的梯度方向原封不动。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>LLM 的真实分布是 one-hot，所以交叉熵坍缩成一项：loss 等于负的 log q(正确 token)。</li>
+<li>负对数让交叉熵对「自信地答对」罚得很轻，对「自信地答错」罚得极重。</li>
+<li>最小化交叉熵等于让模型分布逼近真实分布，训练 LLM 在数学上就是训一个最优的语料压缩器。</li>
+<li>交叉熵配 softmax 时，对 logit 的梯度就是「预测减真值」，没有 MSE 那种让梯度趋零的衰减项。</li>
+<li>loss 和 perplexity 只能在同一个 tokenizer 内部比，跨模型比较要靠下游 benchmark。</li>
+<li>Loshchilov 与 Hutter 的 AdamW 由三件套组成：动量、按每个参数梯度历史自适应的步长、与梯度解耦的权重衰减。</li>
+<li>Adam 把 weight decay 揉进梯度，会被 √v 缩放而失效；AdamW 把它挪到了梯度之外。</li>
+<li>AdamW 的优化器状态是参数量的两倍，所以训大模型必须用 ZeRO 或 FSDP 把它分片到多卡。</li>
+<li>Warmup 让 Adam 的二阶矩先攒够样本，decay 让末期精修；关键不在余弦还是线性，而是两头都必须有。</li>
+<li>全局范数梯度裁剪只把超阈值的梯度等比缩短、方向不变，LLM 训练默认阈值取 1.0。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="cf9e4daa16ffd4da" style="border-left-color:#7b61ff">

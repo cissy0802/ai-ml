@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -265,6 +272,33 @@ examples = [(1, 5), (2, 8), (3, 11)]   <span class="cmt"># 规约 = 一组 I/O �
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 程序合成 = 神经网络负责"在浩瀚程序空间里聪明地搜"，符号执行负责"精确地验"，库学习负责"把成果攒成可复用资产"——三者合一才是它的全貌。<br/>🤔 DreamCoder 的"库越攒越强、搜索越来越快"和你写代码时"工具箱越来越顺手"是同一种现象吗？人类的"经验积累"也是一种库学习吗？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>佛学 · 陈那的现量与比量</b>：陈那只承认两种可靠的认识：现量是离开概念的直接感知，比量是借概念和推理得来的间接认识，正好对应感知归神经、推理归符号的分工。不像在于，现量不贴标签，神经网络的输出却本身就是标签。</li>
+<li><b>东西方哲学 · 康德的感性与知性</b>：《纯粹理性批判》（1781）认为，直观提供材料、概念加以整理，缺一就没有知识；神经符号把这两半交给两个系统。不像的是，康德的范畴先天固定、人人相同，DeepProbLog 的规则却由工程师手写、随任务更换。</li>
+<li><b>神经科学 · 习惯与规划的仲裁（Daw、Niv、Dayan，2005）</b>：他们提出，背外侧纹状体的无模型「习惯」系统和前额叶的基于模型「规划」系统并行运作，谁的不确定性更低就听谁的。这比神经符号的分层多走一步：大脑按把握程度动态换挡，今天的混合架构多半由工程师事先把分工写死；而且大脑里两套系统都跑在神经元上。</li>
+<li><b>量子力学 · 复平面上的相位旋转</b>：RotatE 把关系写成模长为 1 的复数相乘，和量子态幺正演化时只转相位、不改模长是同一套数学；对称关系就是转 180 度，转两次回到原处。不像在于，嵌入里没有叠加、干涉和测量，复数只是记角度的工具。</li>
+<li><b>生物进化 · 雅各布的「修补匠」（1977）</b>：François Jacob 指出，演化不像工程师从零设计，而是把现成零件改装拼接；DreamCoder 的库学习同样在已有函数上搭新函数，越攒越快。不像的是，演化没有「提炼抽象」这一步，复用的部件常带着历史包袱。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>神经符号不是某个模型，而是一条架构原则：感知交给会学的神经网络，验证交给可证的符号系统。</li>
+<li>纯神经网络的短板是多步推理不可靠、输出无法验证，纯符号系统的短板是学不会感知。</li>
+<li>Kautz 的分类法把神经符号排成一条耦合光谱：越松越可验证，越紧越能端到端学习。</li>
+<li>LLM 调用计算器或求解器是最朴素的松耦合神经符号，也是今天落地最多的形态。</li>
+<li>知识图谱嵌入把实体和关系变成向量，链接预测就变成在向量空间里找最近邻。</li>
+<li>TransE 把关系建模为平移 h+r≈t，表达不了对称关系；RotatE 改用复数空间的旋转补上了这块。</li>
+<li>链接预测给的是置信度排名而非事实裁决，生产中要配阈值和人工或符号校验。</li>
+<li>DeepProbLog 用神经谓词把梯度接进逻辑程序，只靠「两图之和」这种弱标签就学会了认单个数字。</li>
+<li>把离散逻辑松弛成连续概率，换来可学习性，代价是失去可证性、引入近似误差、难以扩展。</li>
+<li>DreamCoder 的醒睡循环让函数库和神经搜索互相增强，学到的是人能读懂、能复用的程序库。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="745456503fca4792" style="border-left-color:#7b61ff">

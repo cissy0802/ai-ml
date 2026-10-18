@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -259,6 +266,32 @@ probs = out.logits_per_image.<span class="fn">softmax</span>(dim=1)  <span class
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 CLIP 的杠杆是<strong>用自然语言当监督信号</strong>：不再人工标固定类别，而是让海量"图+配文"自己教会模型。zero-shot 的本质，是把分类悄悄换成了检索。<br/>🤔 "用更弱但海量的监督（网络图文）替代精标小数据"——这个思路，对你积累个人知识、训练自己的判断力，是不是也成立？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · Hubel 与 Wiesel 的感受野</b>：1959 年起两人记录猫视觉皮层，发现「简单细胞」只对视野某一小块里特定朝向的边缘放电，更高层的细胞再把它们组合起来，1981 年因此获诺贝尔奖。卷积的局部感受野和逐层组合与此同构。不像在于：大脑没有严格的参数共享，每个神经元的突触各长各的，还有大量自上而下的反馈连接。</li>
+<li><b>生物进化 · 雅各布的「修补匠」（François Jacob，1977）</b>：演化不是工程师从零设计，而是在已有结构上东拼西补。残差块也是默认保留输入 x、只叠加一点修改 F(x)。不同在于：演化没法退回原点重来，而 F(x) 学成 0 时，残差块可以干净地退回原样。</li>
+<li><b>西方哲学 · 康德的先天直观形式</b>：康德认为空间是心灵整理经验的先天形式，不是从经验里学来的；CNN 把局部性和平移不变直接写进架构，像一种先天的空间形式。ViT 更接近经验论的白板，空间关系靠数据学。不像的是：康德的形式不可放弃，CNN 的先验只是设计选择，ViT 也还留着位置编码。</li>
+<li><b>语言学与哲学 · 索绪尔的「差异」</b>：索绪尔《普通语言学教程》（1916）主张，符号的意义不来自自身，而来自它和其他符号的差异。对比学习也一样，一个向量的位置由「该靠近谁、该远离谁」决定。不同在于：索绪尔的符号系统封闭在语言内部，CLIP 却把文字锚到了图像上。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>卷积靠局部连接加参数共享，让参数量与图像大小无关，并天然获得平移不变性。</li>
+<li>CNN 的 kernel 权重由反向传播自动学出，人只决定 kernel 的尺寸和数量。</li>
+<li>卷积层逐层堆叠让感受野不断扩大，特征从边缘、纹理一路组合到整个物体。</li>
+<li>深网络的退化问题是连训练误差都上升，和训练好、测试差的过拟合不是一回事。</li>
+<li>He et al. 2015 的 ResNet 让层学残差 F(x)=H(x)−x，最坏也能退回恒等映射。</li>
+<li>残差连接的 +x 给梯度开了直通浅层的高速公路，如今 Transformer 的每个 block 都在用。</li>
+<li>ViT 把图像切成 16×16 的 patch 当 token，加位置编码和 [CLS] token 后送进标准 Transformer。</li>
+<li>数据量是 ViT 的分水岭：中等规模上不如 CNN，预训练数据上亿张时反超，先验少反成优势。</li>
+<li>CLIP 用 4 亿对网络图文做对比学习，拉高 N×N 相似度矩阵的对角线，压低其余错配。</li>
+<li>CLIP 的 zero-shot 分类本质是图文检索：类别随时可加，但它强在匹配、弱在数数和空间推理。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="93c4d479634adc67" style="border-left-color:#7b61ff">

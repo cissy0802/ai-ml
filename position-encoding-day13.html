@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -281,6 +288,31 @@ bias = <span class="fn">alibi_bias</span>(seq_len=8, n_heads=4)
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 ALiBi = "<b>不要 PE 向量，直接给远距离扣分</b>"——把位置变成 attention 的一个归纳偏置（inductive bias），换来强外推。<br/>🤔 一个明显的"近优先"归纳偏置就能让外推变好——这是否暗示，"通用"的位置编码反而比"针对任务"的偏置更难学好？</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>佛学 · 缘起与无自性</b>：RoPE 点积后绝对位置抵消，只剩相对距离，像「一法的意义只在关系里成立」。不像在于：RoPE 内部仍先算出绝对角度再消掉，缘起说的是本无独立的「第几位」。</li>
+<li><b>量子力学 · 全局相位不可观测</b>：整个波函数乘同一相位，测量结果不变，可观测的只有相对相位；Q、K 同转一个角度，点积也不变。不像的是，量子里这是基本原理，RoPE 只是人挑的设计。</li>
+<li><b>神经科学 · 位置细胞的相位进动（O'Keefe 与 Recce，1993）</b>：大鼠穿过位置野时，放电在 theta 节律里一圈比一圈提前，位置被写成相位角，和 RoPE 同一思路。不像：大脑的相位还受跑速影响，RoPE 只看序号。</li>
+<li><b>心理学 · 时间贴现</b>：ALiBi 每远一步扣 m 分，softmax 后权重按距离指数衰减，像指数贴现。人和动物实测却是双曲贴现；Kurth-Nelson 与 Redish 2009 年的模型显示，一群折扣率各异的指数贴现者合起来就呈双曲形态。ALiBi 各 head 斜率不同，是相近的多尺度组合，但拼接投影不保证合成双曲。</li>
+<li><b>发育生物学 · Wolpert 的法国国旗模型（1969）</b>：细胞读形态发生素浓度、按阈值决定长成哪一色，等于读绝对坐标，和可学习位置表同构。不像在于：胚胎长大，图案得按比例伸缩；位置表定长，多一位就无坐标。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>纯 Attention 是置换不变的，打乱 token 顺序结果不变，所以必须额外注入位置。</li>
+<li>正弦位置编码用几何分布频率的 sin/cos 给每个位置生成无参数的多频段指纹。</li>
+<li>正弦编码公式上能算任意位置，PE(pos+k) 可由 PE(pos) 线性变换得到，但实测外推一般。</li>
+<li>可学习绝对位置编码是 max_len 行的查找表，BERT、GPT-2 用过，超长就无法外推。</li>
+<li>RoPE（Su Jianlin 等，2021）按位置旋转 Q 和 K，点积后只剩相对距离。</li>
+<li>RoPE 不占 token embedding 容量，不同维度配不同频率，自带多分辨率的相对位置感知。</li>
+<li>原生 RoPE 也不能无限外推，YaRN 等方法缩放低频维度、少量微调即可大幅扩窗。</li>
+<li>ALiBi（Press 等，2022）不用位置向量，直接在 attention 分数上减去「斜率 × 距离」。</li>
+<li>ALiBi 的近优先偏置外推强，却在远距离精确检索上吃亏，所以主流模型仍选 RoPE。</li>
+<li>位置编码的演化主线：从加在输入上的数据，走到 attention 几何与偏置里的结构。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="001036a425d1f7ea" style="border-left-color:#7b61ff">

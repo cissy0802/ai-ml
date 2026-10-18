@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -328,6 +335,35 @@ ripples = [
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Welding a fact into weights is easy; updating knowledge <b>consistently</b> is brutally hard — model editing's biggest enemy isn't "can't change it" but "changed it without cascading." Sometimes the steadiest "edit" is putting the new fact in context (RAG).<br>🤔 If even large models can't "change one premise and auto-cascade all inferences," how does the human brain do it (or does it also fail)? Is belief-update consistency itself a core hard problem of intelligence?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · Concept cells (Quiroga et al., 2005)</b>: in the medial temporal lobe of epilepsy patients, some neurons fired only for pictures of Jennifer Aniston, much like a "knowledge neuron." The difference: Quiroga stresses that a concept is coded by a small group of cells, so losing one does not erase her, whereas zeroing a knowledge neuron in a model really does drop its confidence in that fact.</li>
+    <li><b>Neuroscience · Memory reconsolidation (Nader et al., 2000)</b>: a rat's fear memory, once recalled, becomes briefly malleable, and blocking protein synthesis then weakens it. You can change an old memory without relearning from scratch, just as ROME rewrites one fact in place. Unlike ROME, though, reconsolidation needs recall to open the window; ROME edits weights offline.</li>
+    <li><b>Psychology · Retroactive interference</b>: newer learning crowds out older learning, and the more similar the material, the worse. A model that "bleeds" after dozens of looped ROME edits shows the same interference piling up in weights. The difference: people ease it with spacing and sleep; MEMIT solves a batch jointly and spreads it across layers.</li>
+    <li><b>Western philosophy · Quine's web of belief (1951)</b>: in "Two Dogmas of Empiricism," Quine treats knowledge as one connected web; when experience overturns something at the edge, the rest of the web must adjust. RippleEdits measures exactly that adjustment. The difference: Quine's web rebalances itself, while an edited model moves only one node.</li>
+    <li><b>Evolutionary biology · Pleiotropy</b>: one gene shapes several traits, so changing it tugs on others, a biological version of an edit's collateral damage (specificity). Yet the reverse fails to match: in pleiotropy the traits that should change together do change together, and that wanted propagation is exactly what model editing lacks.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Geva et al. (2021) showed that a Transformer's feed-forward layer (FFN) is essentially a key-value memory: the first matrix matches input patterns, the second writes the answer.</li>
+    <li>The knowledge-neuron method uses gradient attribution to find the neurons that contribute most to the right answer; zeroing them lowers the model's confidence in that fact.</li>
+    <li>Causal tracing corrupts the input until the model fails, then restores clean activations layer by layer; the answer comes back at the middle-layer MLP on the subject's last token.</li>
+    <li>Hase et al. (2023) found that the layer causal tracing points to barely correlates with the layer where editing works best: knowing where a fact is read is not knowing where to write it.</li>
+    <li>ROME turns changing one fact into a single rank-one matrix update, using the covariance of existing keys as a guardrail to leave other memories alone.</li>
+    <li>Looping ROME one edit at a time accumulates interference; after a few dozen edits the model starts to bleed and lose general ability.</li>
+    <li>MEMIT solves thousands of edits jointly in one least-squares objective and spreads them across a run of middle-layer MLPs, keeping each layer's change small.</li>
+    <li>The RippleEdits benchmark shows that mainstream editing methods get the target fact right while logically linked facts fail to update.</li>
+    <li>On RippleEdits, simply putting the new fact in the prompt (in-context editing) scored best, because facts in context take part in reasoning.</li>
+    <li>Judging a model edit means checking efficacy, generalization, specificity and ripple effects together; edit success rate alone is a single-metric trap.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

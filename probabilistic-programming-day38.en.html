@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -300,6 +307,32 @@ pm.<span class="fn">summary</span>(idata)  <span class="cmt"># outputs mean, 94%
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 A probabilistic programming language is "the SQL of the Bayesian world"—you declare the model, the engine infers; it lowers the computational barrier, but the modeling judgment is still yours.<br>🤔 SQL let people who don't understand B+ trees query databases. PPLs let people who don't understand MCMC do Bayes—what's the next field this kind of "declarative abstraction" will upend?</div>
   </div>
+</div>
+
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Friston's free-energy principle</b>: Friston argues the brain keeps minimizing "variational free energy," which is exactly the negative ELBO: perception means adjusting an internal approximation q toward the hidden causes of sensation. The math is identical; the difference is that VI is an algorithm an engineer chooses, while whether the brain really computes this way is still a hypothesis under test.</li>
+<li><b>Quantum mechanics · Bell's theorem</b>: Physics argued over the aleatoric/epistemic split for decades. Einstein hoped quantum randomness was just "hidden variables we haven't found," i.e. epistemic; Bell's 1964 theorem and the experiments that followed ruled out local hidden variables, so measurement randomness looks irreducibly aleatoric. The difference: a model's aleatoric noise is only noise given these features, and finer features may dissolve it; quantum randomness has no such escape hatch.</li>
+<li><b>Evolution · mutation and selection</b>: Metropolis-Hastings' "random proposal, accept by ratio" resembles mutation plus selection, a population wandering a fitness landscape. The difference: selection almost only climbs, while MCMC must sometimes accept downhill moves with some probability, or it finds one peak and never maps the whole distribution.</li>
+<li><b>Investing · Galton's ox</b>: In 1907 Galton found that the median of roughly 800 fairgoers' guesses at an ox's weight was within 1% of the truth. Deep Ensembles also average out independent errors; the difference is that ensembles prize the disagreement itself as a "not sure here" signal, much as dispersion among analysts' forecasts is a risk reading in its own right.</li>
+</ul></div>
+</div>
+
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Bayesian methods output a posterior distribution instead of a single point estimate, handing over how certain the answer is along with the answer.</li>
+<li>The hard part of Bayesian inference is the normalizing constant p(D), an integral over all parameters that is intractable in high dimensions.</li>
+<li>MCMC looks only at the density ratio between the old and new positions, so the denominator cancels and visit frequencies approximate the posterior.</li>
+<li>NUTS, proposed by Hoffman and Gelman in 2011, decides automatically when HMC should stop and is the default sampler in PyMC and Stan.</li>
+<li>MCMC results must be checked with R-hat and ESS, because a chain stuck in one mode or heavily autocorrelated samples can mislead.</li>
+<li>Variational inference swaps sampling for optimization: fit a simple distribution q to the posterior by maximizing the ELBO, which balances fitting the data against staying near the prior.</li>
+<li>The reparameterization trick rewrites sampling as "mean + std × noise," letting gradients pass through randomness; it is a shared building block of VAEs and diffusion models.</li>
+<li>Variational inference that minimizes KL(q‖p) systematically underestimates uncertainty, so its credible intervals tend to be too narrow.</li>
+<li>Aleatoric uncertainty comes from noise in the data and cannot be reduced by more data; epistemic uncertainty comes from unseen regions and can.</li>
+<li>A softmax score of 0.99 is not a calibrated confidence; epistemic uncertainty has to come from model disagreement via MC Dropout or Deep Ensembles.</li>
+</ol>
 </div>
 
 <!-- Further Reading -->

@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -301,6 +308,32 @@ ids = tok(<span class="str">"Define entropy in one sentence."</span>, return_ten
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 量化是<b>有损压缩</b>——必须在你的真实任务上量化前后对比评估，benchmark 数字不够。<br/>🤔 "用更少 bit 表达同样的意思"在你的工作中还有哪些场景？信息论的"<b>有效熵</b>"和工程上的"<b>表示精度</b>"是同一回事吗？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 工作记忆的容量上限（Nelson Cowan，2001）</b>：KV cache 像模型的工作记忆，每出一个词都要回看全部历史。不像在于：Cowan 估计人一次只抓得住约 4 个组块，靠压缩和遗忘过活；KV cache 一字不落全存，上下文越长搬运越重。</li>
+<li><b>心理学 · 卡尼曼的快思考与慢思考</b>：推测解码里小模型抢跑像系统 1 的直觉，大模型一次核对像系统 2 的审查。不像的是，卡尼曼的系统 2 很懒，常对直觉照单全收；大模型逐个 token 核对，结果和它单独生成一致。</li>
+<li><b>商业 · 丰田的单件流（大野耐一）</b>：批量生产整批要等最慢的工序，单件流把调度单位缩到一件、做完就走，和连续批处理把粒度降到每一步同构。不像在于：单件流也缩短每件交期，连续批处理只抬总吞吐，单请求并不变快。</li>
+<li><b>神经科学 · 突触强度的精度（Bartol、Sejnowski 等，2015）</b>：测大鼠海马突触，估计一个突触约能分出 26 档强度、合 4.7 bit，恰在 INT4 附近：大脑也靠低精度权重做高级计算。不像的是，突触的低精度是噪声和能耗逼出来的，量化是先训成高精度再往下压。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>LLM 推理分两阶段：prefill 并行处理整个 prompt，属计算密集；decode 逐个出 token，属带宽密集。</li>
+<li>KV cache 把历史 token 的 Key 和 Value 存下来复用，因为生成新 token 时前面 token 的 K/V 不会改变。</li>
+<li>KV cache 本身也会成为瓶颈：Llama-3 70B 每个 token 约占 320 KB，长上下文加大 batch 很快就装不下。</li>
+<li>LLM 推理的主要瓶颈是显存带宽而不是算力，推测解码、连续批处理和量化本质上都在多榨带宽。</li>
+<li>推测解码让小模型先写几个草稿 token，大模型一次前向并行验证，接受从头连续一致的部分。</li>
+<li>推测解码是无损加速，输出与大模型单独生成一致；草稿数 K 太大或 batch 较大时收益骤降。</li>
+<li>连续批处理把调度粒度从整个请求降到每一步 decode：完成的请求立刻退出，等待的新请求立刻补位。</li>
+<li>连续批处理提升系统吞吐而非单请求延迟；vLLM 的 PagedAttention 分页管理 KV cache，让它真正可用。</li>
+<li>量化把浮点权重线性映射到小整数区间，Llama-3 70B 从 FP16 的约 140 GB 压到 INT4 的约 35 GB。</li>
+<li>量化损失在数学推理、代码和长链任务上会被放大，要在自己的真实任务上对比前后，别只信 benchmark。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="34ebcbbb5a3a0671" style="border-left-color:#7b61ff">

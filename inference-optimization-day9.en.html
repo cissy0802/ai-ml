@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -334,6 +341,34 @@ ids = tok(<span class="str">"Define entropy in one sentence."</span>, return_ten
     <div class="label">Takeaway + reflection</div>
     <div class="takeaway">💡 Quantization is <b>lossy compression</b> — you must compare quantized-vs-full on your real task; benchmark numbers alone aren't enough.<br>🤔 "Express the same meaning with fewer bits" — where else does this show up in your work? Are information theory's "effective entropy" and engineering's "representation precision" the same thing?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+<li><b>Neuroscience · The limits of working memory (Nelson Cowan, 2001)</b>: The KV cache is the model's working memory: every new token looks back over the entire history. The difference: Cowan estimated that human working memory holds only about four chunks at once and survives by compressing and forgetting; the KV cache keeps everything verbatim, so the longer the context, the heavier the traffic.</li>
+<li><b>Psychology · Kahneman's fast and slow thinking</b>: In speculative decoding the small model racing ahead is System 1 offering a quick guess, and the large model's single check is System 2 reviewing it. The difference: Kahneman's System 2 is lazy and often rubber-stamps intuition, while the large model checks every token, so the result matches what it would have produced alone.</li>
+<li><b>Business · Toyota's one-piece flow (Taiichi Ohno)</b>: In mass production a whole batch waits on the slowest step; one-piece flow shrinks the unit of scheduling to a single item that moves on as soon as it is done. Continuous batching makes the same move, from whole requests down to single steps. The difference: one-piece flow also shortens each item's lead time, whereas continuous batching raises total throughput without making any single request faster.</li>
+<li><b>Neuroscience · How precise a synapse is (Bartol, Sejnowski et al., 2015)</b>: Measuring synapses in the rat hippocampus, this study estimated that a synapse can distinguish only about 26 strength levels, roughly 4.7 bits, right next to INT4. The likeness: brains also do high-level computation with low-precision weights. The difference: synaptic imprecision is forced by noise and energy cost, while quantization trains at high precision first and compresses afterwards.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+<li>LLM inference has two phases: prefill processes the whole prompt in parallel and is compute-bound; decode emits one token at a time and is memory-bandwidth-bound.</li>
+<li>The KV cache stores the Keys and Values of past tokens for reuse, because earlier tokens' K/V never change when a new token is generated.</li>
+<li>The KV cache itself becomes a bottleneck: Llama-3 70B needs about 320 KB per token, so long contexts plus large batches quickly run out of memory.</li>
+<li>The main bottleneck in LLM inference is memory bandwidth, not compute; speculative decoding, continuous batching and quantization all squeeze more out of bandwidth.</li>
+<li>Speculative decoding lets a small model draft several tokens, then the large model verifies them in one parallel forward pass and keeps the matching prefix.</li>
+<li>Speculative decoding is lossless, matching the large model's own output, but gains drop sharply when the draft length K is too large or the batch is big.</li>
+<li>Continuous batching shrinks scheduling granularity from whole requests to each decode step: finished requests leave at once and queued ones fill the gaps.</li>
+<li>Continuous batching raises system throughput rather than per-request latency; vLLM's PagedAttention, which pages the KV cache, is what makes it practical.</li>
+<li>Quantization maps floating-point weights linearly onto a small integer range, shrinking Llama-3 70B from about 140 GB in FP16 to about 35 GB in INT4.</li>
+<li>Quantization loss is amplified in math reasoning, code generation and long-chain tasks, so compare quantized and full models on your own real tasks rather than trusting benchmarks.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -306,6 +313,31 @@ W.<span class="fn">register_hook</span>(<span class="fn">masked_grad_hook</span>
 </div>
 
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Evolution · gene duplication (Susumu Ohno, 1970)</b>: new genes mostly arise by duplication; one copy stays under selection and keeps the old job, the other is freed to explore, much like freezing an old column and opening a new one. Unlike it: duplication is random, and the copies share no designed lateral links.</li>
+<li><b>Psychology · Piaget's assimilation and accommodation</b>: assimilation fits new experience into an old schema, accommodation rewrites the schema, the stability and plasticity poles. Unlike it: accommodation reorganizes old knowledge into something better, while an overwritten network just loses the old skill.</li>
+<li><b>Zen · Shunryu Suzuki's beginner's mind</b>: in Zen Mind, Beginner's Mind (1970) the beginner sees many possibilities and the expert few. EWC piling up quadratic constraints until the tenth task can barely move is an algorithmic expert's mind. Unlike it: Zen asks you to keep the skill and empty the cup again; EWC can only slide lambda between rigid and forgetful.</li>
+<li><b>Business · Christensen's The Innovator's Dilemma (1997)</b>: incumbents are locked in by current customers, so he prescribes a separate unit that can borrow the parent's resources, parameter isolation with lateral links. Unlike it: the new unit often cannibalizes the old business, while old columns never change.</li>
+<li><b>Philosophy of science · Neurath's boat</b>: knowledge is a ship rebuilt plank by plank at sea, never in dry dock. Online continual learning cannot retrain from scratch either, and no new plank may sink the old skills. Unlike it: Neurath meant knowledge as a whole has no foundation.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Catastrophic forgetting: a network trained on tasks in sequence rapidly loses earlier skills, a problem documented in 1989.</li>
+<li>Catastrophic forgetting arises because weights are shared mutable state that SGD overwrites in place for each new task.</li>
+<li>The stability-plasticity dilemma: weights too stable cannot learn new tasks; weights too plastic forget old ones.</li>
+<li>Catastrophic forgetting is not a capacity problem; overparameterized networks still forget because the objective sees only the current task.</li>
+<li>EWC (Kirkpatrick et al., 2017) rates each weight's importance with Fisher information and ties it to its old value with a spring.</li>
+<li>EWC needs no old data or new parameters, but its quadratic penalties accumulate until plasticity dries up over many tasks.</li>
+<li>Experience replay mixes a few old samples into each new-task batch and is the simplest, strongest continual learning baseline.</li>
+<li>Generative replay swaps stored data for synthetic samples from a generator, capped by its fidelity and degrading over long task chains.</li>
+<li>Parameter isolation freezes old tasks' weights as read-only: PackNet prunes to free room, progressive networks add a column per task.</li>
+<li>Parameter isolation's zero forgetting costs task identity at inference, limited capacity, and one-way transfer from old to new.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#00d4ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -292,6 +299,33 @@ ripples = [
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 把事实焊进权重容易，让知识<b>一致地</b>更新极难——模型编辑最大的敌人不是「改不动」，而是「改了不级联」。有时最稳的「编辑」反而是把新事实放进 context（RAG）。<br/>🤔 如果连大模型都做不到「改一个前提就自动级联更新所有推论」，那人脑是怎么做到的（或者其实也做不到）？信念更新的一致性，本身是不是智能的核心难题？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 概念细胞（Quiroga 等，2005）</b>：癫痫病人的内侧颞叶里，有神经元只对詹妮弗·安妮斯顿的各种照片放电，很像一颗「知识神经元」。不像在于：Quiroga 强调一个概念由一小群细胞共同编码，少掉一个不会就此忘掉她；而把模型里的知识神经元清零，对这条事实的信心确实会掉。</li>
+<li><b>神经科学 · 记忆再巩固（Nader 等，2000）</b>：大鼠的恐惧记忆被唤起后会短暂变得可塑，这时阻断蛋白质合成就能削弱它；改旧记忆不必从头重学，正像 ROME 原地改一条事实。不像的是，再巩固必须先唤起才打开窗口，ROME 直接改离线的权重。</li>
+<li><b>心理学 · 倒摄干扰</b>：后学的东西会挤掉先学的，内容越相似挤得越厉害；循环调用 ROME 改到几十条后模型「串味」，是同一种干扰在权重里累积。不像在于：人靠间隔和睡眠缓解干扰，MEMIT 的办法是把一批改动联合求解、摊到多层。</li>
+<li><b>西方哲学 · 奎因的信念之网（1951）</b>：奎因在《经验论的两个教条》里把知识看成一张整体的网，边缘处被经验推翻，网内就要连带调整，RippleEdits 测的正是这种连带。不像的是，奎因的网会自己重新平衡，被编辑的模型只动了一个结点。</li>
+<li><b>生物进化 · 基因多效性</b>：一个基因同时影响好几种性状，改一处会牵动别处，这是编辑「误伤」（specificity）的生物版。反过来又不像：多效性里该一起变的性状真的一起变了，模型编辑缺的恰恰是这种该有的连带。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Geva 等 2021 年指出，Transformer 的前馈层（FFN）本质上是 key-value 记忆：第一个矩阵匹配输入模式，第二个矩阵往输出里写答案。</li>
+<li>知识神经元方法用梯度归因找出对正确答案贡献最大的神经元，把它清零后模型对该事实的信心下降。</li>
+<li>因果追踪先加噪让模型答错，再逐层还原干净激活，结果指向处理主语最后一个 token 时的中层 MLP。</li>
+<li>Hase 等 2023 年发现，因果追踪定位到的层和编辑效果最好的层几乎不相关：知道存在哪，不等于知道从哪写。</li>
+<li>ROME 把改一条事实变成一次秩一矩阵更新，用已有 key 的协方差作护栏，尽量不碰其他记忆。</li>
+<li>循环调用 ROME 逐条编辑会累积干扰，改到几十条后模型开始串味、通用能力下降。</li>
+<li>MEMIT 把上千条编辑放进同一个最小二乘目标联合求解，再摊到一段连续的中层 MLP 上，单层扰动小、总容量大。</li>
+<li>RippleEdits 基准显示，主流编辑方法改对了目标事实，逻辑上被牵连的相关事实却没有跟着更新。</li>
+<li>在 RippleEdits 上，直接把新事实放进 prompt 的上下文内编辑反而得分最好，因为上下文里的事实能参与推理。</li>
+<li>评价模型编辑要同时看 efficacy、generalization、specificity 和涟漪，只看编辑成功率是单指标陷阱。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="2a74d1730e179a44" style="border-left-color:#7b61ff">

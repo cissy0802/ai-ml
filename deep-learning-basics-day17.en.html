@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -303,6 +310,35 @@ model.<span class="fn">eval</span>()    <span class="cmt"># eval mode: Dropout o
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Overfitting = rote memorization. L2 taxes large weights to force smoothness; Dropout uses a Chaos Monkey to force redundancy—both aim at generalization, not memory.<br>🤔 SGD's noise, Dropout, L2—all are "deliberately adding disturbance to training" yet make the model stronger. Why is "measured chaos" a friend of generalization? What does it imply about "over-optimization always has a cost"?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · Crick's objection (1989)</b>: Backprop needs the error to flow back through the very same weights. In a 1989 Nature piece, Francis Crick argued real neurons can hardly do such exact reverse transport. The brain faces the same problem of crediting every synapse; it differs in the bookkeeping, since it can only use locally available signals.</li>
+    <li><b>Evolutionary biology · Fitness landscapes (Sewall Wright, 1932)</b>: Wright drew gene combinations as rolling terrain with populations climbing toward peaks, a loss surface turned upside down. The difference: evolution computes no gradient and probes blindly with a whole population, and its terrain shifts with the environment, while a training set's loss surface stays put.</li>
+    <li><b>Buddhism · Dependent origination</b>: Backprop splits one error into a share of responsibility for every parameter, much like the view that any outcome arises from many conditions with no single culprit. The difference: the chain rule assigns each condition an exact share, while dependent origination warns against pinning the outcome on any fixed self.</li>
+    <li><b>Neuroscience · Synaptic homeostasis hypothesis (Tononi and Cirelli, 2003)</b>: They proposed that waking learning strengthens synapses broadly and sleep scales them all back down, preserving signal-to-noise and freeing room to learn: weight decay for the brain. Unlike weight decay, applied at every step, the hypothesis remains contested.</li>
+    <li><b>Complexity science · Lyapunov exponents</b>: In a chaotic system, a tiny perturbation is stretched or shrunk at every step, and its long-run fate depends on the growth rate of a product of Jacobians. Vanishing and exploding gradients are the same arithmetic, unrolled across layers instead of time. The difference: chaos is the phenomenon under study, whereas deep networks use activations, initialization and residual connections to hold that growth rate near the critical point where signals neither grow nor shrink.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Backpropagation uses the chain rule in one backward pass over the computation graph to get every parameter's gradient, at roughly the cost of one forward pass.</li>
+    <li>Backpropagation only computes gradients; how to update parameters with them is the optimizer's job, so keep the two apart when debugging a stuck loss.</li>
+    <li>Gradient descent moves parameters against the gradient, and the learning rate sets the step size, making it the first knob to tune.</li>
+    <li>SGD estimates the gradient from mini-batches, saving huge compute, and its noise helps the model escape sharp local minima.</li>
+    <li>Adam tracks moving averages of the gradient and its square to give each parameter an adaptive step, but you still set the global learning rate.</li>
+    <li>Without activation functions, stacked linear layers collapse into a single layer, so a network's depth becomes fake.</li>
+    <li>The sigmoid's derivative peaks at 0.25, so deep chains of it vanish; ReLU's derivative is 1 for positive inputs, so gradients flow through.</li>
+    <li>Overfitting means memorizing training samples along with their noise; L2 regularization fines large weights and pushes toward smoother functions.</li>
+    <li>Dropout randomly zeroes neurons during training and switches off at inference, forcing redundant features; always call model.eval() before evaluating.</li>
+    <li>The synaptic homeostasis hypothesis, in which sleep scales synapses down across the board, reads like weight decay for the brain.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

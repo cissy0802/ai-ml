@@ -43,6 +43,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -401,6 +408,31 @@ top5 = [r.document[<span class="str">"text"</span>] <span class="kw">for</span> 
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Psychology · Encoding specificity (Tulving &amp; Thomson, 1973)</b>: recall works best when the cue matches how the memory was encoded; query rewriting does exactly this, reshaping the user's question to look like the documents did when they were embedded. The difference: human memory is stored with its context, while a vector store keeps only semantics and drops time and place.</li>
+<li><b>Neuroscience · The fruit fly's "hash" (Dasgupta, Stevens &amp; Navlakha, 2017)</b>: the fly projects signals from about 50 odorant receptor types onto about 2,000 Kenyon cells and keeps only the top ~5% as a tag, so similar smells get similar tags. That is approximate nearest-neighbor search. Unlike vector search, it expands dimensions first and then sparsifies, instead of building a graph in a fixed space.</li>
+<li><b>Complexity science · Navigating a small world (Milgram 1967; Kleinberg 2000)</b>: Milgram's senders passed a letter to whichever acquaintance seemed closer to the target, homing in by local greedy hops. Kleinberg proved greedy routing finds short paths only when long-range links follow a specific distance law, and HNSW's layered graph does the same job. The difference: most of Milgram's letters never arrived, while HNSW keeps a candidate list it can fall back on, so missed neighbors stay rare.</li>
+<li><b>Psychology · System 1 and System 2 (Kahneman)</b>: fast, rough intuition proposes candidates and slow, effortful deliberation checks them, the same division of labor as bi-encoder recall plus cross-encoder re-ranking. The difference: a person's System 2 is often lazy and just endorses the intuition, while a reranker faithfully rescores every candidate.</li>
+<li><b>Philosophy · Wittgenstein's "family resemblance"</b>: the uses of a word share no common essence, only overlapping similarities, and an embedding likewise gives distances, not definitions. The difference: for Wittgenstein meaning is use, action inside a language game, while an embedding sees only co-occurrence statistics, which is why it cannot tell praising X from attacking X.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>An embedding maps text into a high-dimensional vector so that semantically close sentences land close together, measured by cosine similarity.</li>
+<li>Embeddings encode statistical co-occurrence patterns, not understanding, so they rate praising X and attacking X as similar.</li>
+<li>Embeddings are good at finding similarity, not difference; comparing versions needs diff snippets, finer chunks or hard metadata filters.</li>
+<li>Vector databases use approximate nearest-neighbor indexes such as HNSW to answer queries over tens of millions of vectors in milliseconds, without guaranteeing the true top-K.</li>
+<li>Under about 100,000 documents, embedded options like pgvector, FAISS or Chroma are enough; there is no need to start with Pinecone or Milvus.</li>
+<li>Naive RAG usually fails because the right document was never retrieved, so the work goes into chunking, query rewriting, hybrid search and metadata filtering.</li>
+<li>Poor recall usually comes from chunking and query rewriting; swapping in a bigger embedding model is like buying a faster CPU to fix a slow database query.</li>
+<li>Inflating top-K adds noise, triggers "lost in the middle" and raises cost; keep K small and use re-ranking to sharpen precision.</li>
+<li>Re-ranking with a cross-encoder scores the query and document together, more accurately than a bi-encoder, but is affordable only for a few dozen retrieved candidates.</li>
+<li>The fruit fly's olfactory circuit gives similar smells similar tags through sparse projection, solving the same approximate nearest-neighbor problem as vector search.</li>
+</ol>
+</div>
 <a href="index.en.html" class="back">← Back to home</a>
 
 <footer>BigCat · AI &amp; ML · Day 4 · 2026-05-21</footer>

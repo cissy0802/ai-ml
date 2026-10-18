@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -296,6 +303,35 @@ msg = client.messages.<span class="fn">create</span>(
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 LLM-as-Judge makes evaluation scalable, but it's not a truth detector—it's a <strong>probe with known biases that needs continuous calibration</strong>.<br>🤔 Does your monitoring system monitor itself? Same here: when you use AI to evaluate AI, who evaluates the evaluator? Where does this chain bottom out?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Immunology · Burnet's clonal selection theory (1957)</b>: The immune system first makes a vast random repertoire of antibodies, then lets the antigen pick the few that bind: the same shape as pass@k's sample-many, filter-by-tests. Unlike pass@k, the chosen cells multiply and leave a memory.</li>
+    <li><b>Psychology · The primacy effect (Solomon Asch, 1946)</b>: The same trait list opened with "intelligent" or with "envious" yields very different impressions, much like a judge favoring the first answer. But humans can't unsee an order and must be counterbalanced across groups; a memoryless LLM judge can simply be asked again, swapped.</li>
+    <li><b>Evolution · Zahavi's handicap principle (1975)</b>: A peacock's tail is believable because it is costly to fake; "longer means more effort" was once a costly signal in human writing too. Verbosity bias arises because length is nearly free for an LLM, so the signal is no longer honest, yet the judge still reads it the old way.</li>
+    <li><b>Investing and economics · Goodhart's law (Charles Goodhart, 1975)</b>: The Bank of England adviser saw that a statistical regularity breaks down once it becomes a control target, later condensed into "when a measure becomes a target, it ceases to be a good measure." Optimizing a judge score as a KPI, or an industry chasing one leaderboard, is its rerun. The difference: the gamer is no longer millions of people but one gradient-descent optimizer, more tireless and with no sense of proportion.</li>
+    <li><b>Philosophy · The Münchhausen trilemma (Hans Albert, 1968)</b>: Push any justification far enough and three exits remain: infinite regress, circularity, or a dogmatic stop. "Who evaluates the evaluator" lands here, and human spot checks are a stop chosen on purpose. Philosophy calls that a predicament; engineering calls it a budget line.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>MMLU, from Hendrycks et al., pools multiple-choice questions across 57 subjects into one world-knowledge score.</li>
+    <li>MMLU grades by comparing each option's log-likelihood, turning open generation into auto-gradable classification.</li>
+    <li>Contamination is the weak spot of public benchmarks: leaked questions get memorized, not solved.</li>
+    <li>A high MMLU score shows knowledge retrieval and test-taking skill, not reasoning depth or open-ended generation.</li>
+    <li>HumanEval grades code with 164 Python problems and hidden unit tests: only passing the tests counts.</li>
+    <li>The Codex paper's unbiased pass@k estimator samples n solutions and applies a combinatorial formula, cutting variance versus retrying k times.</li>
+    <li>When an automatic verifier exists, pass@k reflects real usefulness better than pass@1.</li>
+    <li>MT-Bench scores depend on the judge model and prompt, so they only support relative comparisons under one setup.</li>
+    <li>Zheng et al. found GPT-4 judges agree with humans over 80% of the time, yet show position, verbosity, and self-enhancement biases.</li>
+    <li>An LLM judge needs order-swapped double runs and human spot checks, or models learn to please the judge.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

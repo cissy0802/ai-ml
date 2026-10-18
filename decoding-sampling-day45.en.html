@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -302,6 +309,32 @@ out = big.<span class="fn">generate</span>(
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Speculative decoding = speculative execution for decoding: the small model guesses, the large model verifies in parallel, rejection sampling keeps the output distribution byte-for-byte unchanged. A (nearly) free lunch.<br>🤔 Speculative decoding trades speed via "cheap guessing + provable verification." Which parts of your workflow could "execute optimistically, then verify cheaply" instead of "confirming cautiously step by step"?</div>
   </div>
+</div>
+
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Investing · Keynes's beauty contest</b>: In the General Theory (1936), Keynes likened the stock market to a contest where you pick not the prettiest face but the one everyone else will pick. Likelihood-maximizing beam search likewise bets on the safest consensus word, and the text turns bland and repetitive. The difference: betting on consensus can win the contest, but in writing it just makes things dull.</li>
+    <li><b>Evolution · Eigen's error threshold</b>: Manfred Eigen's 1971 quasispecies model showed that once the copying error rate passes a threshold, genetic information collapses and the population drifts into random sequences. Raising the temperature works the same way: a little variation buys diversity, too much yields nonsense. The difference: evolution has natural selection to weed out bad mutations afterward, while a sampled token is written straight in with no one screening it.</li>
+    <li><b>Neuroscience · efference copy</b>: When the brain issues a motor command, it predicts the resulting sensation and subtracts that prediction from what it actually feels, which is why you can hardly tickle yourself (Blakemore, Wolpert and Frith, 1998). Contrastive decoding also subtracts the predictable part to keep the surprising, informative signal. The difference: the brain subtracts its own prediction, whereas contrastive decoding subtracts a separate, weaker model.</li>
+    <li><b>Consciousness · controlled hallucination</b>: In Being You (2021), Anil Seth describes perception as the brain's top-down guess, kept in check by sensory prediction errors. Speculative decoding likewise guesses first, verifies second, and corrects only where they disagree. The difference: in the brain the guesser is the smart higher level; here it is the weak small model.</li>
+  </ul></div>
+</div>
+
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Decoding is the step that picks the next token from the full probability distribution the model outputs over its vocabulary.</li>
+    <li>Greedy decoding takes the most probable token at each step; beam search keeps the k paths with the highest cumulative log-probability, and k=1 reduces to greedy.</li>
+    <li>Holtzman et al. (2019) found that in open-ended generation, chasing the highest-probability sequence produces dull, repetitive text.</li>
+    <li>Temperature divides the logits by T to sharpen or flatten the distribution; it adds no knowledge, only redistributes existing probability.</li>
+    <li>Top-k keeps a fixed k candidates, top-p keeps the smallest set reaching cumulative probability p, and min-p keeps tokens above a fraction of the top probability.</li>
+    <li>Top-p, min-p and the plausibility constraint in contrastive decoding share one idea: fewer candidates when the model is confident, more when it hesitates.</li>
+    <li>Contrastive decoding subtracts an amateur model's log-probabilities from an expert's, cancelling the repetition and clichés both models share.</li>
+    <li>Contrastive decoding needs a plausibility constraint limiting it to expert-approved candidates, or it rewards gibberish the amateur strongly dislikes.</li>
+    <li>Speculative decoding lets a small model draft several tokens for a large model to verify in one parallel pass, with rejection sampling keeping the output distribution identical.</li>
+    <li>Temperature, truncation and contrastive decoding all change what the model says; speculative decoding alone is pure speedup with an unchanged output distribution.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

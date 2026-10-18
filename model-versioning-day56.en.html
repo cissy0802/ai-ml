@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -285,6 +292,33 @@ d = a.<span class="fn">astype</span>(<span class="fn">float</span>) - b.<span cl
 </div>
 </div>
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Western philosophy · Kripke's rigid designators</b>: In <i>Naming and Necessity</i> (lectures given in 1970), Kripke argued that a proper name picks out the same object in every possible world. A model name fails that test: "o3" meant one system in preview and another at launch, behaving more like a rewritable description. The difference: a proper name is anchored by a causal-historical chain, while a model name's anchor can be moved by the vendor at any time.</li>
+<li><b>Buddhism · Nagasena's chariot</b>: In the <i>Milinda Pañha</i>, Nagasena asks King Milinda whether the "chariot" is the wheels, the axle or the pole, and concludes that "chariot" is only a conventional label laid over an assembly of parts. A model name is the same kind of label, laid over weights, system prompt, inference budget and routing. The difference: Buddhism says no unchanging essence can be found, but engineering can find one: pin the checkpoint hash and you have a reference that does not move.</li>
+<li><b>Biological taxonomy · type specimens</b>: Zoological nomenclature ties each species name to a physical type specimen held in a collection, so the name is backed by an object rather than by a description that can be rewritten. That is exactly the job of a checkpoint hash. The difference: the species keeps evolving and the specimen only fixes the name, whereas a weight snapshot fixes the experimental object itself.</li>
+<li><b>Quantum mechanics · Bohr's complementarity</b>: Bohr insisted that a quantum "phenomenon" must be described together with the whole experimental arrangement. "The score belongs to model × scaffold × harness" has the same shape. The difference: in quantum measurement the dependence is a matter of principle, while in evaluation it is just missing from the report, and recording the full config restores reproducibility.</li>
+<li><b>Psychology · researcher degrees of freedom</b>: Simmons, Nelson and Simonsohn showed in 2011 that small choices, such as which samples to drop, which measure to report and when to stop collecting data, can add up to a sharply inflated false-positive rate. The five gates of an eval harness and the sampling budget k are the same kind of forking path, with the same cure: disclose everything. The difference: in psychology the forks are often used to chase significance, while in evaluation they are mostly just left unreported.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>A model name is a mutable pointer, not an immutable reference: the weights, system prompt, inference budget and routing behind it can all change.</li>
+<li>The o3 preview verified by ARC Prize scored 87.5% on ARC-AGI-1, while the o3 released in 2025 scored only about 41% to 53%.</li>
+<li>A reproducible experiment records the model id actually returned in the response plus a run fingerprint, not just the model name requested.</li>
+<li>An agent benchmark score belongs to the joint system of model, scaffold, sampling budget and grading protocol, yet leaderboards label only the model.</li>
+<li>pass@k = 1 − (1 − p)^k rises monotonically with the number of attempts, so a score reported without k hides a tunable variable.</li>
+<li>Claude 3.7 Sonnet scored 62.3% on SWE-bench Verified with the standard setup and 70.3% with a custom scaffold: same model, 8 points apart.</li>
+<li>A benchmark is a dataset plus a scoring protocol: changing the prompt template, few-shot setup, scoring method or answer-extraction rule changes the score.</li>
+<li>When comparing answer log-probabilities, a raw sum favors short options and length normalization favors long ones, so the same MMLU yields two scores.</li>
+<li>Construct validity asks whether a benchmark measures the ability you think it does; GSM1k and SWE-Bench+ show that contamination and weak grading both inflate scores.</li>
+<li>An eval score is an estimate with error: at 500 questions and 70% accuracy the 95% confidence interval is about ±4 points, so a 1-point gap is usually not significant.</li>
+</ol>
+</div>
 <!-- Further reading -->
 <div class="card" style="border-left-color:#7b61ff">
 <h2>Further Reading<span class="en">Further Reading</span></h2>

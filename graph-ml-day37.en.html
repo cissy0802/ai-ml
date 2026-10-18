@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -287,6 +294,34 @@ emb = model()           <span class="cmt"># (N, 128) one vector per node</span>
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Graph embedding translates "structurally similar" into "close in vector space." node2vec relies on random walks (transductive, lookup); GraphSAGE learns an aggregation function (inductive, handles new nodes) — pick the latter for dynamic graphs.<br>🤔 node2vec's p, q control BFS/DFS preference, which is really asking "is a node's identity defined by its <b>neighbor community</b> or by its <b>structural role</b>?" Which of these two similarities is closer to what you mean when you say "two people are alike"?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · Lateral inhibition</b>: neighboring neurons in the retina also "pass messages," but the message is inhibition: the brighter my neighbors, the more I damp myself, which sharpens edges. Hartline first measured this systematically in the compound eye of the horseshoe crab. Sum and mean aggregation in a GNN are excitatory, so representations blur with depth; the brain preserves contrast by subtracting its neighbors, a different route around over-smoothing.</li>
+    <li><b>Buddhism · Indra's Net</b>: the Huayan school pictures a net in which every jewel reflects all the other jewels, the one containing the whole. After K rounds of message passing, each node's representation likewise reflects its K-hop neighborhood. The difference: in Indra's Net every jewel holds all the others yet stays distinct, while a deep GNN smears the nodes into sameness.</li>
+    <li><b>Sociology · Granovetter's weak ties</b>: in 1973 Granovetter showed that people hear about jobs mostly through acquaintances rather than close friends, because weak ties bridge separate circles. GAT's attention resembles learning tie strength; the difference is that attention tends to favor neighbors similar to oneself, and so may overlook the fresh information weak ties carry.</li>
+    <li><b>Developmental biology · Positional information</b>: an embryonic cell has no lookup table of the adult body; it reads morphogen concentrations around it and applies one shared rule to decide what to become, which Wolpert in 1969 called positional information. That is GraphSAGE's move of storing "how to compute" rather than "what was computed." The difference: evolution fixed the developmental rule, while the aggregator is learned in training.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>In graph data the key information lives in the connections: graphs have no fixed order, and nodes have different numbers of neighbors.</li>
+    <li>Message Passing Neural Networks (MPNN, Gilmer et al. 2017) unify GNNs into three steps per layer: message, aggregate, update.</li>
+    <li>The aggregation function in message passing must be permutation-invariant; sum, mean and max all qualify.</li>
+    <li>Stacking too many GNN layers causes over-smoothing, where all node representations converge, so practical GNNs usually use 2–4 layers.</li>
+    <li>GCN (Kipf &amp; Welling 2016) is a neighbor average with self-loops and symmetric degree normalization, followed by a linear transform.</li>
+    <li>GCN edge weights are fixed by node degrees, never change during training, and do not distinguish more important neighbors.</li>
+    <li>GAT weights each neighbor dynamically with softmax-normalized attention coefficients and uses multi-head attention to stabilize training.</li>
+    <li>GAT does not always beat GCN: on strongly homophilous graphs GCN is fast and accurate, while GAT's extra attention can overfit.</li>
+    <li>node2vec runs random walks to generate node sequences and trains word2vec on them, with p and q tuning a BFS or DFS bias.</li>
+    <li>node2vec is transductive and must retrain for new nodes; GraphSAGE learns an aggregation function, so it is inductive and embeds new nodes on the fly.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -271,6 +278,34 @@ ctx, a = <span class="fn">attention</span>(torch.<span class="fn">randn</span>(<
 <div class="takeaway">💡 Attention = score → softmax → 加权求和，让 decoder 动态回看全部源信息，一举打掉定长瓶颈，并直接孕育了 Transformer。<br/>🤔 既然 attention 这么强，为什么还要等 3 年（2014→2017）才有人敢把 RNN 完全删掉？阻力可能在哪？（提示：并行化、归纳偏置、算力）</div>
 </div>
 </div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 前额叶与基底节的门控工作记忆</b>：O'Reilly 与 Frank 2006 年的 PBWM 模型里，前额叶负责把信息稳稳维持住，基底节像闸门，决定何时放新信息进来、何时清空，和 LSTM 的输入门、遗忘门是同一种分工。不像在于：大脑的闸门靠多巴胺奖励信号慢慢学会，LSTM 靠反向传播一次算出梯度。</li>
+<li><b>佛学 · 唯识的种子与熏习</b>：唯识说每次经验都把「种子」熏进阿赖耶识，种子一路随身带着，遇到因缘再现行，像 cell state 默认直传、按门读写。不像在于：唯识里没有一道自动的遗忘门，种子要靠修行转化，而不是被下一句话擦掉。</li>
+<li><b>心理学 · Treisman 的衰减模型</b>：Broadbent（1958）认为注意是开关式过滤器，没被选中的信息直接挡掉；Treisman 改成「衰减」，没被关注的信息只是变弱、仍可能被处理。软注意力的 softmax 权重正是衰减而非开关。不像在于：人的注意容量有限，softmax 只是重新分配权重。</li>
+<li><b>东西方哲学 · 胡塞尔的「滞留」</b>：胡塞尔分析时间意识时说，此刻的意识里总挂着刚刚过去的一段，正在一点点淡去，这很像 RNN 的隐状态把过去带进当下。不像在于：滞留是意识本身的结构，并非把过去压成一个定长向量。</li>
+</ul></div>
+</div>
+
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>RNN 学不到长依赖，是因为误差反传要把权重矩阵连乘几十上百次，梯度会指数级消失或爆炸。</li>
+<li>LSTM（Hochreiter 与 Schmidhuber，1997）把记忆放在 cell state 传送带上，用加法更新，绕开了连乘带来的衰减。</li>
+<li>LSTM 的遗忘门、输入门、输出门都是学出来的 sigmoid 开关，分别决定擦掉什么、写入什么、读出什么。</li>
+<li>LSTM 并不能记无限长，实践中有效记忆通常只有几十到一两百步，真正的长上下文要靠 attention。</li>
+<li>GRU 用一个更新门做「(1−z) 份旧状态加 z 份新状态」的插值，去掉独立 cell state，参数比 LSTM 约少四分之一。</li>
+<li>GRU 和 LSTM 没有普适赢家，该用实验对比而不是认招牌；两者都靠一条接近恒等的直传通道对抗梯度消失。</li>
+<li>Seq2Seq（Sutskever 等，2014）用编码器把整句压成一个定长向量，再由解码器逐词生成，确立了 encoder-decoder 骨架。</li>
+<li>Seq2Seq 的瓶颈是结构性的：任意长的句子都挤进同样大小的向量，单纯调大维度治标不治本。</li>
+<li>Bahdanau attention（2014）让解码器每一步对全部源词打分、做 softmax、再加权求和，得到这一步专属的上下文向量。</li>
+<li>Attention 早于 Transformer 三年就已出现；Transformer 的激进之处是删掉循环，只留下 attention。</li>
+</ol>
+</div>
+
 <!-- 深入资源 -->
 <div class="card" data-tts="593cb73988909e6b" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

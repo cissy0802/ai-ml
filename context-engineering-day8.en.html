@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -311,6 +318,30 @@ resp = client.messages.<span class="fn">create</span>(
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Consciousness studies · Baars's global workspace</b>: In 1988 Bernard Baars pictured consciousness as a small stage whose contents are broadcast to many unconscious processes. The context window is the same kind of scarce stage for what gets "seen." The difference: on Baars's stage, contents compete their way up; in a context window, an engineer decides from outside what goes in.</li>
+<li><b>Psychology · Bartlett's reconstructive memory</b>: In 1932 Frederic Bartlett had people pass the folk tale "The War of the Ghosts" down a chain of retellings; unfamiliar details faded and the plot drifted toward stories his English subjects already knew. That is the "summary of a summary" drift: each round pulls the text toward the summarizer's own priors. Unlike the brain, a system can keep the original on file.</li>
+<li><b>Neuroscience · complementary learning systems</b>: McClelland, McNaughton and O'Reilly argued in 1995 that the hippocampus rapidly records specific episodes while the neocortex slowly extracts regularities, with replay during sleep handing one to the other. Memory extraction has the same shape: raw episodic conversation is stored first, then distilled into semantic facts. The key difference is that consolidation rewires the cortex itself, while an LLM's memory is an external notebook and the model's weights never change.</li>
+<li><b>Buddhism · "perfuming" in Yogacara</b>: Yogacara teaches that every thought and act perfumes the storehouse consciousness (alaya-vijnana) like incense in cloth, leaving "seeds" that later ripen into views and reactions. A wrong memory persisted into the store and steering every later answer is structurally a bad seed. The difference: a memory system can delete it in one click, while transforming a seed takes long practice and new perfuming.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>The context window is the model's working set, not a database; the goal is to put in the right things, not more things.</li>
+<li>Attention compute grows with the square of length and KV-cache memory grows linearly, so window size is fundamentally a hardware-cost problem.</li>
+<li>Liu et al.'s 2023 "Lost in the Middle" found that key facts placed mid-context are recalled far less often than those at the start or end.</li>
+<li>A long window does not replace RAG: stuffing it is slow and costly and the middle gets ignored, so RAG with short context usually wins.</li>
+<li>Prompt caching reuses the KV cache of an unchanging prefix, which must match token for token, so static content goes first.</li>
+<li>Anthropic charges 25% more to write a cache and 90% less to read a hit, so only truly static prefixes are worth caching.</li>
+<li>Context compression comes in four flavors, sliding window, summarization, hierarchical summaries and retrieval, rising in both fidelity and cost.</li>
+<li>Compression is lossy: keep the user's stated preferences, numbers, code and IDs verbatim, since repeated summaries of summaries drift.</li>
+<li>LLMs are stateless, so memory systems run four steps, extract, store, retrieve and inject, to put relevant facts back into context.</li>
+<li>Memory's biggest risk is a wrong fact persisting and polluting every later answer, which calls for confidence scores, user deletion and audits.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading</h2>

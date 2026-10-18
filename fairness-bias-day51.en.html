@@ -52,6 +52,13 @@ table.fm th{background:rgba(123,97,255,0.12);color:#a48cff;font-weight:600}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -307,6 +314,34 @@ y_fair = fair.<span class="fn">predict</span>(X_te, sensitive_features=A_te)
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Fairness isn't a state you can "achieve" but a set of trade-offs requiring <b>explicit choice</b>: pick the definition, own the cost, draw the causality, bear the consequences. The "absolute fairness" that dodges the trade-off is the most irresponsible fairness.<br>🤔 When using AI to aid decisions, have you mistaken some "statistical correlation" for a "legitimate ground"? Draw a causal graph—which arrows should actually be blocked?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Economics · Arrow's impossibility theorem</b>: In 1951 Kenneth Arrow proved that no group voting rule can satisfy a handful of individually reasonable conditions at once, the same "each one fair, together impossible" shape as the fairness impossibility theorem. The difference: Arrow's conflict lives in preference orderings themselves, while the fairness conflict needs unequal base rates; equalize the base rates and all three conditions can coexist.</li>
+    <li><b>Psychology · Signal detection theory</b>: Green and Swets (1966) split a perceptual judgment into sensitivity and a decision criterion; hits and false alarms trade off only by moving the criterion. Group-specific thresholds move that criterion once per group. Unlike psychophysics, there is one ruler here measuring many populations, not one observer.</li>
+    <li><b>Political philosophy · Rawls's veil of ignorance</b>: Rawls (1971) asks us to pick rules without knowing who we will be; counterfactual fairness likewise asks "would the outcome hold if this person's identity changed?" The gap: the veil erases every identity to design institutions, while counterfactual fairness flips only the sensitive attribute and rewrites its downstream effects along a causal graph.</li>
+    <li><b>Management · Goodhart's law</b>: Charles Goodhart observed in 1975 that a measure loses its reliability once it becomes a control target. Forcing the demographic parity gap to zero is the same trap, except that here the shortcut is found by a blind optimizer rather than by people gaming the system on purpose.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Bias enters an ML pipeline at several independent points: historical, representation, measurement, aggregation, and learning or evaluation, each needing its own fix.</li>
+    <li>Measurement bias comes from proxy labels: using "arrested" in place of "committed a crime" turns uneven policing directly into model bias.</li>
+    <li>Dropping sensitive columns like gender or race barely helps, because the model rebuilds them from proxies such as zip code, names, and spending.</li>
+    <li>Demographic parity asks only for equal positive-prediction rates across groups, ignoring ground truth; equalized odds requires equal true and false positive rates.</li>
+    <li>Equal opportunity relaxes equalized odds to equal true positive rates only, fitting cases where missing qualified people is the main harm.</li>
+    <li>A fairness metric is a diagnostic, not an objective; driving one metric to zero in isolation often creates new unfairness elsewhere.</li>
+    <li>Kleinberg et al. and Chouldechova proved that with unequal base rates and an imperfect model, calibration, FPR balance, and TPR balance cannot all hold.</li>
+    <li>In the COMPAS dispute ProPublica wanted equal false positive rates and Northpointe defended calibration; the impossibility theorem says both were right yet incompatible.</li>
+    <li>Debiasing can act in pre-processing, in-processing, or post-processing; Hardt et al. (2016) showed per-group thresholds can achieve equalized odds exactly.</li>
+    <li>Counterfactual fairness asks whether a decision changes when the sensitive attribute and its downstream effects are altered, so it hinges on the causal graph drawn.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

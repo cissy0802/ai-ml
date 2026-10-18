@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -273,6 +280,32 @@ labels, dists = index.<span class="fn">knn_query</span>(q, k=5)  <span class="cm
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 HNSW = 高维空间里的跳表，用"分层 + 小世界图"把最近邻搜索压到 O(log n)，代价是放弃 100% 精确。<br/>🤔 你愿意为 50× 的检索提速，接受 1% 的最近邻被漏掉吗？这个 recall/延迟权衡该由谁、按什么标准来定？<br/><a href="https://cissy0802.github.io/super-individual-weekly/rag-day11.html" style="color:#a48cff">工程对应 → super-individual D11（RAG 检索工程实战）</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 互补学习系统（McClelland、McNaughton、O'Reilly，1995）</b>：这个理论认为大脑有两套记忆，海马体快速、稀疏地记下具体情节，一字不差；新皮层慢慢学出重叠的分布式表征，擅长泛化。这正是 BM25 管精确、稠密检索管语义的分工。不像在于，大脑会在睡眠中把海马体的记忆逐步巩固进皮层，混合检索的两路永远并列，只在查询那一刻融合。</li>
+<li><b>佛学 · 「四依」里的依义不依语</b>：佛教讲读经要依意思、不依字面，稠密检索就是工程版的依义不依语，换了说法也能认出同一个意思。不像在于，BM25 之所以还活着，是因为型号、错误码这类场合字面本身就是意思；而佛家说的「义」，本就不认为能被任何表示穷尽。</li>
+<li><b>心理学 · 舌尖现象（Brown 与 McNeill，1966）</b>：人明明知道要找的意思，甚至记得首字母和音节数，就是叫不出那个词，这是语义通了、词形没通。稠密检索恰好反过来补这个缺口：不靠词形，靠意思把文档找回来。</li>
+<li><b>经济学 · 阿罗不可能定理（Kenneth Arrow，1951）</b>：把多份排名合成一份社会排名，没有任何规则能同时满足几条看似起码的公平条件。RRF 也是一种按名次投票的排名聚合，同样逃不过这个定理。不像在于，阿罗问的是有没有完美规则，检索只问哪条规则在实测里够好，RRF 赢在实证而非公理。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>BM25 是 Elasticsearch 和 Lucene 默认的相关性打分函数，建立在倒排索引之上。</li>
+<li>BM25 用 IDF 奖励稀有词，再用词频饱和与长度归一化防止高频词和长文档刷分。</li>
+<li>在产品型号、人名、错误码这类精确匹配场景里，BM25 依然比向量检索更准、更便宜。</li>
+<li>稠密检索用 bi-encoder 把 query 和文档各自编码成向量，文档向量可以离线预先算好。</li>
+<li>稠密检索的编码器靠对比学习训练：正确的问题与段落拉近，同 batch 的其他段落推远。</li>
+<li>Karpukhin 等人的 DPR（2020）在开放域问答上，top-20 召回准确率比 BM25 高 9 到 19 个百分点。</li>
+<li>稠密检索在跨领域、精确匹配和长尾罕见实体上容易失手，恰好和 BM25 的强项互补。</li>
+<li>混合检索不能直接相加 BM25 分和余弦分；RRF 只用排名融合，k 通常取 60，几乎免调参。</li>
+<li>HNSW 用分层小世界图做近似最近邻搜索，查询约 O(log n)，ef_search 是召回与延迟的旋钮。</li>
+<li>互补学习系统理论里海马体精确快记、新皮层泛化慢学，和 BM25 加稠密检索的分工同构。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="8effdcb187b6eb16" style="border-left-color:#7b61ff">

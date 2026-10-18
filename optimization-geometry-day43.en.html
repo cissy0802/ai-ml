@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -312,6 +319,34 @@ opt = <span class="fn">Lion</span>(model.<span class="fn">parameters</span>(),
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 The history of optimizers is a history of <strong>repeatedly reallocating budget among memory, compute, and generalization</strong>.<br>🤔 Lion was discovered by program search, not hand-designed — when "designing the algorithm" itself can be automated, how does the researcher's role change?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+  <li><b>Evolution · "Survival of the flattest"</b>: In 2001 Wilke, Adami and colleagues found in the Avida digital-organism platform that at high mutation rates the winners were not the genotypes with the highest fitness peak, but those sitting on a flat plateau where mutations barely hurt. Same structure as flat minima: the noisier the process, the more a wide basin beats a sharp peak. The difference: evolution filters a whole population, while SGD follows a single trajectory.</li>
+  <li><b>Neuroscience · Marder's lobster ganglion</b>: Prinz, Bucher and Marder showed in 2004 that model circuits of the lobster stomatogastric ganglion with wildly different ion-channel parameters produce nearly identical rhythms. It is the biological version of the sharpness debate's "one function, many parameter sets"; unlike a trained network, neurons keep retuning themselves through feedback.</li>
+  <li><b>Western philosophy · The Stoic premeditation of evils</b>: Seneca urged people to rehearse poverty and loss in advance and check whether they could still stand. That is the same min-max move as SAM climbing to the worst nearby point before updating. The difference: the Stoic changes the attitude toward a bad outcome, SAM changes where it stands.</li>
+  <li><b>Investing · The 1/N portfolio</b>: In 2009 DeMiguel and colleagues compared over a dozen mean-variance models and found almost none reliably beat splitting money equally across assets out of sample. Lion keeps only the sign and drops gradient magnitude, likewise giving up on noisy estimates and trusting direction; unlike 1/N, Lion still takes its direction from momentum.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+  <li>A flat minimum and a sharp minimum can reach the same training loss, but when the test loss surface shifts slightly, only the flat one stays low.</li>
+  <li>Hochreiter and Schmidhuber introduced flat minima in the 1990s: flatness means robustness to shifts in the data distribution.</li>
+  <li>Li et al. (2018) used filter normalization to plot loss landscapes in 2D and found that skip connections smooth rugged terrain into clean basins.</li>
+  <li>Lower training loss is not automatically better; generalization depends on the geometry of the minimum, not just the loss value.</li>
+  <li>Large batches carry little gradient noise and get stuck in sharp minima, the large-batch generalization gap Keskar et al. reported in 2016.</li>
+  <li>SAM turns training into a min-max problem, minimizing the worst loss within radius rho, at the cost of two forward passes per step and roughly double the training time.</li>
+  <li>Newton's method preconditions with the inverse Hessian, but with hundreds of millions of parameters the n-by-n Hessian can be neither stored nor inverted.</li>
+  <li>K-FAC uses Kronecker products and Shampoo keeps a small preconditioner per tensor dimension; both approximate full curvature with structured factorizations.</li>
+  <li>Lion was found by program search, stores only momentum and updates with the sign, halving optimizer memory versus Adam and needing a 3 to 10 times smaller learning rate.</li>
+  <li>Sophia cheaply estimates a diagonal Hessian every few steps and clips updates element-wise; switching optimizers means retuning the learning rate, and AdamW remains the safest default.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

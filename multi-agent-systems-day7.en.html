@@ -49,6 +49,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -324,6 +331,35 @@ result = app.invoke({<span class="str">"question"</span>: <span class="str">"AI 
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 The heart of multi-agent protocol design isn't "AI collaboration" — it's distributed systems coordination. Your distributed background <b>is</b> the core leverage.<br>🤔 If you view N Agents as N microservices, how do their failure modes match (and differ from) classical distributed systems? (Hint: think about what <b>idempotency</b> and <b>causal consistency</b> mean when outputs come from LLMs.)</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · Global Workspace Theory (Baars, 1988)</b>: the brain runs many specialized unconscious modules in parallel; whichever content wins the competition gets broadcast to all of them, and Baars equates that broadcast with consciousness. A GroupChat's shared history is that broadcast board. The difference: in the brain the modules compete their way onto the stage, while AutoGen needs a Manager to pick the next speaker.</li>
+    <li><b>Evolution · Cell differentiation</b>: one genome becomes a neuron or a liver cell depending on which genes are expressed, just as one base model becomes a coder or a reviewer depending on its system prompt. The weakness carries over too: a flaw written into the shared "genome" makes every role fail together, which is exactly the correlated-error problem debate voting can't fix.</li>
+    <li><b>Psychology · Wisdom of crowds vs. groupthink</b>: in 1907 Galton tallied several hundred guesses at an ox's weight at a country fair, and the median landed within 1% of the truth. Crowds are smart only when their errors are independent. Agents that share one base model and read the same chat history lack exactly that, and slide toward what Janis called groupthink: agreement arrives too fast and nobody dissents.</li>
+    <li><b>Complexity science · Stigmergy (Grassé, 1959)</b>: termites don't message each other; each one looks at the mud already in the nest to decide where the next pellet goes, so coordination runs entirely through a shared, modified environment. The Blackboard protocol has the same structure. The difference: termite rules need no understanding, while an Agent must reinterpret the whole board on every read and pays tokens each time.</li>
+    <li><b>Business · Coase's boundary of the firm (1937)</b>: if markets are so efficient, why do firms exist? Coase's answer was transaction costs: work moves inside the firm when internal coordination is cheaper than negotiating on the market each time. "Should I split this Agent?" is the same arithmetic, with specialization gains weighed against context lost at every handoff. The difference: Agents have no contracts or incentives, only a token bill.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>AutoGen reduces multi-agent collaboration to two things, a message bus plus roles, with Agents coupled only through messages, much like the actor model.</li>
+    <li>In AutoGen, the GroupChatManager decides who speaks next, typically by round-robin, by letting an LLM choose, or by role-based rules.</li>
+    <li>Group chats with more than 4–5 Agents tend to fall into mutual-praise loops or silent deadlock, so start with a doer plus a judge and always set max_turns.</li>
+    <li>CrewAI defines each Agent by Role, Goal and Backstory, assigns Tasks explicitly, and runs them in a Sequential or Hierarchical process.</li>
+    <li>AutoGen buys conversational flexibility and CrewAI buys predictable flow; the two frameworks are different trade-offs, not better and worse.</li>
+    <li>A Backstory only needs one or two defining traits; an overly long one eats the attention budget meant for tool descriptions and task context.</li>
+    <li>Role specialization is really about lightening the LLM's load: a small context, a focused prompt and a narrow tool set make each reasoning step sharper.</li>
+    <li>Split a role when an Agent's failures are mostly "wrong kind of work" rather than "not good enough", but an Agent with 5–7 tools is already focused enough.</li>
+    <li>Each of the four collaboration protocols has its niche: hierarchical for splittable work, pipeline for ordered dependencies, debate for multiple views, blackboard for shared intermediate results.</li>
+    <li>Debating Agents share one base model, so their errors are correlated and voting cannot remove systematic bias; to cut hallucinations, adding RAG beats adding Agents.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

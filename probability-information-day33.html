@@ -52,6 +52,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -257,6 +264,32 @@ print(mutual_info_regression(x.reshape(-1,1), y)[0])  <span class="cmt"># ≈ 1.
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 ELBO 把 intractable 的 evidence 变成可优化的下界：log p(x) = ELBO + KL，最大化 ELBO 同时逼近真后验。它 = 重构项 − KL 正则项，是 VAE / 变分推断 / diffusion 的共同地基。<br/>🤔 ELBO 里重构项和 KL 项在拉锯：KL 权重调大，隐空间更规整但重构更糊（β-VAE 就在调这个权重）。这个「保真 vs 规整」的取舍，和你熟悉的「一致性 vs 可用性」（CAP）在结构上是不是同一类张力？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>佛学 · 缘起</b>：互信息量的是联合分布偏离独立有多远；缘起说诸法依他而起、无自性，相当于说世间少有真正的 I(X;Y)=0。不像在互信息是可算的统计依赖，缘起讲存在层面的相依，没有可测的量。</li>
+<li><b>量子力学 · 纠缠熵</b>：冯·诺依曼熵 S=−Tr(ρ log ρ) 是 Shannon 熵的量子版。不像在纠缠纯态整体熵为 0、每一半的熵却大于 0，条件熵可为负；经典世界里整体的熵不会小于任何部分。</li>
+<li><b>心理学 · Hick 定律</b>：Hick（1952）和 Hyman（1953）发现选择反应时间随备选信息量 log₂N 线性增长，做决定像在为熵付账。不像在练习和刺激-反应匹配度能改写斜率，人脑不是码率固定的信道。</li>
+<li><b>投资 · Kelly 公式</b>：Kelly 1956 年在贝尔实验室证明，赛马模型里内幕消息让资金最优增长率提升的量正好是消息与赛果的互信息；按错误概率 Q 下注，增长率损失 KL(P‖Q)，编码罚款变成真金白银。不像在它假设无限重复下注、只看对数财富，现实中人们常只下半个 Kelly。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Shannon 定义的熵是惊讶度 −log p(x) 的期望，等于不确定性、平均信息量，也是无损压缩的理论下限。</li>
+<li>信息量取对数，是因为独立事件的概率相乘，而信息量应当相加。</li>
+<li>熵是中性度量，高熵只代表不可预测、信息密度高；LLM 的采样温度调的正是输出分布的熵。</li>
+<li>交叉熵 = 真实熵 + KL 散度，所以最小化 cross-entropy loss 本质上就是最小化 KL(P‖Q)。</li>
+<li>KL 散度不对称、也不满足三角不等式，不是距离；需要对称度量时用 JS 散度或 Wasserstein 距离。</li>
+<li>Forward KL 倾向覆盖所有模式而偏糊，reverse KL 倾向锁定单一模式而漏掉其他峰。</li>
+<li>相关系数为 0 只说明没有线性关系，互信息为 0 才代表两个变量真正独立。</li>
+<li>互信息等于 p(x,y) 相对独立假设 p(x)p(y) 的 KL 散度，对比学习的 InfoNCE 在最大化互信息的下界。</li>
+<li>ELBO 永远是证据 log p(x) 的下界，差额是 KL(q‖真后验)；最大化 ELBO 同时让 q 逼近真后验。</li>
+<li>Kingma 与 Welling 2013 年的 VAE 把 ELBO 拆成重构项减 KL 正则项，两者拉锯让生成结果连续但稍糊。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="000420491839abc5" style="border-left-color:#7b61ff">

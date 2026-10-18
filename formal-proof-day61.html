@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -260,6 +267,33 @@ steps = <span class="fn">brute_proof</span>(10_000)
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 硬裁判买到的是<b>正确性</b>，不是简洁、理解或可复用；后三者需要另外的目标函数，而目前还没人知道怎么把它们做成「内核」。<br/>🤔 物理学有大量「算得对但不懂为什么」的结果（量子力学的「闭嘴计算」传统）。数学会不会也进入这样一个阶段？那时「理解」还算是数学的一部分吗？<br/><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#7b61ff">工程对应 → super-individual D5 (Agent Design)</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>免疫学 · 胸腺选择</b>：T 细胞受体靠基因片段随机重组生成，大多数新生 T 细胞在胸腺被淘汰，只放行不攻击「自身」的。生成盲目廉价、把关严格，和 agent 试错再过内核同构；不像的是胸腺的「自身」清单并不完整，漏网就成自身免疫病，正如陈述写不全的风险。</li>
+<li><b>科学哲学 · Reichenbach 的发现与辩护</b>：他 1938 年把想法怎么来的、凭什么成立分成两件事。内核只管辩护，证明出自哪个 agent 无关；不像的是经验科学的辩护可被推翻，内核通过即定论。</li>
+<li><b>儒家 · 正名</b>：「名不正则言不顺」。陈述对齐是工程版的正名：名目一歪，所证就不是所指。不像的是孔子靠礼与共识，这里有 comparator 逐字比对。</li>
+<li><b>复杂性科学 · stigmergy</b>：Grassé 1959 年用它描述白蚁不靠交流、看已建结构决定下一步。定理 DAG 同样把状态留在「工地」上；不像的是白蚁建错也会被沿用，DAG 节点都过了内核。</li>
+<li><b>生物进化 · 能用就行</b>：长颈鹿喉返神经绕进胸腔再折回喉部，因为选择只问能否存活。1300 万行证明也只被「通过」塑造；不同的是证明还能被人重写压缩。</li>
+</ul></div>
+</div>
+<!-- 要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Claude agent 团队 11 天在 Lean 里完成费马大定理的完整形式化，约 1300 万行。</li>
+<li>Curry–Howard 对应把命题看作类型、证明看作程序，于是检查证明就等于类型检查。</li>
+<li>找证明难、查证明易：生成端可以是会出错的模型，正确性只靠一个小而可审查的内核。</li>
+<li>Lean 内核不读注释、不看推理过程，「用理由说服裁判」的通道在这里不存在。</li>
+<li>形式化不等于绝对正确：可信基仍含定理陈述和公理，陈述写歪会得到平凡真。</li>
+<li>comparator 把结果对照 Mathlib 现成的 FLT 陈述，并确认只用三条标准公理、无 sorry。</li>
+<li>早期多 agent 尝试因丢失项目状态而失败，改用 Prove2Me 的定理陈述 DAG 后才跑通。</li>
+<li>陈述与证明分开存放且陈述不可变，证明可以先 import 未证的陈述，把难题拆成小题并行做。</li>
+<li>每份提交都由内核独立检查，agent 之间不必互信或互审，内核就是唯一的共识机制。</li>
+<li>Buzzard 指出这份证明没有新数学、臃肿、进不了 Mathlib：验证了不等于理解或可复用。</li>
+</ol>
 </div>
 <!-- 资源 -->
 <div class="card" data-tts="b7b7b11da0536ea8" style="border-left-color:#7b61ff">

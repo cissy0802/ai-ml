@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -308,6 +315,34 @@ best = <span class="fn">self_consistency</span>(<span class="str">"A pen costs $
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Best-of-N turns randomness into an advantage via "sampling redundancy + selection"—but it amplifies consensus, and is helpless against systematic error.<br>🤔 Voting amplifies consensus, not truth—where else have you seen this trap, in group decisions or scientific consensus?<br><a href="https://cissy0802.github.io/super-individual-weekly/agent-design-day5.html" style="color:#a48cff">Engineering counterpart → super-individual D5: Agent Design</a></div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Psychology · Vygotsky's private speech</b>: In <i>Thinking and Speech</i> (1934), Vygotsky observed that children talk aloud while solving hard problems; the outward speech organizes their thinking and only later turns into silent inner speech. CoT likewise props up reasoning by writing it out as language. The difference: a child's inner speech becomes compressed and elliptical, while a model's hidden thinking is still full, token-by-token text, just kept out of view.</li>
+    <li><b>Investing · Annie Duke on "resulting"</b>: In <i>Thinking in Bets</i> (2018), the former professional poker player warns against judging a decision purely by its outcome; review the process instead. ORM grades only the result, PRM grades every step, the same shift. The difference: poker outcomes carry luck noise, while in a math derivation each step's correctness directly determines the result.</li>
+    <li><b>Social choice · Condorcet's jury theorem (1785)</b>: if each voter is right more than half the time and votes independently, the majority converges on the truth as the group grows. Self-consistency is this theorem, with the same weak spot: N samples from one model are far from independent, so systematic errors get voted in together.</li>
+    <li><b>Evolution · blind variation and selective retention</b>: In 1960 the psychologist Donald Campbell described creative thought as a Darwinian process: generate variants blindly, then select and keep the survivors. Best-of-N is "sampling as variation, verifier as selection." The difference: Best-of-N runs a single generation and losers pass nothing on; only o1's backtracking within one chain accumulates a little.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Reasoning models shift part of the compute from training to run time on each request, making "thinking longer" a second scaling path beside building bigger models.</li>
+    <li>OpenAI's o1 uses reinforcement learning to teach the model how to think, rewarded by final answers in automatically verifiable domains like math and code.</li>
+    <li>DeepSeek-R1 showed that pure reinforcement learning, without human-annotated reasoning, makes reflection, verification and backtracking emerge on their own.</li>
+    <li>For tasks that need no multi-step reasoning, such as summarizing, rewriting or fact lookup, a reasoning model is just slower and pricier; ask whether the problem needs scratch work.</li>
+    <li>Chain-of-thought (CoT) spreads the fixed depth of a single forward pass across sequence length, giving the model a scratchpad.</li>
+    <li>A model's written chain of thought may be post-hoc rationalization: fluent steps neither guarantee a correct answer nor show how the model actually reasoned.</li>
+    <li>An outcome reward model (ORM) checks only the final answer, a process reward model (PRM) scores each step; OpenAI showed in 2023 that process supervision wins on MATH.</li>
+    <li>Verifying is often easier than generating, but self-checking has blind spots; an independent verifier or external signals like running code or plugging numbers back in are more reliable.</li>
+    <li>Best-of-N samples several candidates in parallel and lets a verifier pick the best; self-consistency is the special case of majority-voting the final answer.</li>
+    <li>Majority voting amplifies consensus, not truth: when a model errs systematically, larger N just agrees on the wrong answer, because the samples are not independent.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

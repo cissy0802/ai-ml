@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -278,6 +285,33 @@ action = vla.<span class="fn">predict_action</span>(**inputs, unnorm_key=<span c
     <div class="label">Takeaway + reflection</div>
     <div class="takeaway">💡 Tying today's four pieces together: text, images, audio, video, actions — <b>all encoded into tokens, fed into one autoregressive engine</b>. The essence of multimodality is "everything is a token".<br>🤔 If even robot actions can be predicted as tokens, is there still a fundamental computational difference between "thinking" and "acting"? What does that mean for agent design?</div>
   </div>
+</div>
+
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · Mriganka Sur's rewired ferrets</b>: Sur's lab routed newborn ferrets' visual input into auditory cortex and reported in Nature in 2000 that this auditory cortex grew the orientation-selective maps typical of visual cortex, and the animals could use it to see. Cortex, like attention, is modality-agnostic: it learns the structure of whatever sequence it is fed. The difference: cortex takes continuous spike trains, with no prior step of chopping them into tokens and no precision lost to vocabulary granularity.</li>
+    <li><b>Psychology · change blindness (Rensink, O'Regan &amp; Clark, 1997)</b>: flicker two versions of a picture with a brief blank in between, and people often take a long time to spot an obvious change. Human vision is already sparse sampling filled in by expectation, the same logic as video frame sampling. Unlike it, the eye samples where attention and prediction point; a fixed 1 fps is blind sampling that cannot tell which frame matters.</li>
+    <li><b>Psychology · Paivio's dual coding theory (1971)</b>: Allan Paivio argued the mind runs two separate codes, verbal and imagery, linked by referential connections, which is why concrete, picturable words are easier to remember. CLIP also has two towers but forces both codes into one space; Paivio's two systems stay distinct and only call on each other when needed.</li>
+    <li><b>Buddhism · the six consciousnesses</b>: each of the first five consciousnesses keeps to one domain, eye-consciousness to forms, ear-consciousness to sounds, while the sixth, mind-consciousness, can take all sense objects plus mental objects and bring them together. That resembles separate vision and audio encoders handing everything to an LLM. Unlike it, mind-consciousness is itself one more dependently arisen, impermanent link, not a central processor sitting behind the senses.</li>
+    <li><b>Quantum physics · Planck's quanta (1900)</b>: to explain blackbody radiation, Planck assumed energy is exchanged only in discrete packets, the first time a continuous quantity was cut into units. Cutting pixels, sound waves and actions into tokens is the same move. The difference: quanta are nature's own grain, while token size is an engineer's choice, and choose it too coarse and small text becomes unreadable.</li>
+  </ul></div>
+</div>
+
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>CLIP trains on about 400 million image-text pairs with contrastive learning, placing images and text in one vector space; it matches but cannot generate sentences.</li>
+    <li>LLaVA-style generative VLMs use a vision encoder plus a projection layer to turn an image into visual tokens that enter the LLM alongside text tokens.</li>
+    <li>A VLM squeezes an image into a few hundred patch tokens, so it grasps semantics well but often misreads small text, exact counts and table numbers.</li>
+    <li>Whisper is end-to-end seq2seq speech recognition: waveform to log-Mel spectrogram, an encoder, then a decoder that emits text tokens autoregressively.</li>
+    <li>Whisper gets its robustness from 680,000 hours of weakly supervised data, yet as a generative model it can repeat or invent text on long audio and silence.</li>
+    <li>The bottleneck in video understanding is too many frames; sparse sampling, token merging and Q-Former compression keep the token count under control.</li>
+    <li>Feeding a model more video frames does not mean better understanding; past the context budget attention gets diluted, so picking the right frames is what counts.</li>
+    <li>RT-2 discretizes 7-degree-of-freedom robot actions into tokens sharing the text vocabulary, letting robot control borrow common sense from web image-text data.</li>
+    <li>The unifying thread of multimodality is that everything becomes tokens, at the cost of discretization loss, token explosion for dense modalities and cross-modal alignment.</li>
+    <li>Human vision also samples sparsely; change blindness shows the brain fills gaps with expectation, the same trade-off as video frame sampling.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

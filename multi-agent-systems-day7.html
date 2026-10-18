@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -291,6 +298,33 @@ result = app.invoke({<span class="str">"question"</span>: <span class="str">"202
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 multi-agent 协议设计的核心不在"AI 协作"，在"分布式系统协调"——你的分布式背景就是核心 leverage。<br/>🤔 如果你把 N 个 Agent 看成 N 个微服务，它们的失败模式和分布式系统有何相同/不同？(提示：思考"<b>幂等</b>"和"<b>因果一致性</b>"在 LLM 输出场景下意味着什么)</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 全局工作空间理论（Baars 1988）</b>：大脑里众多专门化的无意识模块各干各的，赢得竞争的那条信息被"广播"给全体，Baars 认为这就是意识。GroupChat 的共享历史正是这块广播板；不像在：大脑靠模块自己竞争上台，AutoGen 要 Manager 指定谁发言。</li>
+<li><b>生物进化 · 细胞分化</b>：同一套基因组，靠表达哪些基因分化出神经元、肝细胞，正像同一个底模靠不同 system prompt 分化出 coder 和 reviewer。连弱点也像：缺陷写在共同的"基因"里，所有角色会一起错，辩论投票纠不掉的 correlated errors 就是这个。</li>
+<li><b>心理学 · 群体智慧与群体思维</b>：Galton 1907 年统计集市上猜牛重的几百张票，中位数离真实重量不到 1%。群体聪明的前提是各人误差独立；共用一个底模、又读同一段对话历史的 Agent 恰好缺这一条，更容易滑向 Janis 说的"群体思维"（groupthink）：一致来得太快，反而没人再提异议。</li>
+<li><b>复杂性科学 · 痕迹协调（stigmergy，Grassé 1959）</b>：白蚁不互相传话，而是看巢里已有的泥团决定下一团放哪，协调全靠改动共享环境。Blackboard 协议是同一结构；不像在：白蚁规则简单到无需理解，Agent 每次读黑板都要重新解读全部内容，读一次付一次 token。</li>
+<li><b>商业 · 科斯的企业边界（Coase 1937）</b>：科斯问，市场这么有效，为何还要公司？答案是交易成本：内部协调比每次上市场谈判便宜，就收进公司。"该不该拆 Agent"是同一道算术，专门化收益要大过每次交接的上下文损失；不像在：Agent 没有合同和激励，只有 token 账。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>AutoGen 把 multi-agent 协作还原成"消息总线 + 角色"两件事，Agent 之间只靠消息耦合，近似 actor model。</li>
+<li>AutoGen 的 GroupChatManager 负责决定下一个发言者，常见策略是轮流、由 LLM 挑选或按角色规则选。</li>
+<li>超过 4–5 个 Agent 的群聊容易陷入互捧循环或沉默僵局，起步先用执行者加评判者两个 Agent，并始终设 max_turns 兜底。</li>
+<li>CrewAI 用 Role、Goal、Backstory 定义 Agent，把 Task 显式分派给某个 Agent，按 Sequential 或 Hierarchical 流程执行。</li>
+<li>AutoGen 换来对话的灵活，CrewAI 换来流程的可预测，两个框架是不同的取舍而非高下之分。</li>
+<li>Backstory 突出一两个性格特征就够，写得过长会挤占工具描述和任务上下文的注意力预算。</li>
+<li>角色分工的本质是给 LLM 减负：小上下文、专门 prompt、受限工具集让每一步推理更准。</li>
+<li>Agent 的失败多是"做错了类型"而非"做得不够好"时就该拆角色，但单个 Agent 有 5–7 个工具已足够专一。</li>
+<li>四种协作协议各有用处：可拆可合用层级，有依赖用流水线，要多视角用辩论，要共享中间结果用黑板。</li>
+<li>辩论中的多个 Agent 共用同一底模，错误彼此相关，投票纠不掉系统性偏差；要压幻觉，加 RAG 比加 Agent 有效。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="7a71ec66782c1185" style="border-left-color:#7b61ff">

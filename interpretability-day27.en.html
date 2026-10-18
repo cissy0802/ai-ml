@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -291,6 +298,31 @@ probe = LogisticRegression(max_iter=1000).<span class="fn">fit</span>(np.<span c
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Optogenetics</b>: a probe is like an electrode recording spikes; activation patching is like optogenetics, developed around 2005 by Boyden, Deisseroth and colleagues, which switches a chosen class of neurons on or off with light to see whether behavior changes, pushing correlation to causation. The difference: a brain cannot take the state from another, "clean" run and transplant it wholesale; it can only turn cells on or off.</li>
+<li><b>Neuroscience · The "Jennifer Aniston neuron"</b>: in 2005 Quiroga and colleagues recorded single neurons in epilepsy patients that fired for different photos of one person, and even for the written name, much like a monosemantic SAE feature. The difference: those were lucky finds among a few recording sites, and nobody can clamp one high to rewrite a patient's thoughts.</li>
+<li><b>Quantum mechanics · Superposition</b>: same word, half the same structure. Both add several components linearly into one vector. But quantum basis states are strictly orthogonal and measurement collapses them; a model holds more features than dimensions, only nearly orthogonal, relies on sparsity to avoid collisions, and reading out gives interference, not collapse.</li>
+<li><b>Evolution · Pleiotropy</b>: one gene shaping several traits has the same form as one neuron lighting up for DNA, Arabic and French: limited parts reused again and again. The difference: pleiotropy is whatever evolutionary history happened to pile up, while superposition is lossy compression of sparse features that training settles on under capacity pressure.</li>
+<li><b>Complexity science · Anderson's "More Is Different"</b>: in 1972 the physicist P. W. Anderson argued that being able to reduce a system to parts does not mean you can rebuild the whole from them, which is exactly the "a circuit diagram is not understanding the model" trap. The difference: a model's parts and wiring are all on the table; the hard part is sheer number and superposition, not new laws emerging.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Mechanistic interpretability goes past input-output correlation and disassembles a trained network like a program without source code, recovering its internal circuits.</li>
+<li>Every attention head and MLP in a Transformer adds its output back into the residual stream, so each component's contribution can be pulled out and inspected on its own.</li>
+<li>An induction head finds where the current token appeared earlier and copies the token that followed it, one of the core mechanisms of in-context learning.</li>
+<li>A model's self-explanation (CoT, self-report) can be after-the-fact rationalization, so it is not audit evidence of the real computation path.</li>
+<li>When features outnumber dimensions and rarely co-occur, a network packs them into the same neurons; this superposition is why neurons are polysemantic and hard to read.</li>
+<li>A sparse autoencoder uses reconstruction error plus an L1 sparsity penalty to unpack activations into very wide, mostly-zero monosemantic features; larger λ means sparser features but worse reconstruction.</li>
+<li>Anthropic clamped the "Golden Gate Bridge feature" in Claude 3 Sonnet to 10x its maximum and the model claimed to be the bridge, showing features can be causally steered.</li>
+<li>Activation patching transplants one activation from a clean input into the forward pass on a corrupted input and measures how much the output recovers, to judge whether that component is causally key.</li>
+<li>Anthropic's 2025 attribution-graph work found Claude plans a rhyme first and then writes the line toward it, a kind of planning that self-report cannot reveal.</li>
+<li>A linear probe that reads information from a layer only proves the information is there, not that the model uses it: probes test correlation, activation patching tests causation.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

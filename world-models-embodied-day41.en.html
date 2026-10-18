@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -283,6 +290,35 @@ obs = env.<span class="fn">reset</span>()                       <span class="cmt
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 Intelligence isn't only symbols in a head — it lives in the <b>closed-loop interaction</b> with the world, the direction all four concepts point toward.<br>🤔 Is your AI workflow a "document read/write pure function," or a real "embodied" system with a feedback loop? Which link is missing?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · hippocampal replay</b>: Wilson and McNaughton found in 1994 that during sleep a rat's hippocampus re-fires the routes it ran that day, in their original order, like rehearsing in a dream. The difference: replay mostly re-runs real experience, while Dreamer's dreams are new trajectories the model rolls forward on its own.</li>
+    <li><b>Buddhism · "dull emptiness"</b>: representation collapse maps every input to one constant, driving loss to zero with no information left, much like the Chan warning against "dull emptiness" (wankong), mistaking emptiness for sheer nothing. Unlike JEPA, the Buddhist emptiness keeps all distinctions intact ("true emptiness, wondrous existence"); JEPA has to protect them with engineering tricks like EMA.</li>
+    <li><b>Quantum mechanics · measurement as disturbance</b>: do(X) assumes you can separate seeing from doing: watching the rooster leaves it alone, only intervention cuts its causes. Quantum measurement erases that line, since measuring generally changes the state of what is measured; the undisturbing bystander causal inference takes for granted does not exist at that scale.</li>
+    <li><b>Psychology · Held and Hein's kitten carousel (1963)</b>: two kittens share a carousel, one walking on its own, the other carried in a gondola, seeing nearly the same images; only the walker learned visually guided movement. The difference: PaLM-E shows web image-text data still transfers positively, so passive data is not useless to machines.</li>
+    <li><b>Cognitive science × Buddhism · Varela et al., <i>The Embodied Mind</i> (1991)</b>: drawing on the Buddhist mindfulness tradition, Varela, Thompson and Rosch argue that cognition is enacted through a body's interaction with its environment, placing intelligence inside the perception-action loop just as embodied AI does. Where it parts ways: they reject representing a pre-given world inside the head, which is exactly what the world-model program sets out to build.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>A world model lets an agent predict how the world changes when it acts, so it can practice in imagination and sidestep reinforcement learning's poor sample efficiency.</li>
+    <li>Ha and Schmidhuber's 2018 world model has three parts: a VAE encoder V, an RNN predictor M, and a tiny controller C.</li>
+    <li>DreamerV3 handles 150+ tasks with a single set of hyperparameters and was the first to mine diamonds in Minecraft from scratch without human demonstrations.</li>
+    <li>A world model should be judged by how accurately it predicts latent dynamics and supports planning, not by how realistic its generated frames look.</li>
+    <li>JEPA predicts the target's embedding in an abstract representation space instead of reconstructing pixels, spending compute on predictable structure.</li>
+    <li>I-JEPA uses an EMA target encoder with stop-gradient to block representation collapse, where loss gets very low but the representation becomes useless.</li>
+    <li>Observing P(Y|X) is not intervening P(Y|do(X)): silencing the rooster won't stop sunrise, because Earth's rotation is the common cause of both.</li>
+    <li>Causal representation learning (Schölkopf et al., 2021) aims to discover high-level causal variables from pixels that obey the Independent Causal Mechanisms principle.</li>
+    <li>Embodied intelligence holds that intelligence arises from a body's perception-action loop with the physical world; Moravec's paradox marks sensorimotor skill as the truly hard part.</li>
+    <li>PaLM-E feeds images, robot state and text into a language model as "multimodal sentences," and web image-text knowledge transfers positively to robot reasoning.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

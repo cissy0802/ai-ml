@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -254,6 +261,32 @@ continuous = per_step
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 Mirage 批判 = <b>很多"涌现"是非线性度量制造的表象，换连续指标就平滑了</b>——不是说涌现不存在，而是"取决于你拿什么尺子量"。<br/>🤔 "测量方式决定你看到什么"——这和量子测量、心理测量里"观测改变对象"的命题是同一回事，还是本质不同？一个纯粹的度量选择，能在多大程度上算"客观发现"？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>生物学 · 克莱伯定律</b>：动物的基础代谢率约与体重的 3/4 次方成正比，从老鼠到大象都落在同一条 log-log 直线上，和 Kaplan 的幂律一样干净。不像在：1997 年 West、Brown、Enquist 用分形的输运网络给这条直线找到了理论解释；规模定律至今只有曲线，还没有这样的第一性原理。</li>
+<li><b>生物进化 · 昂贵组织假说</b>：Aiello 与 Wheeler（1995）认为，人类大脑变大是靠缩小同样耗能的肠道换来的，固定的代谢预算在两个昂贵器官之间重新分配，和 Chinchilla 在参数与数据之间分算力同构。不像在：进化不是在求最优解，只是被饮食变化推着走。</li>
+<li><b>复杂性科学 · 渗流相变</b>：Erdős 与 Rényi（1960）证明，随机网络的平均连边数一旦越过 1，覆盖大部分节点的巨连通分量就突然出现，是数学上真的相变。像涌现；但这种陡峭只在无限大网络里成立，有限网络里转折被抹平，突变有多突取决于规模和尺子。</li>
+<li><b>佛学 · 顿悟与渐修</b>：禅宗有南顿北渐之争，惠能讲一念顿悟，神秀讲时时拂拭、渐次修行。Mirage 批判站在神秀一边：看似一夜开窍，底下是单步能力的平滑累积。不像在：禅宗的顿悟恰恰主张质变不能还原成积累，这正是涌现派想守住的地方。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>规模定律让人在小模型上画曲线、外推大模型的效果，把炼丹式的试错变成预算规划。</li>
+<li>Kaplan 等人 2020 年发现，语言模型的 loss 随参数量、数据量和算力呈幂律下降。</li>
+<li>幂律在 log-log 图上是一条直线，Kaplan 的实验里这条直线横跨 7 个数量级都不弯。</li>
+<li>规模定律带一个不可降的 loss 下限，堆规模的收益递减，loss 永远到不了 0。</li>
+<li>Chinchilla 论文（Hoffmann 等 2022）指出，固定算力下参数和数据应等比例放大，约每个参数配 20 个 token。</li>
+<li>按 Chinchilla 的标准 GPT-3 严重训不足，70B 参数、喂 1.4T token 的 Chinchilla 反超了更大的 Gopher。</li>
+<li>每参数 20 个 token 只对训练成本最优；要被海量调用的模型更适合过度训练一个小模型，Llama 走的正是这条路。</li>
+<li>涌现能力指某些下游任务在小模型上接近随机、过了临界规模突然跃升，无法从小模型外推。</li>
+<li>Mirage 批判认为，许多涌现来自 exact-match 这类全或无的指标，换成连续指标曲线就变平滑。</li>
+<li>指标即立场：看到陡峭的能力曲线，先换一把尺子复验，再下质变或撞墙的结论。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="a652d927cb24e6a1" style="border-left-color:#7b61ff">

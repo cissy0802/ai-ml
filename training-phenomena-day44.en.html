@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -270,6 +277,33 @@ token_acc   = p                       <span class="cmt"># continuous metric: per
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 A "cliff" is often carved by your ruler, not the shape of the world — switch rulers and the cliff may become a gentle slope.<br>🤔 Which pass/fail metrics in your daily life are disguising smooth progress as stagnation or a sudden jump?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Sleep and insight</b>: Wagner et al. (Nature, 2004) hid a shortcut rule inside a number task; people who slept on it found the rule more than twice as often as those who stayed awake. Like grokking: first execute the steps fluently, then compress them into a rule. Unlike it: the brain replays offline across two systems, hippocampus and neocortex, while grokking is one network slowly cleaning up online.</li>
+<li><b>Neuroscience · Synaptic pruning</b>: Huttenlocher's 1979 counts showed synaptic density in human frontal cortex peaking in early childhood, then being heavily pruned. Overconnect first, trim later: the same shape as overparameterization plus weight decay. Unlike it: pruning is selective, use it or lose it, while weight decay shrinks every weight alike.</li>
+<li><b>Evolutionary biology · Punctuated equilibrium</b>: Eldredge and Gould (1972) argued that species sit in long stasis and then speciate quickly, the same plateau-then-jump as an emergence curve. Critics raised a Schaeffer-style objection: a geological "instant" can span tens of thousands of years, so part of the suddenness comes from the resolution of the fossil record.</li>
+<li><b>Western philosophy · The sorites paradox</b>: one grain of sand is not a heap, nor is one more; so where does the heap begin? "Is it a heap" is a binary predicate laid over a continuous grain count, forcing a boundary nobody can find. Exact match is a binary predicate too. Unlike it: the paradox's trouble is a boundary too blurry, the mirage's trouble is a boundary too steep.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Grokking: training accuracy hits 100% early, validation accuracy sits at chance for a long time, then jumps to near 100% orders of magnitude of steps later.</li>
+<li>A network first reaches the easy memorization solution, a large-norm lookup table; weight decay then slowly pushes it toward a small-norm solution that generalizes.</li>
+<li>Nanda et al. (2023) reverse-engineered the Fourier-style circuit behind grokking, showing it grows gradually even though the headline metric looks like a sudden jump.</li>
+<li>Without weight decay a model stays in the memorization solution and never groks, so flat validation accuracy is not always a reason to stop training.</li>
+<li>Double descent: test error peaks at the interpolation threshold, where capacity just suffices for zero training error, then falls again as capacity keeps growing.</li>
+<li>Past that threshold, spare degrees of freedom let SGD's implicit regularization pick a low-norm solution; the capacity to avoid is "just enough", not "large".</li>
+<li>Some downstream abilities, such as multi-digit arithmetic and chain-of-thought reasoning, stay at chance in small models and appear abruptly past a scale threshold.</li>
+<li>One explanation for emergence: a complex ability needs several sub-circuits at once, so smoothly rising individual success rates combine through AND into a cliff.</li>
+<li>Schaeffer et al. (2023) showed that discrete metrics like exact match turn smooth improvement into a fake cliff, while continuous metrics keep the curve smooth.</li>
+<li>The emergence debate is open: some is a measurement artifact, some may be real phase change, and predictable pre-training loss does not mean predictable downstream ability.</li>
+</ol>
 </div>
 
 <!-- Further Reading -->

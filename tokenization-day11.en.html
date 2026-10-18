@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -288,6 +295,30 @@ ids = enc.<span class="fn">encode</span>(<span class="str">"你好🌍"</span>)
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Complexity science · Path dependence (W. Brian Arthur, 1989)</b>: small early advantages get amplified by increasing returns until one technology is locked in. BPE works the same way: the tokens formed in the first merges decide what can be built later, with no going back. The difference is that BPE locks in only during training; once the vocab is frozen it stops reinforcing itself.</li>
+<li><b>Developmental psychology · Statistical learning in infants (Saffran, Aslin &amp; Newport, 1996)</b>: after just two minutes of an unbroken artificial speech stream, 8-month-olds segment "words" using transitional probabilities between syllables, tracking what binds tightly to what, close to the idea behind WordPiece scoring. Unlike WordPiece, infants go on to attach meaning to the words they find; WordPiece stops at statistics.</li>
+<li><b>Neuroscience · Synaptic pruning (Peter Huttenlocher)</b>: Huttenlocher's synapse counts in human cortex show synapses overshooting in early childhood, then the less-used connections being pruned. Unigram likewise builds a large candidate set and then trims it. The difference: pruning depends on local use, while Unigram re-scores everything against the global likelihood each round.</li>
+<li><b>Evolutionary biology · The reading frame of the genetic code</b>: DNA is read three bases at a time as codons; shift the start by one and everything downstream becomes the wrong amino acids, a frameshift mutation. A token cut through the middle of a character's UTF-8 bytes is the same misaligned frame. The difference: UTF-8 lead bytes and continuation bytes look different, so a decoder can find character boundaries again and the garbling stays local; DNA has no such marker, so one frameshift misreads all the way to the next stop codon.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>A word-level vocab grows without bound and hits OOV, a character-level one makes sequences too long; subword tokenization sits in between.</li>
+<li>BPE starts from single characters and repeatedly merges the most frequent adjacent pair into a new token; training yields an ordered list of merge rules.</li>
+<li>BPE splits purely by frequency, not by grammar or word roots, so a different corpus can split the same word in odd ways.</li>
+<li>WordPiece keeps the greedy merge loop but scores pairs by freq(ab)/(freq(a)×freq(b)), a pointwise mutual information idea that favors tightly bound pieces.</li>
+<li>The ## prefix in WordPiece marks a word-internal continuation piece; it is key to lossless reconstruction, and deleting it misplaces spaces.</li>
+<li>SentencePiece is a framework, not an algorithm: it treats spaces as ▁, works on raw text, and runs either BPE or Unigram inside.</li>
+<li>Unigram, introduced by Kudo in 2018, works top-down: build a large candidate set, then use EM to drop the subwords contributing least to likelihood each round.</li>
+<li>Byte-level BPE puts all 256 bytes in the base vocab so it is never OOV, at the cost of tokens that can split a character's UTF-8 bytes.</li>
+<li>A model sees only tokens and bytes, with no layer that represents characters, so tasks like counting the r's in strawberry often go wrong.</li>
+<li>A bigger vocab shortens sequences and eases the tokenization tax on non-English text, but the embedding matrix grows linearly with it and rare tokens stay undertrained.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en"></span></h2>

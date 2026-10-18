@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -283,6 +290,34 @@ opt = <span class="fn">Lion</span>(model.<span class="fn">parameters</span>(),
 <div class="takeaway">💡 优化器的进化史，是一部「<strong>在显存、计算、泛化之间反复重新分配预算</strong>」的历史。<br/>🤔 Lion 由程序搜索自动发现、而非人手设计——当「设计算法」本身可以被自动化，研究者的角色会怎么变？</div>
 </div>
 </div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>生物进化 · 「最平者生存」</b>：Wilke、Adami 等人 2001 年在数字生物平台 Avida 里发现，突变率很高时胜出的不是适应度峰值最高的基因型，而是站在平坦高原、突变后也不怎么掉分的那批。这和平坦极小是同一个结构：噪声越大，宽盆地越胜过尖峰。不像的是，进化靠一整个种群来筛，SGD 只有一条轨迹。</li>
+<li><b>神经科学 · Marder 的龙虾神经节</b>：Prinz、Bucher 与 Marder 2004 年的模型显示，龙虾口胃神经节里离子通道参数差得很远的回路，能打出几乎一样的节律。这是锐度争论里「同一个函数、很多套参数」的生物版；不像的是，神经元靠反馈持续自我调节，网络参数训练完就定住了。</li>
+<li><b>西方哲学 · 斯多葛的「预想恶事」</b>：塞涅卡劝人先在心里预演贫穷和失去，看自己还站不站得住，和 SAM 先爬到邻域最坏点再更新是同一个 min-max 动作。不同在于，斯多葛改的是自己面对坏结果的态度，SAM 改的是落脚的位置。</li>
+<li><b>投资 · 1/N 等权组合</b>：DeMiguel 等人 2009 年比较了十几种均值-方差优化模型，样本外几乎没有一个稳定跑赢「每样资产平分」的 1/N。Lion 只取符号、丢掉梯度幅度，也是放弃估不准的数值、只信方向；不像的是 1/N 连方向都不估，Lion 的方向仍来自动量。</li>
+</ul></div>
+</div>
+
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>平坦极小和尖锐极小的训练 loss 可以一样低，测试集 loss 曲面略一平移，只有平坦极小还留在低 loss 区。</li>
+<li>「平坦极小」概念由 Hochreiter 与 Schmidhuber 在 1990 年代提出：平坦意味着对数据分布的扰动鲁棒。</li>
+<li>Li 等人 2018 年用 filter normalization 把损失景观投影到 2D，发现残差连接把崎岖地形抚平成光滑盆地。</li>
+<li>训练 loss 越低不等于越好，决定泛化的是极小点的几何形状，而不只是 loss 数值。</li>
+<li>大 batch 的梯度噪声小，容易困在尖锐极小，这就是 Keskar 等人 2016 年发现的大 batch 泛化鸿沟。</li>
+<li>SAM 把训练目标改成 min-max，最小化半径 ρ 邻域里的最坏 loss，代价是每步两次前向、训练慢约一倍。</li>
+<li>Newton 法用 Hessian 的逆做预条件，但参数上亿时 n×n 的 Hessian 既存不下，也求不了逆。</li>
+<li>K-FAC 用 Kronecker 积、Shampoo 按张量维度各设小预条件矩阵，都是用结构化分解逼近全曲率。</li>
+<li>Lion 由程序搜索自动发现，只存动量、更新取符号，优化器显存比 Adam 减半，学习率要小 3–10 倍。</li>
+<li>Sophia 每隔几步轻量估一次对角 Hessian 并做逐元素裁剪；换优化器要重调学习率，AdamW 仍是最稳的默认。</li>
+</ol>
+</div>
+
 <!-- 深入资源 -->
 <div class="card" data-tts="81c92746d4702315" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

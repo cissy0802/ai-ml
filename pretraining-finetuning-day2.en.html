@@ -43,6 +43,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -385,6 +392,31 @@ trainer.train()                            <span class="cmt"># done — quality 
     <details><summary>DPO's beta controls "how far the new model can drift from the reference." What happens at very large or small values? Why is the "middle" hardest to tune?</summary><div>Beta very large: the model barely moves (strong constraint), conservative failure. Beta very small: the model can drift dramatically, but preference-data noise gets amplified — overfitting the pair's surface details instead of the intent behind them, aggressive failure. The middle is hardest because the optimum depends on three variables: preference data quality, reference model strength, and target-task alignment difficulty — none with closed-form formulas. So industry does grid search on beta (typically 0.01 to 0.5) while holding other hyperparameters fixed. Same shape as tuning K8s HPA thresholds or DB connection pool sizes — finding inflection points in systems with high feedback latency.</div></details>
     <details><summary>After DPO came IPO, KTO, ORPO and more — where might future alignment methods break ground? (Hint: all current methods assume "pairwise preferences" — what if there are none?)</summary><div>Three plausible directions: (1) move beyond pairs — KTO already handles single-point "good/bad" labels; the future may use even sparser "pass/fail" signals or pure environment rewards; (2) multi-objective alignment — current methods squash "helpful, harmless, honest" into one scalar; future work needs Pareto optimization over multiple objectives; (3) self-alignment — let the model critique itself (Self-Rewarding LLM), breaking the annotator bottleneck. A more radical bet: rather than patching alignment in post-training, weight pre-training data by values from day one (Anthropic's "pretraining with values"). Common trend: shift "alignment" from a post-training fine-tune to a paradigm threaded through the whole training pipeline.</div></details>
   </div>
+</div>
+
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · Predictive coding</b>: In Rao and Ballard's 1999 model, visual cortex keeps predicting its next input and passes only the prediction error upward to revise its internal model. That is the same loop as pre-training: guess the next token, learn from the miss. The difference: the brain predicts in order to act through a body; the model predicts text for its own sake.</li>
+<li><b>Evolutionary biology · Exaptation</b>: Gould and Vrba named it in 1982: feathers first evolved for warmth and were later co-opted for flight. Abilities built for next-word guessing get co-opted into conversation by a small SFT set in much the same way. The difference: evolution has no designer, while fine-tuning is a deliberate human choice of direction.</li>
+<li><b>Psychology · Law of comparative judgment</b>: Thurstone showed in 1927 that people are shaky at giving absolute scores but much steadier at saying which of two is better. RLHF exploits exactly this by asking annotators to pick one of two rather than write the ideal answer. The difference: Thurstone measured sensory magnitudes; a reward model must recover an overall preference over whole passages.</li>
+<li><b>Eastern philosophy · Following the heart without overstepping</b>: Confucius said that only at seventy could he follow his heart's desires without crossing the line. The KL penalty and DPO's beta have the same shape: chase a high score, but never stray far from the reference model. The difference: for Confucius the line had become his own nature; for the model it stays an external penalty term.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Pre-training does one thing: predict the next token from context, turning a vast corpus into a shared base of language and common sense.</li>
+<li>A pre-trained model knows facts through statistical co-occurrence, which is why it confidently produces plausible but false hallucinations.</li>
+<li>A base model that has only been pre-trained is a continuation engine and does not follow instructions in conversation.</li>
+<li>Chinchilla (2022) showed smaller models fed more data win at fixed compute, but inference costs pushed industry toward overtrained small models.</li>
+<li>Supervised fine-tuning (SFT) keeps the next-token loss; only the data changes, to high-quality instruction-response pairs.</li>
+<li>SFT mainly teaches style, format and tone rather than new knowledge; facts that change belong in RAG.</li>
+<li>LIMA argues capability is already learned in pre-training, so about 1,000 diverse, high-quality SFT examples suffice to unlock it.</li>
+<li>RLHF swaps hard-to-write ideal answers for easy pairwise choices: train a reward model, then optimize the policy with PPO.</li>
+<li>The KL penalty in RLHF keeps the policy near the SFT model to prevent reward hacking; RLHF makes models more agreeable, not necessarily smarter.</li>
+<li>DPO replaces the reward model and PPO with one classification-style loss on preference pairs: cheaper and more stable, but offline only.</li>
+</ol>
 </div>
 
 <a href="index.en.html" class="back">← Back to home</a>

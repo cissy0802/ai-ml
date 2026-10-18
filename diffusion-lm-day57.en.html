@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -289,6 +296,32 @@ slots = (ids[<span class="str">0</span>] == tok.mask_token_id).<span class="fn">
 <div class="label">Takeaway + question</div>
 <div class="takeaway">💡 The fundamental tax on parallel decoding is "conditional independence within a step"; diffusion trades likelihood precision and reasoning quality for latency and bidirectional control.<br/>🤔 If block size were a tunable parameter, what signal would you tune it on at runtime — input length, task type, or whether a human is waiting?</div>
 </div>
+</div>
+<!-- crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · perceptual filling-in at the blind spot</b>: the retina has no photoreceptors at the blind spot, yet the brain paints it in from the surrounding color and texture, so you never notice a hole. That is bidirectional [MASK] filling from context. The difference: the brain fills it in one pass and reports no confidence, while masked diffusion commits over several rounds.</li>
+<li><b>Evolutionary biology · Waddington's epigenetic landscape (1957)</b>: cell differentiation is a ball rolling down branching valleys; the further down, the deeper the grooves and the fewer the fates left. Denoising likewise starts on the open plateau of all-mask and gets funneled by context into one groove. The difference: in development the fork comes first, whereas confidence-first decoding saves the fork for last, and by the time it arrives the groove has already chosen for it.</li>
+<li><b>Investing · the Gaussian copula and 2008</b>: David X. Li's 2000 copula model gave each loan a plausible default probability on its own but badly underestimated how much they would default together. Committing k slots at once from marginals passed off as a joint is the same mistake. The difference: bad text can be resampled; a crisis cannot.</li>
+<li><b>Quantum mechanics · entanglement and marginals</b>: each particle of an entangled pair looks purely random when measured alone; the correlation lives only in the joint state. Two slots that should read "New" and "York" are similar: each alone has many options, together only one reading. The difference: language correlations are classical and are recovered by committing one slot at a time; quantum ones violate Bell inequalities and admit no such piecewise account.</li>
+</ul></div>
+</div>
+<!-- ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>A masked diffusion language model lays down a fixed-length canvas of [MASK] tokens and commits them in parallel over several rounds, so the text develops like a photograph.</li>
+<li>Noise in discrete diffusion is forgetting, not Gaussian jitter: the forward process swaps a fraction of tokens for the absorbing [MASK] state.</li>
+<li>The core structural difference from GPT is dropping the causal mask, so a bidirectional Transformer predicts every masked position in one forward pass.</li>
+<li>MDLM reduces the diffusion ELBO to a 1/t-weighted masked-LM loss, which amounts to training a BERT that can handle any mask ratio.</li>
+<li>Confidence-first decoding pushes high-entropy reasoning decision points to the end, where context has already pruned the branches: the flexibility trap.</li>
+<li>JustGRPO forces left-to-right exploration during RL training while keeping parallel decoding at inference, showing that a bigger hypothesis space with a greedy order can do worse.</li>
+<li>Block diffusion is autoregressive across blocks and denoises in parallel within a block, restoring both the KV cache and variable-length output; block size is a continuous dial.</li>
+<li>Decoding latency is roughly NFE times the cost of one forward pass; block diffusion cuts NFE, not FLOPs, trading idle compute for serial round trips.</li>
+<li>Committing k positions in one step assumes they are conditionally independent; the larger k, the further from the true joint, so parallelism versus quality is a real curve.</li>
+<li>A diffusion language model only gives an ELBO lower bound on likelihood, so its perplexity is not directly comparable to an autoregressive model's; DiffusionGemma currently buys latency, not capability.</li>
+</ol>
 </div>
 <!-- resources -->
 <div class="card" style="border-left-color:#7b61ff">

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -284,6 +291,34 @@ continuous = per_step
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 The Mirage critique = <b>many "emergences" are appearances manufactured by nonlinear metrics; switch to a continuous metric and they smooth out</b>—not "emergence doesn't exist," but "it depends what ruler you measure with."<br>🤔 "Measurement decides what you see"—is this the same as the "observation changes the object" claim in quantum or psychological measurement, or fundamentally different? To what extent can a pure metric choice count as an "objective finding"?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Biology · Kleiber's law</b>: an animal's basal metabolic rate scales roughly as body mass to the 3/4 power, and everything from mice to elephants sits on one log-log line, as clean as Kaplan's power law. The difference: in 1997 West, Brown and Enquist explained that line with fractal transport networks; scaling laws still have only the curve and no first-principles account like that.</li>
+    <li><b>Evolution · the expensive-tissue hypothesis</b>: Aiello and Wheeler (1995) argued that the human brain grew by shrinking the equally costly gut, reallocating a fixed metabolic budget between two expensive organs, the same shape as Chinchilla splitting compute between parameters and data. The difference: evolution is not solving for an optimum; it is pushed along by changes in diet.</li>
+    <li><b>Complexity science · percolation</b>: Erd&#337;s and R&eacute;nyi (1960) showed that once a random network's average degree crosses 1, a giant connected component covering most nodes appears abruptly, a genuine mathematical phase transition. It looks like emergence, but the sharpness holds only for infinite networks; in finite ones the transition is smeared, so how sudden a jump looks depends on scale and on the ruler.</li>
+    <li><b>Buddhism · sudden versus gradual awakening</b>: Chan Buddhism split between Huineng's sudden enlightenment and Shenxiu's patient, step-by-step polishing of the mind. The Mirage critique sides with Shenxiu: an overnight breakthrough hides a smooth accumulation of per-step skill. The difference: the sudden school insists the qualitative shift cannot be reduced to accumulation, which is exactly the ground the emergence camp wants to hold.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Scaling laws let you fit a curve on small models and extrapolate to large ones, turning trial-and-error alchemy into budget planning.</li>
+    <li>Kaplan et al. (2020) found that language-model loss falls as a power law in parameters, data and compute.</li>
+    <li>A power law is a straight line on a log-log plot, and in Kaplan's experiments that line stayed straight across 7 orders of magnitude.</li>
+    <li>Scaling laws include an irreducible loss floor, so returns to scale diminish and loss never reaches zero.</li>
+    <li>The Chinchilla paper (Hoffmann et al. 2022) showed that under fixed compute, parameters and data should grow in equal proportion, about 20 tokens per parameter.</li>
+    <li>By the Chinchilla standard GPT-3 was badly undertrained, and the 70B Chinchilla trained on 1.4T tokens beat the larger Gopher.</li>
+    <li>Twenty tokens per parameter is optimal only for training cost; a heavily deployed model is better off as a smaller, overtrained model, the route Llama took.</li>
+    <li>Emergent abilities are downstream tasks where small models score near chance and performance jumps past a critical scale, defying extrapolation.</li>
+    <li>The Mirage critique argues that many cases of emergence come from all-or-nothing metrics like exact match and turn smooth under continuous metrics.</li>
+    <li>Metrics are a stance: when a capability curve looks steep, re-measure with a different ruler before declaring a breakthrough or a wall.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

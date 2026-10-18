@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -272,6 +279,34 @@ clf.<span class="fn">fit</span>(X, y)
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 SVM teaches two timeless ideas: "maximum margin" = leave slack to be robust; "kernel trick" = look from another space and the hard problem turns easy. These two outlive SVM itself.<br>🤔 "Lifting dimensions turns inseparable into separable" — is there an analog in your other domains (data modeling, problem decomposition, cross-disciplinary thinking): switch representation space and a tangled problem suddenly resolves?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+<li><b>Neuroscience · the McCulloch–Pitts neuron</b>: in 1943 the pair modeled a neuron as "sum the weighted inputs, fire if over threshold," the same skeleton as logistic regression; the sigmoid is like swapping the hard threshold for a smooth firing-rate curve. The difference: real neurons carry information in spike timing, and dendrites do nonlinear computation of their own, far more than one weighted sum.</li>
+<li><b>Quantum mechanics · the Fermi–Dirac distribution</b>: the probability that an electron occupies an energy level is 1/(e<sup>(E−μ)/kT</sup>+1), exactly the sigmoid shape, with energy playing negative score and temperature setting the steepness. The difference: in physics the temperature and chemical potential are given by the system, while logistic regression has to learn its weights from data.</li>
+<li><b>Investing · Markowitz portfolio theory</b>: the 1952 insight is that diversification cuts risk only when assets are weakly correlated; a basket of stocks that rise and fall together is no diversification at all. Random forests use bootstrap samples and random features to drive down exactly that correlation between trees. The difference: a portfolio weighs expected return when setting weights, while every tree gets one equal vote.</li>
+<li><b>Psychology · Rosch's prototype theory</b>: in the 1970s Eleanor Rosch found that people decide "is it a bird?" by similarity to a typical member such as a robin. SVM does the opposite: a class is defined by its hardest boundary cases, the support vectors, and deleting every typical example leaves the boundary unchanged.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+<li>Linear regression assumes the outcome is a weighted sum of features and measures error with mean squared error (MSE).</li>
+<li>Least squares has a closed-form solution, w = (XᵀX)⁻¹Xᵀy, with no iteration; Legendre was already using it in 1805.</li>
+<li>Linear regression is linear only in its parameters: feed it x² or log(x) and it fits curves, at the cost of hand-designed features.</li>
+<li>Logistic regression wraps the weighted sum in a sigmoid to squash scores into probabilities between 0 and 1, linearly predicting the log-odds.</li>
+<li>Logistic regression trains on cross-entropy rather than MSE because cross-entropy keeps the loss convex and equals maximum likelihood estimation.</li>
+<li>A logistic regression output of 0.9 is a confidence, not an accuracy, and the 0.5 threshold should move with the cost of false alarms versus misses.</li>
+<li>A decision tree greedily picks the split that most reduces Gini impurity; it is fully readable but high-variance, and deep trees overfit.</li>
+<li>Breiman's 2001 random forest decorrelates trees with bootstrap sampling and random feature subsets, so voting sharply cuts variance.</li>
+<li>An SVM maximizes the margin, and only the few support vectors pressed against the boundary define it, which makes SVMs stable on high-dimensional small data.</li>
+<li>The kernel trick lifts data to higher dimensions implicitly by computing only pairwise similarities; a larger RBF γ bends the boundary and risks overfitting.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

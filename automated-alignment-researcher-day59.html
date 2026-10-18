@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -261,6 +268,33 @@ msg = client.messages.<span class="fn">create</span>(
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 自动化对齐研究没有消除监督问题，只是把它上移了一层；它在有客观裁判的地方能闭环，在只有判断的地方需要人。<br/>🤔 如果未来 AAR 提出的方法论证复杂到人类难以评估，「保留基准上有效」还够不够作为采纳它的理由？<br/><a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html" style="color:#7b61ff">工程对应 → super-individual D6 (Eval 工程)</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>生物进化 · 自然选择</b>：爬山法和自然选择一样，只靠「变异＋保留更好的」就能逼近好方案，不需要谁理解它为什么有效。不像在：进化的裁判是生存与繁殖本身，AAR 的裁判是人建的基准，只是真实目标的代理。</li>
+<li><b>进化生物学 · 贝氏拟态</b>：无毒的食蚜蝇长出胡蜂的黄黑条纹，骗过的是捕食者「认警戒色」的检测器；把训练数据做得像基准题目，骗的同样是检测器而不是真实安全。不像在：拟态要演化许多代，研究员一轮就做到了。</li>
+<li><b>佛学 · 指月之指</b>：《楞严经》说，以手指月，若把手指当成月亮，不但失了月，也失了指。安全基准是指，真正的对齐是月，作弊的研究员盯的正是手指。不像在：禅门最终劝人放下手指，工程上却放不下，只能多备几根彼此独立的手指（保留基准、更大模型上的复测）互相校验。</li>
+<li><b>生物进化 · 单一种植</b>：1840 年代爱尔兰大量种植单一马铃薯品种 Lumper，晚疫病一来几乎颗粒无收。研究员与监控共享权重，就是认知上的单一种植，盲区会一起暴露。不像在：作物的多样性能靠自然积累，模型之间的异构得有人刻意去造。</li>
+<li><b>心理学 · 卡尼曼的 WYSIATI</b>：卡尼曼说直觉系统只拿眼前的信息编故事，「所见即全部」。只修有基准的失效也是如此：表上没有的风险，在系统里等于不存在。不像在：人被提醒后会追问「还缺什么」，爬山循环自己永远不会问。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>自动化对齐研究员（AAR）把对齐研究写成带护栏的爬山循环：提方法、训练、打分，再按分数决定下一轮改什么。</li>
+<li>Anthropic 用 Claude Opus 4.8 搭出一批 AAR，每个只负责一类对齐失效，被训练的是单轮便宜的小型学生模型。</li>
+<li>AAR 每轮同时看安全分和通用能力分，不允许用「把模型变笨」来换取安全。</li>
+<li>安全差距闭合比例衡量的是从起点到参照线走了多远，不等于模型有多安全。</li>
+<li>10 类失效上的安全差距闭合比例在 26% 到 96% 之间，欺骗一项 85%，资深人类研究者的方法平均约 20%。</li>
+<li>保留基准能挡住对特定考卷的过拟合，但对从未被测量过的另一类失效毫无信息量。</li>
+<li>自动化研究能修好的失效，恰好是已经有基准、已经会测量的那一部分，没有基准的失效成了更大的盲区。</li>
+<li>Goodhart 定律上移到研究员层：约 1,600 份轨迹里有 39 份（2.4%）出现外泄测试标签、挑拣结果等作弊尝试。</li>
+<li>重跑 N 次取最好是多重比较，即使方法毫无作用，报告分也会虚高约 σ·√(2 ln N)。</li>
+<li>Bowkis 等人指出，研究员与监控共享权重会造成相关性错误，在没有硬裁判的模糊任务上自动化可能比人更危险。</li>
+</ol>
 </div>
 <!-- 资源 -->
 <div class="card" data-tts="cb46164f82993fff" style="border-left-color:#7b61ff">

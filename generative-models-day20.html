@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -278,6 +285,33 @@ bce = nn.<span class="fn">BCELoss</span>()  <span class="cmt"># 二分类交叉�
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 流匹配把生成统一为<b>「学一个搬运噪声到数据的速度场」</b>，并指出扩散只是其中一种走法——用最简单的直线路径换来更快采样。<br/>🤔 四种模型，loss 最终都坍缩成一个 MSE 回归，差别只在「回归什么 / 走哪条路径」。当一堆看似不同的方法被证明是同一框架的特例，这对你判断"技术热点"的真假信号有什么启发？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>商业 · 古德哈特定律</b>：经济学家 Charles Goodhart 1975 年的观察：一个指标一旦被当成目标，就不再是好指标。模式坍缩正是生成器把「骗过判别器」当成目标，找到一种讨巧画法反复刷分。不像在于，判别器会跟着进化、迟早惩罚这种取巧，公司里的 KPI 却往往一定好几年。</li>
+<li><b>神经科学 · Friston 的自由能原理</b>：Karl Friston 认为大脑在不断最小化「变分自由能」，而它在数学上正是 VAE 的负 ELBO：既要解释好感官输入（重构），又不能偏离先验太远（KL）。不像的是，大脑还能动手改变世界来减少意外（主动推断），VAE 只能被动地压缩看到的数据。</li>
+<li><b>物理 · 麦克斯韦妖</b>：麦克斯韦 1867 年设想一个小妖，逐个挑拣分子，让混乱的气体自发变得有序，像在倒放熵增。扩散的反向去噪也是一步步把噪声倒回成结构。区别在于，Landauer 1961 年指出小妖记录、擦除信息要付热力学代价；去噪网络不违反任何定律，它付的代价是训练时吞下的数据与算力。</li>
+<li><b>佛学 · 渐修与顿悟</b>：《六祖坛经》里神秀的偈子说「时时勤拂拭，勿使惹尘埃」，一点点擦去尘埃，正像扩散几百步去噪；慧能回以「本来无一物」，一念即悟，更像 GAN 和流匹配追求的一步到位。有意思的是生成模型的演化方向：先渐修求稳，再把路拉直，尽量少走几步。不像的是，禅宗说的是回到本来面目，扩散却是从噪声里造出一张原本不存在的图。</li>
+<li><b>生物进化 · Waddington 的表观遗传景观</b>：发育生物学家 Waddington 1957 年把细胞分化画成小球沿山谷滚下：起点相同，最后落进不同的谷底，成为不同细胞。流匹配的速度场也把一团无差别的噪声引向各个具体样本。不像在于，小球在岔口有随机性，流匹配的 ODE 是确定的，终点完全由起点那粒噪声决定。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>判别模型给现有数据下判断，生成模型要造出从未存在却像真的新样本，难度高得多。</li>
+<li>GAN、VAE、扩散、流匹配四种生成模型，都是把简单的高斯噪声搬运成复杂真实数据的不同答案。</li>
+<li>Goodfellow 等人 2014 年的 GAN 用一个可学习的判别器代替手工 loss，让数据自己定义什么叫逼真。</li>
+<li>GAN 训练解的是 minimax 动态博弈，最典型的失败是模式坍缩：生成器只画一种样本反复骗过判别器。</li>
+<li>VAE 把输入编码成一团高斯分布而非一个点，用重构损失加 KL 散度（合起来是 ELBO）把隐空间规整填满。</li>
+<li>重参数化技巧把采样写成 z = μ + σ·ε，随机性外置后梯度才能穿过采样节点训练编码器。</li>
+<li>VAE 没有被淘汰：Stable Diffusion 就在 VAE 压缩出的低维隐空间里做扩散，大幅节省算力。</li>
+<li>扩散模型（DDPM）把生成拆成几百步去噪，loss 只是预测所加噪声的均方误差，训练极稳但采样慢。</li>
+<li>流匹配学一个把噪声直线搬到数据的速度场，扩散只是其中一种弯曲路径的特例，几步就能采样。</li>
+<li>VAE、扩散、流匹配都把随机生成转化为有标准答案的确定性回归，这是它们比 GAN 稳定的根本原因。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="0c850b47baaadf12" style="border-left-color:#7b61ff">

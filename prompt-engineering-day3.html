@@ -44,6 +44,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -365,6 +372,31 @@ answers = []
 <details><summary>4. 把 Self-Consistency 跟 ReAct 组合起来会发生什么？</summary><div>等于"让 N 个 agent 各自跑一遍完整的工具调用循环"。好处：能纠正单个 agent 工具选错/参数错的偶然失误，对最终结论更鲁棒。代价巨大：每个 agent 都要花 5-10 步工具调用，N=10 就是 100 次工具调用 + 100 倍 LLM token，延迟和钱都受不了。实际工程上更常见的折中：只对"关键决策点"做 Self-Consistency（比如最终结论那一步），中间工具调用还是单路径。这也是 Day 7 多 Agent 系统的雏形——把"独立采样"演化成"角色分工的多 agent 协作"。</div></details>
 <details><summary>5. 站在产品视角，怎么向用户解释"为什么这次回答更慢但更准"？</summary><div>这是个值得专门设计的 UX 问题。三种讲法：(a) 进度条："正在用 5 种不同思路独立验证..."，把多采样可视化成"严谨度"，用户觉得贵的有道理；(b) 对比展示：把 5 条推理链折叠展示，让用户看到收敛过程，建立信任；(c) 分级选项：默认快速模式（单次）、给高价值任务（投资决策、医疗）开"深度分析"按钮触发 self-consistency，让用户主动选权衡。本质是把"算力换准确率"翻译成用户能感知的价值——这也是 Day 29 AI 产品设计要展开讲的"延迟预算"和"用户信任"。</div></details>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>哲学 · 维特根斯坦的「遵循规则」</b>：《哲学研究》§185 里，学生照「加 2」写到 1000 之后却写出 1004、1008，有限的例子从来不能单独钉死一条规则。few-shot 正处在这个处境：3 个例子同样容许无数种推广，模型能推对，靠的是预训练给它的那套「生活形式」。不像在于：维特根斯坦要说的是没有任何事实能最终固定规则，工程上则由训练分布在实际上替我们定了。</li>
+<li><b>心理学 · 维果茨基的「自我言语」</b>：维果茨基（《思维与语言》，1934）观察到孩子遇到难题会自言自语，把思路外化成语言来引导自己，正像 CoT 把推理写出来再借它往下算。不像的是，孩子的自我言语会慢慢内化成无声的内部言语；模型每次调用都得重新把推理写出来，才能拿到那份额外的计算。</li>
+<li><b>心灵哲学 · 延展心智（Clark &amp; Chalmers，1998）</b>：失忆的 Otto 靠随身笔记本记路，笔记本在功能上就是他记忆的一部分；ReAct 的工具调用和 Observation 也把「认知」延伸到了模型之外。不像的是，Otto 的本子一直在手边，模型却每轮都要把全部历史重新读一遍，心智越延展，上下文越重。</li>
+<li><b>政治哲学 · 孔多塞陪审团定理（1785）</b>：每个投票者答对概率略高于一半且彼此独立，人越多，多数票答对的概率越逼近 1，这正是自一致性投票的数学底座。不像的是，同一个模型的多次采样远不独立，共享的偏见会一起犯错，定理最要紧的前提在这里打了折扣。</li>
+<li><b>神经科学 · 运动皮层的群体编码（Georgopoulos 等，1986）</b>：猴子运动皮层里单个神经元的方向调谐都很宽，但把一大群神经元的「投票」按向量加起来，就能准确预测手臂运动方向。像在都靠多个嘈杂个体求稳；不像在群体向量是对连续方向取加权平均，自一致性是对离散答案取众数，所以答案空间一开放，投票就失灵。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Zero-shot 只用自然语言描述任务，few-shot 在 prompt 里放几个输入→输出例子，两者都不改模型参数。</li>
+<li>Few-shot 的本质是 in-context learning：模型续写它看到的模式，下次调用就忘了，并不是训练。</li>
+<li>Few-shot 例子重质不重量：3–5 个覆盖边界情况的例子，往往胜过 20 个雷同例子。</li>
+<li>Few-shot 的例子顺序会影响输出，最后一个例子常被模型当作最强信号，最像目标输入的例子宜放最后。</li>
+<li>用例子定型输出格式，比写一串「不要解释」的禁令更可靠，因为模型擅长模仿示例而不擅长遵循禁令。</li>
+<li>思维链（CoT，Wei 等人 2022）让模型先写中间推理再给答案，多出来的 token 等于多给了计算预算。</li>
+<li>CoT 写出的推理过程不等于模型真实的内部计算，中间步骤可能看似合理却和最终答案脱节。</li>
+<li>ReAct（Yao 等人 2022）把 Thought、Action、Observation 交织成循环，让模型调工具拿实时信息，是多数 Agent 框架的基础范式。</li>
+<li>ReAct 的循环由外层 runtime 解析输出、执行工具、再把结果拼回 prompt，调试时 bug 常出在解析和工具描述上。</li>
+<li>自一致性（Self-Consistency）在 temperature 大于 0 时采样多条 CoT 再多数投票，只适用于有单一明确答案的题。</li>
+</ol>
 </div>
 <a class="back" href="index.html">← 返回首页</a>
 <footer>BigCat · AI &amp; ML · Day 3 · 2026</footer>

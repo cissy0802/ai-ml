@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -277,6 +284,32 @@ JURY = [<span class="str">"claude-opus-4-8"</span>, <span class="str">"gpt-judge
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 抵消裁判偏差靠「跨故障域的多样性投票 + 校准」，不是靠单个更强的裁判；多样性 &gt; 数量。<br/>🤔 你信任的那些「AI 打的分」，是校准过的置信度，还是只是没有量程的数字？下次能不能换个家族的模型交叉验一下？<br/>📎 工程对应 → <a href="https://cissy0802.github.io/super-individual-weekly/eval-day6.html">super-individual D6：Eval 工程</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 自己挠不了自己痒</b>：Blakemore、Wolpert 与 Frith 1998 年发现，大脑用运动指令的「副本」预测自身动作的感觉后果，于是认得出也压得住自己产生的信号。LLM 裁判同样靠风格签名认出自己的文本，方向却相反：大脑给自我信号打折，裁判给自我信号加分。</li>
+<li><b>生物进化 · 爱尔兰马铃薯饥荒</b>：1840 年代爱尔兰大面积种单一品种 Lumper，晚疫病一来几乎同时倒下。单一栽培就是错误趋同：抗性一样，盲区也一样。不像在：作物的多样性靠突变自然长出来，裁判的多样性得刻意去挑不同家族。</li>
+<li><b>心理学 · 达克效应</b>：Kruger 与 Dunning 1999 年指出，能力不足的人往往也缺识别自己错误的元认知，即「双重诅咒」。这正是 GV-Gap 塌陷：题目超出能力时，写和审一起失灵。不像在：达克效应的统计稳健性至今有争议，GV-Gap 能在金标准样本上直接测出来。</li>
+<li><b>佛学 · 末那识</b>：唯识学说第七识「恒审思量」，执第八识为「我」，一切判断先过一道我执的滤镜。自我偏好像这层我执：熟悉的风格被当成好的风格。不像在：模型背后没有被执着的主体，只有一组可识别的用词分布，倒恰好印证「我」不过是一组模式。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>Zheng et al. 2023 测出 LLM 裁判的三类偏差：位置偏差、冗长偏差和自我增强偏差。</li>
+<li>位置偏差指同一对答案只因交换先后顺序，裁判的胜负判断就会翻转。</li>
+<li>裁判偏差源于 next-token 预测把语料里「靠前」「更长」与被选中的相关误当成因果。</li>
+<li>顺序对称化是第一步修正：两个顺序各跑一次，两次结论一致才算数。</li>
+<li>改用 1–10 分制消不掉偏差：冗长偏差仍在，分数还会扎堆在 7–9 分。</li>
+<li>Panickssery et al. 2024 发现，模型越能认出自己写的文本，就越偏爱自己的输出。</li>
+<li>生成模型和裁判模型同源时盲区重叠、错误趋同，自评就成了给自己盖橡皮章。</li>
+<li>生成-验证鸿沟（GV-Gap）衡量「审」比「写」强多少，是 Best-of-N 和 self-refine 的地基。</li>
+<li>题目超出模型能力时 GV-Gap 会塌到零甚至为负，自我验证近乎抛硬币。</li>
+<li>不同家族小模型组成的陪审团（PoLL）比单个大裁判更贴近人类、更便宜，关键在多样性而非数量。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="26071362e721a9de" style="border-left-color:#7b61ff">

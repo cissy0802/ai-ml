@@ -50,6 +50,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -444,6 +451,30 @@ result = run_code_safely(unsafe_code)
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · action selection in the basal ganglia</b>: Redgrave, Prescott and Gurney proposed in 1999 that the basal ganglia act as a central selector: the cortex proposes many candidate actions at once, and the basal ganglia keep everything inhibited except the winner, which they release. In Function Calling the model only requests an action and host code lets it through: the same split between proposing and releasing. The difference is that the brain's gate is tuned by learning, while an agent's whitelist is written by hand.</li>
+<li><b>Evolution · the universal genetic code</b>: nearly all life shares one codon table, so a gene moved into another species still gets read, which is what makes horizontal gene transfer work. MCP lets one server be understood by any host the same way, through a shared way of reading. Unlike it, the genetic code is what Crick called a "frozen accident" and can no longer change; MCP still evolves by version.</li>
+<li><b>Psychology · Hick's law and the consideration set</b>: Hick showed in 1952 that choice reaction time grows with the logarithm of the number of options. Shoppers cope by first forming a small consideration set and choosing within it, which is exactly the top-k recall step of tool retrieval. The difference: people pay in time, models pay in wrong picks and tokens.</li>
+<li><b>Buddhism · guarding the sense doors</b>: Buddhist training in restraint does not assume every arising thought is wholesome; it sets a guard where the senses meet their objects. A sandbox likewise does not bet on the model's good intentions, it limits what the model can touch. Unlike practice, which aims to transform the mind itself, a sandbox never expects the model to get better.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Function Calling makes the model emit a structured tool_call matching a JSON Schema; your code runs it and sends the result back for a second request.</li>
+<li>Enabling Function Calling does not guarantee a tool call; the model may call several in parallel or hallucinate a nonexistent tool, so the executor needs a whitelist.</li>
+<li>Constrained decoding guarantees valid JSON, but valid format is not correct meaning, so arguments still need business validation.</li>
+<li>MCP, introduced by Anthropic in 2024, borrows from LSP and uses JSON-RPC to turn N×M adapters into N+M.</li>
+<li>An MCP server exposes three capabilities: Tools the model calls, Resources the app injects into context, and Prompts the user triggers.</li>
+<li>Function Calling is the contract between model and app; MCP is the contract between app and tools; the two are orthogonal and complementary.</li>
+<li>Tool selection treats the toolset as a searchable corpus and feeds the model only the top-k most relevant tools, typically 5 to 10.</li>
+<li>In tool retrieval, recall matters more than precision: if the right tool is missing, the model cannot recover, so over-retrieve a little.</li>
+<li>A default Docker setup is not a secure sandbox; untrusted code calls for seccomp, gVisor or Firecracker microVMs on top.</li>
+<li>Agent design starts from not trusting the model: least privilege, a fresh sandbox per task, audit logs and human confirmation together.</li>
+</ol>
+</div>
 <a href="index.en.html" class="back">← Back to home</a>
 
 <footer>BigCat · AI &amp; ML · Day 6 · 2026-05-24</footer>
