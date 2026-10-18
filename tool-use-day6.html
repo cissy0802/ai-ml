@@ -408,7 +408,7 @@ result = run_code_safely(unsafe_code)
 <details><summary>5. Sandbox 看似只是工程问题，背后却折射出 Agent 时代的根本设计哲学：<b>不信任模型</b>。这一假设和传统软件开发哲学有何不同？对系统架构有什么连锁影响？</summary><div>传统软件假设：代码是开发者写的、经过 code review、CI 测试过，runtime 可以信任。Agent 时代：代码是 LLM 当场生成的、没有 review、无法 reproducible 测试，runtime <b>必须假设它会犯错或被利用</b>。连锁影响：(a) <b>权限设计颠倒</b>——传统系统给应用尽可能多权限以避免功能受限，Agent 系统反过来——最小权限优先，按需 escalate；(b) <b>状态不持久</b>——传统服务的好性能依赖长连接缓存，Agent 沙箱每次 fresh 避免状态污染，性能换安全；(c) <b>审计成为一等公民</b>——传统 log 是 best-effort，Agent log 是<b>合规证据</b>，每个 tool call、每个 sandbox 启停都要可追溯；(d) <b>Human-in-the-loop 重新流行</b>——20 年前我们在工业控制系统强调人工确认，Agent 时代又回来了。这种"零信任"设计哲学和 cloud-native security、SaaS 多租户、零信任网络一脉相承——本质都是"不可信代码运行在可信基础设施上"。理解这一点，Agent 工程就不再是写 prompt，而是设计一整套受控执行体系。</div></details>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="e66d312d8ad2b6fa" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>神经科学 · 基底神经节的动作选择</b>：Redgrave 等人 1999 年提出，基底神经节是大脑的中央选择器：皮层同时提出多个候选动作，它平时全面抑制，只放行胜出的那个。Function Calling 里模型只“申请执行”、宿主代码决定放行，同样把提议和放行分开。不像的是，大脑的闸门靠学习调成，Agent 的白名单是人手写死的。</li>
@@ -417,7 +417,7 @@ result = run_code_safely(unsafe_code)
 <li><b>佛学 · 守护根门</b>：戒学讲守护根门：不指望念头生起就是善的，而在感官接触外境处设防。沙箱也不赌模型意图良善，只限定它碰得到什么。不像的是，修行最终要转化心本身，沙箱从不指望模型变好。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="cbac913cc1dfae25">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>Function Calling 让模型按 JSON Schema 输出 tool_call，你的代码执行后把结果拼回对话再请求一次。</li>

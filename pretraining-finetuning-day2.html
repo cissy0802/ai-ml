@@ -353,7 +353,7 @@ trainer.train()                            <span class="cmt"># 跑完，效果�
 <details><summary>DPO 之后出现 IPO、KTO、ORPO 等变体——未来的对齐方法可能从什么角度突破？（提示：现在所有方法都假设"成对偏好"——如果没有呢？）</summary><div>三个可能方向：(1) 摆脱成对——KTO 已经做到只用"好/坏"单点标签，未来可能用更稀疏的"通过/失败"信号或纯粹的环境奖励；(2) 多目标对齐——当前方法把"有用、安全、诚实"压成一个标量分数，未来需要 Pareto 多目标优化；(3) 自我对齐——让模型自己批判自己（Self-Rewarding LLM），打破"标注员瓶颈"。更激进的思路：与其在 post-training 修，不如在 pre-training 阶段就用价值观加权数据（Anthropic 的 "pretraining with values"）。共同趋势：把"对齐"从一个 fine-tuning 后处理步骤，变成贯穿整个训练 pipeline 的范式。</div></details>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="5f0b04a470bcf120" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>神经科学 · 预测编码</b>：Rao 与 Ballard 1999 年提出，视觉皮层不断预测下一刻的输入，只把预测误差往上传，用误差修正内部模型。和预训练「猜下一个 token、用误差调参」是同一个结构。不像在：大脑预测是为了指导身体行动，模型只预测文本本身。</li>
@@ -362,7 +362,7 @@ trainer.train()                            <span class="cmt"># 跑完，效果�
 <li><b>东方哲学 · 从心所欲不逾矩</b>：孔子自述七十岁才达到的境界，在规矩之内自由行事。KL 惩罚和 DPO 的 beta 让模型追求高分，却不许离参考模型太远，结构相同。不像在：孔子的矩已内化为本心，模型的约束始终是外加的惩罚项。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="d7726d3e9abec3dc">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>预训练只做一件事：给定前文预测下一个 token，用海量语料把语言和常识学成共享底座。</li>
@@ -377,7 +377,6 @@ trainer.train()                            <span class="cmt"># 跑完，效果�
 <li>DPO 用偏好对上的一个分类式损失替代奖励模型和 PPO，更便宜更稳定，但只能离线学习。</li>
 </ol>
 </div>
-
 <a class="back" href="index.html">← 返回首页</a>
 <footer>BigCat · AI &amp; ML · 2026</footer>
 </div>

@@ -289,7 +289,7 @@ bias = <span class="fn">alibi_bias</span>(seq_len=8, n_heads=4)
 <div class="takeaway">💡 ALiBi = "<b>不要 PE 向量，直接给远距离扣分</b>"——把位置变成 attention 的一个归纳偏置（inductive bias），换来强外推。<br/>🤔 一个明显的"近优先"归纳偏置就能让外推变好——这是否暗示，"通用"的位置编码反而比"针对任务"的偏置更难学好？</div>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="9f7aadfcd2b67c5a" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>佛学 · 缘起与无自性</b>：RoPE 点积后绝对位置抵消，只剩相对距离，像「一法的意义只在关系里成立」。不像在于：RoPE 内部仍先算出绝对角度再消掉，缘起说的是本无独立的「第几位」。</li>
@@ -299,7 +299,7 @@ bias = <span class="fn">alibi_bias</span>(seq_len=8, n_heads=4)
 <li><b>发育生物学 · Wolpert 的法国国旗模型（1969）</b>：细胞读形态发生素浓度、按阈值决定长成哪一色，等于读绝对坐标，和可学习位置表同构。不像在于：胚胎长大，图案得按比例伸缩；位置表定长，多一位就无坐标。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="c20587520c3e8b56">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>纯 Attention 是置换不变的，打乱 token 顺序结果不变，所以必须额外注入位置。</li>

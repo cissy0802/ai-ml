@@ -368,7 +368,7 @@ top5 = [r.document[<span class="str">"text"</span>] <span class="kw">for</span> 
 <details><summary>5. 如果一个查询本身就模糊（如"那个东西怎么办"），reranker 还能救场吗？</summary><div>救不了多少。Reranker 的输入是 (query, doc) 配对，query 本身信息量低时，无论用多精细的模型都无法"想出用户真正想问什么"。这类查询的正确处理在更上游：(a) 多轮对话——先让 LLM 反问澄清，"你说的'那个'指的是上次提的复利还是房贷？"；(b) 用户画像 + 会话历史——把过去 5 轮的话题拼进 query 再 embed；(c) Query expansion——用 LLM 把模糊问题改写成 3-5 个具体版本，每个都做检索后取并集。本质是"信息论极限"——查询里没有的信息，下游再聪明也补不出来；架构上要把澄清/扩展放在 reranker 之前。</div></details>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="e7ae3f59655eeb60" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>心理学 · 编码特异性原则（Tulving &amp; Thomson，1973）</b>：线索和记忆存入时的编码方式越吻合，越容易想起来；查询改写正是把用户的问法改得像文档被 embed 时的样子。不像在于：人脑存入时就带着情境，向量库只记语义，时间和场合全丢了。</li>
@@ -378,7 +378,7 @@ top5 = [r.document[<span class="str">"text"</span>] <span class="kw">for</span> 
 <li><b>哲学 · 维特根斯坦的「家族相似」</b>：一个词的各种用法没有共同本质，只有交错重叠的相似，embedding 也只给出远近，不给定义。不像在于：维特根斯坦说意义在于使用、在语言游戏的行动里，embedding 只看统计共现，所以分不清赞美 X 和骂 X。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="1520230348b0c7ea">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>Embedding 把文本映射成高维向量，语义越近的句子坐标越近，用余弦相似度衡量语义相似度。</li>

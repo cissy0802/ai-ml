@@ -282,7 +282,7 @@ W.<span class="fn">register_hook</span>(<span class="fn">masked_grad_hook</span>
 <div class="takeaway">💡 参数隔离用"分区 + 冻结只读"给旧任务硬保证：PackNet 在固定容量里剪枝腾位，渐进网络每任务加一列。零遗忘，代价是需知任务身份、容量/参数受限。<br/>🤔 三派对策（正则/重放/隔离）恰好对应你熟悉的三种并发控制：加锁、重演日志、数据分片。哪一派最像"乐观锁"，哪一派最像"悲观锁"？</div>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="5d339aa975252dc0" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>生物进化 · 基因复制（大野乾，1970）</b>：新基因多来自复制：一份拷贝受选择约束守住旧功能，另一份松绑去试新功能，正是“冻结旧列、另开新列”。不像在：复制是随机事件，两份拷贝间也没有设计好的横向连接。</li>
@@ -292,7 +292,7 @@ W.<span class="fn">register_hook</span>(<span class="fn">masked_grad_hook</span>
 <li><b>科学哲学 · 纽拉特之船</b>：知识像一艘只能在海上逐块换板的船，进不了船坞。在线持续学习也不能回炉重训，每次换板都不能让旧能力沉没。不像在：纽拉特说的是知识整体没有地基。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="be349821907c0c48">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>灾难性遗忘指网络顺序学多个任务时，学新的会急剧抹掉旧能力，1989 年即被发现。</li>

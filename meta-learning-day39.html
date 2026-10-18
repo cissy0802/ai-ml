@@ -288,7 +288,7 @@ resp = client.messages.<span class="fn">create</span>(
 <div class="takeaway">💡 ICL 是小样本学习的「终极形态」：学习从「训练阶段」彻底移进了「<strong>推理的那一次前向传播</strong>」，零权重更新、即用即弃。从迁移学习到 ICL，「学习」一路向运行时（runtime）迁移——这条线索本身就是过去十年 ML 的缩影。<br/>🤔 既然示例标签错了也不太影响，那 few-shot「学习」到底有几分是「学」，几分是「检索 + 定位」？<br/><a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-day1.html" style="color:#7b61ff">工程对应 → super-individual D1: Prompt Engineering（few-shot 示例怎么挑、怎么排序、几个最优）</a></div>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="3eab90651aef19b8" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>神经科学 · 互补学习系统</b>：McClelland 等人 1995 年提出：海马体一次记住新经历，新皮层慢慢抽取统计规律，正像「ICL 快、权重慢」。不像在：海马体会在睡眠中回放、把经历巩固进皮层；ICL 学到的推理一结束就蒸发，什么也沉淀不进权重。</li>
@@ -298,7 +298,7 @@ resp = client.messages.<span class="fn">create</span>(
 <li><b>西方哲学 · 柏拉图《美诺篇》</b>：苏格拉底只靠提问，让没学过几何的奴隶男孩解出正方形倍积题，柏拉图说学习即回忆。标签打乱仍有效的 ICL 也是在唤起而非教。不像在：模型的「前世」是看得见的预训练语料。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="bad575662d2155e2">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>迁移学习冻结预训练网络的底层通用特征，只重训顶层，几百张图就能训出像样的分类器。</li>

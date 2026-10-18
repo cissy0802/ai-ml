@@ -264,7 +264,7 @@ ids = enc.<span class="fn">encode</span>(<span class="str">"你好🌍"</span>)
 <div class="takeaway">💡 字节回退保证"永不 OOV"，代价是字符被切碎——模型的世界里没有"字母"，只有 token 和字节。<br/>🤔 既然模型看不见字符，那它能流利拼写、能写正确代码，靠的到底是什么？（提示：海量数据里"字符级模式"被间接编码进了 token 共现统计）</div>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="e00eed0e9be535b9" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>复杂性科学 · 路径依赖（W. Brian Arthur，1989）</b>：早期的小优势靠收益递增被放大，最后锁定一种技术。BPE 也是这样，前几轮合并出的 token 决定后面能拼出什么，走过就回不去。不像在于，BPE 只在训练时锁定，词表冻结后不再自我强化。</li>
@@ -273,7 +273,7 @@ ids = enc.<span class="fn">encode</span>(<span class="str">"你好🌍"</span>)
 <li><b>生物进化 · 遗传密码的阅读框</b>：DNA 三个碱基一组读成密码子，起点错一位，后面整段都读成错的氨基酸，这就是移码突变；token 切在汉字的 UTF-8 字节中间，也是阅读框错了位。不像在于，UTF-8 的首字节和续字节写法不同，解码器能自己找回字符边界，乱码只停在局部；DNA 没有这种标记，一次移码会一路错到下一个终止密码子。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="e8d565c47d32be10">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>词级词表会无限膨胀并撞上 OOV，字符级又让序列太长，子词 tokenization 取两者中间点。</li>

@@ -291,7 +291,7 @@ opt = <span class="fn">Lion</span>(model.<span class="fn">parameters</span>(),
 </div>
 </div>
 <!-- 越界 -->
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="2c6b629788277d83" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>生物进化 · 「最平者生存」</b>：Wilke、Adami 等人 2001 年在数字生物平台 Avida 里发现，突变率很高时胜出的不是适应度峰值最高的基因型，而是站在平坦高原、突变后也不怎么掉分的那批。这和平坦极小是同一个结构：噪声越大，宽盆地越胜过尖峰。不像的是，进化靠一整个种群来筛，SGD 只有一条轨迹。</li>
@@ -300,9 +300,8 @@ opt = <span class="fn">Lion</span>(model.<span class="fn">parameters</span>(),
 <li><b>投资 · 1/N 等权组合</b>：DeMiguel 等人 2009 年比较了十几种均值-方差优化模型，样本外几乎没有一个稳定跑赢「每样资产平分」的 1/N。Lion 只取符号、丢掉梯度幅度，也是放弃估不准的数值、只信方向；不像的是 1/N 连方向都不估，Lion 的方向仍来自动量。</li>
 </ul></div>
 </div>
-
 <!-- 十条要点 -->
-<div class="card">
+<div class="card" data-tts="9ffbf5d3e671a318">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>平坦极小和尖锐极小的训练 loss 可以一样低，测试集 loss 曲面略一平移，只有平坦极小还留在低 loss 区。</li>
@@ -317,7 +316,6 @@ opt = <span class="fn">Lion</span>(model.<span class="fn">parameters</span>(),
 <li>Sophia 每隔几步轻量估一次对角 Hessian 并做逐元素裁剪；换优化器要重调学习率，AdamW 仍是最稳的默认。</li>
 </ol>
 </div>
-
 <!-- 深入资源 -->
 <div class="card" data-tts="81c92746d4702315" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

@@ -246,7 +246,7 @@ model = <span class="fn">FSDP</span>(
 </div>
 </div>
 <!-- 4. Megatron-LM -->
-<div class="card" data-tts="2763ce9403707493">
+<div class="card" data-tts="8c3e56d27ccb2dfc">
 <h2>Megatron-LM 张量并行<span class="en">Megatron-LM / Tensor Parallelism</span></h2>
 <div class="tags"><span class="tag">张量并行</span><span class="tag purple">3D 并行</span></div>
 <div class="section">
@@ -305,7 +305,7 @@ model = <span class="fn">FSDP</span>(
 <div class="takeaway">💡 张量并行切的是<b>单个算子</b>，Megatron 的巧思是让切分边界避开非线性，把每层同步压到一次；3D 并行 = 按带宽层级摆放三种并行。<br/>🤔 "把通信最重的并行放在带宽最高的层级"——这条原则和你做存储/缓存分层（热数据上内存、冷数据下磁盘）是不是同一个第一性原理？</div>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="500ea82806b97c2c" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>神经科学 · 海马索引理论（Teyler &amp; DiScenna，1986）</b>：这个理论认为，一段记忆的各个成分分散存在皮层各处，海马只存一张「索引」，回忆时按索引把碎片重新拼起来，和 ZeRO-3 平时只存 1/N 分片、用时 all-gather 很像。不像在于：all-gather 拼回来的参数逐位不差，大脑的回忆却是重构，每拼一次都可能走样。</li>
@@ -314,7 +314,7 @@ model = <span class="fn">FSDP</span>(
 <li><b>管理学 · 布鲁克斯定律（Fred Brooks，1975）</b>：《人月神话》说给延期的项目加人只会更晚，因为人与人之间的沟通线按 n(n-1)/2 增长，和「加卡不等于线性加速」是同一个病根。不像的是，ring all-reduce 让每张卡的通信量基本不随卡数增长，GPU 比人好协调得多。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="2f06df057383390e">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>大模型训练的瓶颈首先是显存和通信而不是算力：混合精度下每个参数约占 16 字节，70B 模型要 1TB 出头。</li>
@@ -329,7 +329,6 @@ model = <span class="fn">FSDP</span>(
 <li>3D 并行的放置原则是通信越重放在带宽越高的层级：张量并行留在机内 NVLink，流水线并行跨节点，数据并行跨集群。</li>
 </ol>
 </div>
-
 <!-- 工程 cross-reference -->
 <div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">

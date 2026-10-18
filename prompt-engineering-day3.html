@@ -373,7 +373,7 @@ answers = []
 <details><summary>5. 站在产品视角，怎么向用户解释"为什么这次回答更慢但更准"？</summary><div>这是个值得专门设计的 UX 问题。三种讲法：(a) 进度条："正在用 5 种不同思路独立验证..."，把多采样可视化成"严谨度"，用户觉得贵的有道理；(b) 对比展示：把 5 条推理链折叠展示，让用户看到收敛过程，建立信任；(c) 分级选项：默认快速模式（单次）、给高价值任务（投资决策、医疗）开"深度分析"按钮触发 self-consistency，让用户主动选权衡。本质是把"算力换准确率"翻译成用户能感知的价值——这也是 Day 29 AI 产品设计要展开讲的"延迟预算"和"用户信任"。</div></details>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="6712fcf63a8cbaca" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>哲学 · 维特根斯坦的「遵循规则」</b>：《哲学研究》§185 里，学生照「加 2」写到 1000 之后却写出 1004、1008，有限的例子从来不能单独钉死一条规则。few-shot 正处在这个处境：3 个例子同样容许无数种推广，模型能推对，靠的是预训练给它的那套「生活形式」。不像在于：维特根斯坦要说的是没有任何事实能最终固定规则，工程上则由训练分布在实际上替我们定了。</li>
@@ -383,7 +383,7 @@ answers = []
 <li><b>神经科学 · 运动皮层的群体编码（Georgopoulos 等，1986）</b>：猴子运动皮层里单个神经元的方向调谐都很宽，但把一大群神经元的「投票」按向量加起来，就能准确预测手臂运动方向。像在都靠多个嘈杂个体求稳；不像在群体向量是对连续方向取加权平均，自一致性是对离散答案取众数，所以答案空间一开放，投票就失灵。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="20157d1453f4a5a1">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>Zero-shot 只用自然语言描述任务，few-shot 在 prompt 里放几个输入→输出例子，两者都不改模型参数。</li>

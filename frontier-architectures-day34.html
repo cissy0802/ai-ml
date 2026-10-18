@@ -289,7 +289,7 @@ pos_interpolated = pos * scale     <span class="cmt"># 模型只需"认识"它�
 </div>
 </div>
 <!-- 越界 -->
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="8b7625d9c6410363" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>神经科学 · 稀疏编码与能量预算</b>：Peter Lennie 2003 年估算，受能耗所限，皮层同一时刻只有约 1% 的神经元能大量放电；容量大、同时在算的少，和 MoE 同构。不像在于：皮层分工部分对应功能区，MoE 专家的分工却不对应人类领域。</li>
@@ -298,9 +298,8 @@ pos_interpolated = pos * scale     <span class="cmt"># 模型只需"认识"它�
 <li><b>心理学 · 双系统理论（Kahneman）</b>：思维大部分时间靠快而省力的系统 1 流过去，少数关键时刻才调用慢而费力的系统 2 精确核对；混合架构同样是大量 Mamba 层配少量注意力层。不像的是，人按情境决定何时启用系统 2，混合架构里注意力层的位置在训练前就写死了。</li>
 </ul></div>
 </div>
-
 <!-- 十条要点 -->
-<div class="card">
+<div class="card" data-tts="6a00f052e8fcd374">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>标准 Transformer 有两个先天病：注意力随序列长度呈 O(n²) 增长，以及每个 token 激活全部参数的稠密计算。</li>
@@ -315,7 +314,6 @@ pos_interpolated = pos * scale     <span class="cmt"># 模型只需"认识"它�
 <li>长上下文要同时翻过算力 O(n²)、KV cache 显存和位置外推三道墙，且能装下 1M 不等于用得好 1M。</li>
 </ol>
 </div>
-
 <!-- 深入资源 -->
 <div class="card" data-tts="ebd000308d8b81e5" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>

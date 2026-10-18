@@ -276,7 +276,7 @@ out = big.<span class="fn">generate</span>(
 <div class="takeaway">💡 推测解码 = 解码版的投机执行：小模型猜、大模型并行验、拒绝采样保证输出分布一字不改。免费的午餐（几乎）。<br/>🤔 推测解码用「便宜的猜测 + 可证明的验证」换速度。你的工作流里，哪些环节可以「先乐观执行，再廉价验证」，而不是「小心翼翼逐步确认」？</div>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="3c56d57dd59a8956" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>投资 · 凯恩斯的选美比赛</b>：凯恩斯在《通论》（1936）里把股市比作猜「大家觉得谁最美」的比赛。beam search 也在押最安全的共识词，于是平庸重复。不像在：押共识能赢比赛，写文章只会无聊。</li>
@@ -285,8 +285,7 @@ out = big.<span class="fn">generate</span>(
 <li><b>意识 · 受控幻觉</b>：Anil Seth 在《Being You》（2021）里把知觉说成大脑先猜、再由感官误差纠偏的「受控幻觉」。推测解码也是先猜后验。不像在：大脑里猜的是聪明的高层，这里猜的是笨的小模型。</li>
 </ul></div>
 </div>
-
-<div class="card">
+<div class="card" data-tts="6e248210f77d2230">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>解码是从模型输出的整张词表概率分布里挑出下一个 token 的那一步。</li>
@@ -301,7 +300,6 @@ out = big.<span class="fn">generate</span>(
 <li>温度、截断和对比解码都在改写模型说什么，只有推测解码是不改变输出分布的纯加速。</li>
 </ol>
 </div>
-
 <!-- 深入资源 -->
 <div class="card" data-tts="50b025b017e64144" style="border-left-color:#7b61ff">
 <h2>深入资源<span class="en">Further Reading</span></h2>
