@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -251,6 +258,30 @@ PGD：  <span class="box">x</span><span class="arrow">·▶</span><span class="
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 经验防御给"信心"，认证防御给"保证"；代价是更小的适用范围和更模糊的模型。<br/>🤔 你愿意为"可证明的安全"牺牲多少性能？这个 σ 的选择，和 CAP 里的取舍是不是同一种智慧？</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>动物行为学 · 廷伯根的超常刺激</b>：银鸥雏鸟啄亲鸟喙上的红斑，廷伯根发现带红条纹的细木棍比真鸟喙引来更多啄击。感知靠少数线索，放大线索就能接管行为，这是对抗样本的同一结构；不同在于超常刺激夸张可见，对抗扰动人眼看不见。</li>
+<li><b>哲学 · 古德曼的「绿蓝」悖论</b>：古德曼造了谓词 grue：某时刻前看到是绿，之后是蓝。迄今每块绿宝石都同样支持「绿」和「grue」。模型学到人类不会用的非鲁棒特征，是这道题的工程版：数据定不了概念，先验才定。</li>
+<li><b>复杂性科学 · 高度优化容忍</b>：Carlson 与 Doyle 1999 年提出 HOT：为常见扰动高度优化的系统，对没设计过的扰动格外脆弱。对抗训练只防练过的 ε 和范数，正合此律；不同在于 HOT 的罕见扰动来自自然，这里来自专门找缝的对手。</li>
+<li><b>投资 · 格雷厄姆的安全边际</b>：格雷厄姆要求买价远低于估算的内在价值，让估值误差翻不了盘。认证半径也是缓冲：最高票得票率越高，能吞下的扰动越大。不像的是安全边际靠经验判断，认证半径有定理撑腰，但只管 L2 球内。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>对抗样本是加了人眼不可见的扰动、却让网络高置信度分错的输入，2013 年由 Szegedy 等人发现。</li>
+<li>Goodfellow 的线性假说：网络局部近似线性，每维扰动 ε 沿权重符号累加，logit 变化随维度线性增长。</li>
+<li>对抗脆弱不是训练不足，而是高维线性的结构性代价：十几万维的小量累积足以越过分类边界。</li>
+<li>FGSM 对输入求梯度，沿梯度符号一步走满 ε，是 L∞ 约束下最快但粗糙的攻击。</li>
+<li>PGD 把 FGSM 拆成多个小步并每步投影回 ε-球，是评估鲁棒性的事实标准。</li>
+<li>Madry 的对抗训练是 min-max 优化：内层用 PGD 找最坏扰动，外层在最坏样本上做梯度下降。</li>
+<li>对抗训练会降低干净准确率，且只防训练时那种范数和 ε，是没有数学证明的经验防御。</li>
+<li>迁移性：不同模型从同一份数据学到相同的非鲁棒特征，所以替身模型上造的对抗样本能做黑盒攻击。</li>
+<li>随机平滑取高斯噪声下的多数票，认证半径 R = σ·Φ⁻¹(pA)，半径内的 L2 扰动可证明翻不了输出。</li>
+<li>认证鲁棒只覆盖小范围 L2 球；σ 越大越鲁棒，模型也越模糊，就像一道有定理撑腰却有边界的安全边际。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="15695c569088ba40" style="border-left-color:#7b61ff">

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -292,6 +299,30 @@ rec = model.<span class="fn">decode</span>(enc.audio_codes, enc.audio_scales,
 </div>
 
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · cochlear tonotopy</b>: The mel spectrogram is almost a copy of the cochlea: the basilar membrane lays out frequencies from base to apex, finely resolved at the low end and coarsely at the high end, matching the mel scale's log spacing. The difference: auditory nerves phase-lock at low frequencies and keep fine timing, whereas the mel spectrogram throws phase away and needs a vocoder to rebuild it.</li>
+<li><b>Psychology · categorical perception</b>: Liberman and colleagues (1957) built a smooth continuum from /b/ to /d/, yet listeners heard an abrupt jump between two categories and barely noticed differences within one: the ear ships with a quantizer. The difference: human categories follow the phonemes of one's native language, while codec codewords serve reconstruction quality and map to no phoneme.</li>
+<li><b>Cognitive psychology · phonemic restoration</b>: In 1970 Warren replaced one sound in a sentence with a cough; listeners still "heard" the missing sound and could not even say where the cough was. The brain fills gaps from context, much like Whisper's guessing; the difference is that meaning and intent back up human guesses, so they are usually right.</li>
+<li><b>Buddhism · momentariness (kshana)</b>: Abhidharma holds that mind is not one continuous river but a chain of moments arising and ceasing, with continuity only an impression of rapid succession: the same structure as slicing sound into 20 ms frames and stringing them together. The difference: frame length is an engineering knob, while a moment is, for the commentators, the minimal unit of existence itself.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>The hardest part of speech recognition is alignment, not understanding: training data labels whole sentences, not which frames map to which character.</li>
+<li>CTC adds a blank symbol, merges adjacent repeats and then deletes blanks, so countless frame-level paths collapse into the same text.</li>
+<li>The CTC loss sums the probabilities of every path that collapses to the correct text, computed efficiently with forward-backward dynamic programming and no frame-level labels.</li>
+<li>CTC assumes frame outputs are conditionally independent, which makes it fast and naturally streamable but blind to language patterns, so it often needs an external language model.</li>
+<li>Whisper generates text autoregressively with an encoder-decoder, giving more fluent output but also more hallucinated words when the audio is unclear.</li>
+<li>Modern TTS runs in two stages: an acoustic model turns text into a mel spectrogram, and a vocoder turns the mel spectrogram into a playable waveform.</li>
+<li>Duration is the core difficulty for a TTS acoustic model; FastSpeech predicts durations explicitly and generates in parallel, avoiding the skips and repeats of autoregressive attention.</li>
+<li>A neural audio codec uses residual vector quantization (RVQ), cascading small codebooks that approximate the residual step by step, to turn a continuous waveform into discrete tokens.</li>
+<li>Once audio is discrete tokens, VALL-E can generate speech like language modeling and clone a voice zero-shot from a 3-second sample.</li>
+<li>Streaming recognition is bound by causality; causal, chunked and look-ahead designs pick points between latency and quality, and must be built in at training time.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#00d4ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

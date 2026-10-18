@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -267,6 +274,33 @@ revision = client.messages.<span class="fn">create</span>(
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 DPO 用一个代数恒等式证明"语言模型本身就是隐式奖励模型"，从而把 RLHF 的复杂架构塌缩成一个分类 loss。<br/>🤔 一个数学化简（消掉配分函数 Z）就让对齐成本骤降一个数量级——回想你的领域，有没有哪个"看似必须的中间组件"其实能被一个恒等式消掉？<br/><a href="https://cissy0802.github.io/super-individual-weekly/prompt-injection-day20.html" style="color:#7b61ff">工程对应 → super-individual D20: Prompt Injection（对齐被绕过时的攻防）</a></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>生物进化 · Tinbergen 的超常刺激</b>：蛎鹬会撇下自己的蛋，去孵一只大得离谱的假蛋。本能这个「奖励模型」只在自然界真实出现过的蛋上校准过，分布外的夸张刺激反而拿到最高分，和 reward hacking 是同一个结构。不像在于，鸟不会自己造假蛋，钻空子的是实验者或杜鹃；RLHF 里钻空子的是被优化的策略自己。</li>
+<li><b>统计物理 · 玻尔兹曼分布</b>：最优策略 π* ∝ π_ref·exp(r/β) 正是玻尔兹曼分布的形状：r 相当于负能量，β 相当于温度，Z 就是物理里的配分函数。温度越高越贴近 π_ref，越低越挤向最高奖励。不像的是，物理里各状态的先验权重通常一视同仁，这里的先验是一个预训练好的模型。</li>
+<li><b>心理学 · 前景理论的参照点（Kahneman 与 Tversky，1979）</b>：人评估得失看的是相对参照点的变化，不是财富的绝对值；DPO 的隐式奖励同样只看策略相对 π_ref 的对数概率比。不像在于，人对损失的敏感约是同等收益的两倍，DPO 对抬高好回答和压低坏回答一视同仁。</li>
+<li><b>佛学 · 戒律的「随犯随制」</b>：律藏里的戒条大多是佛陀遇到具体过失之后才制定的，规则从一件件案例里长出来；Constitutional AI 反过来，先写原则，再让模型拿原则去审具体回答。相同的是，两者都想用一份能传下去的明文条文，代替事事去问老师。</li>
+<li><b>投资 · 跟踪误差预算</b>：主动型基金经理要在「相对基准的跟踪误差不超过上限」的约束下追求超额收益，和「最大化奖励、减去偏离 π_ref 的 KL」是同一种带拴绳的优化。不像在于，基金的基准是外部指数，π_ref 是模型冻结下来的过去的自己。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>对齐数学要做的事，是把「有帮助、无害、诚实」这类写不成单元测试的目标变成可优化的损失函数。</li>
+<li>InstructGPT（Ouyang et al. 2022）确立了 RLHF 三阶段：SFT 得到参考模型、训练奖励模型、用 PPO 优化策略。</li>
+<li>RLHF 最大化「奖励减去 β 倍 KL 散度」，KL 拴绳防止策略跑离参考模型去钻奖励模型的空子。</li>
+<li>RLHF 几乎不增加知识和推理能力，只是把预训练已有的能力引导成有帮助、无害的表达方式。</li>
+<li>奖励模型用 Bradley-Terry 模型从成对偏好拟合标量分：人选 A 胜 B 的概率等于两者分差过 sigmoid。</li>
+<li>Bradley-Terry 损失只看分数之差，奖励的绝对刻度没有意义，策略生成的分布外输出得到高分也不可信。</li>
+<li>Constitutional AI（Bai et al. 2022）让模型按明文「宪法」自我批判和改写，再用 AI 偏好代替人类标注做 RLAIF。</li>
+<li>Constitutional AI 没有去掉人，而是把人的价值判断从逐条标数据上移到写原则，前提是判断比生成容易。</li>
+<li>DPO 利用带 KL 目标的闭式解，让配分函数 Z 在相减中抵消，把 RLHF 塌缩成一个分类 loss。</li>
+<li>DPO 只见离线的固定偏好对，更容易过拟合、分布外不如在线 RLHF 鲁棒，简单稳和上限高是工程权衡。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="8df9eb71f7c36b5a" style="border-left-color:#7b61ff">

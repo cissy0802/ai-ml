@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -260,6 +267,30 @@ rec = model.<span class="fn">decode</span>(enc.audio_codes, enc.audio_scales,
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 流式的核心约束是因果性（不能看未来）；因果/分块/前瞻是在"延迟↔质量"谱系上取点的三种机制，且须在训练时就注入因果性，不是离线模型的切块用法。<br/>🤔 同声传译也面临"不能等说完"，译员靠"预测下一句"抢时间。这种"用预测补偿因果延迟"的策略，能不能用到流式语音模型里？</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 耳蜗的频率拓扑</b>：梅尔频谱几乎是在模仿耳蜗：基底膜从底到顶按频率高低排开，低频分得细、高频分得粗，正合梅尔刻度的对数间距。不像在哪：听神经在低频还能锁相，保留波形的精细时间结构；梅尔频谱却把相位整个扔掉，只好再请声码器补回来。</li>
+<li><b>心理学 · 范畴知觉</b>：Liberman 等 1957 年发现，把 /b/ 到 /d/ 做成连续渐变，人听到的却是两类之间的突然跳变，类内差别几乎听不出：耳朵自带量化器。不像在哪：人的类别按母语音位划分；codec 的码字只为重建音质，不对应任何音位。</li>
+<li><b>认知心理学 · 音位修复效应</b>：Warren 1970 年把句中一个音换成咳嗽声，听者照样“听到”那个音，还说不准咳嗽在哪。大脑也在靠上下文补全，像 Whisper 的脑补；不同在于人的补全背后有语义和意图兜着，多数时候补对了。</li>
+<li><b>佛学 · 刹那生灭</b>：阿毗达磨说心识不是一条连续的河，而是一刹那一刹那生灭相续，“连续”只是快速接续的印象，和把声音切成 20 毫秒一帧再串起来同构。不像在哪：帧长是工程上随手选的旋钮，刹那在论师那里是存在本身的最小单位。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>语音识别最难的不是听懂而是对齐：训练数据只标整句文本，不标哪几帧对应哪个字。</li>
+<li>CTC 引入 blank 符号，先合并相邻重复再删掉 blank，让无数条帧级路径折叠成同一句文本。</li>
+<li>CTC 损失把所有能折叠成正确文本的路径概率加总，用前向-后向动态规划高效计算，无需帧级对齐标注。</li>
+<li>CTC 假设各帧输出条件独立，因此快、天然适合流式，但不建模语言规律，实战常外挂语言模型纠错。</li>
+<li>Whisper 用 encoder-decoder 自回归生成文字，语言更流畅，也更容易在没听清时幻觉出没说过的词。</li>
+<li>现代 TTS 分两阶段：声学模型把文字转成梅尔频谱，声码器再把梅尔频谱还原成可播放的波形。</li>
+<li>TTS 声学模型的核心难点是时长，FastSpeech 用显式时长预测并行生成，避免自回归注意力漏字和重复。</li>
+<li>神经音频 codec 用残差向量量化（RVQ）级联小码本逐级逼近残差，把连续波形变成离散 token。</li>
+<li>音频变成离散 token 后，VALL-E 能像语言建模一样生成语音，3 秒样本即可零样本克隆音色。</li>
+<li>流式识别受因果性约束，因果、分块、前瞻三种机制在延迟与质量间取点，且须在训练时注入。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="e4e248e7b97c2778" style="border-left-color:#00d4ff">

@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -282,6 +289,31 @@ k = torch.<span class="fn">randn_like</span>(q); v = torch.<span class="fn">rand
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Neuroscience · the two visual streams (Ungerleider &amp; Mishkin, 1982)</b>: the same retinal input is split between a ventral "what" pathway and a dorsal "where" pathway, processed in parallel and merged in higher cortex—the same shape as MHA slicing one vector into several subspaces, each learning one kind of relation. The difference: the brain's division of labor is fixed by anatomy, while heads grow theirs during training, and often redundantly.</li>
+<li><b>Evolution · antagonistic pleiotropy (George Williams, 1957)</b>: one gene shapes several traits, which saves genes but ties those traits together, so a benefit in youth can cost you in old age. GQA letting a group of query heads share one KV is the same bargain. The difference: GQA's groups are chosen by people, and their number is tunable.</li>
+<li><b>Complexity science · small-world networks (Watts &amp; Strogatz, 1998)</b>: in a ring where nodes link only to neighbors, any two points are many steps apart; add a few random long-range shortcuts and the average path length collapses. Longformer's global tokens are those shortcuts. The difference: small-world shortcuts are random, global tokens are designated hubs.</li>
+<li><b>Psychology · the world as an outside memory (Kevin O'Regan, 1992)</b>: O'Regan argued the brain never stores a complete picture of the visual scene; it just looks again when it needs something, and change blindness is the evidence. FlashAttention likewise never materializes the full n×n matrix, fetching and computing block by block. The difference: the brain pays for its thrift by missing things, while FlashAttention stays exact.</li>
+<li><b>Business · theory of constraints (Goldratt, <i>The Goal</i>, 1984)</b>: a system's output is set by its slowest bottleneck, and speeding up anything else is wasted. Attention's bottleneck is HBM traffic, not multiplications, and FlashAttention aims straight at it. The difference: Goldratt says keep the bottleneck fully fed; FlashAttention routes less work through it.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Multi-head attention (MHA) splits d_model into several heads, each attending independently in its own low-dimensional subspace, then concatenates and mixes them with an output projection.</li>
+<li>Scaled dot-product attention divides by √d_head so large dot products don't saturate the softmax and kill gradients, a design from the 2017 Transformer paper.</li>
+<li>More heads is not always better: each head's dimension shrinks, and many trained heads turn out redundant and can be pruned with little loss.</li>
+<li>The main bottleneck in autoregressive decoding is often reading the whole KV cache from HBM at every step, and KV cache size scales with the number of KV heads.</li>
+<li>MQA (Shazeer 2019) has all query heads share one KV, while GQA (Ainslie 2023) shares per group, reaching near-MHA quality at near-MQA speed.</li>
+<li>GQA and MQA save inference-time KV cache memory and bandwidth, not training compute: they are memory-access optimizations dressed as architecture.</li>
+<li>Sliding window attention lets each token see only the previous w tokens, cutting cost to O(n·w), with an effective receptive field of about L·w after L layers.</li>
+<li>Pure sliding window attention is structurally weak at single-hop, long-range exact retrieval, so it is often paired with global tokens or full-attention layers.</li>
+<li>FlashAttention computes in SRAM tiles with an online softmax and never materializes the n×n matrix in HBM, so its output is exactly identical to the naive version.</li>
+<li>Attention is memory-bound rather than compute-bound, so speedups must target the real bottleneck: moving data, not counting multiplications.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en"></span></h2>

@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -250,6 +257,31 @@ k = torch.<span class="fn">randn_like</span>(q); v = torch.<span class="fn">rand
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 同样的数学，换个访存顺序就快 2–4 倍——性能瓶颈常在 <b>memory，不在 FLOPs</b>。<br/>🤔 你过去优化系统时，有多少次"以为是 CPU 瓶颈、其实是 I/O 瓶颈"？这个直觉怎么迁移到判断 AI 系统的性能问题？</div>
 </div>
+</div>
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 视觉的双通路（Ungerleider &amp; Mishkin，1982）</b>：同一份视网膜输入分给腹侧「是什么」、背侧「在哪里」两条通路并行加工再汇合，像 MHA 把同一向量切进多个子空间各学一种关系。不像在于：大脑的分工由解剖固定，head 的分工是训练里长出来的，还常冗余。</li>
+<li><b>生物进化 · 拮抗多效性（George Williams，1957）</b>：一个基因管多个性状，省了基因却把性状绑在一起，年轻时的好处换来年老的代价。GQA 让一组 query head 共用一份 KV 是同一笔账。不像在于：GQA 的分组是人定的，可调。</li>
+<li><b>复杂性科学 · 小世界网络（Watts &amp; Strogatz，1998）</b>：只连近邻的环网里两点相隔很多步，随机加几条远程捷径，平均路径骤降；Longformer 的全局 token 就是捷径。不像在于：小世界的捷径随机，全局 token 是指定枢纽。</li>
+<li><b>心理学 · 世界即外部记忆（Kevin O'Regan，1992）</b>：脑中不存完整的视觉图像，要时再看一眼去取，变化盲视是旁证；FlashAttention 也不物化整张 n×n 矩阵，按块现取现算。不像在于：大脑省下的代价是看漏，FlashAttention 却逐元素精确。</li>
+<li><b>商业 · 约束理论（Goldratt《目标》，1984）</b>：产出由最慢的瓶颈决定，非瓶颈上提速是白费。attention 的瓶颈是 HBM 搬运而非乘法，FlashAttention 对准的正是它。不像在于：Goldratt 要把瓶颈喂满，FlashAttention 是少走瓶颈。</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>多头注意力（MHA）把 d_model 切成多个 head，各在低维子空间独立做注意力，再拼接混合。</li>
+<li>缩放点积注意力除以 √d_head，防止 softmax 饱和、梯度消失，这是 2017 年 Transformer 原论文的设计。</li>
+<li>head 并非越多越好：每个 head 维度变小，训练后很多 head 冗余，剪掉几乎不影响效果。</li>
+<li>自回归解码的主要瓶颈常是每步从 HBM 读一遍 KV cache，其大小与 KV head 数成正比。</li>
+<li>MQA（Shazeer 2019）让所有 query head 共享一份 KV，GQA（Ainslie 2023）分组共享、兼顾质量与速度。</li>
+<li>GQA 和 MQA 省的是推理时的 KV cache 显存和带宽，不是训练算力，是披着架构外衣的访存优化。</li>
+<li>滑动窗口注意力让每个 token 只看前 w 个，复杂度降到 O(n·w)，L 层后感受野约为 L·w。</li>
+<li>纯滑动窗口的结构性短板是单跳远距离精确检索，所以常配全局 token 或与全注意力层交替。</li>
+<li>FlashAttention 分块在 SRAM 里算、用 online softmax 累加，不在 HBM 物化 n×n 矩阵，结果逐元素精确。</li>
+<li>Attention 是访存受限而非算力受限，提速要落在真正的瓶颈：搬数据，而不是乘法次数。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="9ad8bdc076763e01" style="border-left-color:#7b61ff">

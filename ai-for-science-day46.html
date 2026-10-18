@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -248,6 +255,32 @@ emb = out.last_hidden_state.<span class="fn">mean</span>(dim=1)
 <div class="label">一句话 takeaway + 思考题</div>
 <div class="takeaway">💡 科学基础模型证明了一件深刻的事：<strong>很多「需要求解方程」的问题，其实可以「从数据里直接学出来」</strong>——前提是数据够多够好。<br/><span style="color:#8b92a8">🤔 思考：一个从不「理解」物理、只做插值的模型，能算「做出了科学发现」吗？发现和理解是一回事吗？</span></div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>生物进化 · 定向进化（Frances Arnold，2018 年诺贝尔化学奖）</b>：Arnold 在试管里让酶随机突变、按活性筛选、留下最好的再突变，正是 FunSearch「变异—打分—保留」的循环。不像在于：她的突变是盲目的，靠海量筛选碰运气；FunSearch 让 LLM 做变异，每个后代都是读过上一代代码之后「有根据的猜」。</li>
+<li><b>心理学 · 快思考与慢思考（Kahneman，2011）</b>：GNoME 的漏斗像系统 1 先凭直觉粗判、系统 2 再费力核查。不像的是，人的系统 2 很懒，常给直觉盖章放行；DFT 对每个入围候选都真算一遍，结果还回头训练快模型，让「直觉」被核查持续校准。</li>
+<li><b>科学哲学 · 发现的语境与辩护的语境（Reichenbach，1938）</b>：赖欣巴哈把「想法怎么冒出来」和「想法怎么被证成」分开。Davies 路线正好切在这条线上：AI 只进发现的语境，证明留在辩护的语境。不同在于，他认为发现没有逻辑可分析，FunSearch 却把发现做成了可复现的流程。</li>
+<li><b>量子力学 · 「闭嘴，计算」（David Mermin，1989）</b>：量子力学预测精度极高，含义却争了近百年，许多物理学家选择只算不问；科学基础模型「准但说不出为什么」是同一种处境。不像的是，量子力学至少有写得出的方程可争，神经网络连可供解读的方程都没有。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>AlphaFold2（Jumper 等，2021）从多序列比对的共变信号里读出哪些氨基酸在空间上相邻，再预测三维结构。</li>
+<li>共进化的关键假设：两个位点在三维结构里接触，往往会一起突变来维持结构稳定。</li>
+<li>AlphaFold 输出的是单一静态构象的预测，每个残基带 pLDDT 置信度，低置信区域不能当真。</li>
+<li>GNoME 用图神经网络预测晶体稳定性，只把最有希望的候选送去做昂贵的 DFT 验证，结果再回填训练集。</li>
+<li>GNoME 报告的约 38 万个稳定晶体只是预测：热力学稳定不等于能合成，也不等于有用。</li>
+<li>Davies 等人 2021 年用 AI 找出纽结不变量之间的意外相关，提示数学家证出新定理，AI 是直觉放大器而非证明机。</li>
+<li>FunSearch 搜索构造解的程序而不是解本身：LLM 当变异算子，自动 evaluator 当适应度函数。</li>
+<li>进化式程序搜索只适用于「解难找、好坏能廉价自动验证」的问题，扩展的是搜索，不是证明。</li>
+<li>GraphCast 和 ESM-2 说明，大数据自监督预训练学到的领域表示，在很多问题上比第一性原理求解更准也更快。</li>
+<li>数据驱动的科学模型本质是高级插值，在训练分布内很强，外推到史无前例的情况就不可靠。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="7653ef4a13ad88ad" style="border-left-color:#7b61ff">

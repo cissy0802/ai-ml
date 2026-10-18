@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -287,6 +294,30 @@ PGD: &nbsp;<span class="box">x</span><span class="arrow">·▶</span><span class
 </div>
 
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Ethology · Tinbergen's supernormal stimuli</b>: Herring gull chicks peck at the red spot on a parent's bill, and Tinbergen found a thin stick with red stripes drew more pecks than a real bill. A perceptual system that leans on a few cues can be hijacked by anyone who amplifies them, the same structure as adversarial examples exploiting the features a model relies on. The difference: supernormal stimuli are loud and visible, adversarial perturbations are invisible.</li>
+<li><b>Philosophy · Goodman's "grue"</b>: Goodman defined "grue": green if observed before some time, blue after. Every emerald seen so far supports "green" and "grue" equally, and induction alone cannot say which is natural. A model picking up non-robust features humans would never use is the engineering version of this puzzle: data does not fix the concept, priors do.</li>
+<li><b>Complexity science · Highly Optimized Tolerance</b>: Carlson and Doyle (1999) proposed HOT: systems tuned hard against common perturbations become unusually fragile to rare or unanticipated ones, "robust yet fragile" as two sides of one coin. Adversarial training defends only the epsilon and norm it practiced on and breaks under another, which fits the pattern; the difference is that HOT's rare shocks come from nature, here from an opponent hunting for the gap.</li>
+<li><b>Investing · Graham's margin of safety</b>: Graham insisted on buying well below estimated intrinsic value so errors in the estimate would not flip the outcome. A certified radius is also a buffer: the higher the top class's vote share, the larger the perturbation it can absorb. Unlike a margin of safety, which is judgment, the radius is backed by a theorem, but only for perturbations inside an L2 ball.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Adversarial examples are inputs with tiny, invisible perturbations that make a neural network misclassify with high confidence; Szegedy et al. found them in 2013.</li>
+<li>Goodfellow's linear hypothesis: networks are locally near-linear, so a per-dimension nudge epsilon along sign(w) shifts the logit by epsilon times the L1 norm of w, growing with dimension.</li>
+<li>Adversarial fragility is not undertraining but a structural cost of high-dimensional linearity: across 150,000 pixels, tiny changes add up enough to cross a decision boundary.</li>
+<li>FGSM freezes the weights, takes the gradient with respect to the input, and steps a full epsilon along its sign: the fastest, crudest attack under an L-infinity budget.</li>
+<li>PGD splits FGSM into many small steps and projects back into the epsilon-ball after each; it is the de facto robustness benchmark, and a defense that fails it is fake robustness.</li>
+<li>Madry's adversarial training is min-max robust optimization: an inner PGD loop finds the worst perturbation, and an outer gradient step trains on it.</li>
+<li>Adversarial training lowers clean accuracy and only protects against the norm and epsilon it trained on; it is an empirical defense with no mathematical proof.</li>
+<li>Transferability: adversarial examples built on a surrogate model often fool other models because they learn the same non-robust features from the same data, which makes black-box attacks possible.</li>
+<li>Randomized smoothing wraps a classifier as a majority vote under Gaussian noise, with certified radius R = sigma times the inverse normal CDF of pA; no L2 perturbation inside R can flip it.</li>
+<li>Certified robustness covers only a small L2 ball, and larger sigma buys robustness at the cost of a blurrier model; like a margin of safety, the buffer is provable but bounded.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

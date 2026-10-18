@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -292,6 +299,34 @@ x = torch.randn(2, 512)
     <div class="label">Takeaway + question</div>
     <div class="takeaway">💡 RMSNorm = LayerNorm minus "subtract the mean"; its wide adoption proves that <b>at huge scale, small per-step savings get amplified into a decisive advantage</b>.<br>🤔 "Re-centering is redundant" is an empirical hypothesis, not a theorem. Could it fail under a different architecture or data distribution? How would you design an experiment to verify "a default step can actually be removed"?</div>
   </div>
+</div>
+
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+  <h2>Crossovers</h2>
+  <div class="crossx"><ul>
+    <li><b>Neuroscience · divisive normalization (Carandini &amp; Heeger, 2012)</b>: in visual cortex, a neuron's response gets divided by the pooled activity of its neighbours, which the two called a "canonical neural computation". LayerNorm dividing by the magnitude of all of a sample's features is the same structure. The difference: the brain's denominator is a weighted neighbourhood that attention can tune, while LayerNorm treats every feature equally.</li>
+    <li><b>Quantum mechanics · normalizing the wave function</b>: a quantum state's squared amplitudes must sum to 1, and multiplying the whole state by a constant changes nothing physical; the direction carries the information. RMSNorm likewise keeps a vector's direction and drops its magnitude. Unlike quantum normalization, which is a hard constraint, RMSNorm then lets the model learn back the scale it needs through γ.</li>
+    <li><b>Molecular biology · the lac operon (Jacob &amp; Monod, 1961)</b>: whether E. coli switches on its lactose genes depends on whether lactose is present and glucose is absent, which amounts to "content × gate". SwiGLU's gate likewise lets the input decide how much passes. Unlike the operon, which behaves like a few logic switches, SwiGLU's gate is continuous and learned in training.</li>
+    <li><b>Complexity science · the edge of chaos (Christopher Langton, 1990)</b>: in cellular automata, Langton found that information processing is richest in a band squeezed between frozen order and runaway chaos. Vanishing gradients and unstable training are a deep net's two extremes, and normalization pushes the signal back into the middle. The difference: Langton tuned one parameter, λ, to find that band, while a deep net is forced back into it at every layer and every step.</li>
+  </ul></div>
+</div>
+
+<!-- Ten takeaways -->
+<div class="card">
+  <h2>Ten takeaways</h2>
+  <ol class="takeaways">
+    <li>Without activation functions, stacked linear layers collapse into one matrix, so any depth is only as expressive as a single layer.</li>
+    <li>Sigmoid and Tanh saturate at both ends, so gradients multiplied layer by layer shrink exponentially and deep networks stop learning.</li>
+    <li>ReLU's gradient is a constant 1 on the positive side, which makes deep nets trainable, but neurons whose inputs stay negative die for good (dying ReLU).</li>
+    <li>GELU is defined as x times the standard normal CDF Φ(x), weighting inputs smoothly by relative size and leaking a little signal for negatives.</li>
+    <li>SwiGLU uses one projection passed through Swish as a gate and another as content, multiplied element-wise; it is standard in modern LLM feed-forward layers.</li>
+    <li>BatchNorm computes mean and variance per feature across the batch, while LayerNorm computes them per sample across that sample's own features.</li>
+    <li>Transformers use LayerNorm because sequence lengths vary and inference batches can be size 1, and LayerNorm behaves the same in training and inference.</li>
+    <li>Normalization may not work by reducing internal covariate shift; Santurkar et al. (2018) argue it more likely smooths the loss landscape.</li>
+    <li>RMSNorm, proposed by Zhang and Sennrich in 2019, drops LayerNorm's mean subtraction and divides only by the root mean square, running faster with comparable results.</li>
+    <li>Pre-LN, which normalizes before each sublayer, gives steadier gradients than Post-LN and lets you skip the fiddly warmup.</li>
+  </ol>
 </div>
 
 <!-- Further Reading -->

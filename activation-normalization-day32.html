@@ -51,6 +51,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -258,6 +265,32 @@ x = torch.randn(2, 512)
 <div class="label">Takeaway + 思考题</div>
 <div class="takeaway">💡 RMSNorm = LayerNorm 砍掉「减均值」；它的广泛采用证明了：<b>在巨大规模下，每步省下的小成本会被放大成决定性优势</b>。<br/>🤔 「re-centering 冗余」是个经验假设而非定理。如果换一种架构或数据分布，这个假设会不会失效？你怎么设计实验去验证「某个被默认的步骤其实可以删」？</div>
 </div>
+</div>
+<!-- 越界 -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
+<div class="crossx"><ul>
+<li><b>神经科学 · 除法归一化（Carandini &amp; Heeger，2012）</b>：视觉皮层里一个神经元的响应，会被周围一群神经元的总活动除一下，两人称之为「典型神经计算」；LayerNorm 拿同一样本全部特征的幅度去除，是同一个结构。不像的是，大脑的分母是邻域加权、还随注意力调节，LayerNorm 对所有特征一视同仁。</li>
+<li><b>量子力学 · 波函数归一化</b>：量子态要求各概率幅的模方加起来等于 1，整体乘一个常数不改变物理，携带信息的是方向；RMSNorm 也只留下向量的方向、丢掉幅度。不像在于，量子的归一化是硬约束，RMSNorm 随后又用 γ 让模型把需要的尺度学回来。</li>
+<li><b>分子生物学 · 乳糖操纵子（Jacob &amp; Monod，1961）</b>：大肠杆菌的乳糖基因开不开，取决于环境里有没有乳糖、有没有葡萄糖，相当于「内容 × 门」；SwiGLU 的门同样由输入决定放行多少。不像的是，操纵子近似几个开关的逻辑，SwiGLU 的门是连续的、靠训练学出来的。</li>
+<li><b>复杂性科学 · 混沌边缘（Christopher Langton，1990）</b>：Langton 在元胞自动机里发现，信息处理最活跃的区间夹在冻结的有序和失控的混沌之间；梯度消失和训练失稳正是深网的这两端，归一化把信号按回中间地带。不像的是，Langton 调一个参数 λ 去找这片区间，深网则在每一层每一步强行拉回。</li>
+</ul></div>
+</div>
+<!-- 十条要点 -->
+<div class="card">
+<h2>十条要点<span class="en">Ten takeaways</span></h2>
+<ol class="takeaways">
+<li>没有激活函数，多层线性变换可以折叠成一个矩阵，叠再多层表达力也只等于单层。</li>
+<li>Sigmoid 和 Tanh 两端饱和，梯度在反向传播中逐层相乘、指数衰减，深层网络因此学不动。</li>
+<li>ReLU 在正区间梯度恒为 1，让深网可训；代价是输入长期为负的神经元会永久死亡（Dying ReLU）。</li>
+<li>GELU 定义为 x 乘以标准正态 CDF Φ(x)，按输入相对大小平滑加权，负区还留一点信号。</li>
+<li>SwiGLU 用一路过 Swish 的投影当门、另一路当内容，逐元素相乘，是现代 LLM 前馈层的标配。</li>
+<li>BatchNorm 对每个特征跨整个 batch 统计均值和方差，LayerNorm 对每个样本跨它自己的全部特征统计。</li>
+<li>Transformer 用 LayerNorm，因为序列长度可变、推理时 batch 可能为 1，而 LayerNorm 训练和推理行为一致。</li>
+<li>归一化有效未必是因为减少了内部协变量偏移，Santurkar 等人 2018 年认为更可能是平滑了损失曲面。</li>
+<li>Zhang 与 Sennrich 2019 年提出的 RMSNorm 砍掉减均值一步，只除以均方根，更快且效果相当。</li>
+<li>把归一化放在子层之前的 Pre-LN 比 Post-LN 梯度更稳，可以省掉繁琐的 warmup。</li>
+</ol>
 </div>
 <!-- 深入资源 -->
 <div class="card" data-tts="3ca6828b87dd09b1" style="border-left-color:#7b61ff">

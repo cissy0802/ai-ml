@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -279,6 +286,32 @@ emb = out.last_hidden_state.<span class="fn">mean</span>(dim=1)
   </div>
 </div>
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Evolution · Directed evolution (Frances Arnold, 2018 Nobel Prize in Chemistry)</b>: Arnold mutated enzymes at random, screened them for activity, kept the best and mutated again: the same mutate-score-keep loop as FunSearch. The difference: her mutations were blind, so success came from screening huge libraries; FunSearch lets an LLM do the mutating, so each offspring is an informed guess made after reading its parent's code.</li>
+<li><b>Psychology · Fast and slow thinking (Kahneman, 2011)</b>: the GNoME funnel looks like System 1 making a quick intuitive call and System 2 doing the effortful check. Unlike us, though: the human System 2 is lazy and often rubber-stamps intuition, while DFT really computes every shortlisted candidate and its results retrain the fast model, so the intuition keeps getting recalibrated.</li>
+<li><b>Philosophy of science · Context of discovery vs context of justification (Reichenbach, 1938)</b>: Reichenbach separated how an idea arises from how it is justified. The Davies route cuts exactly along that line: AI works only in discovery, proof stays in justification. Where it differs: he held that discovery has no logic to analyze, whereas FunSearch turns discovery into a reproducible procedure.</li>
+<li><b>Quantum mechanics · "Shut up and calculate" (David Mermin, 1989)</b>: quantum theory predicts with extraordinary precision, yet its meaning has been argued over for nearly a century, and many physicists simply compute without asking. Scientific foundation models that are accurate but cannot say why sit in the same position. The difference: quantum mechanics at least has written-down equations to argue about; a neural network has no equations to interpret at all.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>AlphaFold2 (Jumper et al., 2021) reads co-variation signals in a multiple sequence alignment to infer which amino acids sit close in space, then predicts the 3D structure.</li>
+<li>The key co-evolution assumption: two positions in contact in 3D tend to mutate together to keep the structure stable.</li>
+<li>AlphaFold outputs a prediction of a single static conformation, with a pLDDT confidence per residue; low-confidence regions should not be trusted.</li>
+<li>GNoME uses a graph neural network to predict crystal stability, sends only the most promising candidates to expensive DFT checks, and feeds the results back into training.</li>
+<li>GNoME's roughly 380,000 stable crystals are predictions: thermodynamically stable does not mean synthesizable, nor useful.</li>
+<li>Davies et al. (2021) used AI to spot unexpected correlations between knot invariants, prompting mathematicians to prove a new theorem; AI acted as an intuition amplifier, not a prover.</li>
+<li>FunSearch searches for programs that construct solutions rather than for the solutions themselves, with an LLM as mutation operator and an automatic evaluator as fitness function.</li>
+<li>Evolutionary program search only works where solutions are hard to find but cheap to verify automatically; it extends search, not proof.</li>
+<li>GraphCast and ESM-2 show that domain representations learned by large-scale self-supervised pretraining can beat first-principles solvers on many problems, in both accuracy and speed.</li>
+<li>Data-driven scientific models are essentially sophisticated interpolators: strong inside the training distribution, unreliable when extrapolating to unprecedented cases.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>

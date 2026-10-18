@@ -50,6 +50,13 @@ pre .fn{color:#00d4ff}
 a{color:#00d4ff;text-decoration:none}
 a:hover{color:#7b61ff;text-decoration:underline}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -303,6 +310,33 @@ revision = client.messages.<span class="fn">create</span>(
   </div>
 </div>
 
+<!-- Crossovers -->
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Evolution &middot; Tinbergen's supernormal stimuli</b>: an oystercatcher will abandon its own egg to sit on an absurdly oversized fake one. Instinct, the bird's "reward model," was calibrated only on eggs that occur in nature, so an out-of-distribution exaggeration scores highest &mdash; the same structure as reward hacking. The difference: the bird does not build the fake egg; the exploit comes from an experimenter or a cuckoo, whereas in RLHF the exploiter is the policy being optimized.</li>
+<li><b>Statistical physics &middot; the Boltzmann distribution</b>: the optimal policy &pi;* &prop; &pi;_ref&middot;exp(r/&beta;) has exactly the Boltzmann form, with r as negative energy, &beta; as temperature, and Z as the physicist's partition function. Higher temperature stays close to &pi;_ref; lower temperature piles onto the top reward. Unlike physics, where states usually get equal prior weight, the prior here is a pretrained model.</li>
+<li><b>Psychology &middot; the reference point in prospect theory (Kahneman and Tversky, 1979)</b>: people judge gains and losses as changes from a reference point, not as absolute wealth; DPO's implicit reward likewise looks only at the policy's log-probability ratio against &pi;_ref. The difference: people feel a loss about twice as strongly as an equal gain, while DPO treats raising the good answer and lowering the bad one symmetrically.</li>
+<li><b>Buddhism &middot; Vinaya rules laid down case by case</b>: most monastic precepts were set by the Buddha only after a specific offense occurred, so the rules grew out of incidents. Constitutional AI runs the other way: principles first, then the model applies them to concrete answers. What they share is the wish to replace asking the teacher every time with a written code that can be handed down.</li>
+<li><b>Investing &middot; the tracking-error budget</b>: an active fund manager chases excess return while keeping tracking error against a benchmark under a cap, the same leashed optimization as "maximize reward minus KL from &pi;_ref." The difference: the fund's benchmark is an external index, while &pi;_ref is the model's own frozen past self.</li>
+</ul></div>
+</div>
+<!-- Ten takeaways -->
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>Alignment math turns goals like "helpful, harmless, honest," which no unit test can capture, into a loss function a model can optimize.</li>
+<li>InstructGPT (Ouyang et al. 2022) set the three RLHF stages: SFT for a reference model, a trained reward model, then PPO on the policy.</li>
+<li>RLHF maximizes reward minus &beta; times the KL divergence; the KL leash keeps the policy from drifting off to exploit the reward model.</li>
+<li>RLHF adds almost no knowledge or reasoning ability; it steers capabilities already learned in pretraining toward helpful, harmless expression.</li>
+<li>A reward model fits scalar scores to pairwise preferences via Bradley-Terry: the chance a human prefers A over B is the sigmoid of their score gap.</li>
+<li>The Bradley-Terry loss sees only score differences, so absolute reward values mean nothing and high scores on out-of-distribution outputs are untrustworthy.</li>
+<li>Constitutional AI (Bai et al. 2022) has the model critique and revise itself against a written constitution, then uses AI preferences instead of human labels for RLAIF.</li>
+<li>Constitutional AI does not remove humans; it moves human judgment from labeling each example up to writing principles, betting that judging is easier than generating.</li>
+<li>DPO uses the closed-form solution of the KL-regularized objective so the partition function Z cancels, collapsing RLHF into a single classification loss.</li>
+<li>DPO trains offline on fixed preference pairs, so it overfits more easily and is less robust out of distribution than online RLHF: simplicity versus ceiling.</li>
+</ol>
+</div>
 <!-- Further Reading -->
 <div class="card" style="border-left-color:#7b61ff">
   <h2>Further Reading<span class="en">Further Reading</span></h2>
