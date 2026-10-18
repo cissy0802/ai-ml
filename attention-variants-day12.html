@@ -258,7 +258,7 @@ k = torch.<span class="fn">randn_like</span>(q); v = torch.<span class="fn">rand
 <div class="takeaway">💡 同样的数学，换个访存顺序就快 2–4 倍——性能瓶颈常在 <b>memory，不在 FLOPs</b>。<br/>🤔 你过去优化系统时，有多少次"以为是 CPU 瓶颈、其实是 I/O 瓶颈"？这个直觉怎么迁移到判断 AI 系统的性能问题？</div>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="c629e3a04f6fcd32" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>神经科学 · 视觉的双通路（Ungerleider &amp; Mishkin，1982）</b>：同一份视网膜输入分给腹侧「是什么」、背侧「在哪里」两条通路并行加工再汇合，像 MHA 把同一向量切进多个子空间各学一种关系。不像在于：大脑的分工由解剖固定，head 的分工是训练里长出来的，还常冗余。</li>
@@ -268,7 +268,7 @@ k = torch.<span class="fn">randn_like</span>(q); v = torch.<span class="fn">rand
 <li><b>商业 · 约束理论（Goldratt《目标》，1984）</b>：产出由最慢的瓶颈决定，非瓶颈上提速是白费。attention 的瓶颈是 HBM 搬运而非乘法，FlashAttention 对准的正是它。不像在于：Goldratt 要把瓶颈喂满，FlashAttention 是少走瓶颈。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="2cdeef45b2fec203">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>多头注意力（MHA）把 d_model 切成多个 head，各在低维子空间独立做注意力，再拼接混合。</li>
