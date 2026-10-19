@@ -48,6 +48,13 @@ a:hover{color:#7b61ff;text-decoration:underline}
 .back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
 .back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
 footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+.crossx ul{list-style:none;margin:6px 0 0;padding:0}
+.crossx li{margin:12px 0;padding-left:14px;border-left:2px solid rgba(123,97,255,0.45);color:#cfd3df;font-size:0.95rem}
+.crossx b{color:#a48cff}
+.takeaways{counter-reset:tk;list-style:none;margin:6px 0 0;padding:0;border:1px solid rgba(0,212,255,0.28);border-radius:12px;background:rgba(0,212,255,0.04)}
+.takeaways li{counter-increment:tk;position:relative;margin:0;padding:11px 18px 11px 52px;border-top:1px solid rgba(0,212,255,0.12);font-size:0.93rem;line-height:1.75;color:#cfd3df}
+.takeaways li:first-child{border-top:none}
+.takeaways li::before{content:counter(tk,decimal-leading-zero);position:absolute;left:18px;top:12px;font-family:"SF Mono",Menlo,monospace;font-size:0.78rem;color:#00d4ff}
 @media(max-width:600px){
   header h1{font-size:1.5rem}
   .card{padding:20px}
@@ -447,6 +454,31 @@ Output JSON: {{"action": "search|write_file|spawn_task|done",
   </div>
 </div>
 
+<div class="card" style="border-left-color:#a48cff">
+<h2>Crossovers</h2>
+<div class="crossx"><ul>
+<li><b>Eastern philosophy · Wang Yangming's unity of knowing and acting</b>: ReAct refuses to separate thinking from doing; every Thought is checked against a real Observation. The difference: for Wang, knowing and acting are one thing, while in ReAct they are still two steps taking turns, and the "knowing" is just a string of text.</li>
+<li><b>Business and the military · John Boyd's OODA loop</b>: US Air Force colonel Boyd framed decision-making as a loop of observe, orient, decide, act, which is almost Observation → Thought → Action. The difference: OODA is about cycling faster than an opponent; ReAct has no opponent, and every extra turn just costs more.</li>
+<li><b>Psychology · implementation intentions (Peter Gollwitzer, 1999)</b>: Gollwitzer found that writing down "if X happens, I will do Y" in advance markedly raises the odds of reaching a goal, which is the case for planning first in Plan-and-Execute. The difference: implementation intentions work by fixing the response ahead of time, whereas Plan-and-Execute earns its keep by re-planning midway.</li>
+<li><b>Neuroscience · complementary learning systems (McClelland et al., 1995)</b>: the hippocampus records the day's experiences quickly, then slowly transfers them to the neocortex during sleep; Reflexion's notes are only the hippocampal half. The difference: the brain consolidates, while Reflexion wipes its notes when the task ends and leaves the weights untouched.</li>
+<li><b>Evolutionary biology · Manfred Eigen's error threshold (1971)</b>: Eigen showed that once the per-site copying error rate times genome length crosses a threshold, genetic information can no longer be passed on stably, an "error catastrophe". AutoGPT's 0.9^10 ≈ 35% is the same math: a little error per step, and a long chain falls apart. The difference: evolution has natural selection weeding out errors every generation; an autonomous agent without a reliable Evaluator lacks that sieve.</li>
+</ul></div>
+</div>
+<div class="card">
+<h2>Ten takeaways</h2>
+<ol class="takeaways">
+<li>ReAct interleaves reasoning and acting in a Thought → Action → Observation loop until the LLM gives a final answer.</li>
+<li>ReAct is essentially a while loop with formatted output: your code runs the tools, and the LLM only emits text saying which tool it wants to call.</li>
+<li>Because ReAct feeds the full history back into the prompt every turn, long runs suffer token bloat, lost-in-the-middle forgetting and compounding errors.</li>
+<li>Plan-and-Execute has a planner write the full list of subtasks first, then an executor runs them one by one, curing ReAct's short-sightedness.</li>
+<li>The real power of Plan-and-Execute is re-planning; clinging to the initial plan turns the agent into a script with fixed steps.</li>
+<li>Pairing a strong model as planner with a cheap model as executor cuts cost sharply with little loss in quality.</li>
+<li>Reflexion has the model write a verbal reflection after a failure and adds it to the next prompt before retrying, with no change to the weights.</li>
+<li>Reflexion is capped by the quality of the Evaluator's signal; when the evaluator misjudges, reflection can turn a correct answer into a wrong one.</li>
+<li>AutoGPT bundles a task queue, vector memory, a file workspace and tool access into one continuously running autonomous agent process.</li>
+<li>Errors compound in autonomous agents: 90% accuracy per step over 10 steps leaves about 35% success, the same structure as evolution's error threshold.</li>
+</ol>
+</div>
 <a href="index.en.html" class="back">← Back to home</a>
 
 <footer>BigCat · AI &amp; ML · Day 5 · 2026-05-23</footer>
