@@ -411,7 +411,7 @@ graph.add_conditional_edges(<span class="str">"execute"</span>, <span class="kw"
 <details><summary>5. 把 Day 1-5 串起来看：从 Transformer → 微调 → Prompt → RAG → Agent，技术演进的主线是什么？</summary><div>主线是"<b>从静态能力到动态系统的能力延展</b>"。具体来看：(a) Day 1 解决"<b>怎么训出一个会说话的模型</b>"——架构层；(b) Day 2 解决"<b>怎么让它说话符合人类偏好</b>"——对齐层；(c) Day 3 解决"<b>怎么不重新训练就让它做特定任务</b>"——使用层；(d) Day 4 解决"<b>怎么让它访问训练时没见过的知识</b>"——外部知识层；(e) Day 5 解决"<b>怎么让它跨多步执行复杂任务</b>"——能动性层。每一层都在把 LLM 推向"更接近通用工具"：Transformer 是底层引擎，微调是定制，Prompt 是 API，RAG 是数据库连接，Agent 是<b>把这些组合成一个能持续运行的程序</b>。后面 Day 6-10 会进一步深入 Tool Use（让 Agent 调用结构化工具）、Multi-Agent（多个 Agent 协作）和 Context 工程（让 Agent 有更好的记忆），都是在这条主线上继续推进。理解这条主线，你就能在新概念出现时快速定位它属于哪一层、解决了什么遗留问题。</div></details>
 </div>
 </div>
-<div class="card" style="border-left-color:#a48cff">
+<div class="card" data-tts="1eed24f669f956be" style="border-left-color:#a48cff">
 <h2>越界 · 跨学科的联想<span class="en">Crossovers</span></h2>
 <div class="crossx"><ul>
 <li><b>东方哲学 · 王阳明的知行合一</b>：ReAct 不让「想」和「做」分家，每个 Thought 都要接一次真实的 Observation 来校正。不像的是，阳明说知与行本是一件事，ReAct 里两者仍是轮流出场的两个步骤，而且「知」只是一段文本。</li>
@@ -421,7 +421,7 @@ graph.add_conditional_edges(<span class="str">"execute"</span>, <span class="kw"
 <li><b>生物进化 · Manfred Eigen 的错误阈值（1971）</b>：Eigen 指出，单个位点的复制错误率与基因组长度的乘积一旦越过阈值，遗传信息就无法稳定传下去，称为「错误灾变」。AutoGPT 的 0.9^10 ≈ 35% 是同一个数学：每步一点误差，链条一长就崩。不像的是，进化每代都有自然选择淘汰错误，自主 Agent 没有可靠的 Evaluator 就缺了这道筛子。</li>
 </ul></div>
 </div>
-<div class="card">
+<div class="card" data-tts="20e3ddb4b4370daa">
 <h2>十条要点<span class="en">Ten takeaways</span></h2>
 <ol class="takeaways">
 <li>ReAct 把推理和行动交错成 Thought → Action → Observation 的循环，直到 LLM 给出最终答案。</li>
